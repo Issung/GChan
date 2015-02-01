@@ -1,4 +1,4 @@
-﻿using System;/************************************************************************
+﻿/************************************************************************
  * Copyright (C) 2015 by themirage <mirage@secure-mail.biz>             *
  *                                                                      *
  * This program is free software: you can redistribute it and/or modify *
@@ -15,6 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/> *
  ************************************************************************/
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
