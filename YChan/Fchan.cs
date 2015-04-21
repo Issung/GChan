@@ -33,15 +33,15 @@ using System.IO;
 
 namespace YChan {
     class Fchan : Imageboard {
-        public static string regThread  = "boards.4chan.org/[a-zA-Z]*?/thread/[0-9]*";
-        public static string regBoard   = "boards.4chan.org/[a-zA-Z]*?/$";
+        public static string regThread  = "boards.4chan.org/[a-zA-Z0-9]*?/thread/[0-9]*";
+        public static string regBoard   = "boards.4chan.org/[a-zA-Z0-9]*?/$";
 
         
         public Fchan(string url, bool isBoard) : base(url, isBoard) {
             this.Board     = isBoard;
             this.imName    = "4chan";
             if(!isBoard) {
-                Match match = Regex.Match(url, @"boards.4chan.org/[a-zA-Z]*?/thread/\d*");
+                Match match = Regex.Match(url, @"boards.4chan.org/[a-zA-Z0-9]*?/thread/\d*");
                 this.URL       = "http://" + match.Groups[0].Value;
             } else {
                 this.URL = url;

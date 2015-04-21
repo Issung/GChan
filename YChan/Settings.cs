@@ -34,7 +34,7 @@ namespace YChan {
                 if(int.Parse(edtTimer.Text) < 5){
                     MessageBox.Show("Timer has to be higher than 5 seconds");
                 } else {
-                    General.setSettings(edtPath.Text, int.Parse(edtTimer.Text)*1000, chkHTML.Checked, chkSave.Checked, chkTray.Checked); // save settings
+                    General.setSettings(edtPath.Text, int.Parse(edtTimer.Text)*1000, chkHTML.Checked, chkSave.Checked, chkTray.Checked, chkWarn.Checked); // save settings
                     
                     this.Close();
                 }              
@@ -64,6 +64,7 @@ namespace YChan {
             chkHTML.Checked = General.loadHTML;
             chkSave.Checked = General.saveOnClose;
             chkTray.Checked = General.minimizeToTray;
+            chkWarn.Checked = General.warnOnClose;
         }
 
     }

@@ -33,15 +33,15 @@ using System.IO;
 
 namespace YChan {
     class Infinitechan : Imageboard {
-        public static string regThread  = "8ch.net/[a-zA-Z]*?/res/[0-9]*.[^0-9]*";  // Regex to check whether is Thread or not
-        public static string regBoard   = "8ch.net/[a-zA-Z]*?/";                    // Regex to check whether is Board or not
+        public static string regThread  = "8ch.net/[a-zA-Z0-9]*?/res/[0-9]*.[^0-9]*";  // Regex to check whether is Thread or not
+        public static string regBoard   = "8ch.net/[a-zA-Z0-9]*?/";                    // Regex to check whether is Board or not
 
         
         public Infinitechan(string url, bool isBoard) : base(url, isBoard) {
             this.Board     = isBoard;
             this.imName    = "8ch";
             if(!isBoard) {
-                Match match = Regex.Match(url, @"8ch.net/[a-zA-Z]*?/res/[0-9]*");
+                Match match = Regex.Match(url, @"8ch.net/[a-zA-Z0-9]*?/res/[0-9]*");
                 this.URL       = "http://" + match.Groups[0].Value + ".html";      // simplify thread url
             } else {
                 this.URL = url;
@@ -219,8 +219,11 @@ namespace YChan {
                 } catch(WebException webEx) {
                     // I think I should handle this
                 }
-                if(website != "")
+                if(website != "") {
+                    if(!Directory.Exists(this.SaveTo))
+                        Directory.CreateDirectory(this.SaveTo);
                     File.WriteAllText(this.SaveTo+"\\Thread.html", website); // save thread
+                }
             }
            
             try {

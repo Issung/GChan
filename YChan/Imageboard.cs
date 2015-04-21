@@ -38,7 +38,7 @@ using System.Text.RegularExpressions;
 
 
 namespace YChan {
-    class Imageboard {
+    public class Imageboard {
         protected string URL;                            // Thread/Board URL
         protected string SaveTo;                         // Path to save to
         protected string imName;                         // Name of the IB

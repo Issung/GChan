@@ -32,11 +32,12 @@
             this.chkHTML = new System.Windows.Forms.CheckBox();
             this.chkSave = new System.Windows.Forms.CheckBox();
             this.chkTray = new System.Windows.Forms.CheckBox();
+            this.chkWarn = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // btnSSave
             // 
-            this.btnSSave.Location = new System.Drawing.Point(92, 84);
+            this.btnSSave.Location = new System.Drawing.Point(142, 84);
             this.btnSSave.Name = "btnSSave";
             this.btnSSave.Size = new System.Drawing.Size(75, 23);
             this.btnSSave.TabIndex = 0;
@@ -46,7 +47,7 @@
             // 
             // btnSCan
             // 
-            this.btnSCan.Location = new System.Drawing.Point(173, 84);
+            this.btnSCan.Location = new System.Drawing.Point(232, 84);
             this.btnSCan.Name = "btnSCan";
             this.btnSCan.Size = new System.Drawing.Size(75, 23);
             this.btnSCan.TabIndex = 1;
@@ -117,13 +118,24 @@
             this.chkTray.Text = "Minimize to Tray";
             this.chkTray.UseVisualStyleBackColor = true;
             // 
+            // chkWarn
+            // 
+            this.chkWarn.AutoSize = true;
+            this.chkWarn.Location = new System.Drawing.Point(318, 12);
+            this.chkWarn.Name = "chkWarn";
+            this.chkWarn.Size = new System.Drawing.Size(116, 17);
+            this.chkWarn.TabIndex = 9;
+            this.chkWarn.Text = "Show Exit Warning";
+            this.chkWarn.UseVisualStyleBackColor = true;
+            // 
             // Settings
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.ClientSize = new System.Drawing.Size(346, 115);
+            this.ClientSize = new System.Drawing.Size(446, 115);
             this.ControlBox = false;
+            this.Controls.Add(this.chkWarn);
             this.Controls.Add(this.chkTray);
             this.Controls.Add(this.chkSave);
             this.Controls.Add(this.chkHTML);
@@ -156,5 +168,6 @@
         private System.Windows.Forms.CheckBox chkHTML;
         private System.Windows.Forms.CheckBox chkSave;
         private System.Windows.Forms.CheckBox chkTray;
+        private System.Windows.Forms.CheckBox chkWarn;
     }
 }

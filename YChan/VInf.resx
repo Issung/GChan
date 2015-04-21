@@ -123,6 +123,13 @@
 - add proxy support
 - add option to filter by extension
 - add option to filter by regex
+- rewrite xmlconfig stuff
+
+&gt; YChan 2.3
+    - warning when closing YChan
+    - support for boards with numbers (/s4s/, /3/, ...)
+    - save urls on crash and load them when 
+       restarting
 
 &gt; YChan 2.2
     - fixed 8ch downloader

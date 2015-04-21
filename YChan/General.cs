@@ -35,6 +35,7 @@ namespace YChan {
         public static bool   firstStart = false;                                            // First start?
         public static bool   saveOnClose = false;                                           // saveonclose activated?
         public static bool   minimizeToTray = true;                                         // Minimize to tray activated?
+        public static bool   warnOnClose = true;                                            // Display warning before closing main window
 
         public static string loadURLs(bool board) {                                         // read saved URLS
             if(board && File.Exists(Application.CommonAppDataPath+"\\boards.dat"))
@@ -67,12 +68,13 @@ namespace YChan {
             return true;
         }
 
-        public static void setSettings(string path, int time, bool HTML, bool Save, bool tray) { // set settings
+        public static void setSettings(string path, int time, bool HTML, bool Save, bool tray, bool closewarn) { // set settings
             General.path = path;
             General.timer = time;
             General.loadHTML = HTML;
             General.saveOnClose = Save;
             General.minimizeToTray = tray;
+            General.warnOnClose = closewarn;
             General.writeSettings();
         }
 
@@ -87,12 +89,17 @@ namespace YChan {
                 lines = lines + "1";
             else
                 lines = lines + "0";
-            lines = lines + "</saveonclose><minimizetotray>";
+            lines = lines + "</saveonclose>\r\n<minimizetotray>";
             if(minimizeToTray)
                 lines = lines + "1";
             else
                 lines = lines + "0";
-            lines = lines + "</minimizetotray>\r\n</data>\r\n";
+            lines = lines + "</minimizetotray>\r\n<warnonclose>";
+            if(warnOnClose)
+                lines = lines + "1";
+            else
+                lines = lines + "0";
+            lines = lines + "</warnonclose>\r\n</data>\r\n";
             
             StreamWriter file = new StreamWriter(Application.CommonAppDataPath+"\\YCHAN2.xml");
             file.WriteLine(lines);
@@ -120,6 +127,13 @@ namespace YChan {
                 else
                     sav = (NodSaveOnClose.InnerText == "1");
 
+                XmlNode NodWarnOnClose = doc.DocumentElement.SelectSingleNode("/data/warnonclose");
+                bool warn;
+                if(NodWarnOnClose == null)
+                    warn = true;
+                else
+                    warn = (NodWarnOnClose.InnerText == "1");
+
                 XmlNode NodMinimizeToTray = doc.DocumentElement.SelectSingleNode("/data/minimizetotray");
                 bool tray;
                 if(NodMinimizeToTray == null)
@@ -131,15 +145,15 @@ namespace YChan {
                 if(IsDigitsOnly(Time))
                     iTime = int.Parse(Time);
 
-                General.setSettings(Path, iTime, html, sav, tray);                      
+                General.setSettings(Path, iTime, html, sav, tray, warn);                      
             } else {
                 firstStart = true;                                                                      // No settings file,
-                General.setSettings("C:\\", 10000, false, false, true);                                 // set default values
+                General.setSettings("C:\\", 10000, false, false, true, true);                                 // set default values
             }
             
-            if(!File.Exists(Application.CommonAppDataPath+"\\2.2")){                                    // Old settings file, new
+            if(!File.Exists(Application.CommonAppDataPath+"\\2.3")){                                    // Old settings file, new
                 firstStart = true;                                                                      // version, first start,
-                File.Create(Application.CommonAppDataPath+"\\2.2").Dispose();                           // create file to save version
+                File.Create(Application.CommonAppDataPath+"\\2.3").Dispose();                           // create file to save version
             }
         }
         public static Imageboard createNewIMB(string url, bool board) {                                 // Create a new Imageboard

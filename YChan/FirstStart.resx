@@ -118,28 +118,27 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="rtWelcome.Text" xml:space="preserve">
-    <value>Welcome to YChan 2.2! 
+    <value>Welcome to YChan 2.3! 
 
-After releasing 2.1 8ch changed something on there
-code so I had to change the code. I added some new
-features too: It's now possible to save the URLs when
-closing YChan and loading them when starting YChan. 
-There is now an option to show YChan in the tray. If this
-is enabled it can be hiden / shown via doubleclicking
-on the tray icon. If you minimize YChan it will minimize 
-to the tray, not to the taskbar. Rightclicking on the tray 
-icon will open a context menu where you can open the
-download folder and exit the program. 
+After you guys found some bugs and sent me some
+suggestions here is the new YChan. It now supports
+boards with numbers in them on 4chan and 8ch.
+I also added some code to save the urls whenever
+YChan crashes (if something like this happens). 
 For more informations see "Changelog"
 
-I edited some important things since 1.2 so it's
-possible that you have to configure YChan again.
+I edited some important things since the last
+version was released so it's possible that you 
+have to configure YChan again.
 
 Last but not least:
 If you like the program dont be a greedy jew
 and gift me a game or a CS:GO Case Key on steam.
 Link: http://steamcommunity.com/id/cptgrunge/wishlist/
-For more informations see "About".</value>
+For more informations see "About".
+
+Thanks to everyone who actually gifted me something on
+Steam. I love you guys, thanks for keeping me motivated!</value>
   </data>
   <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <data name="$this.Icon" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">

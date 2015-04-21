@@ -94,6 +94,12 @@
     <Compile Include="Settings.designer.cs">
       <DependentUpon>Settings.cs</DependentUpon>
     </Compile>
+    <Compile Include="CloseWarn.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CloseWarn.designer.cs">
+      <DependentUpon>CloseWarn.cs</DependentUpon>
+    </Compile>
     <Compile Include="VInf.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -120,6 +126,9 @@
     </Compile>
     <EmbeddedResource Include="Settings.resx">
       <DependentUpon>Settings.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CloseWarn.resx">
+      <DependentUpon>CloseWarn.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="VInf.resx">
       <DependentUpon>VInf.cs</DependentUpon>

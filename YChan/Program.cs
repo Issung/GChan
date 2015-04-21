@@ -23,14 +23,48 @@ using System.Windows.Forms;
 
 namespace YChan {
     static class Program {
+        public static frmMain MainFrame;
+        /// <summary>
+        /// Main thread exception handler
+        /// </summary>
+        /// <param name="sender">sender</param>
+        /// <param name="e">event</param>
+        public static void Application_ThreadException(object sender, System.Threading.ThreadExceptionEventArgs e) {
+            General.setSettings(General.path, General.timer, General.loadHTML, true, General.minimizeToTray, General.warnOnClose);
+            try {
+                General.writeURLs(MainFrame.clBoards, MainFrame.clThreads);
+            } catch(Exception eX) {
+                MessageBox.Show(eX.Message);
+            }
+        }
+
+        /// <summary>
+        /// Application domain exception handler
+        /// </summary>
+        /// <param name="sender">sender</param>
+        /// <param name="e">event</param>
+        public static void AppDomain_UnhandledException(object sender, System.UnhandledExceptionEventArgs e) {
+            General.setSettings(General.path, General.timer, General.loadHTML, true, General.minimizeToTray, General.warnOnClose);
+            try {
+                General.writeURLs(MainFrame.clBoards, MainFrame.clThreads);
+            } catch(Exception eX) {
+                MessageBox.Show(eX.Message);
+            }
+        }
+
         /// <summary>
         /// Der Haupteinstiegspunkt für die Anwendung.
         /// </summary>
         [STAThread]
-        static void Main() {
+        static void Main() {    
+            // Unhandled exceptions for our Application Domain
+            AppDomain.CurrentDomain.UnhandledException += new System.UnhandledExceptionEventHandler(AppDomain_UnhandledException);
+
+            // Unhandled exceptions for the executing UI thread
+            Application.ThreadException += new System.Threading.ThreadExceptionEventHandler(Application_ThreadException);
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            frmMain MainFrame = new frmMain();
+            MainFrame = new frmMain();
             Application.Run(MainFrame);
         }
     }

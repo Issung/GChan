@@ -32,8 +32,8 @@ using System.Diagnostics;
 
 namespace YChan {
     public partial class frmMain : Form {
-        List<Imageboard> clThreads = new List<Imageboard>();                        // list of monitored threads
-        List<Imageboard> clBoards  = new List<Imageboard>();                        // list of monitored boards
+        public List<Imageboard> clThreads = new List<Imageboard>();                        // list of monitored threads
+        public List<Imageboard> clBoards  = new List<Imageboard>();                        // list of monitored boards
         List<Thread> thrThreads    = new List<Thread>();                            // list of threads that download 
         Thread Scanner = null;                                                      // thread that addes stuff
 
@@ -96,7 +96,7 @@ namespace YChan {
 
         private void btnAdd_Click(object sender, EventArgs e) {
             bool board = (tcApp.SelectedIndex == 1);                             // Board Tab is open -> board=true; Thread tab -> board=false 
-            Imageboard newImageboard = General.createNewIMB(edtURL.Text, board);
+            Imageboard newImageboard = General.createNewIMB(edtURL.Text.Trim(), board);
 
             if(newImageboard != null) {
                 if(isUnique(newImageboard.getURL(), clThreads)) {
@@ -215,16 +215,27 @@ namespace YChan {
         }
 
         private void frmMain_FormClosing(object sender, FormClosingEventArgs e) {
-            this.Hide();
-            nfTray.Visible = false;
-            if(General.saveOnClose)
-                General.writeURLs(clBoards, clThreads);
+            bool close = true;
+            if(General.warnOnClose && clThreads.Count > 0) {
+                CloseWarn clw = new CloseWarn();
+                var result = clw.ShowDialog();
+                close = clw.closeit;
+                if(!close)
+                    e.Cancel = true;
+            }
 
-            if(Scanner != null && Scanner.IsAlive)
-                Scanner.Abort();
-            for(int i = 0; i < thrThreads.Count; i++) {
-                if(thrThreads[i].IsAlive)
-                    thrThreads[i].Abort();
+            if(close == true || !General.warnOnClose) {
+                this.Hide();
+                nfTray.Visible = false;
+                if(General.saveOnClose)
+                    General.writeURLs(clBoards, clThreads);
+
+                if(Scanner != null && Scanner.IsAlive)
+                    Scanner.Abort();
+                for(int i = 0; i < thrThreads.Count; i++) {
+                    if(thrThreads[i].IsAlive)
+                        thrThreads[i].Abort();
+                }
             }
         }
 

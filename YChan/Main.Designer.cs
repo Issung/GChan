@@ -245,7 +245,7 @@
             // 
             this.cmTrayOpen.Image = ((System.Drawing.Image)(resources.GetObject("cmTrayOpen.Image")));
             this.cmTrayOpen.Name = "cmTrayOpen";
-            this.cmTrayOpen.Size = new System.Drawing.Size(152, 22);
+            this.cmTrayOpen.Size = new System.Drawing.Size(139, 22);
             this.cmTrayOpen.Text = "Open Folder";
             this.cmTrayOpen.Click += new System.EventHandler(this.cmTrayOpen_Click);
             // 
@@ -253,7 +253,7 @@
             // 
             this.cmTrayExit.Image = ((System.Drawing.Image)(resources.GetObject("cmTrayExit.Image")));
             this.cmTrayExit.Name = "cmTrayExit";
-            this.cmTrayExit.Size = new System.Drawing.Size(152, 22);
+            this.cmTrayExit.Size = new System.Drawing.Size(139, 22);
             this.cmTrayExit.Text = "Exit";
             this.cmTrayExit.Click += new System.EventHandler(this.cmTrayExit_Click);
             // 
@@ -269,7 +269,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.msHead;
             this.Name = "frmMain";
-            this.Text = "YChan 2.2";
+            this.Text = "YChan 2.3";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.frmMain_FormClosing);
             this.Load += new System.EventHandler(this.frmMain_Load);
             this.SizeChanged += new System.EventHandler(this.frmMain_SizeChanged);
