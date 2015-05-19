@@ -46,6 +46,7 @@ namespace YChan {
         }
 
         private void frmMain_Load(object sender, EventArgs e) {
+
             General.loadSettings();                                                 // load settings on startup
             if(!General.minimizeToTray)                                             // if trayicon deactivated
                 nfTray.Visible = false;                                             // hide it

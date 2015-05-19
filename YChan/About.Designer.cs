@@ -30,7 +30,7 @@
             // 
             // btnAClose
             // 
-            this.btnAClose.Location = new System.Drawing.Point(136, 232);
+            this.btnAClose.Location = new System.Drawing.Point(139, 250);
             this.btnAClose.Name = "btnAClose";
             this.btnAClose.Size = new System.Drawing.Size(75, 23);
             this.btnAClose.TabIndex = 0;
@@ -46,7 +46,7 @@
             this.rtAbout.Location = new System.Drawing.Point(12, 12);
             this.rtAbout.Name = "rtAbout";
             this.rtAbout.ReadOnly = true;
-            this.rtAbout.Size = new System.Drawing.Size(322, 214);
+            this.rtAbout.Size = new System.Drawing.Size(322, 232);
             this.rtAbout.TabIndex = 1;
             this.rtAbout.Text = resources.GetString("rtAbout.Text");
             this.rtAbout.LinkClicked += new System.Windows.Forms.LinkClickedEventHandler(this.rtAbout_LinkClicked);
@@ -55,7 +55,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(343, 259);
+            this.ClientSize = new System.Drawing.Size(343, 276);
             this.ControlBox = false;
             this.Controls.Add(this.rtAbout);
             this.Controls.Add(this.btnAClose);

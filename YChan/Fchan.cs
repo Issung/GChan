@@ -175,14 +175,20 @@ namespace YChan {
                         string old =baseURL + xmlTim[i].InnerText + xmlExt[i].InnerText;
                         string rep = xmlTim[i].InnerText + xmlExt[i].InnerText;
                         website = website.Replace(old, rep);
+/*http://i.4cdn.org/a/1431901271793s.jpg
                         Regex nmb = new Regex("//[0-9].t.4cdn.org/"+getURL().Split('/')[3] + "/" + xmlTim[i].InnerText +"s.jpg");
-
                         old = "//t.4cdn.org/" + getURL().Split('/')[3] + "/" + xmlTim[i].InnerText +"s.jpg";
                         rep = "thumb/" + xmlTim[i].InnerText +"s.jpg";
-                        strThumbs = strThumbs + "http:" + old +"\n";
+/*                        Regex nmb = new Regex("http://i.4cdn.org/"+getURL().Split('/')[3] + "/" + xmlTim[i].InnerText +"s.jpg");
+                        old = "http://i.4cdn.org/" + getURL().Split('/')[3] + "/" + xmlTim[i].InnerText +"s.jpg";
+                        rep = "thumb/" + xmlTim[i].InnerText +"s.jpg";
+                        strThumbs = strThumbs + old +"\n";
 
-                        website = nmb.Replace(website, rep);
-//                        website = website.Replace(old, rep);
+                        website = nmb.Replace(website, rep);*/
+//                        MessageBox.Show("Replace http://i.4cdn.org/" + getURL().Split('/')[3] + "/" + xmlTim[i].InnerText +"s.jpg with thumb/" + xmlTim[i].InnerText +"s.jpg");
+                        old = "//t.4cdn.org/" + getURL().Split('/')[3] + "/" + xmlTim[i].InnerText +"s.jpg";
+                        strThumbs = strThumbs + "http:" + old +"\n";
+                        website = website.Replace("//i.4cdn.org/"+getURL().Split('/')[3], "thumb");
                     }
 
                     website = website.Replace("=\"//", "=\"http://");
