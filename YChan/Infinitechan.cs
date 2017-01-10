@@ -94,14 +94,16 @@ namespace YChan {
                 xmlExt     = doc.DocumentElement.SelectNodes("/root/posts/item/ext");
 
                 for(int i = 0; i < xmlExt.Count; i++) {
-                    exed = exed + "https://8ch.net/" + getURL().Split('/')[3] + "/src/" + xmlTim[i].InnerText + xmlExt[i].InnerText + "\n";
+                    //exed = exed + "https://8ch.net/" + getURL().Split('/')[3] + "/src/" + xmlTim[i].InnerText + xmlExt[i].InnerText + "\n";
+					exed = exed + "https://8ch.net/" + "/file_store/" + xmlTim[i].InnerText + xmlExt[i].InnerText + "\n";
                 }
 
                 // get images of posts with multiple images
                 xmlTim     = doc.DocumentElement.SelectNodes("/root/posts/item/extra_files/item/tim");
                 xmlExt     = doc.DocumentElement.SelectNodes("/root/posts/item/extra_files/item/ext");
                 for(int i = 0; i < xmlExt.Count; i++) {
-                    exed = exed + "https://8ch.net/" + getURL().Split('/')[3] + "/src/" + xmlTim[i].InnerText + xmlExt[i].InnerText + "\n";
+                    //exed = exed + "https://8ch.net/" + getURL().Split('/')[3] + "/src/" + xmlTim[i].InnerText + xmlExt[i].InnerText + "\n";
+					exed = exed + "https://8ch.net/" + "/file_store/" + xmlTim[i].InnerText + xmlExt[i].InnerText + "\n";
                 }
 
 
