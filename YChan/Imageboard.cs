@@ -15,16 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/> *
  ************************************************************************/
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Windows.Forms;
-using System.Text.RegularExpressions;
 
 /***********************************************************************************************************
  * Imageboard.cs v0.4                                                                                      *

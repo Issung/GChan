@@ -15,17 +15,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/> *
  ************************************************************************/
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Text.RegularExpressions;
-using System.Windows.Forms;
 
 using System.Net;
 using System.Xml;
-using System.Xml.XPath;
 using System.Xml.Linq;
 using System.Runtime.Serialization.Json;
 using System.IO;

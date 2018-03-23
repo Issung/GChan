@@ -15,17 +15,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/> *
  ************************************************************************/
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
 using System.Net;
 using System.Xml;
-using System.Xml.XPath;
 using System.Xml.Linq;
 using System.Runtime.Serialization.Json;
 using System.IO;
@@ -136,7 +131,7 @@ namespace YChan {
                     Res = Res + "http://boards.4chan.org/" + getURL().Split('/')[3] + "/thread/" + tNo[i].InnerText + "/" + tNa[i].InnerText + "\n";
                 }
             } catch(WebException webEx) {
-//                MessageBox.Show("Connection Error");
+//                MessageBox.Show("Connection Error: " + webEx.Message);
             }
 //            MessageBox.Show(Res);
 
@@ -149,15 +144,24 @@ namespace YChan {
             string strThumbs = "";
             string baseURL = "//i.4cdn.org/" + getURL().Split('/')[3] + "/";
             string website  = "";
+
             if(General.loadHTML) {
                 try {
-                    website = new WebClient().DownloadString(this.getURL());
 
-                    string JURL =  "http://a.4cdn.org/" + getURL().Split('/')[3] +"/thread/" + getURL().Split('/')[5] +".json";
+                    string JURL = "http://a.4cdn.org/" + getURL().Split('/')[3] + "/thread/" + getURL().Split('/')[5] + ".json";
                     string Res = "";
                     string str = "";
 
-                    string json = new WebClient().DownloadString(JURL);
+                    //Add an UserAgent to prevent 403
+                    WebClient web = new WebClient();
+                    web.Headers["User-Agent"] = "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0";
+
+                    website = web.DownloadString(this.getURL());
+
+                    //Prevent the html from being destroyed by the anti adblock script
+                    website = website.Replace("f=\"to\"", "f=\"penis\"");
+
+                    string json = web.DownloadString(JURL);
                     byte[] bytes = Encoding.ASCII.GetBytes(json);
                     using(var stream = new MemoryStream(bytes)) {
                         var quotas = new XmlDictionaryReaderQuotas();
@@ -204,14 +208,15 @@ namespace YChan {
 
                 } catch(WebException webEx) {
                     // should be handled
+#if DEBUG
+                    MessageBox.Show("Error: " + webEx.Message); 
+#endif
                 }
                 if(website != "")
                     File.WriteAllText(this.SaveTo+"\\Thread.html", website);
 
             }
             
-
-        
             try {
                 URLs = Regex.Split(getLinks(), "\n");
             } catch(WebException webEx) {
