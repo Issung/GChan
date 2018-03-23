@@ -117,30 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="rtWelcome.Text" xml:space="preserve">
-    <value>Welcome to YChan 2.3! 
-
-After you guys found some bugs and sent me some
-suggestions here is the new YChan. It now supports
-boards with numbers in them on 4chan and 8ch.
-I also added some code to save the urls whenever
-YChan crashes (if something like this happens). 
-For more informations see "Changelog"
-
-I edited some important things since the last
-version was released so it's possible that you 
-have to configure YChan again.
-
-Last but not least:
-If you like the program dont be a greedy jew
-and gift me a game or a CS:GO Case Key on steam.
-Link: http://steamcommunity.com/id/cptgrunge/wishlist/
-For more informations see "About".
-
-Thanks to everyone who actually gifted me something on
-Steam. I love you guys, thanks for keeping me motivated!
-steel king is best girl,  (around) 6 months™</value>
-  </data>
   <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <data name="$this.Icon" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>

@@ -52,7 +52,9 @@
             this.rtWelcome.Name = "rtWelcome";
             this.rtWelcome.Size = new System.Drawing.Size(216, 230);
             this.rtWelcome.TabIndex = 3;
-            this.rtWelcome.Text = resources.GetString("rtWelcome.Text");
+            this.rtWelcome.Text = "Welcome to YChan 2.4 (Fork)! \n\nSince the original has been marked as abandoned on" +
+    " SourceForge, I decided to fork it and fix a bug that was annoying me.\n\nThat is " +
+    "all, have fun.";
             this.rtWelcome.LinkClicked += new System.Windows.Forms.LinkClickedEventHandler(this.rtWelcome_LinkClicked);
             // 
             // FirstStart

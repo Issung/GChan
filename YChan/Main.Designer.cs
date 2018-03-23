@@ -275,7 +275,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.msHead;
             this.Name = "frmMain";
-            this.Text = "YChan 2.3";
+            this.Text = "YChan 2.4 (Fork)";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.frmMain_FormClosing);
             this.Load += new System.EventHandler(this.frmMain_Load);
             this.SizeChanged += new System.EventHandler(this.frmMain_SizeChanged);
