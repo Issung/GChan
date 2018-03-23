@@ -92,6 +92,9 @@
             // 
             // tcApp
             // 
+            this.tcApp.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.tcApp.Controls.Add(this.tpThreads);
             this.tcApp.Controls.Add(this.tpBoard);
             this.tcApp.Location = new System.Drawing.Point(12, 56);
@@ -144,6 +147,7 @@
             // 
             // btnAdd
             // 
+            this.btnAdd.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnAdd.Location = new System.Drawing.Point(495, 28);
             this.btnAdd.Name = "btnAdd";
             this.btnAdd.Size = new System.Drawing.Size(75, 23);
@@ -154,6 +158,8 @@
             // 
             // edtURL
             // 
+            this.edtURL.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.edtURL.Location = new System.Drawing.Point(12, 30);
             this.edtURL.Name = "edtURL";
             this.edtURL.Size = new System.Drawing.Size(477, 20);
