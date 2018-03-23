@@ -116,6 +116,9 @@
             // 
             // lbThreads
             // 
+            this.lbThreads.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.lbThreads.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.lbThreads.FormattingEnabled = true;
             this.lbThreads.Location = new System.Drawing.Point(0, 3);
@@ -137,6 +140,9 @@
             // 
             // lbBoards
             // 
+            this.lbBoards.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.lbBoards.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.lbBoards.FormattingEnabled = true;
             this.lbBoards.Location = new System.Drawing.Point(0, 0);
