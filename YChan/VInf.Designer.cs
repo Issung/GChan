@@ -30,6 +30,9 @@
             // 
             // rtbChange
             // 
+            this.rtbChange.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.rtbChange.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.rtbChange.Cursor = System.Windows.Forms.Cursors.Arrow;
             this.rtbChange.Location = new System.Drawing.Point(12, 12);
@@ -41,6 +44,8 @@
             // 
             // btnVIClose
             // 
+            this.btnVIClose.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.btnVIClose.Location = new System.Drawing.Point(106, 215);
             this.btnVIClose.Name = "btnVIClose";
             this.btnVIClose.Size = new System.Drawing.Size(75, 23);

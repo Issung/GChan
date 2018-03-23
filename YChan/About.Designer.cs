@@ -59,6 +59,7 @@
             this.ControlBox = false;
             this.Controls.Add(this.rtAbout);
             this.Controls.Add(this.btnAClose);
+            this.MaximumSize = new System.Drawing.Size(359, 315);
             this.Name = "About";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;

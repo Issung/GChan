@@ -30,9 +30,11 @@
             // 
             // btnAClose
             // 
-            this.btnAClose.Location = new System.Drawing.Point(90, 298);
+            this.btnAClose.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnAClose.Location = new System.Drawing.Point(90, 248);
             this.btnAClose.Name = "btnAClose";
-            this.btnAClose.Size = new System.Drawing.Size(120, 23);
+            this.btnAClose.Size = new System.Drawing.Size(60, 23);
             this.btnAClose.TabIndex = 2;
             this.btnAClose.Text = "Open Settings";
             this.btnAClose.UseVisualStyleBackColor = true;
@@ -40,12 +42,15 @@
             // 
             // rtWelcome
             // 
+            this.rtWelcome.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.rtWelcome.BackColor = System.Drawing.SystemColors.Control;
             this.rtWelcome.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.rtWelcome.Cursor = System.Windows.Forms.Cursors.Default;
             this.rtWelcome.Location = new System.Drawing.Point(12, 12);
             this.rtWelcome.Name = "rtWelcome";
-            this.rtWelcome.Size = new System.Drawing.Size(276, 280);
+            this.rtWelcome.Size = new System.Drawing.Size(216, 230);
             this.rtWelcome.TabIndex = 3;
             this.rtWelcome.Text = resources.GetString("rtWelcome.Text");
             this.rtWelcome.LinkClicked += new System.Windows.Forms.LinkClickedEventHandler(this.rtWelcome_LinkClicked);
@@ -54,7 +59,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(300, 327);
+            this.ClientSize = new System.Drawing.Size(240, 277);
             this.Controls.Add(this.rtWelcome);
             this.Controls.Add(this.btnAClose);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
