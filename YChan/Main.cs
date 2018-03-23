@@ -32,8 +32,8 @@ using System.Diagnostics;
 
 namespace YChan {
     public partial class frmMain : Form {
-        public List<Imageboard> clThreads = new List<Imageboard>();                        // list of monitored threads
-        public List<Imageboard> clBoards  = new List<Imageboard>();                        // list of monitored boards
+        public List<Imageboard> clThreads = new List<Imageboard>();                 // list of monitored threads
+        public List<Imageboard> clBoards  = new List<Imageboard>();                 // list of monitored boards
         List<Thread> thrThreads    = new List<Thread>();                            // list of threads that download 
         Thread Scanner = null;                                                      // thread that addes stuff
 
@@ -109,7 +109,7 @@ namespace YChan {
                         clThreads.Add(newImageboard);
                     }
                 } else {
-                    MessageBox.Show("URL is already in queu!");
+                    MessageBox.Show("URL is already in queue!");
                 }
             } else {
                 MessageBox.Show("Corrupt URL, unsupported website or not a board/thread!");

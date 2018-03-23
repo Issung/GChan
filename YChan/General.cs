@@ -15,19 +15,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/> *
  ************************************************************************/
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
 using System.Xml;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 using System.Net;
-using System.IO;
 
-namespace YChan {
+namespace YChan
+{
     class General {
         public static string path  = "";                                                    // dl Path
         public static int    timer = 0;                                                     // Timer for frmMain.scnTimer
@@ -148,12 +144,12 @@ namespace YChan {
                 General.setSettings(Path, iTime, html, sav, tray, warn);                      
             } else {
                 firstStart = true;                                                                      // No settings file,
-                General.setSettings("C:\\", 10000, false, false, true, true);                                 // set default values
+                General.setSettings("C:\\", 10000, false, false, true, true);                           // set default values
             }
             
-            if(!File.Exists(Application.CommonAppDataPath+"\\2.3")){                                    // Old settings file, new
+            if(!File.Exists(Application.CommonAppDataPath+"\\2.4")){                                    // Old settings file, new
                 firstStart = true;                                                                      // version, first start,
-                File.Create(Application.CommonAppDataPath+"\\2.3").Dispose();                           // create file to save version
+                File.Create(Application.CommonAppDataPath+"\\2.4").Dispose();                           // create file to save version
             }
         }
         public static Imageboard createNewIMB(string url, bool board) {                                 // Create a new Imageboard

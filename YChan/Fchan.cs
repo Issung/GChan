@@ -24,7 +24,7 @@ using System.Xml;
 using System.Xml.Linq;
 using System.Runtime.Serialization.Json;
 using System.IO;
-// see Infinitechan.cs for explaneation
+// see Infinitechan.cs for explanation
 
 namespace YChan {
     class Fchan : Imageboard {
@@ -95,19 +95,12 @@ namespace YChan {
             } catch(WebException webEx) {
                 if(((int) webEx.Status) == 7)
                     this.Gone = true;
-
-//                MessageBox.Show("Webex: (" + (int)webEx.Status + ") " + webEx.Message); //DEBUG
                 throw webEx;
-
-                //                if(((HttpWebResponse) webEx.Response).StatusCode == HttpStatusCode.NotFound)
-                //                MessageBox.Show("Removed " + URL);
-
             }
             return exed;
         }
 
         override public string getThreads() {
-//            MessageBox.Show("getthreads");
             string URL = "http://a.4cdn.org/" + getURL().Split('/')[3] + "/catalog.json";
             string Res = "";
             string str = "";
@@ -131,17 +124,15 @@ namespace YChan {
                     Res = Res + "http://boards.4chan.org/" + getURL().Split('/')[3] + "/thread/" + tNo[i].InnerText + "/" + tNa[i].InnerText + "\n";
                 }
             } catch(WebException webEx) {
-//                MessageBox.Show("Connection Error: " + webEx.Message);
+#if DEBUG
+                MessageBox.Show("Connection Error: " + webEx.Message);
+#endif
             }
-//            MessageBox.Show(Res);
-
             return Res;
         }
 
-        override public void download() {
+        override public void download(){
             string[] URLs;
-            string[] thumbs;
-            string strThumbs = "";
             string baseURL = "//i.4cdn.org/" + getURL().Split('/')[3] + "/";
             string website  = "";
 
@@ -149,7 +140,6 @@ namespace YChan {
                 try {
 
                     string JURL = "http://a.4cdn.org/" + getURL().Split('/')[3] + "/thread/" + getURL().Split('/')[5] + ".json";
-                    string Res = "";
                     string str = "";
 
                     //Add an UserAgent to prevent 403
@@ -176,41 +166,34 @@ namespace YChan {
                     XmlNodeList xmlExt     = doc.DocumentElement.SelectNodes("/root/posts/item/ext");
 
                     for(int i = 0; i < xmlExt.Count; i++) {
-                        string old =baseURL + xmlTim[i].InnerText + xmlExt[i].InnerText;
+                        string old = baseURL + xmlTim[i].InnerText + xmlExt[i].InnerText;
                         string rep = xmlTim[i].InnerText + xmlExt[i].InnerText;
-                        website = website.Replace(old, rep);
-/*http://i.4cdn.org/a/1431901271793s.jpg
-                        Regex nmb = new Regex("//[0-9].t.4cdn.org/"+getURL().Split('/')[3] + "/" + xmlTim[i].InnerText +"s.jpg");
-                        old = "//t.4cdn.org/" + getURL().Split('/')[3] + "/" + xmlTim[i].InnerText +"s.jpg";
-                        rep = "thumb/" + xmlTim[i].InnerText +"s.jpg";
-/*                        Regex nmb = new Regex("http://i.4cdn.org/"+getURL().Split('/')[3] + "/" + xmlTim[i].InnerText +"s.jpg");
-                        old = "http://i.4cdn.org/" + getURL().Split('/')[3] + "/" + xmlTim[i].InnerText +"s.jpg";
-                        rep = "thumb/" + xmlTim[i].InnerText +"s.jpg";
-                        strThumbs = strThumbs + old +"\n";
 
-                        website = nmb.Replace(website, rep);*/
-//                        MessageBox.Show("Replace http://i.4cdn.org/" + getURL().Split('/')[3] + "/" + xmlTim[i].InnerText +"s.jpg with thumb/" + xmlTim[i].InnerText +"s.jpg");
-                        old = "//t.4cdn.org/" + getURL().Split('/')[3] + "/" + xmlTim[i].InnerText +"s.jpg";
-                        strThumbs = strThumbs + "http:" + old +"\n";
-                        website = website.Replace("//i.4cdn.org/"+getURL().Split('/')[3], "thumb");
+                        string thumbName = rep.Split('.')[0] + "s";
+                        
+                        website = website.Replace(old, rep);
+                        website = website.Replace(thumbName+".jpg", rep.Split('.')[0] + "." + rep.Split('.')[1]);
+                        website = website.Replace("/" + thumbName, thumbName);
+                        website = website.Replace("/" + rep, rep);
+                        website = website.Replace("//i.4cdn.org/" + getURL().Split('/')[3], "");
                     }
 
                     website = website.Replace("=\"//", "=\"http://");
 
                     if(!Directory.Exists(this.SaveTo))
                         Directory.CreateDirectory(this.SaveTo);
-
-                    thumbs = strThumbs.Split('\n');
-
-                    for(int i = 0; i < thumbs.Length-1; i++) {
-                        General.dlTo(thumbs[i],this.SaveTo + "\\thumb");
-                    }
-
-                } catch(WebException webEx) {
-                    // should be handled
+                }
+                catch (WebException webEx) {
 #if DEBUG
-                    MessageBox.Show("Error: " + webEx.Message); 
+                    MessageBox.Show("Error: " + webEx.Message + "\nOn " + getURL());
 #endif
+
+                    //Thread 404's
+                    if (((int)webEx.Status) == 7)
+                    {
+                            this.Gone = true;
+                        return;
+                    }
                 }
                 if(website != "")
                     File.WriteAllText(this.SaveTo+"\\Thread.html", website);
