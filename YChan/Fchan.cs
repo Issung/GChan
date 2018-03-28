@@ -135,14 +135,16 @@ namespace YChan {
             string[] URLs;
             string baseURL = "//i.4cdn.org/" + getURL().Split('/')[3] + "/";
             string website  = "";
+            string[] thumbs;
+            string strThumbs = "";
 
-            if(General.loadHTML) {
+            if (General.loadHTML) {
                 try {
 
                     string JURL = "http://a.4cdn.org/" + getURL().Split('/')[3] + "/thread/" + getURL().Split('/')[5] + ".json";
                     string str = "";
 
-                    //Add an UserAgent to prevent 403
+                    //Add a UserAgent to prevent 403
                     WebClient web = new WebClient();
                     web.Headers["User-Agent"] = "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0";
 
@@ -166,22 +168,42 @@ namespace YChan {
                     XmlNodeList xmlExt     = doc.DocumentElement.SelectNodes("/root/posts/item/ext");
 
                     for(int i = 0; i < xmlExt.Count; i++) {
+
                         string old = baseURL + xmlTim[i].InnerText + xmlExt[i].InnerText;
                         string rep = xmlTim[i].InnerText + xmlExt[i].InnerText;
-
-                        string thumbName = rep.Split('.')[0] + "s";
-                        
                         website = website.Replace(old, rep);
-                        website = website.Replace(thumbName+".jpg", rep.Split('.')[0] + "." + rep.Split('.')[1]);
-                        website = website.Replace("/" + thumbName, thumbName);
-                        website = website.Replace("/" + rep, rep);
-                        website = website.Replace("//i.4cdn.org/" + getURL().Split('/')[3], "");
+
+                        //Save thumbs for files that need it
+                        if (rep.Split('.')[1] == "webm" /*|| rep.Split('.')[1] == ""*/)
+                        {
+                            old = "//t.4cdn.org/" + getURL().Split('/')[3] + "/" + xmlTim[i].InnerText + "s.jpg";
+                            strThumbs = strThumbs + "http:" + old + "\n";
+
+                            website = website.Replace("//i.4cdn.org/" + getURL().Split('/')[3] + "/" + xmlTim[i].InnerText, "thumb/" + xmlTim[i].InnerText);
+                            website = website.Replace("/" + rep, rep);
+
+                        }
+                        else
+                        {
+                            string thumbName = rep.Split('.')[0] + "s";
+                            website = website.Replace(thumbName + ".jpg", rep.Split('.')[0] + "." + rep.Split('.')[1]);
+                            website = website.Replace("/" + thumbName, thumbName);
+
+                            website = website.Replace("//i.4cdn.org/" + getURL().Split('/')[3] + "/" + xmlTim[i].InnerText, xmlTim[i].InnerText);
+                            website = website.Replace("/" + rep, rep);
+                        }
                     }
 
                     website = website.Replace("=\"//", "=\"http://");
 
                     if(!Directory.Exists(this.SaveTo))
                         Directory.CreateDirectory(this.SaveTo);
+
+                    //Save thumbs for files that need it
+                    thumbs = strThumbs.Split('\n');
+                    for (int i = 0; i < thumbs.Length - 1; i++)
+                        General.dlTo(thumbs[i], this.SaveTo + "\\thumb");
+                    
                 }
                 catch (WebException webEx) {
 #if DEBUG
