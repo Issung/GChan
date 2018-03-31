@@ -23,16 +23,16 @@
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(About));
             this.btnAClose = new System.Windows.Forms.Button();
             this.rtAbout = new System.Windows.Forms.RichTextBox();
             this.SuspendLayout();
             // 
             // btnAClose
             // 
-            this.btnAClose.Location = new System.Drawing.Point(139, 250);
+            this.btnAClose.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnAClose.Location = new System.Drawing.Point(121, 186);
             this.btnAClose.Name = "btnAClose";
-            this.btnAClose.Size = new System.Drawing.Size(75, 23);
+            this.btnAClose.Size = new System.Drawing.Size(127, 23);
             this.btnAClose.TabIndex = 0;
             this.btnAClose.Text = "Close";
             this.btnAClose.UseVisualStyleBackColor = true;
@@ -40,15 +40,19 @@
             // 
             // rtAbout
             // 
+            this.rtAbout.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.rtAbout.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.rtAbout.Cursor = System.Windows.Forms.Cursors.Arrow;
             this.rtAbout.ImeMode = System.Windows.Forms.ImeMode.NoControl;
             this.rtAbout.Location = new System.Drawing.Point(12, 12);
             this.rtAbout.Name = "rtAbout";
             this.rtAbout.ReadOnly = true;
-            this.rtAbout.Size = new System.Drawing.Size(322, 232);
+            this.rtAbout.Size = new System.Drawing.Size(236, 168);
             this.rtAbout.TabIndex = 1;
-            this.rtAbout.Text = resources.GetString("rtAbout.Text");
+            this.rtAbout.Text = "Fork of\nhttps://sourceforge.net/p/ychan/\n\nCreated by mirage (mirage@secure-mail.b" +
+    "iz)\nIcon by karan000 (creator of XChan)\nContext Menu Icons by Oxygen Team\n";
             this.rtAbout.LinkClicked += new System.Windows.Forms.LinkClickedEventHandler(this.rtAbout_LinkClicked);
             // 
             // About
@@ -56,11 +60,10 @@
             this.AcceptButton = this.btnAClose;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(343, 276);
+            this.ClientSize = new System.Drawing.Size(257, 212);
             this.ControlBox = false;
             this.Controls.Add(this.rtAbout);
             this.Controls.Add(this.btnAClose);
-            this.MaximumSize = new System.Drawing.Size(359, 315);
             this.Name = "About";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;

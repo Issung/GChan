@@ -117,21 +117,4 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="rtAbout.Text" xml:space="preserve">
-    <value>Please report bugs and send feedback or suggestions via email
-or via sourceforge. 
-https://sourceforge.net/p/ychan/
-
-Created by mirage (mirage@secure-mail.biz)
-Icon by karan000 (creator of XChan)
-Context Menu Icons by Oxygen Team
-
-Thanks to MacK, karan000 and everyone who keeps me motivated. Special thanks to everyone who gifted me something on steam.
-steel king is best girl,  (around) 6 months™!
-
-You like my work? Dont be a fucking jew und gift me a game
-or a CS:GO Case Key on Steam!
-
-Whishlist: http://steamcommunity.com/id/cptgrunge/wishlist</value>
-  </data>
 </root>

@@ -17,12 +17,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 using System.Threading;
@@ -350,6 +346,11 @@ namespace YChan {
             if(General.minimizeToTray && this.WindowState == FormWindowState.Minimized) {
                 this.Hide();                                                                // when minimized hide from taskbar if trayicon enabled
             }
+        }
+
+        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            frmMain_FormClosing(sender, new FormClosingEventArgs(CloseReason.UserClosing, false));
         }
     }
 }
