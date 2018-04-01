@@ -170,15 +170,14 @@ namespace YChan {
                         string ext = xmlExt[i].InnerText;
 //                        if(ext == ".webm")
 //                            ext = ".jpg";
-                        strThumbs = strThumbs + "https://8ch.net/" + getURL().Split('/')[3] + "/thumb/" + xmlTim[i].InnerText + ext + "\n";
+                        strThumbs = strThumbs + "https://8ch.net/file_store/thumb/" + xmlTim[i].InnerText + ext + "\n";
 
-                        website = website.Replace("https://8ch.net/" + getURL().Split('/')[3] + "/thumb/" + xmlTim[i].InnerText + ext, "thumb/" + xmlTim[i].InnerText + ext);
-                        website = website.Replace("=\"/" + getURL().Split('/')[3] + "/thumb/" + xmlTim[i].InnerText + ext, "=\"thumb/" + xmlTim[i].InnerText + ext);
-                        website = website.Replace("=\"/" + getURL().Split('/')[3] + "/src/" + xmlTim[i].InnerText + ext, "=\"" + xmlTim[i].InnerText + ext);
-                        website = website.Replace("https://8ch.net/" + getURL().Split('/')[3] + "/thumb/" + xmlTim[i].InnerText + ext, "thumb/"+ xmlTim[i].InnerText + ext);
-                        website = website.Replace("https://media.8ch.net/" + getURL().Split('/')[3] + "/thumb/" + xmlTim[i].InnerText + ext, "thumb/"+ xmlTim[i].InnerText + ext);
-                        website = website.Replace("https://media.8ch.net/" + getURL().Split('/')[3] + "/src/" + xmlTim[i].InnerText + ext, xmlTim[i].InnerText + ext);
-                        website = website.Replace("https://8ch.net/" + getURL().Split('/')[3] + "/src/" + xmlTim[i].InnerText + ext, xmlTim[i].InnerText + ext);
+                        website = website.Replace("https://8ch.net/file_store/thumb/" + xmlTim[i].InnerText + ext, "thumb/" + xmlTim[i].InnerText + ext);
+                        website = website.Replace("=\"/file_store/thumb/" + xmlTim[i].InnerText + ext, "=\"thumb/" + xmlTim[i].InnerText + ext);
+                        website = website.Replace("=\"/file_store/" + xmlTim[i].InnerText + ext, "=\"" + xmlTim[i].InnerText + ext);
+                        website = website.Replace("https://media.8ch.net/file_store/thumb/" + xmlTim[i].InnerText + ext, "thumb/"+ xmlTim[i].InnerText + ext);
+                        website = website.Replace("https://media.8ch.net/file_store/" + xmlTim[i].InnerText + ext, xmlTim[i].InnerText + ext);
+                        website = website.Replace("https://8ch.net/file_store/" + xmlTim[i].InnerText + ext, xmlTim[i].InnerText + ext);
                     }
 
                     // get images of posts with multiple images
@@ -188,16 +187,14 @@ namespace YChan {
                         string ext = xmlExt[i].InnerText;
 //                        if(ext == ".webm")
 //                            ext = ".jpg";
-                        strThumbs = strThumbs + "https://8ch.net/" + getURL().Split('/')[3] + "/thumb/" + xmlTim[i].InnerText + ext + "\n";
+                        strThumbs = strThumbs + "https://8ch.net/file_store/thumb/" + xmlTim[i].InnerText + ext + "\n";
 
-                        website = website.Replace("https://8ch.net/" + getURL().Split('/')[3] + "/thumb/"+ xmlTim[i].InnerText + ext, "thumb/" + xmlTim[i].InnerText + ext);
-                        website = website.Replace("=\"/" + getURL().Split('/')[3] + "/thumb/" + xmlTim[i].InnerText + ext, "=\"thumb/" + xmlTim[i].InnerText + ext);
-                        website = website.Replace("=\"/" + getURL().Split('/')[3] + "/src/" + xmlTim[i].InnerText + ext, "=\"" + xmlTim[i].InnerText + ext);
-
-                        website = website.Replace("https://8ch.net/" + getURL().Split('/')[3] + "/thumb/" + xmlTim[i].InnerText + ext, "thumb/"+ xmlTim[i].InnerText + ext);
-                        website = website.Replace("https://media.8ch.net/" + getURL().Split('/')[3] + "/thumb/" + xmlTim[i].InnerText + ext, "thumb/"+ xmlTim[i].InnerText + ext);
-                        website = website.Replace("https://media.8ch.net/" + getURL().Split('/')[3] + "/src/" + xmlTim[i].InnerText + ext, xmlTim[i].InnerText + ext);
-                        website = website.Replace("https://8ch.net/" + getURL().Split('/')[3] + "/src/" + xmlTim[i].InnerText + ext, xmlTim[i].InnerText + ext);
+                        website = website.Replace("https://8ch.net/file_store/thumb/" + xmlTim[i].InnerText + ext, "thumb/" + xmlTim[i].InnerText + ext);
+                        website = website.Replace("=\"/file_store/thumb/" + xmlTim[i].InnerText + ext, "=\"thumb/" + xmlTim[i].InnerText + ext);
+                        website = website.Replace("=\"/file_store/" + xmlTim[i].InnerText + ext, "=\"" + xmlTim[i].InnerText + ext);
+                        website = website.Replace("https://media.8ch.net/file_store/thumb/" + xmlTim[i].InnerText + ext, "thumb/"+ xmlTim[i].InnerText + ext);
+                        website = website.Replace("https://media.8ch.net/file_store/" + xmlTim[i].InnerText + ext, xmlTim[i].InnerText + ext);
+                        website = website.Replace("https://8ch.net/file_store/" + xmlTim[i].InnerText + ext, xmlTim[i].InnerText + ext);
                     }
 
                     website = website.Replace("=\"/", "=\"https://8ch.net/");
