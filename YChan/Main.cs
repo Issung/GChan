@@ -352,5 +352,10 @@ namespace YChan {
         {
             frmMain_FormClosing(sender, new FormClosingEventArgs(CloseReason.UserClosing, false));
         }
+
+        private void openFolderToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            Process.Start(General.path);
+        }
     }
 }

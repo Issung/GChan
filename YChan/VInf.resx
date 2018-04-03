@@ -127,6 +127,8 @@
 
 &gt; YChan 2.4
     - fix 4chan html file creator
+    - fix 8chan html file creator
+    - UI improvements and fixes
 
 &gt; YChan 2.3
     - warning when closing YChan

@@ -23,6 +23,7 @@
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(About));
             this.btnAClose = new System.Windows.Forms.Button();
             this.rtAbout = new System.Windows.Forms.RichTextBox();
             this.SuspendLayout();
@@ -51,8 +52,7 @@
             this.rtAbout.ReadOnly = true;
             this.rtAbout.Size = new System.Drawing.Size(236, 168);
             this.rtAbout.TabIndex = 1;
-            this.rtAbout.Text = "Fork of\nhttps://sourceforge.net/p/ychan/\n\nCreated by mirage (mirage@secure-mail.b" +
-    "iz)\nIcon by karan000 (creator of XChan)\nContext Menu Icons by Oxygen Team\n";
+            this.rtAbout.Text = resources.GetString("rtAbout.Text");
             this.rtAbout.LinkClicked += new System.Windows.Forms.LinkClickedEventHandler(this.rtAbout_LinkClicked);
             // 
             // About
