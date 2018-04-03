@@ -18,19 +18,26 @@
 using System;
 using System.Windows.Forms;
 
-namespace YChan {
-    static class Program {
+namespace YChan
+{
+    internal static class Program
+    {
         public static frmMain MainFrame;
+
         /// <summary>
         /// Main thread exception handler
         /// </summary>
         /// <param name="sender">sender</param>
         /// <param name="e">event</param>
-        public static void Application_ThreadException(object sender, System.Threading.ThreadExceptionEventArgs e) {
+        public static void Application_ThreadException(object sender, System.Threading.ThreadExceptionEventArgs e)
+        {
             General.setSettings(General.path, General.timer, General.loadHTML, true, General.minimizeToTray, General.warnOnClose);
-            try {
-                General.writeURLs(MainFrame.clBoards, MainFrame.clThreads);
-            } catch(Exception eX) {
+            try
+            {
+                General.writeURLs(MainFrame.listBoards, MainFrame.listThreads);
+            }
+            catch (Exception eX)
+            {
                 MessageBox.Show(eX.Message);
             }
         }
@@ -40,11 +47,15 @@ namespace YChan {
         /// </summary>
         /// <param name="sender">sender</param>
         /// <param name="e">event</param>
-        public static void AppDomain_UnhandledException(object sender, System.UnhandledExceptionEventArgs e) {
+        public static void AppDomain_UnhandledException(object sender, System.UnhandledExceptionEventArgs e)
+        {
             General.setSettings(General.path, General.timer, General.loadHTML, true, General.minimizeToTray, General.warnOnClose);
-            try {
-                General.writeURLs(MainFrame.clBoards, MainFrame.clThreads);
-            } catch(Exception eX) {
+            try
+            {
+                General.writeURLs(MainFrame.listBoards, MainFrame.listThreads);
+            }
+            catch (Exception eX)
+            {
                 MessageBox.Show(eX.Message);
             }
         }
@@ -53,7 +64,8 @@ namespace YChan {
         /// Der Haupteinstiegspunkt für die Anwendung.
         /// </summary>
         [STAThread]
-        static void Main() {    
+        private static void Main()
+        {
             // Unhandled exceptions for our Application Domain
             AppDomain.CurrentDomain.UnhandledException += new System.UnhandledExceptionEventHandler(AppDomain_UnhandledException);
 

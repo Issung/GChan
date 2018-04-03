@@ -15,7 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/> *
  ************************************************************************/
 
-
 /***********************************************************************************************************
  * Imageboard.cs v0.4                                                                                      *
  * abstract class to use as skeleton for the imageboard classes. all IB classes inherit from this class    *
@@ -26,45 +25,69 @@
  * download    -> Download Images from Thread                                                              *
  ***********************************************************************************************************/
 
-
-namespace YChan {
-    public class Imageboard {
+namespace YChan
+{
+    public class Imageboard
+    {
         protected string URL;                            // Thread/Board URL
         protected string SaveTo;                         // Path to save to
         protected string imName;                         // Name of the IB
         protected bool Board;                            // Flag to distinguish Boards and Threads of an IB
-        protected bool Gone = false;                     // Flag for 404 
+        protected bool Gone = false;                     // Flag for 404
 
-
-        public Imageboard(string url, bool isBoard) {    // Constructor, setting URL and Type (Board/Thread)
-            this.URL       = url;
-            this.Board     = isBoard;
+        public Imageboard(string url, bool isBoard)
+        {    // Constructor, setting URL and Type (Board/Thread)
+            this.URL = url;
+            this.Board = isBoard;
         }
 
-        public bool isGone() {
+        public bool isGone()
+        {
             return this.Gone;
         }
 
-        public string getURL() {
-            return this.URL;        
+        public string getURL()
+        {
+            return this.URL;
         }
 
-        public string getImName() {
+        public string getImName()
+        {
             return this.imName;
         }
-        public string getPath() {
+
+        public string getPath()
+        {
             return this.SaveTo;
         }
 
-        static public bool isThread(string url) {
+        static public bool isThread(string url)
+        {
             return false;
         }
 
-        static public bool isBoard(string url)  {
+        static public bool isBoard(string url)
+        {
             return false;
         }
-        virtual public void         download()          {}
-        virtual protected string    getLinks()          { return ""; }
-        virtual public string       getThreads()        { return ""; }
+
+        virtual public void download()
+        {
+        }
+
+        virtual protected string getLinks()
+        {
+            return "";
+        }
+
+        virtual public string getThreads()
+        {
+            return "";
+        }
+
+        public override string ToString()
+        {
+            return this.URL;
+        }
     }
 }
