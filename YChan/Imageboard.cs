@@ -75,9 +75,9 @@ namespace YChan
         {
         }
 
-        virtual protected string getLinks()
+        virtual protected string[] getLinks()
         {
-            return "";
+            return null;
         }
 
         virtual public string getThreads()

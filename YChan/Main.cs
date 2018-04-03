@@ -85,7 +85,7 @@ namespace YChan
                                 newImageboard.download();
                             });
                             listDownloadThreads.Add(nIMB);
-                            listDownloadThreads.Last().Start();
+                            nIMB.Start();
                         }
                     }
                 }
@@ -153,7 +153,7 @@ namespace YChan
                 });
                 nIMB.Name = newImageboard.getURL();
                 listDownloadThreads.Add(nIMB);
-                listDownloadThreads.Last().Start();
+                nIMB.Start();
             }
 
             edtURL.Text = "";
@@ -404,7 +404,7 @@ namespace YChan
                                 });
                                 nIMB.Name = newImageboard.getURL();
                                 listDownloadThreads.Add(nIMB);
-                                listDownloadThreads.Last().Start();
+                                nIMB.Start();
                             }
                         }
                     }

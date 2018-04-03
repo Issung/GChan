@@ -15,6 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/> *
  ************************************************************************/
 
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Runtime.Serialization.Json;
@@ -72,9 +74,9 @@ namespace YChan
                 return false;
         }
 
-        override protected string getLinks()
+        override protected string[] getLinks()
         {
-            string exed = "";
+            List<string> links = new List<string>();
             string JSONUrl = ("http://8ch.net/" + getURL().Split('/')[3] + "/res/" + getURL().Split('/')[5] + ".json").Replace(".html", ""); // thread JSON url
             string str = "";
             XmlNodeList xmlTim;
@@ -101,7 +103,7 @@ namespace YChan
                 for (int i = 0; i < xmlExt.Count; i++)
                 {
                     //exed = exed + "https://8ch.net/" + getURL().Split('/')[3] + "/src/" + xmlTim[i].InnerText + xmlExt[i].InnerText + "\n";
-                    exed = exed + "https://8ch.net/" + "/file_store/" + xmlTim[i].InnerText + xmlExt[i].InnerText + "\n";
+                    links.Add("https://8ch.net/" + "/file_store/" + xmlTim[i].InnerText + xmlExt[i].InnerText);
                 }
 
                 // get images of posts with multiple images
@@ -110,7 +112,7 @@ namespace YChan
                 for (int i = 0; i < xmlExt.Count; i++)
                 {
                     //exed = exed + "https://8ch.net/" + getURL().Split('/')[3] + "/src/" + xmlTim[i].InnerText + xmlExt[i].InnerText + "\n";
-                    exed = exed + "https://8ch.net/" + "/file_store/" + xmlTim[i].InnerText + xmlExt[i].InnerText + "\n";
+                    links.Add("https://8ch.net/" + "/file_store/" + xmlTim[i].InnerText + xmlExt[i].InnerText);
                 }
             }
             catch (WebException webEx)
@@ -119,7 +121,7 @@ namespace YChan
                     this.Gone = true;
                 throw webEx;
             }
-            return exed;
+            return links.ToArray();
         }
 
         override public string getThreads()
@@ -158,108 +160,103 @@ namespace YChan
 
         override public void download()
         {
-            string[] URLs;
-            string[] thumbs;
-            string strThumbs = "";
-            string website = "";
-            string str;
-
-            if (General.loadHTML)
-            {                                                     // if HTML download activated get HTML, thumbnails, do some magic
-                try
-                {
-                    website = new WebClient().DownloadString(this.getURL());
-
-                    string JURL = this.getURL().Replace(".html", ".json");
-
-                    string Content = new WebClient().DownloadString(JURL);
-
-                    byte[] bytes = Encoding.ASCII.GetBytes(Content);
-                    using (var stream = new MemoryStream(bytes))
-                    {
-                        var quotas = new XmlDictionaryReaderQuotas();
-                        var jsonReader = JsonReaderWriterFactory.CreateJsonReader(stream, quotas);
-                        var xml = XDocument.Load(jsonReader);
-                        str = xml.ToString();
-                    }
-
-                    // get single images
-                    XmlDocument doc = new XmlDocument();
-                    doc.LoadXml(str);
-                    XmlNodeList xmlTim = doc.DocumentElement.SelectNodes("/root/posts/item/tim");
-                    XmlNodeList xmlExt = doc.DocumentElement.SelectNodes("/root/posts/item/ext");
-                    for (int i = 0; i < xmlExt.Count; i++)
-                    {
-                        string ext = xmlExt[i].InnerText;
-                        //                        if(ext == ".webm")
-                        //                            ext = ".jpg";
-                        strThumbs = strThumbs + "https://8ch.net/file_store/thumb/" + xmlTim[i].InnerText + ext + "\n";
-
-                        website = website.Replace("https://8ch.net/file_store/thumb/" + xmlTim[i].InnerText + ext, "thumb/" + xmlTim[i].InnerText + ext);
-                        website = website.Replace("=\"/file_store/thumb/" + xmlTim[i].InnerText + ext, "=\"thumb/" + xmlTim[i].InnerText + ext);
-                        website = website.Replace("=\"/file_store/" + xmlTim[i].InnerText + ext, "=\"" + xmlTim[i].InnerText + ext);
-                        website = website.Replace("https://media.8ch.net/file_store/thumb/" + xmlTim[i].InnerText + ext, "thumb/" + xmlTim[i].InnerText + ext);
-                        website = website.Replace("https://media.8ch.net/file_store/" + xmlTim[i].InnerText + ext, xmlTim[i].InnerText + ext);
-                        website = website.Replace("https://8ch.net/file_store/" + xmlTim[i].InnerText + ext, xmlTim[i].InnerText + ext);
-                    }
-
-                    // get images of posts with multiple images
-                    xmlTim = doc.DocumentElement.SelectNodes("/root/posts/item/extra_files/item/tim");
-                    xmlExt = doc.DocumentElement.SelectNodes("/root/posts/item/extra_files/item/ext");
-                    for (int i = 0; i < xmlExt.Count; i++)
-                    {
-                        string ext = xmlExt[i].InnerText;
-                        //                        if(ext == ".webm")
-                        //                            ext = ".jpg";
-                        strThumbs = strThumbs + "https://8ch.net/file_store/thumb/" + xmlTim[i].InnerText + ext + "\n";
-
-                        website = website.Replace("https://8ch.net/file_store/thumb/" + xmlTim[i].InnerText + ext, "thumb/" + xmlTim[i].InnerText + ext);
-                        website = website.Replace("=\"/file_store/thumb/" + xmlTim[i].InnerText + ext, "=\"thumb/" + xmlTim[i].InnerText + ext);
-                        website = website.Replace("=\"/file_store/" + xmlTim[i].InnerText + ext, "=\"" + xmlTim[i].InnerText + ext);
-                        website = website.Replace("https://media.8ch.net/file_store/thumb/" + xmlTim[i].InnerText + ext, "thumb/" + xmlTim[i].InnerText + ext);
-                        website = website.Replace("https://media.8ch.net/file_store/" + xmlTim[i].InnerText + ext, xmlTim[i].InnerText + ext);
-                        website = website.Replace("https://8ch.net/file_store/" + xmlTim[i].InnerText + ext, xmlTim[i].InnerText + ext);
-                    }
-
-                    website = website.Replace("=\"/", "=\"https://8ch.net/");
-
-                    if (!Directory.Exists(this.SaveTo))
-                        Directory.CreateDirectory(this.SaveTo);
-
-                    thumbs = strThumbs.Split('\n');
-
-                    for (int i = 0; i < thumbs.Length - 1; i++)
-                    {
-                        General.dlTo(thumbs[i], this.SaveTo + "\\thumb");
-                    }
-                }
-                catch (WebException webEx)
-                {
-                    // I think I should handle this
-                }
-                if (website != "")
-                {
-                    if (!Directory.Exists(this.SaveTo))
-                        Directory.CreateDirectory(this.SaveTo);
-                    File.WriteAllText(this.SaveTo + "\\Thread.html", website); // save thread
-                }
-            }
+            if (!Directory.Exists(this.SaveTo))
+                Directory.CreateDirectory(this.SaveTo);
 
             try
             {
-                URLs = Regex.Split(getLinks(), "\n");
+                if (General.loadHTML)
+                    downloadHTMLPage();
+
+                string[] URLs = getLinks();
+
+                for (int y = 0; y < URLs.Length; y++)
+                    General.dlTo(URLs[y], this.SaveTo);
+
             }
             catch (WebException webEx)
             {
                 if (((int)webEx.Status) == 7)
                     this.Gone = true;
-                return;
+            }
+        }
+
+        private void downloadHTMLPage()
+        {
+            List<string> thumbs = new List<string>();
+            string htmlPage = "";
+            string str;
+
+            try
+            {
+                htmlPage = new WebClient().DownloadString(this.getURL());
+
+                string JURL = this.getURL().Replace(".html", ".json");
+
+                string Content = new WebClient().DownloadString(JURL);
+
+                byte[] bytes = Encoding.ASCII.GetBytes(Content);
+                using (var stream = new MemoryStream(bytes))
+                {
+                    var quotas = new XmlDictionaryReaderQuotas();
+                    var jsonReader = JsonReaderWriterFactory.CreateJsonReader(stream, quotas);
+                    var xml = XDocument.Load(jsonReader);
+                    str = xml.ToString();
+                }
+
+                // get single images
+                XmlDocument doc = new XmlDocument();
+                doc.LoadXml(str);
+                XmlNodeList xmlTim = doc.DocumentElement.SelectNodes("/root/posts/item/tim");
+                XmlNodeList xmlExt = doc.DocumentElement.SelectNodes("/root/posts/item/ext");
+                for (int i = 0; i < xmlExt.Count; i++)
+                {
+                    string ext = xmlExt[i].InnerText;
+                    //                        if(ext == ".webm")
+                    //                            ext = ".jpg";
+                    thumbs.Add("https://8ch.net/file_store/thumb/" + xmlTim[i].InnerText + ext);
+
+                    htmlPage = htmlPage.Replace("https://8ch.net/file_store/thumb/" + xmlTim[i].InnerText + ext, "thumb/" + xmlTim[i].InnerText + ext);
+                    htmlPage = htmlPage.Replace("=\"/file_store/thumb/" + xmlTim[i].InnerText + ext, "=\"thumb/" + xmlTim[i].InnerText + ext);
+                    htmlPage = htmlPage.Replace("=\"/file_store/" + xmlTim[i].InnerText + ext, "=\"" + xmlTim[i].InnerText + ext);
+                    htmlPage = htmlPage.Replace("https://media.8ch.net/file_store/thumb/" + xmlTim[i].InnerText + ext, "thumb/" + xmlTim[i].InnerText + ext);
+                    htmlPage = htmlPage.Replace("https://media.8ch.net/file_store/" + xmlTim[i].InnerText + ext, xmlTim[i].InnerText + ext);
+                    htmlPage = htmlPage.Replace("https://8ch.net/file_store/" + xmlTim[i].InnerText + ext, xmlTim[i].InnerText + ext);
+                }
+
+                // get images of posts with multiple images
+                xmlTim = doc.DocumentElement.SelectNodes("/root/posts/item/extra_files/item/tim");
+                xmlExt = doc.DocumentElement.SelectNodes("/root/posts/item/extra_files/item/ext");
+                for (int i = 0; i < xmlExt.Count; i++)
+                {
+                    string ext = xmlExt[i].InnerText;
+                    //                        if(ext == ".webm")
+                    //                            ext = ".jpg";
+                    thumbs.Add("https://8ch.net/file_store/thumb/" + xmlTim[i].InnerText + ext);
+
+                    htmlPage = htmlPage.Replace("https://8ch.net/file_store/thumb/" + xmlTim[i].InnerText + ext, "thumb/" + xmlTim[i].InnerText + ext);
+                    htmlPage = htmlPage.Replace("=\"/file_store/thumb/" + xmlTim[i].InnerText + ext, "=\"thumb/" + xmlTim[i].InnerText + ext);
+                    htmlPage = htmlPage.Replace("=\"/file_store/" + xmlTim[i].InnerText + ext, "=\"" + xmlTim[i].InnerText + ext);
+                    htmlPage = htmlPage.Replace("https://media.8ch.net/file_store/thumb/" + xmlTim[i].InnerText + ext, "thumb/" + xmlTim[i].InnerText + ext);
+                    htmlPage = htmlPage.Replace("https://media.8ch.net/file_store/" + xmlTim[i].InnerText + ext, xmlTim[i].InnerText + ext);
+                    htmlPage = htmlPage.Replace("https://8ch.net/file_store/" + xmlTim[i].InnerText + ext, xmlTim[i].InnerText + ext);
+                }
+
+                htmlPage = htmlPage.Replace("=\"/", "=\"https://8ch.net/");
+
+
+                for (int i = 0; i < thumbs.Count; i++)
+                {
+                    General.dlTo(thumbs[i], this.SaveTo + "\\thumb");
+                }
+            }
+            catch (WebException webEx)
+            {
+                throw webEx;
             }
 
-            for (int y = 0; y < URLs.Length - 1; y++)
-            {
-                General.dlTo(URLs[y], this.SaveTo);                         // download images
-            }
+            if (!String.IsNullOrWhiteSpace(htmlPage))
+                File.WriteAllText(this.SaveTo + "\\Thread.html", htmlPage); // save thread
         }
     }
 }

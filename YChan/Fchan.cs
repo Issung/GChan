@@ -15,6 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/> *
  ************************************************************************/
 
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Runtime.Serialization.Json;
@@ -55,24 +56,19 @@ namespace YChan
         public new static bool isThread(string url)
         {
             Regex urlMatcher = new Regex(regThread);
-            if (urlMatcher.IsMatch(url))
-                return true;
-            else
-                return false;
+            return (urlMatcher.IsMatch(url));
+
         }
 
         public new static bool isBoard(string url)
         {
             Regex urlMatcher = new Regex(regBoard);
-            if (urlMatcher.IsMatch(url))
-                return true;
-            else
-                return false;
+            return (urlMatcher.IsMatch(url));
         }
 
-        override protected string getLinks()
+        override protected string[] getLinks()
         {
-            string exed = "";
+            List<string> links = new List<string>();
             string JSONUrl = "http://a.4cdn.org/" + getURL().Split('/')[3] + "/thread/" + getURL().Split('/')[5] + ".json";
             string baseURL = "http://i.4cdn.org/" + getURL().Split('/')[3] + "/";
             string str = "";
@@ -101,16 +97,14 @@ namespace YChan
                 xmlExt = doc.DocumentElement.SelectNodes("/root/posts/item/ext");
                 for (int i = 0; i < xmlExt.Count; i++)
                 {
-                    exed = exed + baseURL + xmlTim[i].InnerText + xmlExt[i].InnerText + "\n";
+                    links.Add(baseURL + xmlTim[i].InnerText + xmlExt[i].InnerText);
                 }
             }
             catch (WebException webEx)
             {
-                if (((int)webEx.Status) == 7)
-                    this.Gone = true;
                 throw webEx;
             }
-            return exed;
+            return links.ToArray();
         }
 
         override public string getThreads()
@@ -143,120 +137,111 @@ namespace YChan
             }
             catch (WebException webEx)
             {
-#if DEBUG
+                #if DEBUG
                 MessageBox.Show("Connection Error: " + webEx.Message);
-#endif
+                #endif
             }
             return Res;
         }
 
         override public void download()
         {
-            string[] URLs;
-            string baseURL = "//i.4cdn.org/" + getURL().Split('/')[3] + "/";
-            string website = "";
-            string[] thumbs;
-            string strThumbs = "";
-
-            if (General.loadHTML)
-            {
-                try
-                {
-                    string JURL = "http://a.4cdn.org/" + getURL().Split('/')[3] + "/thread/" + getURL().Split('/')[5] + ".json";
-                    string str = "";
-
-                    //Add a UserAgent to prevent 403
-                    WebClient web = new WebClient();
-                    web.Headers["User-Agent"] = "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0";
-
-                    website = web.DownloadString(this.getURL());
-
-                    //Prevent the html from being destroyed by the anti adblock script
-                    website = website.Replace("f=\"to\"", "f=\"penis\"");
-
-                    string json = web.DownloadString(JURL);
-                    byte[] bytes = Encoding.ASCII.GetBytes(json);
-                    using (var stream = new MemoryStream(bytes))
-                    {
-                        var quotas = new XmlDictionaryReaderQuotas();
-                        var jsonReader = JsonReaderWriterFactory.CreateJsonReader(stream, quotas);
-                        var xml = XDocument.Load(jsonReader);
-                        str = xml.ToString();
-                    }
-
-                    XmlDocument doc = new XmlDocument();
-                    doc.LoadXml(str);
-                    XmlNodeList xmlTim = doc.DocumentElement.SelectNodes("/root/posts/item/tim");
-                    XmlNodeList xmlExt = doc.DocumentElement.SelectNodes("/root/posts/item/ext");
-
-                    for (int i = 0; i < xmlExt.Count; i++)
-                    {
-                        string old = baseURL + xmlTim[i].InnerText + xmlExt[i].InnerText;
-                        string rep = xmlTim[i].InnerText + xmlExt[i].InnerText;
-                        website = website.Replace(old, rep);
-
-                        //Save thumbs for files that need it
-                        if (rep.Split('.')[1] == "webm" /*|| rep.Split('.')[1] == ""*/)
-                        {
-                            old = "//t.4cdn.org/" + getURL().Split('/')[3] + "/" + xmlTim[i].InnerText + "s.jpg";
-                            strThumbs = strThumbs + "http:" + old + "\n";
-
-                            website = website.Replace("//i.4cdn.org/" + getURL().Split('/')[3] + "/" + xmlTim[i].InnerText, "thumb/" + xmlTim[i].InnerText);
-                            website = website.Replace("/" + rep, rep);
-                        }
-                        else
-                        {
-                            string thumbName = rep.Split('.')[0] + "s";
-                            website = website.Replace(thumbName + ".jpg", rep.Split('.')[0] + "." + rep.Split('.')[1]);
-                            website = website.Replace("/" + thumbName, thumbName);
-
-                            website = website.Replace("//i.4cdn.org/" + getURL().Split('/')[3] + "/" + xmlTim[i].InnerText, xmlTim[i].InnerText);
-                            website = website.Replace("/" + rep, rep);
-                        }
-                    }
-
-                    website = website.Replace("=\"//", "=\"http://");
-
-                    if (!Directory.Exists(this.SaveTo))
-                        Directory.CreateDirectory(this.SaveTo);
-
-                    //Save thumbs for files that need it
-                    thumbs = strThumbs.Split('\n');
-                    for (int i = 0; i < thumbs.Length - 1; i++)
-                        General.dlTo(thumbs[i], this.SaveTo + "\\thumb");
-                }
-                catch (WebException webEx)
-                {
-#if DEBUG
-                    MessageBox.Show("Error: " + webEx.Message + "\nOn " + getURL());
-#endif
-
-                    //Thread 404's
-                    if (((int)webEx.Status) == 7)
-                    {
-                        this.Gone = true;
-                        return;
-                    }
-                }
-                if (website != "")
-                    File.WriteAllText(this.SaveTo + "\\Thread.html", website);
-            }
+            if (!Directory.Exists(this.SaveTo))
+                Directory.CreateDirectory(this.SaveTo);
 
             try
             {
-                URLs = Regex.Split(getLinks(), "\n");
+                if (General.loadHTML)
+                    downloadHTMLPage();
+
+                string[] URLs = getLinks();
+
+                for (int y = 0; y < URLs.Length; y++)
+                    General.dlTo(URLs[y], this.SaveTo);
+
             }
             catch (WebException webEx)
             {
                 if (((int)webEx.Status) == 7)
                     this.Gone = true;
-                return;
+            }
+        }
+
+        private void downloadHTMLPage()
+        {
+            List<string> thumbs = new List<string>();
+            string htmlPage = "";
+            string str = "";
+            string baseURL = "//i.4cdn.org/" + getURL().Split('/')[3] + "/";
+            string JURL = "http://a.4cdn.org/" + getURL().Split('/')[3] + "/thread/" + getURL().Split('/')[5] + ".json";
+
+            try
+            {
+                //Add a UserAgent to prevent 403
+                WebClient web = new WebClient();
+                web.Headers["User-Agent"] = "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0";
+
+                htmlPage = web.DownloadString(this.getURL());
+
+                //Prevent the html from being destroyed by the anti adblock script
+                htmlPage = htmlPage.Replace("f=\"to\"", "f=\"penis\"");
+
+                string json = web.DownloadString(JURL);
+                byte[] bytes = Encoding.ASCII.GetBytes(json);
+                using (var stream = new MemoryStream(bytes))
+                {
+                    var quotas = new XmlDictionaryReaderQuotas();
+                    var jsonReader = JsonReaderWriterFactory.CreateJsonReader(stream, quotas);
+                    var xml = XDocument.Load(jsonReader);
+                    str = xml.ToString();
+                }
+
+                XmlDocument doc = new XmlDocument();
+                doc.LoadXml(str);
+                XmlNodeList xmlTim = doc.DocumentElement.SelectNodes("/root/posts/item/tim");
+                XmlNodeList xmlExt = doc.DocumentElement.SelectNodes("/root/posts/item/ext");
+
+                for (int i = 0; i < xmlExt.Count; i++)
+                {
+                    string old = baseURL + xmlTim[i].InnerText + xmlExt[i].InnerText;
+                    string rep = xmlTim[i].InnerText + xmlExt[i].InnerText;
+                    htmlPage = htmlPage.Replace(old, rep);
+
+                    //Save thumbs for files that need it
+                    if (rep.Split('.')[1] == "webm" /*|| rep.Split('.')[1] == ""*/)
+                    {
+                        old = "//t.4cdn.org/" + getURL().Split('/')[3] + "/" + xmlTim[i].InnerText + "s.jpg";
+                        thumbs.Add("http:" + old);
+
+                        htmlPage = htmlPage.Replace("//i.4cdn.org/" + getURL().Split('/')[3] + "/" + xmlTim[i].InnerText, "thumb/" + xmlTim[i].InnerText);
+                    }
+                    else
+                    {
+                        string thumbName = rep.Split('.')[0] + "s";
+                        htmlPage = htmlPage.Replace(thumbName + ".jpg", rep.Split('.')[0] + "." + rep.Split('.')[1]);
+                        htmlPage = htmlPage.Replace("/" + thumbName, thumbName);
+
+                        htmlPage = htmlPage.Replace("//i.4cdn.org/" + getURL().Split('/')[3] + "/" + xmlTim[i].InnerText, xmlTim[i].InnerText);
+                    }
+
+                    htmlPage = htmlPage.Replace("/" + rep, rep);
+                }
+
+                htmlPage = htmlPage.Replace("=\"//", "=\"http://");
+
+                //Save thumbs for files that need it
+                for (int i = 0; i < thumbs.Count; i++)
+                    General.dlTo(thumbs[i], this.SaveTo + "\\thumb");
+
             }
 
-            for (int y = 0; y < URLs.Length - 1; y++)
+            catch (WebException webEx)
             {
-                General.dlTo(URLs[y], this.SaveTo);
+                throw webEx;
             }
+
+            if (!string.IsNullOrWhiteSpace(htmlPage))
+                File.WriteAllText(this.SaveTo + "\\Thread.html", htmlPage);
         }
     }
 }
