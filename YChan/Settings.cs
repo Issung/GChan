@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License    *
  * along with this program.  If not, see <http://www.gnu.org/licenses/> *
  ************************************************************************/
-
+using System.IO;
 using System.Windows.Forms;
 
 namespace YChan
@@ -31,6 +31,10 @@ namespace YChan
         {
             if ((edtPath.Text != "") && (General.IsDigitsOnly(edtTimer.Text)))
             {
+                if (!hasWriteAccessToFolder(edtPath.Text))
+                {
+                    MessageBox.Show("No Permission to write to the selected folder", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
                 if (int.Parse(edtTimer.Text) < 5)
                 {
                     MessageBox.Show("Timer has to be higher than 5 seconds");
@@ -75,6 +79,23 @@ namespace YChan
             chkSave.Checked = General.saveOnClose;
             chkTray.Checked = General.minimizeToTray;
             chkWarn.Checked = General.warnOnClose;
+        }
+
+
+        //Source: https://stackoverflow.com/questions/1410127/c-sharp-test-if-user-has-write-access-to-a-folder?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
+        private bool hasWriteAccessToFolder(string folderPath)
+        {
+            try
+            {
+                // Attempt to get a list of security permissions from the folder. 
+                // This will raise an exception if the path is read only or do not have access to view the permissions. 
+                System.Security.AccessControl.DirectorySecurity ds = Directory.GetAccessControl(folderPath);
+                return true;
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return false;
+            }
         }
     }
 }

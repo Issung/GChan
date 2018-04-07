@@ -82,7 +82,19 @@ namespace YChan
                             listThreads.Add(newImageboard);
                             Thread nIMB = new Thread(delegate ()
                             {
-                                newImageboard.download();
+                                try
+                                {
+                                    newImageboard.download();
+                                }
+                                catch(UnauthorizedAccessException ex)
+                                {
+                                    
+                                    this.Invoke((MethodInvoker)(() =>
+                                    {
+                                        this.FormClosing -= frmMain_FormClosing;
+                                        this.Close();
+                                    }));
+                                }
                             });
                             listDownloadThreads.Add(nIMB);
                             nIMB.Start();
@@ -149,7 +161,18 @@ namespace YChan
             {
                 Thread nIMB = new Thread(delegate ()
                 {
-                    newImageboard.download();
+                    try
+                    {
+                        newImageboard.download();
+                    }
+                    catch (UnauthorizedAccessException ex)
+                    {
+                        this.Invoke((MethodInvoker)(() =>
+                        {
+                            this.FormClosing -= frmMain_FormClosing;
+                            this.Close();
+                        }));
+                    }
                 });
                 nIMB.Name = newImageboard.getURL();
                 listDownloadThreads.Add(nIMB);

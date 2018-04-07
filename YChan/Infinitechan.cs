@@ -22,6 +22,7 @@ using System.Net;
 using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Windows.Forms;
 using System.Xml;
 using System.Xml.Linq;
 
@@ -160,11 +161,11 @@ namespace YChan
 
         override public void download()
         {
-            if (!Directory.Exists(this.SaveTo))
-                Directory.CreateDirectory(this.SaveTo);
-
             try
             {
+                if (!Directory.Exists(this.SaveTo))
+                    Directory.CreateDirectory(this.SaveTo);
+
                 if (General.loadHTML)
                     downloadHTMLPage();
 
@@ -178,6 +179,11 @@ namespace YChan
             {
                 if (((int)webEx.Status) == 7)
                     this.Gone = true;
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                MessageBox.Show(ex.Message, "No Permission to access folder");
+                throw ex;
             }
         }
 
@@ -249,14 +255,18 @@ namespace YChan
                 {
                     General.dlTo(thumbs[i], this.SaveTo + "\\thumb");
                 }
+
+                if (!String.IsNullOrWhiteSpace(htmlPage))
+                    File.WriteAllText(this.SaveTo + "\\Thread.html", htmlPage); // save thread
             }
             catch (WebException webEx)
             {
                 throw webEx;
             }
-
-            if (!String.IsNullOrWhiteSpace(htmlPage))
-                File.WriteAllText(this.SaveTo + "\\Thread.html", htmlPage); // save thread
+            catch (UnauthorizedAccessException ex)
+            {
+                throw ex;
+            }
         }
     }
 }

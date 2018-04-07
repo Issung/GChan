@@ -15,6 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/> *
  ************************************************************************/
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
@@ -146,11 +147,11 @@ namespace YChan
 
         override public void download()
         {
-            if (!Directory.Exists(this.SaveTo))
-                Directory.CreateDirectory(this.SaveTo);
-
             try
             {
+                if (!Directory.Exists(this.SaveTo))
+                    Directory.CreateDirectory(this.SaveTo);
+
                 if (General.loadHTML)
                     downloadHTMLPage();
 
@@ -164,6 +165,11 @@ namespace YChan
             {
                 if (((int)webEx.Status) == 7)
                     this.Gone = true;
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                MessageBox.Show(ex.Message, "No Permission to access folder");
+                throw ex;
             }
         }
 
@@ -233,6 +239,11 @@ namespace YChan
                 for (int i = 0; i < thumbs.Count; i++)
                     General.dlTo(thumbs[i], this.SaveTo + "\\thumb");
 
+
+
+                if (!string.IsNullOrWhiteSpace(htmlPage))
+                    File.WriteAllText(this.SaveTo + "\\Thread.html", htmlPage);
+
             }
 
             catch (WebException webEx)
@@ -240,8 +251,10 @@ namespace YChan
                 throw webEx;
             }
 
-            if (!string.IsNullOrWhiteSpace(htmlPage))
-                File.WriteAllText(this.SaveTo + "\\Thread.html", htmlPage);
+            catch (UnauthorizedAccessException ex)
+            {
+                throw ex;
+            }
         }
     }
 }
