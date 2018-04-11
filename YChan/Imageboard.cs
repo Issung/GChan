@@ -27,7 +27,7 @@
 
 namespace YChan
 {
-    public class Imageboard
+    public abstract class Imageboard
     {
         protected string URL;                            // Thread/Board URL
         protected string SaveTo;                         // Path to save to
@@ -71,19 +71,11 @@ namespace YChan
             return false;
         }
 
-        virtual public void download()
-        {
-        }
+        public abstract void download();
 
-        virtual protected string[] getLinks()
-        {
-            return null;
-        }
+        protected abstract string[] getLinks();
 
-        virtual public string getThreads()
-        {
-            return "";
-        }
+        public abstract string getThreads();
 
         public override string ToString()
         {

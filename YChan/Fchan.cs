@@ -43,15 +43,13 @@ namespace YChan
             {
                 Match match = Regex.Match(url, @"boards.4chan.org/[a-zA-Z0-9]*?/thread/\d*");
                 this.URL = "http://" + match.Groups[0].Value;
+                this.SaveTo = General.path + "\\" + this.imName + "\\" + getURL().Split('/')[3] + "\\" + getURL().Split('/')[5];
             }
             else
             {
                 this.URL = url;
-            }
-            if (!isBoard)
-                this.SaveTo = General.path + "\\" + this.imName + "\\" + getURL().Split('/')[3] + "\\" + getURL().Split('/')[5];
-            else
                 this.SaveTo = General.path + "\\" + this.imName + "\\" + getURL().Split('/')[3];
+            } 
         }
 
         public new static bool isThread(string url)

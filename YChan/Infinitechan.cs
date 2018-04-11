@@ -41,19 +41,12 @@ namespace YChan
             {
                 Match match = Regex.Match(url, @"8ch.net/[a-zA-Z0-9]*?/res/[0-9]*");
                 this.URL = "http://" + match.Groups[0].Value + ".html";      // simplify thread url
-            }
-            else
-            {
-                this.URL = url;
-            }
-
-            if (!isBoard)
-            {
                 this.SaveTo = (General.path + "\\" + this.imName + "\\" + getURL().Split('/')[3] + "\\" + getURL().Split('/')[5]).Replace(".html", ""); // set saveto path
             }
             else
             {
-                this.SaveTo = General.path + "\\" + this.imName + "\\" + getURL().Split('/')[3];                                                         // set saveto path
+                this.URL = url;
+                this.SaveTo = General.path + "\\" + this.imName + "\\" + getURL().Split('/')[3]; // set saveto path
             }
         }
 
