@@ -125,6 +125,7 @@
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
     </Compile>
     <EmbeddedResource Include="Settings.resx">
       <DependentUpon>Settings.cs</DependentUpon>
@@ -149,6 +150,8 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="icons\Oxygen-Icons.org-Oxygen-Actions-dialog-close.ico" />
+    <None Include="icons\OpenFolder.ico" />
     <Content Include="YChanLogo.ico" />
   </ItemGroup>
   <ItemGroup>
