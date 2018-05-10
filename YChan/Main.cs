@@ -249,20 +249,20 @@ namespace YChan
 
         private void frmMain_FormClosing(object sender, FormClosingEventArgs e)
         {
-            bool close = true;
+            DialogResult result = DialogResult.OK;
             if (General.warnOnClose && listThreads.Count > 0)
             {
                 CloseWarn clw = new CloseWarn();
-                var result = clw.ShowDialog();
-                close = clw.closeit;
-                if (!close)
-                    e.Cancel = true;
+                result = clw.ShowDialog();
+                e.Cancel = (result == DialogResult.Cancel);
             }
 
-            if (close == true || !General.warnOnClose)
+            if (result == DialogResult.OK)
             {
                 this.Hide();
                 nfTray.Visible = false;
+                scnTimer.Enabled = false;
+
                 if (General.saveOnClose)
                     General.writeURLs(listBoards, listThreads);
 
