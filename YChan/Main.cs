@@ -29,7 +29,6 @@ namespace YChan
     {
         public List<Imageboard> listThreads = new List<Imageboard>();                       // list of monitored threads
         public List<Imageboard> listBoards = new List<Imageboard>();                        // list of monitored boards
-        private List<Thread> listDownloadThreads = new List<Thread>();                      // list of threads that download
         private Thread Scanner = null;                                                      // thread that addes stuff
 
         private int tPos = -1;                                                              // Item position in lbThreads
@@ -79,26 +78,6 @@ namespace YChan
                     {
                         Imageboard newImageboard = General.createNewIMB(URLs[i], false);
                         listThreads.Add(newImageboard);
-
-                        Thread nIMB = new Thread(delegate ()
-                        {
-                            try
-                            {
-                                newImageboard.download();
-                            }
-                            catch(UnauthorizedAccessException ex)
-                            {
-                                    
-                                this.Invoke((MethodInvoker)(() =>
-                                {
-                                    this.FormClosing -= frmMain_FormClosing;
-                                    this.Close();
-                                }));
-                            }
-                        });
-                        listDownloadThreads.Add(nIMB);
-                        nIMB.Start();
-                        
                     }
                 }
 
@@ -153,27 +132,6 @@ namespace YChan
                 MessageBox.Show("Corrupt URL, unsupported website or not a board/thread!");
                 edtURL.Text = "";
                 return;
-            }
-            if (!board)
-            {
-                Thread nIMB = new Thread(delegate ()
-                {
-                    try
-                    {
-                        newImageboard.download();
-                    }
-                    catch (UnauthorizedAccessException ex)
-                    {
-                        this.Invoke((MethodInvoker)(() =>
-                        {
-                            this.FormClosing -= frmMain_FormClosing;
-                            this.Close();
-                        }));
-                    }
-                });
-                nIMB.Name = newImageboard.getURL();
-                listDownloadThreads.Add(nIMB);
-                nIMB.Start();
             }
 
             edtURL.Text = "";
@@ -235,9 +193,8 @@ namespace YChan
         {
             if (tPos != -1)
             {
+                listThreads[tPos].getThread().Abort();
                 listThreads.RemoveAt(tPos);
-                listDownloadThreads[tPos].Abort();
-                listDownloadThreads.RemoveAt(tPos);
                 lbThreads.Invoke((MethodInvoker)(() =>
                 {
                     lbThreads.DataSource = null;
@@ -286,6 +243,8 @@ namespace YChan
                 nfTray.Visible = true;
             else
                 nfTray.Visible = false;
+
+            scnTimer.Interval = General.timer;
         }
 
         private void frmMain_FormClosing(object sender, FormClosingEventArgs e)
@@ -309,10 +268,11 @@ namespace YChan
 
                 if (Scanner != null && Scanner.IsAlive)
                     Scanner.Abort();
-                for (int i = 0; i < listDownloadThreads.Count; i++)
+
+                for (int i = 0; i < listThreads.Count; i++)
                 {
-                    if (listDownloadThreads[i].IsAlive)
-                        listDownloadThreads[i].Abort();
+                    if(listThreads[i].getThread().IsAlive)
+                        listThreads[i].getThread().Abort();
                 }
             }
         }
@@ -378,77 +338,62 @@ namespace YChan
         {
             if (Scanner == null || !Scanner.IsAlive)
             {
-                Scanner = new Thread(delegate ()
-                {
-                    for (int k = 0; k < listThreads.Count; k++)
-                    {
-                        if (listThreads[k].isGone())
-                        {
-                            listThreads.RemoveAt(k);
-                            listDownloadThreads.RemoveAt(k);
-
-                            lbThreads.Invoke((MethodInvoker)delegate
-                            {
-                                lbThreads.DataSource = null;
-                                lbThreads.DataSource = listThreads;
-                            });
-
-                            k--;
-                        }
-                    }
-
-                    for (int k = 0; k < listBoards.Count; k++)
-                    {
-                        string[] Threads = { };
-                        try
-                        {
-                            Threads = listBoards[k].getThreads().Split('\n');
-                        }
-                        catch (Exception exep)
-                        {
-                        }
-                        for (int l = 0; l < Threads.Length; l++)
-                        {
-                            Imageboard newImageboard = General.createNewIMB(Threads[l], false);
-                            if (newImageboard != null && isUnique(newImageboard.getURL(), listThreads))
-                            {
-                                listThreads.Add(newImageboard);
-                                lbThreads.Invoke((MethodInvoker)(() =>
-                                {
-                                    lbThreads.DataSource = null;
-                                    lbThreads.DataSource = listThreads;
-                                }));
-                                Thread nIMB = new Thread(delegate ()
-                                {
-                                    newImageboard.download();
-                                });
-                                nIMB.Name = newImageboard.getURL();
-                                listDownloadThreads.Add(nIMB);
-                                nIMB.Start();
-                            }
-                        }
-                    }
-
-                    for (int j = 0; j < listThreads.Count; j++)
-                    {
-                        if (!listDownloadThreads[j].IsAlive)
-                        {
-                            listDownloadThreads[j] = new Thread(delegate ()
-                            {
-                                try
-                                {
-                                    listThreads[j].download();   // why
-                                }
-                                catch (Exception exp)
-                                {
-                                }
-                            });
-                            listDownloadThreads[j].Name = listThreads[j].getURL();
-                            listDownloadThreads[j].Start();
-                        }
-                    }
-                });
+                Scanner = new Thread(new ThreadStart(ScanThread));
                 Scanner.Start();
+            }
+        }
+
+        private void ScanThread()
+        {
+            for (int i = 0; i < listThreads.Count; i++)
+            {
+                if (listThreads[i].isGone())
+                {
+                    listThreads.RemoveAt(i);
+
+                    lbThreads.Invoke((MethodInvoker)delegate
+                    {
+                        lbThreads.DataSource = null;
+                        lbThreads.DataSource = listThreads;
+                    });
+
+                    i--;
+                }
+            }
+
+            for (int i = 0; i < listBoards.Count; i++)
+            {
+                string[] Threads = { };
+                try
+                {
+                    Threads = listBoards[i].getThreads().Split('\n');
+                }
+                catch (Exception exep)
+                {
+                }
+                for (int j = 0; j < Threads.Length; j++)
+                {
+                    Imageboard newImageboard = General.createNewIMB(Threads[j], false);
+                    if (newImageboard != null && isUnique(newImageboard.getURL(), listThreads))
+                    {
+                        listThreads.Add(newImageboard);
+                        lbThreads.Invoke((MethodInvoker)(() =>
+                        {
+                            lbThreads.DataSource = null;
+                            lbThreads.DataSource = listThreads;
+                        }));
+                    }
+                }
+            }
+
+            for (int i = 0; i < listThreads.Count; i++)
+            {
+                if (!listThreads[i].getThread().IsAlive)
+                {
+                    //TODO: Make it so only a few threads are running so as to not overload the computer and server resources
+                    listThreads[i].resetThread();
+                    listThreads[i].getThread().Start();
+                }
             }
         }
 

@@ -25,6 +25,8 @@
  * download    -> Download Images from Thread                                                              *
  ***********************************************************************************************************/
 
+using System.Threading;
+
 namespace YChan
 {
     public abstract class Imageboard
@@ -35,10 +37,25 @@ namespace YChan
         protected bool Board;                            // Flag to distinguish Boards and Threads of an IB
         protected bool Gone = false;                     // Flag for 404
 
+        Thread thread;
+
+        // Constructor, setting URL and Type (Board/Thread)
         public Imageboard(string url, bool isBoard)
-        {    // Constructor, setting URL and Type (Board/Thread)
+        {    
             this.URL = url;
             this.Board = isBoard;
+
+            resetThread();
+        }
+
+        public void resetThread()
+        {
+            this.thread = new Thread(new ThreadStart(download));
+        }
+
+        public Thread getThread()
+        {
+            return thread;
         }
 
         public bool isGone()
