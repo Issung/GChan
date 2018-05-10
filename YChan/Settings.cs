@@ -15,6 +15,7 @@
  * You should have received a copy of the GNU General Public License    *
  * along with this program.  If not, see <http://www.gnu.org/licenses/> *
  ************************************************************************/
+
 using System.IO;
 using System.Windows.Forms;
 
@@ -81,14 +82,13 @@ namespace YChan
             chkWarn.Checked = General.warnOnClose;
         }
 
-
         //Source: https://stackoverflow.com/questions/1410127/c-sharp-test-if-user-has-write-access-to-a-folder?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
         private bool hasWriteAccessToFolder(string folderPath)
         {
             try
             {
-                // Attempt to get a list of security permissions from the folder. 
-                // This will raise an exception if the path is read only or do not have access to view the permissions. 
+                // Attempt to get a list of security permissions from the folder.
+                // This will raise an exception if the path is read only or do not have access to view the permissions.
                 System.Security.AccessControl.DirectorySecurity ds = Directory.GetAccessControl(folderPath);
                 return true;
             }

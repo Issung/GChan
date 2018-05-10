@@ -49,14 +49,13 @@ namespace YChan
             {
                 this.URL = url;
                 this.SaveTo = General.path + "\\" + this.imName + "\\" + getURL().Split('/')[3];
-            } 
+            }
         }
 
         public new static bool isThread(string url)
         {
             Regex urlMatcher = new Regex(regThread);
             return (urlMatcher.IsMatch(url));
-
         }
 
         public new static bool isBoard(string url)
@@ -136,9 +135,9 @@ namespace YChan
             }
             catch (WebException webEx)
             {
-                #if DEBUG
+#if DEBUG
                 MessageBox.Show("Connection Error: " + webEx.Message);
-                #endif
+#endif
             }
             return Res;
         }
@@ -157,7 +156,6 @@ namespace YChan
 
                 for (int y = 0; y < URLs.Length; y++)
                     General.dlTo(URLs[y], this.SaveTo);
-
             }
             catch (WebException webEx)
             {
@@ -237,18 +235,13 @@ namespace YChan
                 for (int i = 0; i < thumbs.Count; i++)
                     General.dlTo(thumbs[i], this.SaveTo + "\\thumb");
 
-
-
                 if (!string.IsNullOrWhiteSpace(htmlPage))
                     File.WriteAllText(this.SaveTo + "\\Thread.html", htmlPage);
-
             }
-
             catch (WebException webEx)
             {
                 throw webEx;
             }
-
             catch (UnauthorizedAccessException ex)
             {
                 throw ex;

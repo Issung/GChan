@@ -25,14 +25,19 @@ namespace YChan
 {
     internal class General
     {
-        public static string path = "";                                                    // dl Path
-        public static int timer = 0;                                                     // Timer for frmMain.scnTimer
+        public static string path = "";                                                   // dl Path
+        public static int timer = 0;                                                      // Timer for frmMain.scnTimer
         public static bool loadHTML = false;                                              // HTML download activated?
         public static bool firstStart = false;                                            // First start?
         public static bool saveOnClose = false;                                           // saveonclose activated?
         public static bool minimizeToTray = true;                                         // Minimize to tray activated?
         public static bool warnOnClose = true;                                            // Display warning before closing main window
 
+        /// <summary>
+        /// Returns all saved threads or boards
+        /// </summary>
+        /// <param name="board">Set true to load boards, false to load threads</param>
+        /// <returns></returns>
         public static string loadURLs(bool board)
         {                                         // read saved URLS
             if (board && File.Exists(Application.CommonAppDataPath + "\\boards.dat"))
@@ -43,8 +48,13 @@ namespace YChan
                 return "";
         }
 
+        /// <summary>
+        /// Saves the thread and board list to disk
+        /// </summary>
+        /// <param name="Boards">List of boards</param>
+        /// <param name="Threads">List of threads</param>
         public static void writeURLs(List<Imageboard> Boards, List<Imageboard> Threads)
-        {   // save URLS
+        {
             string Buffer = "";
             for (int i = 0; i < Boards.Count; i++)
                 Buffer = Buffer + Boards[i].getURL() + "\n";
@@ -57,6 +67,11 @@ namespace YChan
             File.WriteAllText(Application.CommonAppDataPath + "\\threads.dat", Buffer);
         }
 
+        /// <summary>
+        /// Validates if the string only contains digits
+        /// </summary>
+        /// <param name="str">String to validate</param>
+        /// <returns></returns>
         public static bool IsDigitsOnly(string str)
         {
             foreach (char c in str)
@@ -68,6 +83,15 @@ namespace YChan
             return true;
         }
 
+        /// <summary>
+        /// Save settings to disk
+        /// </summary>
+        /// <param name="path">Path to where the application downloads</param>
+        /// <param name="time">Thrad refresh timer in seconds</param>
+        /// <param name="HTML">Save HTML or not</param>
+        /// <param name="Save">Save URLs or not</param>
+        /// <param name="tray">Minimize to tray or not</param>
+        /// <param name="closewarn">Warn before closing or not</param>
         public static void setSettings(string path, int time, bool HTML, bool Save, bool tray, bool closewarn)
         { // set settings
             General.path = path;

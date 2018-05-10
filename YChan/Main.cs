@@ -50,13 +50,19 @@ namespace YChan
             scnTimer.Interval = General.timer;                                          // set interval
             scnTimer.Tick += new EventHandler(this.scan);                               // when Timer ticks call scan()
 
+            if (General.firstStart)
+            {
+                FirstStart tFirstStart = new FirstStart();                              // if first start, show first start message
+                tFirstStart.ShowDialog();
+            }
+
             if (General.saveOnClose)                                                    // if enabled load URLs from file
             {                                               
 
                 string boards = General.loadURLs(true);
                 string threads = General.loadURLs(false);                               // load threads
 
-                if (boards != "")
+                if (!String.IsNullOrWhiteSpace(boards))
                 {
                     string[] URLs = boards.Split('\n');
                     for (int i = 0; i < URLs.Length - 1; i++)
@@ -66,38 +72,33 @@ namespace YChan
                     }
                 }
 
-                if (threads != "")
+                if (!String.IsNullOrWhiteSpace(threads))
                 {
                     string[] URLs = threads.Split('\n');
                     for (int i = 0; i < URLs.Length - 1; i++)
                     {
                         Imageboard newImageboard = General.createNewIMB(URLs[i], false);
-                        if (newImageboard == null)
+                        listThreads.Add(newImageboard);
+
+                        Thread nIMB = new Thread(delegate ()
                         {
-                            MessageBox.Show(URLs[i]);
-                        }
-                        else
-                        {
-                            listThreads.Add(newImageboard);
-                            Thread nIMB = new Thread(delegate ()
+                            try
                             {
-                                try
-                                {
-                                    newImageboard.download();
-                                }
-                                catch(UnauthorizedAccessException ex)
-                                {
+                                newImageboard.download();
+                            }
+                            catch(UnauthorizedAccessException ex)
+                            {
                                     
-                                    this.Invoke((MethodInvoker)(() =>
-                                    {
-                                        this.FormClosing -= frmMain_FormClosing;
-                                        this.Close();
-                                    }));
-                                }
-                            });
-                            listDownloadThreads.Add(nIMB);
-                            nIMB.Start();
-                        }
+                                this.Invoke((MethodInvoker)(() =>
+                                {
+                                    this.FormClosing -= frmMain_FormClosing;
+                                    this.Close();
+                                }));
+                            }
+                        });
+                        listDownloadThreads.Add(nIMB);
+                        nIMB.Start();
+                        
                     }
                 }
 
@@ -108,11 +109,7 @@ namespace YChan
                 scan(null, null);                                              // and start scanning
             }
 
-            if (General.firstStart)
-            {
-                FirstStart tFirstStart = new FirstStart();                      // if first start, show first start message
-                tFirstStart.ShowDialog();
-            }
+            
         }
 
         private void btnAdd_Click(object sender, EventArgs e)
@@ -148,6 +145,7 @@ namespace YChan
                 else
                 {
                     MessageBox.Show("URL is already in queue!");
+                    return;
                 }
             }
             else
@@ -209,7 +207,7 @@ namespace YChan
 
         private void lbThreads_MouseDown(object sender, MouseEventArgs e)
         {
-            if (e.Button == System.Windows.Forms.MouseButtons.Right)
+            if (e.Button == MouseButtons.Right)
             {
                 tPos = -1;
                 if (lbThreads.IndexFromPoint(e.Location) != -1)
@@ -222,7 +220,7 @@ namespace YChan
 
         private void lbBoards_MouseDown(object sender, MouseEventArgs e)
         {
-            if (e.Button == System.Windows.Forms.MouseButtons.Right)
+            if (e.Button == MouseButtons.Right)
             {
                 bPos = -1;
                 if (lbBoards.IndexFromPoint(e.Location) != -1)

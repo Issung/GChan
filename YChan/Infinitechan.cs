@@ -166,7 +166,6 @@ namespace YChan
 
                 for (int y = 0; y < URLs.Length; y++)
                     General.dlTo(URLs[y], this.SaveTo);
-
             }
             catch (WebException webEx)
             {
@@ -242,7 +241,6 @@ namespace YChan
                 }
 
                 htmlPage = htmlPage.Replace("=\"/", "=\"https://8ch.net/");
-
 
                 for (int i = 0; i < thumbs.Count; i++)
                 {
