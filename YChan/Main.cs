@@ -236,7 +236,7 @@ namespace YChan
 
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            About tAbout = new About();
+            AboutBox tAbout = new AboutBox();
             tAbout.ShowDialog();
         }
 
