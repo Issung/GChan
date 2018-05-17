@@ -181,10 +181,10 @@ namespace YChan
                 General.setSettings("C:\\", 10000, false, false, true, true);                           // set default values
             }
 
-            if (!File.Exists(Application.CommonAppDataPath + "\\2.4"))
+            if (!File.Exists(Application.CommonAppDataPath + "\\firstStart"))
             {                                    // Old settings file, new
                 firstStart = true;                                                                      // version, first start,
-                File.Create(Application.CommonAppDataPath + "\\2.4").Dispose();                           // create file to save version
+                File.Create(Application.CommonAppDataPath + "\\firstStart").Dispose();                  // create file to save version
             }
         }
 
