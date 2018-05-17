@@ -14,7 +14,6 @@ namespace YChan
         public CloseWarn()
         {
             this.InitializeComponent();
-            this.DialogResult = DialogResult.OK;
         }
 
         private void btnClose_Click(object sender, EventArgs e)
@@ -24,7 +23,6 @@ namespace YChan
 
         private void btnNoClose_Click(object sender, EventArgs e)
         {
-            this.DialogResult = DialogResult.Cancel;
             this.Close();
         }
 

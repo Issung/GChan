@@ -105,10 +105,10 @@ namespace YChan
             return links.ToArray();
         }
 
-        override public string getThreads()
+        override public string[] getThreads()
         {
             string URL = "http://a.4cdn.org/" + getURL().Split('/')[3] + "/catalog.json";
-            string Res = "";
+            List<string> Res = new List<string>();
             string str = "";
             XmlNodeList tNa;
             XmlNodeList tNo;
@@ -130,7 +130,7 @@ namespace YChan
                 tNa = doc.DocumentElement.SelectNodes("/root/item/threads/item/semantic_url");
                 for (int i = 0; i < tNo.Count; i++)
                 {
-                    Res = Res + "http://boards.4chan.org/" + getURL().Split('/')[3] + "/thread/" + tNo[i].InnerText + "/" + tNa[i].InnerText + "\n";
+                    Res.Add("http://boards.4chan.org/" + getURL().Split('/')[3] + "/thread/" + tNo[i].InnerText + "/" + tNa[i].InnerText);
                 }
             }
             catch (WebException webEx)
@@ -139,7 +139,7 @@ namespace YChan
                 MessageBox.Show("Connection Error: " + webEx.Message);
 #endif
             }
-            return Res;
+            return Res.ToArray();
         }
 
         override public void download()
@@ -246,6 +246,12 @@ namespace YChan
             {
                 throw ex;
             }
+        }
+
+        public override void download(object callback)
+        {
+            Console.WriteLine("Downloading: " + URL);
+            download();
         }
     }
 }

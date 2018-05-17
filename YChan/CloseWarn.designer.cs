@@ -47,6 +47,7 @@ namespace YChan
             // 
             // btnClose
             // 
+            this.btnClose.DialogResult = System.Windows.Forms.DialogResult.OK;
             this.btnClose.Location = new System.Drawing.Point(15, 92);
             this.btnClose.Name = "btnClose";
             this.btnClose.Size = new System.Drawing.Size(75, 23);
@@ -57,6 +58,7 @@ namespace YChan
             // 
             // btnNoClose
             // 
+            this.btnNoClose.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.btnNoClose.Location = new System.Drawing.Point(306, 92);
             this.btnNoClose.Name = "btnNoClose";
             this.btnNoClose.Size = new System.Drawing.Size(75, 23);

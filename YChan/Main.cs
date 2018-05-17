@@ -35,6 +35,9 @@ namespace YChan
         private int bPos = -1;                                                              // Item position in lbBoards
         private System.Windows.Forms.Timer scnTimer = new System.Windows.Forms.Timer();     // Timmer for scanning
 
+        private enum typeURL
+        { thread, board };
+
         public frmMain()
         {
             InitializeComponent();
@@ -48,6 +51,7 @@ namespace YChan
             scnTimer.Enabled = false;                                                   // disable timer
             scnTimer.Interval = General.timer;                                          // set interval
             scnTimer.Tick += new EventHandler(this.scan);                               // when Timer ticks call scan()
+            ThreadPool.SetMaxThreads(Environment.ProcessorCount, Environment.ProcessorCount);
 
             if (General.firstStart)
             {
@@ -56,8 +60,7 @@ namespace YChan
             }
 
             if (General.saveOnClose)                                                    // if enabled load URLs from file
-            {                                               
-
+            {
                 string boards = General.loadURLs(true);
                 string threads = General.loadURLs(false);                               // load threads
 
@@ -87,8 +90,6 @@ namespace YChan
                 scnTimer.Enabled = true;                                       // activate the timer
                 scan(null, null);                                              // and start scanning
             }
-
-            
         }
 
         private void btnAdd_Click(object sender, EventArgs e)
@@ -103,22 +104,12 @@ namespace YChan
                     if (board)
                     {
                         listBoards.Add(newImageboard);
-
-                        lbBoards.Invoke((MethodInvoker)(() =>
-                        {
-                            lbBoards.DataSource = null;
-                            lbBoards.DataSource = listBoards;
-                        }));
+                        updateDataSource(typeURL.board);
                     }
                     else
                     {
                         listThreads.Add(newImageboard);
-
-                        lbThreads.Invoke((MethodInvoker)(() =>
-                        {
-                            lbThreads.DataSource = null;
-                            lbThreads.DataSource = listThreads;
-                        }));
+                        updateDataSource(typeURL.thread);
                     }
                 }
                 else
@@ -138,6 +129,9 @@ namespace YChan
 
             if (!scnTimer.Enabled)
                 scnTimer.Enabled = true;
+            if (General.saveOnClose)
+                General.writeURLs(listBoards, listThreads);
+
             scan(null, null);
         }
 
@@ -193,13 +187,30 @@ namespace YChan
         {
             if (tPos != -1)
             {
-                listThreads[tPos].getThread().Abort();
                 listThreads.RemoveAt(tPos);
-                lbThreads.Invoke((MethodInvoker)(() =>
-                {
-                    lbThreads.DataSource = null;
-                    lbThreads.DataSource = listThreads;
-                }));
+                updateDataSource(typeURL.thread);
+            }
+        }
+
+        private void updateDataSource(typeURL type)
+        {
+            switch (type)
+            {
+                case typeURL.board:
+                    lbBoards.Invoke((MethodInvoker)(() =>
+                    {
+                        lbBoards.DataSource = null;
+                        lbBoards.DataSource = listBoards;
+                    }));
+                    break;
+
+                case typeURL.thread:
+                    lbThreads.Invoke((MethodInvoker)(() =>
+                    {
+                        lbThreads.DataSource = null;
+                        lbThreads.DataSource = listThreads;
+                    }));
+                    break;
             }
         }
 
@@ -265,15 +276,6 @@ namespace YChan
 
                 if (General.saveOnClose)
                     General.writeURLs(listBoards, listThreads);
-
-                if (Scanner != null && Scanner.IsAlive)
-                    Scanner.Abort();
-
-                for (int i = 0; i < listThreads.Count; i++)
-                {
-                    if(listThreads[i].getThread().IsAlive)
-                        listThreads[i].getThread().Abort();
-                }
             }
         }
 
@@ -302,11 +304,7 @@ namespace YChan
             if (bPos != -1)
             {
                 listBoards.RemoveAt(bPos);
-                lbBoards.Invoke((MethodInvoker)(() =>
-                {
-                    lbBoards.DataSource = null;
-                    lbBoards.DataSource = listBoards;
-                }));
+                updateDataSource(typeURL.board);
             }
         }
 
@@ -338,62 +336,55 @@ namespace YChan
         {
             if (Scanner == null || !Scanner.IsAlive)
             {
-                Scanner = new Thread(new ThreadStart(ScanThread));
+                Scanner = new Thread(new ThreadStart(ScanThread))
+                {
+                    Name = "Scan Thread"
+                };
                 Scanner.Start();
             }
         }
 
         private void ScanThread()
         {
-            for (int i = 0; i < listThreads.Count; i++)
+            //Removes 404'd threads
+            foreach (Imageboard imB in listThreads)
             {
-                if (listThreads[i].isGone())
+                if (imB.isGone())
                 {
-                    listThreads.RemoveAt(i);
+                    listThreads.Remove(imB);
+                    updateDataSource(typeURL.thread);
 
-                    lbThreads.Invoke((MethodInvoker)delegate
-                    {
-                        lbThreads.DataSource = null;
-                        lbThreads.DataSource = listThreads;
-                    });
-
-                    i--;
+                    if (General.saveOnClose)
+                        General.writeURLs(listBoards, listThreads);
                 }
             }
 
-            for (int i = 0; i < listBoards.Count; i++)
+            //Searches for new threads on the watched boards
+            foreach (Imageboard imB in listBoards)
             {
                 string[] Threads = { };
                 try
                 {
-                    Threads = listBoards[i].getThreads().Split('\n');
+                    Threads = imB.getThreads();
                 }
                 catch (Exception exep)
                 {
                 }
-                for (int j = 0; j < Threads.Length; j++)
+                foreach (string thread in Threads)
                 {
-                    Imageboard newImageboard = General.createNewIMB(Threads[j], false);
+                    Imageboard newImageboard = General.createNewIMB(thread, false);
                     if (newImageboard != null && isUnique(newImageboard.getURL(), listThreads))
                     {
                         listThreads.Add(newImageboard);
-                        lbThreads.Invoke((MethodInvoker)(() =>
-                        {
-                            lbThreads.DataSource = null;
-                            lbThreads.DataSource = listThreads;
-                        }));
+                        updateDataSource(typeURL.thread);
                     }
                 }
             }
 
-            for (int i = 0; i < listThreads.Count; i++)
+            //Download threads
+            foreach (Imageboard imB in listThreads)
             {
-                if (!listThreads[i].getThread().IsAlive)
-                {
-                    //TODO: Make it so only a few threads are running so as to not overload the computer and server resources
-                    listThreads[i].resetThread();
-                    listThreads[i].getThread().Start();
-                }
+                ThreadPool.QueueUserWorkItem(new WaitCallback(imB.download));
             }
         }
 
@@ -401,7 +392,8 @@ namespace YChan
         {
             if (General.minimizeToTray && this.WindowState == FormWindowState.Minimized)
             {
-                this.Hide();                                                                // when minimized hide from taskbar if trayicon enabled
+                // when minimized hide from taskbar if trayicon enabled
+                this.Hide();
             }
         }
 

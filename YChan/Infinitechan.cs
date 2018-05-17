@@ -118,10 +118,10 @@ namespace YChan
             return links.ToArray();
         }
 
-        override public string getThreads()
+        override public string[] getThreads()
         {
             string URL = "http://8ch.net/" + getURL().Split('/')[3] + "/catalog.json";
-            string Res = "";
+            List<string> Res = new List<string>();
             string str = "";
             XmlNodeList tNo;
             try
@@ -141,15 +141,17 @@ namespace YChan
                 tNo = doc.DocumentElement.SelectNodes("/root/item/threads/item/no");
                 for (int i = 0; i < tNo.Count; i++)
                 {
-                    Res = Res + "http://8ch.net/" + getURL().Split('/')[3] + "/res/" + tNo[i].InnerText + ".html\n";
+                    Res.Add("http://8ch.net/" + getURL().Split('/')[3] + "/res/" + tNo[i].InnerText + ".html");
                 }
             }
             catch (WebException webEx)
-            {                                               // I think I should handle this
-                                                            //                MessageBox.Show("Connection Error");
+            {
+#if DEBUG
+                MessageBox.Show("Connection Error: " + webEx.Message);
+#endif
             }
 
-            return Res;
+            return Res.ToArray();
         }
 
         override public void download()
@@ -258,6 +260,12 @@ namespace YChan
             {
                 throw ex;
             }
+        }
+
+        public override void download(object callback)
+        {
+            Console.WriteLine("Downloading: " + URL);
+            download();
         }
     }
 }
