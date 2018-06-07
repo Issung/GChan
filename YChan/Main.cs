@@ -27,13 +27,16 @@ namespace YChan
 {
     public partial class frmMain : Form
     {
-        public List<Imageboard> listThreads = new List<Imageboard>();                       // list of monitored threads
-        public List<Imageboard> listBoards = new List<Imageboard>();                        // list of monitored boards
+        public List<Imageboard> ListThreads { get; set; } = new List<Imageboard>();
+        public List<Imageboard> ListBoards { get; set; } = new List<Imageboard>();
         private Thread Scanner = null;                                                      // thread that addes stuff
 
         private int tPos = -1;                                                              // Item position in lbThreads
         private int bPos = -1;                                                              // Item position in lbBoards
         private System.Windows.Forms.Timer scnTimer = new System.Windows.Forms.Timer();     // Timmer for scanning
+
+        private object threadLock = new object();
+        private object boardLock = new object();
 
         private enum typeURL
         { thread, board };
@@ -66,26 +69,32 @@ namespace YChan
 
                 if (!String.IsNullOrWhiteSpace(boards))
                 {
-                    string[] URLs = boards.Split('\n');
-                    for (int i = 0; i < URLs.Length - 1; i++)
+                    lock (boardLock)
                     {
-                        Imageboard newImageboard = General.createNewIMB(URLs[i], true); // and add them
-                        listBoards.Add(newImageboard);
+                        string[] URLs = boards.Split('\n');
+                        for (int i = 0; i < URLs.Length - 1; i++)
+                        {
+                            Imageboard newImageboard = General.createNewIMB(URLs[i], true); // and add them
+                            ListBoards.Add(newImageboard);
+                        }
                     }
                 }
 
                 if (!String.IsNullOrWhiteSpace(threads))
                 {
-                    string[] URLs = threads.Split('\n');
-                    for (int i = 0; i < URLs.Length - 1; i++)
+                    lock (threadLock)
                     {
-                        Imageboard newImageboard = General.createNewIMB(URLs[i], false);
-                        listThreads.Add(newImageboard);
+                        string[] URLs = threads.Split('\n');
+                        for (int i = 0; i < URLs.Length - 1; i++)
+                        {
+                            Imageboard newImageboard = General.createNewIMB(URLs[i], false);
+                            ListThreads.Add(newImageboard);
+                        }
                     }
                 }
 
-                lbBoards.DataSource = listBoards;
-                lbThreads.DataSource = listThreads;
+                lbBoards.DataSource = ListBoards;
+                lbThreads.DataSource = ListThreads;
 
                 scnTimer.Enabled = true;                                       // activate the timer
                 scan(null, null);                                              // and start scanning
@@ -99,17 +108,23 @@ namespace YChan
 
             if (newImageboard != null)
             {
-                if (isUnique(newImageboard.getURL(), listThreads))
+                if (isUnique(newImageboard.getURL(), ListThreads))
                 {
                     if (board)
                     {
-                        listBoards.Add(newImageboard);
-                        updateDataSource(typeURL.board);
+                        lock (boardLock)
+                        {
+                            ListBoards.Add(newImageboard);
+                            updateDataSource(typeURL.board);
+                        }
                     }
                     else
                     {
-                        listThreads.Add(newImageboard);
-                        updateDataSource(typeURL.thread);
+                        lock (threadLock)
+                        {
+                            ListThreads.Add(newImageboard);
+                            updateDataSource(typeURL.thread);
+                        }
                     }
                 }
                 else
@@ -130,7 +145,7 @@ namespace YChan
             if (!scnTimer.Enabled)
                 scnTimer.Enabled = true;
             if (General.saveOnClose)
-                General.writeURLs(listBoards, listThreads);
+                General.writeURLs(ListBoards, ListThreads);
 
             scan(null, null);
         }
@@ -149,9 +164,9 @@ namespace YChan
         private int getPlace(string url)
         {
             int plc = -1;
-            for (int i = 0; i < listThreads.Count; i++)
+            for (int i = 0; i < ListThreads.Count; i++)
             {
-                if (listThreads[i].getURL() == url)
+                if (ListThreads[i].getURL() == url)
                     plc = i;
             }
             return plc;
@@ -187,8 +202,11 @@ namespace YChan
         {
             if (tPos != -1)
             {
-                listThreads.RemoveAt(tPos);
-                updateDataSource(typeURL.thread);
+                lock (threadLock)
+                {
+                    ListThreads.RemoveAt(tPos);
+                    updateDataSource(typeURL.thread);
+                }
             }
         }
 
@@ -200,7 +218,7 @@ namespace YChan
                     lbBoards.Invoke((MethodInvoker)(() =>
                     {
                         lbBoards.DataSource = null;
-                        lbBoards.DataSource = listBoards;
+                        lbBoards.DataSource = ListBoards;
                     }));
                     break;
 
@@ -208,7 +226,7 @@ namespace YChan
                     lbThreads.Invoke((MethodInvoker)(() =>
                     {
                         lbThreads.DataSource = null;
-                        lbThreads.DataSource = listThreads;
+                        lbThreads.DataSource = ListThreads;
                     }));
                     break;
             }
@@ -218,7 +236,7 @@ namespace YChan
         {
             if (tPos != -1)
             {
-                string spath = listThreads[tPos].getPath();
+                string spath = ListThreads[tPos].getPath();
                 if (!Directory.Exists(spath))
                     Directory.CreateDirectory(spath);
                 Process.Start(spath);
@@ -261,7 +279,7 @@ namespace YChan
         private void frmMain_FormClosing(object sender, FormClosingEventArgs e)
         {
             DialogResult result = DialogResult.OK;
-            if (General.warnOnClose && listThreads.Count > 0)
+            if (General.warnOnClose && ListThreads.Count > 0)
             {
                 CloseWarn clw = new CloseWarn();
                 result = clw.ShowDialog();
@@ -275,7 +293,7 @@ namespace YChan
                 scnTimer.Enabled = false;
 
                 if (General.saveOnClose)
-                    General.writeURLs(listBoards, listThreads);
+                    General.writeURLs(ListBoards, ListThreads);
             }
         }
 
@@ -283,7 +301,7 @@ namespace YChan
         {
             if (bPos != -1)
             {
-                string spath = listBoards[bPos].getPath();
+                string spath = ListBoards[bPos].getPath();
                 if (!Directory.Exists(spath))
                     Directory.CreateDirectory(spath);
                 Process.Start(spath);
@@ -303,8 +321,11 @@ namespace YChan
         {
             if (bPos != -1)
             {
-                listBoards.RemoveAt(bPos);
-                updateDataSource(typeURL.board);
+                lock (boardLock)
+                {
+                    ListBoards.RemoveAt(bPos);
+                    updateDataSource(typeURL.board);
+                }
             }
         }
 
@@ -346,45 +367,57 @@ namespace YChan
 
         private void ScanThread()
         {
-            //Removes 404'd threads
-            foreach (Imageboard imB in listThreads)
+            lock (threadLock)
             {
-                if (imB.isGone())
+                //Removes 404'd threads
+                foreach (Imageboard imB in ListThreads.ToArray())
                 {
-                    listThreads.Remove(imB);
-                    updateDataSource(typeURL.thread);
-
-                    if (General.saveOnClose)
-                        General.writeURLs(listBoards, listThreads);
-                }
-            }
-
-            //Searches for new threads on the watched boards
-            foreach (Imageboard imB in listBoards)
-            {
-                string[] Threads = { };
-                try
-                {
-                    Threads = imB.getThreads();
-                }
-                catch (Exception exep)
-                {
-                }
-                foreach (string thread in Threads)
-                {
-                    Imageboard newImageboard = General.createNewIMB(thread, false);
-                    if (newImageboard != null && isUnique(newImageboard.getURL(), listThreads))
+                    if (imB.isGone())
                     {
-                        listThreads.Add(newImageboard);
+                        ListThreads.Remove(imB);
                         updateDataSource(typeURL.thread);
+
+                        if (General.saveOnClose)
+                            General.writeURLs(ListBoards, ListThreads);
                     }
                 }
             }
 
-            //Download threads
-            foreach (Imageboard imB in listThreads)
+            lock (boardLock)
             {
-                ThreadPool.QueueUserWorkItem(new WaitCallback(imB.download));
+                //Searches for new threads on the watched boards
+                foreach (Imageboard imB in ListBoards)
+                {
+                    string[] Threads = { };
+                    try
+                    {
+                        Threads = imB.getThreads();
+                    }
+                    catch (Exception exep)
+                    {
+                    }
+                    foreach (string thread in Threads)
+                    {
+                        Imageboard newImageboard = General.createNewIMB(thread, false);
+                        if (newImageboard != null && isUnique(newImageboard.getURL(), ListThreads))
+                        {
+                            lock (threadLock)
+                            {
+                                ListThreads.Add(newImageboard);
+                                updateDataSource(typeURL.thread);
+                            }
+                        }
+                    }
+                }
+            }
+
+            lock (threadLock)
+            {
+                //Download threads
+                foreach (Imageboard imB in ListThreads)
+                {
+                    ThreadPool.QueueUserWorkItem(new WaitCallback(imB.download));
+                }
             }
         }
 

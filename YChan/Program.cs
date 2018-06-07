@@ -34,7 +34,7 @@ namespace YChan
             General.setSettings(General.path, General.timer, General.loadHTML, true, General.minimizeToTray, General.warnOnClose);
             try
             {
-                General.writeURLs(MainFrame.listBoards, MainFrame.listThreads);
+                General.writeURLs(MainFrame.ListBoards, MainFrame.ListThreads);
             }
             catch (Exception eX)
             {
@@ -52,7 +52,7 @@ namespace YChan
             General.setSettings(General.path, General.timer, General.loadHTML, true, General.minimizeToTray, General.warnOnClose);
             try
             {
-                General.writeURLs(MainFrame.listBoards, MainFrame.listThreads);
+                General.writeURLs(MainFrame.ListBoards, MainFrame.ListThreads);
             }
             catch (Exception eX)
             {
