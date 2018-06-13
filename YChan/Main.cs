@@ -101,10 +101,9 @@ namespace YChan
             }
         }
 
-        private void btnAdd_Click(object sender, EventArgs e)
+        private void AddUrl(string url, bool board)
         {
-            bool board = (tcApp.SelectedIndex == 1);                             // Board Tab is open -> board=true; Thread tab -> board=false
-            Imageboard newImageboard = General.createNewIMB(edtURL.Text.Trim(), board);
+            Imageboard newImageboard = General.createNewIMB(url, board);
 
             if (newImageboard != null)
             {
@@ -140,14 +139,22 @@ namespace YChan
                 return;
             }
 
-            edtURL.Text = "";
-
             if (!scnTimer.Enabled)
                 scnTimer.Enabled = true;
             if (General.saveOnClose)
                 General.writeURLs(ListBoards, ListThreads);
 
             scan(null, null);
+        }
+
+        private void btnAdd_Click(object sender, EventArgs e)
+        {
+            bool board = (tcApp.SelectedIndex == 1);                             // Board Tab is open -> board=true; Thread tab -> board=false
+            string url = edtURL.Text.Trim();                                     // get url from TextBox
+
+            AddUrl(url, board);
+
+            edtURL.Text = "";                                                    // clear TextBox
         }
 
         private bool isUnique(string url, List<Imageboard> List)
@@ -438,6 +445,64 @@ namespace YChan
         private void openFolderToolStripMenuItem1_Click(object sender, EventArgs e)
         {
             Process.Start(General.path);
+        }
+
+        private void edtURL_MouseDown(object sender, MouseEventArgs e)
+        {
+            // Start the drag if it's the right mouse button.
+            if (e.Button == MouseButtons.Right)
+            {
+                edtURL.DoDragDrop("Here's some text!", DragDropEffects.Copy);
+            }
+        }
+
+        private void edtURL_DragEnter(object sender, DragEventArgs e)
+        {
+            // See if this is a copy and the data includes text.
+            if (e.Data.GetDataPresent(DataFormats.Text) &&
+                (e.AllowedEffect & DragDropEffects.Copy) != 0)
+            {
+                // Allow this.
+                e.Effect = DragDropEffects.Copy;
+            }
+            else
+            {
+                // Don't allow any other drop.
+                e.Effect = DragDropEffects.None;
+            }
+        }
+
+        private void edtURL_DragDrop(object sender, DragEventArgs e)
+        {
+            bool board = (tcApp.SelectedIndex == 1);                             // Board Tab is open -> board=true; Thread tab -> board=false
+            string url = (string)e.Data.GetData(DataFormats.Text);               // get url from drag and drop
+            AddUrl(url, board);
+        }
+
+        private void btnClearAll_Click(object sender, EventArgs e)
+        {
+            bool board = (tcApp.SelectedIndex == 1);                             // Board Tab is open -> board=true; Thread tab -> board=false
+
+            string type = "threads";
+            if (board) type = "boards";
+
+            DialogResult dialogResult = MessageBox.Show("Are you sure?", "Clear all " + type, MessageBoxButtons.YesNo);    // confirmation prompt
+            if (dialogResult == DialogResult.Yes)
+            {
+                if (board)
+                {
+                    ListBoards.Clear();
+                    updateDataSource(typeURL.board);
+                }
+                else
+                {
+                    ListThreads.Clear();
+                    updateDataSource(typeURL.thread);
+                }
+
+                if (General.saveOnClose)
+                    General.writeURLs(ListBoards, ListThreads);
+            }
         }
     }
 }
