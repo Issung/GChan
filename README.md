@@ -10,3 +10,5 @@ YChan requieres .NET Framework 4.5 or higher.
 Fixes the HTML page downloader on 4chan.    
 Adds some UI resizing tweaks    
 Allows you to press enter to insert urls    
+Adds drag and drop support (drop url on the textbox)    
+Adds a handy clear all button    

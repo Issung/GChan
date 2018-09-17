@@ -125,6 +125,10 @@
 - add option to filter by regex
 - rewrite xmlconfig stuff
 
+&gt; YChan 2.6
+    - add drag and drop support for TextBox
+    - add clear all button
+
 &gt; YChan 2.4
     - fix 4chan html file creator
     - fix 8chan html file creator
