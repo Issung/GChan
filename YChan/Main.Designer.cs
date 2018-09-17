@@ -88,7 +88,7 @@
             // settingsToolStripMenuItem1
             // 
             this.settingsToolStripMenuItem1.Name = "settingsToolStripMenuItem1";
-            this.settingsToolStripMenuItem1.Size = new System.Drawing.Size(152, 22);
+            this.settingsToolStripMenuItem1.Size = new System.Drawing.Size(139, 22);
             this.settingsToolStripMenuItem1.Text = "&Settings";
             this.settingsToolStripMenuItem1.Click += new System.EventHandler(this.settingsToolStripMenuItem_Click);
             // 
@@ -96,21 +96,21 @@
             // 
             this.openFolderToolStripMenuItem1.Image = global::YChan.Properties.Resources.OpenFolder;
             this.openFolderToolStripMenuItem1.Name = "openFolderToolStripMenuItem1";
-            this.openFolderToolStripMenuItem1.Size = new System.Drawing.Size(152, 22);
+            this.openFolderToolStripMenuItem1.Size = new System.Drawing.Size(139, 22);
             this.openFolderToolStripMenuItem1.Text = "&Open Folder";
             this.openFolderToolStripMenuItem1.Click += new System.EventHandler(this.openFolderToolStripMenuItem1_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(149, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(136, 6);
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Image = global::YChan.Properties.Resources.Oxygen_Icons_org_Oxygen_Actions_dialog_close;
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
             this.exitToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Q)));
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
             this.exitToolStripMenuItem.Text = "&Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
@@ -126,14 +126,14 @@
             // changelogToolStripMenuItem1
             // 
             this.changelogToolStripMenuItem1.Name = "changelogToolStripMenuItem1";
-            this.changelogToolStripMenuItem1.Size = new System.Drawing.Size(152, 22);
+            this.changelogToolStripMenuItem1.Size = new System.Drawing.Size(132, 22);
             this.changelogToolStripMenuItem1.Text = "&Changelog";
             this.changelogToolStripMenuItem1.Click += new System.EventHandler(this.changelogToolStripMenuItem_Click);
             // 
             // aboutToolStripMenuItem1
             // 
             this.aboutToolStripMenuItem1.Name = "aboutToolStripMenuItem1";
-            this.aboutToolStripMenuItem1.Size = new System.Drawing.Size(152, 22);
+            this.aboutToolStripMenuItem1.Size = new System.Drawing.Size(132, 22);
             this.aboutToolStripMenuItem1.Text = "&About";
             this.aboutToolStripMenuItem1.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
             // 
@@ -322,6 +322,7 @@
             // 
             // btnClearAll
             // 
+            this.btnClearAll.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnClearAll.Location = new System.Drawing.Point(495, 28);
             this.btnClearAll.Name = "btnClearAll";
             this.btnClearAll.Size = new System.Drawing.Size(75, 23);
