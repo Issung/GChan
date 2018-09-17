@@ -504,5 +504,29 @@ namespace YChan
                     General.writeURLs(ListBoards, ListThreads);
             }
         }
+
+        protected override void WndProc(ref Message m)
+        {
+            if (m.Msg == Program.WM_MY_MSG)
+            {
+                if ((m.WParam.ToInt32() == 0xCDCD) && (m.LParam.ToInt32() == 0xEFEF))
+                {
+                    if (WindowState == FormWindowState.Minimized)
+                    {
+                        WindowState = FormWindowState.Normal;
+                    }
+                    // Bring window to front.
+                    bool temp = TopMost;
+                    TopMost = true;
+                    TopMost = temp;
+                    // Set focus to the window.
+                    Activate();
+                }
+            }
+            else
+            {
+                base.WndProc(ref m);
+            }
+        }
     }
 }

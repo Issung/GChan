@@ -16,7 +16,9 @@
  ************************************************************************/
 
 using System;
+using System.Threading;
 using System.Windows.Forms;
+using System.Runtime.InteropServices;
 
 namespace YChan
 {
@@ -64,17 +66,72 @@ namespace YChan
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
-        private static void Main()
+        private static void Main(string[] args)
         {
-            // Unhandled exceptions for our Application Domain
-            AppDomain.CurrentDomain.UnhandledException += new System.UnhandledExceptionEventHandler(AppDomain_UnhandledException);
+            // See if an instance is already running...
+            // Code from https://stackoverflow.com/a/1777704 by Matt Davis (https://stackoverflow.com/users/51170/matt-davis)
+            if (_single.WaitOne(TimeSpan.Zero, true))
+            {
+                // Unhandled exceptions for our Application Domain
+                AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(AppDomain_UnhandledException);
 
-            // Unhandled exceptions for the executing UI thread
-            Application.ThreadException += new System.Threading.ThreadExceptionEventHandler(Application_ThreadException);
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            MainFrame = new frmMain();
-            Application.Run(MainFrame);
+                // Unhandled exceptions for the executing UI thread
+                Application.ThreadException += new ThreadExceptionEventHandler(Application_ThreadException);
+                Application.EnableVisualStyles();
+                Application.SetCompatibleTextRenderingDefault(false);
+
+                try
+                {
+                    MainFrame = new frmMain();
+                    Application.Run(MainFrame);
+                }
+                catch (Exception ex)
+                {
+                    // handle exception accordingly
+                }
+                finally
+                {
+                    _single.ReleaseMutex();
+                }
+            }
+            else
+            {
+                // Yes...Bring existing instance to top and activate it.
+                PostMessage(
+                    (IntPtr)HWND_BROADCAST,
+                    WM_MY_MSG,
+                    new IntPtr(0xCDCD),
+                    new IntPtr(0xEFEF));
+
+                foreach (string str in args)
+                {
+                    Uri uriResult;
+                    if (Uri.TryCreate(str, UriKind.Absolute, out uriResult))
+                    {
+                        PostMessage(
+                        (IntPtr)HWND_BROADCAST,
+                        RegisterWindowMessage(str),
+                        new IntPtr(0xCDCD),
+                        new IntPtr(0xEFCE));
+                    }
+                }
+            }
         }
+
+        #region Dll Imports
+
+        private const int HWND_BROADCAST = 0xFFFF;
+
+        public static readonly int WM_MY_MSG = RegisterWindowMessage("WM_MY_MSG");
+
+        [DllImport("user32")]
+        private static extern bool PostMessage(IntPtr hwnd, int msg, IntPtr wparam, IntPtr lparam);
+
+        [DllImport("user32")]
+        private static extern int RegisterWindowMessage(string message);
+
+        #endregion Dll Imports
+
+        private static Mutex _single = new Mutex(true, "YChanRunning");
     }
 }
