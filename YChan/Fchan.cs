@@ -98,9 +98,9 @@ namespace YChan
                     links.Add(baseURL + xmlTim[i].InnerText + xmlExt[i].InnerText);
                 }
             }
-            catch (WebException webEx)
+            catch
             {
-                throw webEx;
+                throw;
             }
             return links.ToArray();
         }
@@ -165,7 +165,7 @@ namespace YChan
             catch (UnauthorizedAccessException ex)
             {
                 MessageBox.Show(ex.Message, "No Permission to access folder");
-                throw ex;
+                throw;
             }
         }
 
@@ -238,13 +238,9 @@ namespace YChan
                 if (!string.IsNullOrWhiteSpace(htmlPage))
                     File.WriteAllText(this.SaveTo + "\\Thread.html", htmlPage);
             }
-            catch (WebException webEx)
+            catch
             {
-                throw webEx;
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                throw ex;
+                throw;
             }
         }
 

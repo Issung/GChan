@@ -85,7 +85,7 @@ namespace YChan
                     MainFrame = new frmMain();
                     Application.Run(MainFrame);
                 }
-                catch (Exception ex)
+                catch
                 {
                     // handle exception accordingly
                 }
@@ -97,7 +97,7 @@ namespace YChan
             else
             {
                 // Yes...Bring existing instance to top and activate it.
-                PostMessage(
+                NativeMethods.PostMessage(
                     (IntPtr)HWND_BROADCAST,
                     WM_MY_MSG,
                     new IntPtr(0xCDCD),
@@ -108,17 +108,18 @@ namespace YChan
         #region Dll Imports
 
         private const int HWND_BROADCAST = 0xFFFF;
+        public static readonly int WM_MY_MSG = NativeMethods.RegisterWindowMessage("WM_MY_MSG");
+        private static Mutex _single = new Mutex(true, "YChanRunning");
 
-        public static readonly int WM_MY_MSG = RegisterWindowMessage("WM_MY_MSG");
+        private class NativeMethods
+        {
+            [DllImport("user32")]
+            public static extern bool PostMessage(IntPtr hwnd, int msg, IntPtr wparam, IntPtr lparam);
 
-        [DllImport("user32")]
-        private static extern bool PostMessage(IntPtr hwnd, int msg, IntPtr wparam, IntPtr lparam);
-
-        [DllImport("user32")]
-        private static extern int RegisterWindowMessage(string message);
+            [DllImport("user32")]
+            public static extern int RegisterWindowMessage(string message);
+        }
 
         #endregion Dll Imports
-
-        private static Mutex _single = new Mutex(true, "YChanRunning");
     }
 }

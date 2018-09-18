@@ -400,18 +400,21 @@ namespace YChan
                     {
                         Threads = imB.getThreads();
                     }
-                    catch (Exception exep)
+                    catch
                     {
                     }
-                    foreach (string thread in Threads)
+                    finally
                     {
-                        Imageboard newImageboard = General.createNewIMB(thread, false);
-                        if (newImageboard != null && isUnique(newImageboard.getURL(), ListThreads))
+                        foreach (string thread in Threads)
                         {
-                            lock (threadLock)
+                            Imageboard newImageboard = General.createNewIMB(thread, false);
+                            if (newImageboard != null && isUnique(newImageboard.getURL(), ListThreads))
                             {
-                                ListThreads.Add(newImageboard);
-                                updateDataSource(typeURL.thread);
+                                lock (threadLock)
+                                {
+                                    ListThreads.Add(newImageboard);
+                                    updateDataSource(typeURL.thread);
+                                }
                             }
                         }
                     }
