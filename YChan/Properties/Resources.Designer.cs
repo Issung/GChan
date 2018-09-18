@@ -63,9 +63,9 @@ namespace YChan.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap OpenFolder {
+        internal static System.Drawing.Bitmap CloseIcon {
             get {
-                object obj = ResourceManager.GetObject("OpenFolder", resourceCulture);
+                object obj = ResourceManager.GetObject("CloseIcon", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -73,9 +73,9 @@ namespace YChan.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap Oxygen_Icons_org_Oxygen_Actions_dialog_close {
+        internal static System.Drawing.Bitmap OpenFolder {
             get {
-                object obj = ResourceManager.GetObject("Oxygen-Icons.org-Oxygen-Actions-dialog-close", resourceCulture);
+                object obj = ResourceManager.GetObject("OpenFolder", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
