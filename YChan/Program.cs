@@ -116,7 +116,7 @@ namespace YChan
             [DllImport("user32")]
             public static extern bool PostMessage(IntPtr hwnd, int msg, IntPtr wparam, IntPtr lparam);
 
-            [DllImport("user32")]
+            [DllImport("user32", CharSet = CharSet.Unicode)]
             public static extern int RegisterWindowMessage(string message);
         }
 
