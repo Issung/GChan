@@ -150,7 +150,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="icons\close.ico" />
+    <None Include="icons\Oxygen-Icons.org-Oxygen-Actions-dialog-close.ico" />
     <None Include="icons\OpenFolder.ico" />
     <Content Include="YChanLogo.ico" />
   </ItemGroup>
