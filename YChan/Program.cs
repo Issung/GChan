@@ -102,19 +102,6 @@ namespace YChan
                     WM_MY_MSG,
                     new IntPtr(0xCDCD),
                     new IntPtr(0xEFEF));
-
-                foreach (string str in args)
-                {
-                    Uri uriResult;
-                    if (Uri.TryCreate(str, UriKind.Absolute, out uriResult))
-                    {
-                        PostMessage(
-                        (IntPtr)HWND_BROADCAST,
-                        RegisterWindowMessage(str),
-                        new IntPtr(0xCDCD),
-                        new IntPtr(0xEFCE));
-                    }
-                }
             }
         }
 
