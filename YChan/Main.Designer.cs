@@ -107,7 +107,7 @@
             // 
             // exitToolStripMenuItem
             // 
-            this.exitToolStripMenuItem.Image = global::YChan.Properties.Resources.Oxygen_Icons_org_Oxygen_Actions_dialog_close;
+            this.exitToolStripMenuItem.Image = global::YChan.Properties.Resources.CloseIcon;
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
             this.exitToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Q)));
             this.exitToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
