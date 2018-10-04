@@ -41,12 +41,12 @@ namespace YChan
             {
                 Match match = Regex.Match(url, @"8ch.net/[a-zA-Z0-9]*?/res/[0-9]*");
                 this.URL = "http://" + match.Groups[0].Value + ".html";      // simplify thread url
-                this.SaveTo = (General.path + "\\" + this.imName + "\\" + getURL().Split('/')[3] + "\\" + getURL().Split('/')[5]).Replace(".html", ""); // set saveto path
+                this.SaveTo = (Properties.Settings.Default.path + "\\" + this.imName + "\\" + getURL().Split('/')[3] + "\\" + getURL().Split('/')[5]).Replace(".html", ""); // set saveto path
             }
             else
             {
                 this.URL = url;
-                this.SaveTo = General.path + "\\" + this.imName + "\\" + getURL().Split('/')[3]; // set saveto path
+                this.SaveTo = Properties.Settings.Default.path + "\\" + this.imName + "\\" + getURL().Split('/')[3]; // set saveto path
             }
         }
 
@@ -161,13 +161,13 @@ namespace YChan
                 if (!Directory.Exists(this.SaveTo))
                     Directory.CreateDirectory(this.SaveTo);
 
-                if (General.loadHTML)
+                if (Properties.Settings.Default.loadHTML)
                     downloadHTMLPage();
 
                 string[] URLs = getLinks();
 
                 for (int y = 0; y < URLs.Length; y++)
-                    General.dlTo(URLs[y], this.SaveTo);
+                    General.DownloadToDir(URLs[y], this.SaveTo);
             }
             catch (WebException webEx)
             {
@@ -246,7 +246,7 @@ namespace YChan
 
                 for (int i = 0; i < thumbs.Count; i++)
                 {
-                    General.dlTo(thumbs[i], this.SaveTo + "\\thumb");
+                    General.DownloadToDir(thumbs[i], this.SaveTo + "\\thumb");
                 }
 
                 if (!String.IsNullOrWhiteSpace(htmlPage))

@@ -42,7 +42,7 @@ namespace YChan
                 }
                 else
                 {
-                    General.setSettings(edtPath.Text, int.Parse(edtTimer.Text) * 1000, chkHTML.Checked, chkSave.Checked, chkTray.Checked, chkWarn.Checked); // save settings
+                    General.SaveSettings(edtPath.Text, int.Parse(edtTimer.Text) * 1000, chkHTML.Checked, chkSave.Checked, chkTray.Checked, chkWarn.Checked); // save settings
 
                     this.Close();
                 }
@@ -74,12 +74,12 @@ namespace YChan
 
         private void Settings_Shown(object sender, EventArgs e)
         { // load settings into controls
-            edtPath.Text = General.path;
-            edtTimer.Text = (General.timer / 1000).ToString();
-            chkHTML.Checked = General.loadHTML;
-            chkSave.Checked = General.saveOnClose;
-            chkTray.Checked = General.minimizeToTray;
-            chkWarn.Checked = General.warnOnClose;
+            edtPath.Text = Properties.Settings.Default.path;
+            edtTimer.Text = (Properties.Settings.Default.timer / 1000).ToString();
+            chkHTML.Checked = Properties.Settings.Default.loadHTML;
+            chkSave.Checked = Properties.Settings.Default.saveOnClose;
+            chkTray.Checked = Properties.Settings.Default.minimizeToTray;
+            chkWarn.Checked = Properties.Settings.Default.warnOnClose;
         }
 
         //Source: https://stackoverflow.com/questions/1410127/c-sharp-test-if-user-has-write-access-to-a-folder?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa

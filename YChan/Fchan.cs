@@ -43,12 +43,12 @@ namespace YChan
             {
                 Match match = Regex.Match(url, @"boards.4chan.org/[a-zA-Z0-9]*?/thread/\d*");
                 this.URL = "http://" + match.Groups[0].Value;
-                this.SaveTo = General.path + "\\" + this.imName + "\\" + getURL().Split('/')[3] + "\\" + getURL().Split('/')[5];
+                this.SaveTo = Properties.Settings.Default.path + "\\" + this.imName + "\\" + getURL().Split('/')[3] + "\\" + getURL().Split('/')[5];
             }
             else
             {
                 this.URL = url;
-                this.SaveTo = General.path + "\\" + this.imName + "\\" + getURL().Split('/')[3];
+                this.SaveTo = Properties.Settings.Default.path + "\\" + this.imName + "\\" + getURL().Split('/')[3];
             }
         }
 
@@ -149,13 +149,13 @@ namespace YChan
                 if (!Directory.Exists(this.SaveTo))
                     Directory.CreateDirectory(this.SaveTo);
 
-                if (General.loadHTML)
+                if (Properties.Settings.Default.loadHTML)
                     downloadHTMLPage();
 
                 string[] URLs = getLinks();
 
                 for (int y = 0; y < URLs.Length; y++)
-                    General.dlTo(URLs[y], this.SaveTo);
+                    General.DownloadToDir(URLs[y], this.SaveTo);
             }
             catch (WebException webEx)
             {
@@ -233,7 +233,7 @@ namespace YChan
 
                 //Save thumbs for files that need it
                 for (int i = 0; i < thumbs.Count; i++)
-                    General.dlTo(thumbs[i], this.SaveTo + "\\thumb");
+                    General.DownloadToDir(thumbs[i], this.SaveTo + "\\thumb");
 
                 if (!string.IsNullOrWhiteSpace(htmlPage))
                     File.WriteAllText(this.SaveTo + "\\Thread.html", htmlPage);

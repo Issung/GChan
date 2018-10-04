@@ -28,17 +28,18 @@ namespace YChan
 
         private void chkWarning_CheckedChanged(object sender, EventArgs e)
         {
-            General.setSettings(General.path, General.timer, General.loadHTML, General.saveOnClose, General.minimizeToTray, !this.chkWarning.Checked);
+            Properties.Settings.Default.warnOnClose = !this.chkWarning.Checked;
+            Properties.Settings.Default.Save();
         }
 
         private void chkSave_CheckedChanged(object sender, EventArgs e)
         {
-            General.setSettings(General.path, General.timer, General.loadHTML, this.chkSave.Checked, General.minimizeToTray, General.warnOnClose);
+            Properties.Settings.Default.Save();
         }
 
         private void CloseWarn_Load(object sender, EventArgs e)
         {
-            this.chkSave.Checked = General.saveOnClose;
+            this.chkSave.Checked = Properties.Settings.Default.saveOnClose;
         }
     }
 }

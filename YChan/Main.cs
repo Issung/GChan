@@ -48,24 +48,25 @@ namespace YChan
 
         private void frmMain_Load(object sender, EventArgs e)
         {
-            General.loadSettings();                                                     // load settings on startup
-            if (!General.minimizeToTray)                                                // if trayicon deactivated
+            if (!Properties.Settings.Default.minimizeToTray)                            // if trayicon deactivated
                 nfTray.Visible = false;                                                 // hide it
             scnTimer.Enabled = false;                                                   // disable timer
-            scnTimer.Interval = General.timer;                                          // set interval
+            scnTimer.Interval = Properties.Settings.Default.timer;                      // set interval
             scnTimer.Tick += new EventHandler(this.scan);                               // when Timer ticks call scan()
             ThreadPool.SetMaxThreads(Environment.ProcessorCount, Environment.ProcessorCount);
 
-            if (General.firstStart)
+            if (Properties.Settings.Default.firstStart)
             {
                 FirstStart tFirstStart = new FirstStart();                              // if first start, show first start message
                 tFirstStart.ShowDialog();
+                Properties.Settings.Default.firstStart = false;
+                Properties.Settings.Default.Save();
             }
 
-            if (General.saveOnClose)                                                    // if enabled load URLs from file
+            if (Properties.Settings.Default.saveOnClose)                                // if enabled load URLs from file
             {
-                string boards = General.loadURLs(true);
-                string threads = General.loadURLs(false);                               // load threads
+                string boards = General.LoadURLs(true);
+                string threads = General.LoadURLs(false);                               // load threads
 
                 if (!String.IsNullOrWhiteSpace(boards))
                 {
@@ -74,7 +75,7 @@ namespace YChan
                         string[] URLs = boards.Split('\n');
                         for (int i = 0; i < URLs.Length - 1; i++)
                         {
-                            Imageboard newImageboard = General.createNewIMB(URLs[i], true); // and add them
+                            Imageboard newImageboard = General.CreateNewImageboard(URLs[i], true); // and add them
                             ListBoards.Add(newImageboard);
                         }
                     }
@@ -87,7 +88,7 @@ namespace YChan
                         string[] URLs = threads.Split('\n');
                         for (int i = 0; i < URLs.Length - 1; i++)
                         {
-                            Imageboard newImageboard = General.createNewIMB(URLs[i], false);
+                            Imageboard newImageboard = General.CreateNewImageboard(URLs[i], false);
                             ListThreads.Add(newImageboard);
                         }
                     }
@@ -103,7 +104,7 @@ namespace YChan
 
         private void AddUrl(string url, bool board)
         {
-            Imageboard newImageboard = General.createNewIMB(url, board);
+            Imageboard newImageboard = General.CreateNewImageboard(url, board);
 
             if (newImageboard != null)
             {
@@ -141,8 +142,8 @@ namespace YChan
 
             if (!scnTimer.Enabled)
                 scnTimer.Enabled = true;
-            if (General.saveOnClose)
-                General.writeURLs(ListBoards, ListThreads);
+            if (Properties.Settings.Default.saveOnClose)
+                General.WriteURLs(ListBoards, ListThreads);
 
             scan(this, new EventArgs());
         }
@@ -275,18 +276,18 @@ namespace YChan
         {
             Settings tSettings = new Settings();
             tSettings.ShowDialog();
-            if (General.minimizeToTray)
+            if (Properties.Settings.Default.minimizeToTray)
                 nfTray.Visible = true;
             else
                 nfTray.Visible = false;
 
-            scnTimer.Interval = General.timer;
+            scnTimer.Interval = Properties.Settings.Default.timer;
         }
 
         private void frmMain_FormClosing(object sender, FormClosingEventArgs e)
         {
             DialogResult result = DialogResult.OK;
-            if (General.warnOnClose && ListThreads.Count > 0)
+            if (Properties.Settings.Default.warnOnClose && ListThreads.Count > 0)
             {
                 CloseWarn clw = new CloseWarn();
                 result = clw.ShowDialog();
@@ -299,8 +300,8 @@ namespace YChan
                 nfTray.Visible = false;
                 scnTimer.Enabled = false;
 
-                if (General.saveOnClose)
-                    General.writeURLs(ListBoards, ListThreads);
+                if (Properties.Settings.Default.saveOnClose)
+                    General.WriteURLs(ListBoards, ListThreads);
             }
         }
 
@@ -354,7 +355,7 @@ namespace YChan
 
         private void cmTrayOpen_Click(object sender, EventArgs e)
         {
-            string spath = General.path;
+            string spath = Properties.Settings.Default.path;
             if (!Directory.Exists(spath))
                 Directory.CreateDirectory(spath);
             Process.Start(spath);
@@ -385,8 +386,8 @@ namespace YChan
                         ListThreads.Remove(imB);
                         updateDataSource(typeURL.thread);
 
-                        if (General.saveOnClose)
-                            General.writeURLs(ListBoards, ListThreads);
+                        if (Properties.Settings.Default.saveOnClose)
+                            General.WriteURLs(ListBoards, ListThreads);
                     }
                 }
             }
@@ -408,7 +409,7 @@ namespace YChan
                     {
                         foreach (string thread in Threads)
                         {
-                            Imageboard newImageboard = General.createNewIMB(thread, false);
+                            Imageboard newImageboard = General.CreateNewImageboard(thread, false);
                             if (newImageboard != null && isUnique(newImageboard.getURL(), ListThreads))
                             {
                                 lock (threadLock)
@@ -434,7 +435,7 @@ namespace YChan
 
         private void frmMain_SizeChanged(object sender, EventArgs e)
         {
-            if (General.minimizeToTray && this.WindowState == FormWindowState.Minimized)
+            if (Properties.Settings.Default.minimizeToTray && this.WindowState == FormWindowState.Minimized)
             {
                 // when minimized hide from taskbar if trayicon enabled
                 this.Hide();
@@ -448,7 +449,7 @@ namespace YChan
 
         private void openFolderToolStripMenuItem1_Click(object sender, EventArgs e)
         {
-            Process.Start(General.path);
+            Process.Start(Properties.Settings.Default.path);
         }
 
         private void edtURL_MouseDown(object sender, MouseEventArgs e)
@@ -504,8 +505,8 @@ namespace YChan
                     updateDataSource(typeURL.thread);
                 }
 
-                if (General.saveOnClose)
-                    General.writeURLs(ListBoards, ListThreads);
+                if (Properties.Settings.Default.saveOnClose)
+                    General.WriteURLs(ListBoards, ListThreads);
             }
         }
 

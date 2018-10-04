@@ -33,10 +33,11 @@ namespace YChan
         /// <param name="e">event</param>
         public static void Application_ThreadException(object sender, System.Threading.ThreadExceptionEventArgs e)
         {
-            General.setSettings(General.path, General.timer, General.loadHTML, true, General.minimizeToTray, General.warnOnClose);
+            Properties.Settings.Default.saveOnClose = true;
+            Properties.Settings.Default.Save();
             try
             {
-                General.writeURLs(MainFrame.ListBoards, MainFrame.ListThreads);
+                General.WriteURLs(MainFrame.ListBoards, MainFrame.ListThreads);
             }
             catch (Exception eX)
             {
@@ -51,10 +52,11 @@ namespace YChan
         /// <param name="e">event</param>
         public static void AppDomain_UnhandledException(object sender, System.UnhandledExceptionEventArgs e)
         {
-            General.setSettings(General.path, General.timer, General.loadHTML, true, General.minimizeToTray, General.warnOnClose);
+            Properties.Settings.Default.saveOnClose = true;
+            Properties.Settings.Default.Save();
             try
             {
-                General.writeURLs(MainFrame.ListBoards, MainFrame.ListThreads);
+                General.WriteURLs(MainFrame.ListBoards, MainFrame.ListThreads);
             }
             catch (Exception eX)
             {
