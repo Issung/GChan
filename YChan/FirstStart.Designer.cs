@@ -52,7 +52,7 @@
             this.rtWelcome.Name = "rtWelcome";
             this.rtWelcome.Size = new System.Drawing.Size(216, 230);
             this.rtWelcome.TabIndex = 3;
-            this.rtWelcome.Text = "Welcome to YChan 2.6 (Fork)! \n\nSince the original has been marked as abandoned on" +
+            this.rtWelcome.Text = "Welcome to YChan! \n\nSince the original has been marked as abandoned on" +
     " SourceForge, I decided to fork it and fix a bug that was annoying me.\n\nThat is " +
     "all, have fun.";
             this.rtWelcome.LinkClicked += new System.Windows.Forms.LinkClickedEventHandler(this.rtWelcome_LinkClicked);
@@ -67,7 +67,7 @@
             this.Controls.Add(this.btnAClose);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "FirstStart";
-            this.Text = " ";
+            this.Text = "Welcome to Ychan";
             this.ResumeLayout(false);
 
         }

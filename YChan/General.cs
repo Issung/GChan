@@ -18,6 +18,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Text;
 using System.Windows.Forms;
 using System.Xml;
 
@@ -55,16 +56,17 @@ namespace YChan
         /// <param name="Threads">List of threads</param>
         public static void writeURLs(List<Imageboard> Boards, List<Imageboard> Threads)
         {
-            string Buffer = "";
-            for (int i = 0; i < Boards.Count; i++)
-                Buffer = Buffer + Boards[i].getURL() + "\n";
-            File.WriteAllText(Application.CommonAppDataPath + "\\boards.dat", Buffer);
+            StringBuilder sb = new StringBuilder();
 
-            Buffer = "";
+            for (int i = 0; i < Boards.Count; i++)
+                sb.AppendLine(Boards[i].getURL());
+            File.WriteAllText(Application.CommonAppDataPath + "\\boards.dat", sb.ToString());
+
+            sb = new StringBuilder();
 
             for (int i = 0; i < Threads.Count; i++)
-                Buffer = Buffer + Threads[i].getURL() + "\n";
-            File.WriteAllText(Application.CommonAppDataPath + "\\threads.dat", Buffer);
+                sb.AppendLine(Threads[i].getURL());
+            File.WriteAllText(Application.CommonAppDataPath + "\\threads.dat", sb.ToString());
         }
 
         /// <summary>

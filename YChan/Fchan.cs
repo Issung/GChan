@@ -159,7 +159,7 @@ namespace YChan
             }
             catch (WebException webEx)
             {
-                if (((int)webEx.Status) == 7)
+                if (webEx.Status == WebExceptionStatus.ProtocolError)
                     this.Gone = true;
             }
             catch (UnauthorizedAccessException ex)

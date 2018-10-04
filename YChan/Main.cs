@@ -96,8 +96,8 @@ namespace YChan
                 lbBoards.DataSource = ListBoards;
                 lbThreads.DataSource = ListThreads;
 
-                scnTimer.Enabled = true;                                       // activate the timer
-                scan(null, null);                                              // and start scanning
+                scnTimer.Enabled = true;                                        // activate the timer
+                scan(this, new EventArgs());                                    // and start scanning
             }
         }
 
@@ -144,7 +144,7 @@ namespace YChan
             if (General.saveOnClose)
                 General.writeURLs(ListBoards, ListThreads);
 
-            scan(null, null);
+            scan(this, new EventArgs());
         }
 
         private void btnAdd_Click(object sender, EventArgs e)
@@ -295,7 +295,7 @@ namespace YChan
 
             if (result == DialogResult.OK)
             {
-                this.Hide();
+                //this.Hide();
                 nfTray.Visible = false;
                 scnTimer.Enabled = false;
 
@@ -366,7 +366,8 @@ namespace YChan
             {
                 Scanner = new Thread(new ThreadStart(ScanThread))
                 {
-                    Name = "Scan Thread"
+                    Name = "Scan Thread",
+                    IsBackground = true
                 };
                 Scanner.Start();
             }
