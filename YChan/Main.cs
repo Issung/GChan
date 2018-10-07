@@ -444,7 +444,7 @@ namespace YChan
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            frmMain_FormClosing(sender, new FormClosingEventArgs(CloseReason.UserClosing, false));
+            this.Close();
         }
 
         private void openFolderToolStripMenuItem1_Click(object sender, EventArgs e)
