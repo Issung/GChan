@@ -34,12 +34,14 @@ namespace YChan
 
         private void chkSave_CheckedChanged(object sender, EventArgs e)
         {
+            Properties.Settings.Default.saveOnClose = this.chkSave.Checked;
             Properties.Settings.Default.Save();
         }
 
         private void CloseWarn_Load(object sender, EventArgs e)
         {
             this.chkSave.Checked = Properties.Settings.Default.saveOnClose;
+            this.chkWarning.Checked = !Properties.Settings.Default.warnOnClose;
         }
     }
 }
