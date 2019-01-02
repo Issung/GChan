@@ -117,7 +117,7 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="textBoxDescription.Text" xml:space="preserve">
+  <data name="richTextBoxDescription.Text" xml:space="preserve">
     <value>Original Project https://sourceforge.net/p/ychan/
 Created by mirage (mirage@secure-mail.biz)
 Icon by karan000 (creator of XChan)
@@ -125,6 +125,7 @@ Context Menu Icons by Oxygen Team
 
 Updated by Ricardo1991 and FugiMuffi at
 https://github.com/Ricardo1991/YChan
-https://github.com/FugiMuffi/YChan</value>
+https://github.com/FugiMuffi/YChan
+</value>
   </data>
 </root>

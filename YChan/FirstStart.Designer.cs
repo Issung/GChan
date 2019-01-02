@@ -32,9 +32,9 @@
             // 
             this.btnAClose.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnAClose.Location = new System.Drawing.Point(90, 248);
+            this.btnAClose.Location = new System.Drawing.Point(90, 168);
             this.btnAClose.Name = "btnAClose";
-            this.btnAClose.Size = new System.Drawing.Size(60, 23);
+            this.btnAClose.Size = new System.Drawing.Size(179, 23);
             this.btnAClose.TabIndex = 2;
             this.btnAClose.Text = "Open Settings";
             this.btnAClose.UseVisualStyleBackColor = true;
@@ -50,11 +50,9 @@
             this.rtWelcome.Cursor = System.Windows.Forms.Cursors.Default;
             this.rtWelcome.Location = new System.Drawing.Point(12, 12);
             this.rtWelcome.Name = "rtWelcome";
-            this.rtWelcome.Size = new System.Drawing.Size(216, 230);
+            this.rtWelcome.Size = new System.Drawing.Size(335, 150);
             this.rtWelcome.TabIndex = 3;
-            this.rtWelcome.Text = "Welcome to YChan! \n\nSince the original has been marked as abandoned on" +
-    " SourceForge, I decided to fork it and fix a bug that was annoying me.\n\nThat is " +
-    "all, have fun.";
+            this.rtWelcome.Text = resources.GetString("rtWelcome.Text");
             this.rtWelcome.LinkClicked += new System.Windows.Forms.LinkClickedEventHandler(this.rtWelcome_LinkClicked);
             // 
             // FirstStart
@@ -62,10 +60,11 @@
             this.AcceptButton = this.btnAClose;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(240, 277);
+            this.ClientSize = new System.Drawing.Size(359, 197);
             this.Controls.Add(this.rtWelcome);
             this.Controls.Add(this.btnAClose);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.MinimumSize = new System.Drawing.Size(375, 236);
             this.Name = "FirstStart";
             this.Text = "Welcome to Ychan";
             this.ResumeLayout(false);

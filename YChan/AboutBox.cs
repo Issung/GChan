@@ -96,5 +96,10 @@ namespace YChan
         }
 
         #endregion Assembly Attribute Accessors
+
+        private void richTextBoxDescription_LinkClicked(object sender, LinkClickedEventArgs e)
+        {
+            System.Diagnostics.Process.Start(e.LinkText);
+        }
     }
 }
