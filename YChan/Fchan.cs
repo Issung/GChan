@@ -32,8 +32,8 @@ namespace YChan
 {
     internal class Fchan : Imageboard
     {
-        public static string regThread = "boards.4chan.org/[a-zA-Z0-9]*?/thread/[0-9]*";
-        public static string regBoard = "boards.4chan.org/[a-zA-Z0-9]*?/$";
+        public static string regThread = "boards.(4chan|4channel).org/[a-zA-Z0-9]*?/thread/[0-9]*";
+        public static string regBoard = "boards.(4chan|4channel).org/[a-zA-Z0-9]*?/$";
 
         public Fchan(string url, bool isBoard) : base(url, isBoard)
         {
@@ -41,7 +41,7 @@ namespace YChan
             this.imName = "4chan";
             if (!isBoard)
             {
-                Match match = Regex.Match(url, @"boards.4chan.org/[a-zA-Z0-9]*?/thread/\d*");
+                Match match = Regex.Match(url, @"boards.(4chan|4channel).org/[a-zA-Z0-9]*?/thread/\d*");
                 this.URL = "http://" + match.Groups[0].Value;
                 this.SaveTo = Properties.Settings.Default.path + "\\" + this.imName + "\\" + getURL().Split('/')[3] + "\\" + getURL().Split('/')[5];
             }
