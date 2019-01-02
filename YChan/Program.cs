@@ -70,6 +70,14 @@ namespace YChan
         [STAThread]
         private static void Main(string[] args)
         {
+
+            if (Properties.Settings.Default.UpdateSettings)
+            {
+                Properties.Settings.Default.Upgrade();
+                Properties.Settings.Default.UpdateSettings = false;
+                Properties.Settings.Default.Save();
+            }
+
             // See if an instance is already running...
             // Code from https://stackoverflow.com/a/1777704 by Matt Davis (https://stackoverflow.com/users/51170/matt-davis)
             if (_single.WaitOne(TimeSpan.Zero, true))
