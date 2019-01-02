@@ -123,7 +123,13 @@
 - add proxy support
 - add option to filter by extension
 - add option to filter by regex
-- rewrite xmlconfig stuff
+
+&gt; YChan 2.7
+    - Fix UI bugs
+    - Add 4channel.org
+    - Add doubleclick to open folder
+    - Press delete key to remove entry from list
+    - Other changes and fixes
 
 &gt; YChan 2.6
     - add drag and drop support for TextBox
