@@ -33,11 +33,11 @@ namespace YChan
     internal class Fchan : Imageboard
     {
         public static string regThread = "boards.(4chan|4channel).org/[a-zA-Z0-9]*?/thread/[0-9]*";
-        public static string regBoard = "boards.(4chan|4channel).org/[a-zA-Z0-9]*?/$";
+        public static string regBoard = "boards.(4chan|4channel).org/[a-zA-Z0-9]*?/*$";
 
         public Fchan(string url, bool isBoard) : base(url, isBoard)
         {
-            this.Board = isBoard;
+            this.board = isBoard;
             this.imName = "4chan";
             if (!isBoard)
             {
@@ -52,13 +52,13 @@ namespace YChan
             }
         }
 
-        public new static bool isThread(string url)
+        public new static bool urlIsThread(string url)
         {
             Regex urlMatcher = new Regex(regThread);
             return (urlMatcher.IsMatch(url));
         }
 
-        public new static bool isBoard(string url)
+        public new static bool urlIsBoard(string url)
         {
             Regex urlMatcher = new Regex(regBoard);
             return (urlMatcher.IsMatch(url));
