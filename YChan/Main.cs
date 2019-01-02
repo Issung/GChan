@@ -487,7 +487,8 @@ namespace YChan
             string type = "threads";
             if (board) type = "boards";
 
-            DialogResult dialogResult = MessageBox.Show("Are you sure?", "Clear all " + type, MessageBoxButtons.YesNo);    // confirmation prompt
+            DialogResult dialogResult = MessageBox.Show("Are you sure you want to clear all " + type + "?", "Clear all " + type,
+                MessageBoxButtons.YesNo,MessageBoxIcon.Warning,MessageBoxDefaultButton.Button2);    // confirmation prompt
             if (dialogResult == DialogResult.Yes)
             {
                 if (board)
