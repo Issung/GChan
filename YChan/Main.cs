@@ -452,15 +452,6 @@ namespace YChan
             Process.Start(Properties.Settings.Default.path);
         }
 
-        private void edtURL_MouseDown(object sender, MouseEventArgs e)
-        {
-            // Start the drag if it's the right mouse button.
-            if (e.Button == MouseButtons.Right)
-            {
-                edtURL.DoDragDrop("Here's some text!", DragDropEffects.Copy);
-            }
-        }
-
         private void edtURL_DragEnter(object sender, DragEventArgs e)
         {
             // See if this is a copy and the data includes text.
