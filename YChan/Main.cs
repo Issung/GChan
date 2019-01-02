@@ -108,7 +108,7 @@ namespace YChan
 
             if (newImageboard != null)
             {
-                if (isUnique(newImageboard.getURL(), ListThreads))
+                if (isUnique(newImageboard.getURL(), board?ListBoards:ListThreads))
                 {
                     if (board)
                     {
