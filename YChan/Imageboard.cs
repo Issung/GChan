@@ -32,14 +32,14 @@ namespace YChan
         protected string URL;                            // Thread/Board URL
         protected string SaveTo;                         // Path to save to
         protected string imName;                         // Name of the IB
-        protected bool Board;                            // Flag to distinguish Boards and Threads of an IB
+        protected bool board;                            // Flag to distinguish Boards and Threads of an IB
         protected bool Gone = false;                     // Flag for 404
 
         // Constructor, setting URL and Type (Board/Thread)
         public Imageboard(string url, bool isBoard)
         {
             this.URL = url;
-            this.Board = isBoard;
+            this.board = isBoard;
         }
 
         public bool isGone()
@@ -62,14 +62,19 @@ namespace YChan
             return this.SaveTo;
         }
 
-        static public bool isThread(string url)
+        static public bool urlIsThread(string url)
         {
             return false;
         }
 
-        static public bool isBoard(string url)
+        static public bool urlIsBoard(string url)
         {
             return false;
+        }
+
+        public bool isBoard()
+        {
+            return board;
         }
 
         public abstract void download();

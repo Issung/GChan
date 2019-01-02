@@ -98,25 +98,22 @@ namespace YChan
         }
 
         // Create a new Imageboard
-        public static Imageboard CreateNewImageboard(string url, bool board)
+        public static Imageboard CreateNewImageboard(string url)
         {
             // if FChan, create FChan
             // if 8chan, create 8chan
 
-            if (!board)
-            {
-                if (Fchan.isThread(url))
-                    return new Fchan(url, board);
-                else if (Infinitechan.isThread(url))
-                    return new Infinitechan(url, board);
-            }
-            else
-            {
-                if (Fchan.isBoard(url))
-                    return new Fchan(url, board);
-                else if (Infinitechan.isBoard(url))
-                    return new Infinitechan(url, board);
-            }
+
+            if (Fchan.urlIsThread(url))
+                return new Fchan(url, false);
+            else if (Infinitechan.urlIsThread(url))
+                return new Infinitechan(url, false);
+
+            if (Fchan.urlIsBoard(url))
+                return new Fchan(url, true);
+            else if (Infinitechan.urlIsBoard(url))
+                return new Infinitechan(url, true);
+            
             return null;
         }
 

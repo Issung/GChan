@@ -35,7 +35,7 @@ namespace YChan
 
         public Infinitechan(string url, bool isBoard) : base(url, isBoard)
         {
-            this.Board = isBoard;
+            this.board = isBoard;
             this.imName = "8ch";
             if (!isBoard)
             {
@@ -50,7 +50,7 @@ namespace YChan
             }
         }
 
-        public new static bool isThread(string url)
+        public new static bool urlIsThread(string url)
         {
             Regex urlMatcher = new Regex(regThread);
             if (urlMatcher.IsMatch(url))
@@ -59,7 +59,7 @@ namespace YChan
                 return false;
         }
 
-        public new static bool isBoard(string url)
+        public new static bool urlIsBoard(string url)
         {
             Regex urlMatcher = new Regex(regBoard);
             if (urlMatcher.IsMatch(url))

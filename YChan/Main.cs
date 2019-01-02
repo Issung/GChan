@@ -75,8 +75,8 @@ namespace YChan
                         string[] URLs = boards.Split('\n');
                         for (int i = 0; i < URLs.Length - 1; i++)
                         {
-                            Imageboard newImageboard = General.CreateNewImageboard(URLs[i], true); // and add them
-                            ListBoards.Add(newImageboard);
+                            Imageboard newImageboard = General.CreateNewImageboard(URLs[i]); // and add them
+                            AddURLToList(newImageboard);
                         }
                     }
                 }
@@ -88,8 +88,8 @@ namespace YChan
                         string[] URLs = threads.Split('\n');
                         for (int i = 0; i < URLs.Length - 1; i++)
                         {
-                            Imageboard newImageboard = General.CreateNewImageboard(URLs[i], false);
-                            ListThreads.Add(newImageboard);
+                            Imageboard newImageboard = General.CreateNewImageboard(URLs[i]);
+                            AddURLToList(newImageboard);
                         }
                     }
                 }
@@ -102,30 +102,40 @@ namespace YChan
             }
         }
 
-        private void AddUrl(string url, bool board)
+        private bool AddURLToList(Imageboard imageboard)
         {
-            Imageboard newImageboard = General.CreateNewImageboard(url, board);
+            if (imageboard == null) return false;
+
+            if (imageboard.isBoard())
+            {
+                lock (boardLock)
+                {
+                    ListBoards.Add(imageboard);
+                    updateDataSource(typeURL.board);
+                }
+            }
+            else
+            {
+                lock (threadLock)
+                {
+                    ListThreads.Add(imageboard);
+                    updateDataSource(typeURL.thread);
+                }
+            }
+              
+            return true;
+        }
+
+        private void AddUrl(string url)
+        {
+            Imageboard newImageboard = General.CreateNewImageboard(url);
 
             if (newImageboard != null)
             {
-                if (isUnique(newImageboard.getURL(), board?ListBoards:ListThreads))
+                if (isUnique(newImageboard.getURL(), newImageboard.isBoard()? ListBoards:ListThreads))
                 {
-                    if (board)
-                    {
-                        lock (boardLock)
-                        {
-                            ListBoards.Add(newImageboard);
-                            updateDataSource(typeURL.board);
-                        }
-                    }
-                    else
-                    {
-                        lock (threadLock)
-                        {
-                            ListThreads.Add(newImageboard);
-                            updateDataSource(typeURL.thread);
-                        }
-                    }
+
+                    AddURLToList(newImageboard);
                 }
                 else
                 {
@@ -150,10 +160,9 @@ namespace YChan
 
         private void btnAdd_Click(object sender, EventArgs e)
         {
-            bool board = (tcApp.SelectedIndex == 1);                             // Board Tab is open -> board=true; Thread tab -> board=false
             string url = edtURL.Text.Trim();                                     // get url from TextBox
 
-            AddUrl(url, board);
+            AddUrl(url);
 
             edtURL.Text = "";                                                    // clear TextBox
         }
@@ -409,14 +418,10 @@ namespace YChan
                     {
                         foreach (string thread in Threads)
                         {
-                            Imageboard newImageboard = General.CreateNewImageboard(thread, false);
+                            Imageboard newImageboard = General.CreateNewImageboard(thread);
                             if (newImageboard != null && isUnique(newImageboard.getURL(), ListThreads))
                             {
-                                lock (threadLock)
-                                {
-                                    ListThreads.Add(newImageboard);
-                                    updateDataSource(typeURL.thread);
-                                }
+                                AddURLToList(newImageboard);
                             }
                         }
                     }
@@ -470,13 +475,13 @@ namespace YChan
 
         private void edtURL_DragDrop(object sender, DragEventArgs e)
         {
-            bool board = (tcApp.SelectedIndex == 1);                             // Board Tab is open -> board=true; Thread tab -> board=false
             string url = (string)e.Data.GetData(DataFormats.Text);               // get url from drag and drop
-            AddUrl(url, board);
+            AddUrl(url);
         }
 
         private void btnClearAll_Click(object sender, EventArgs e)
         {
+            if (tcApp.SelectedIndex > 1) return;
             bool board = (tcApp.SelectedIndex == 1);                             // Board Tab is open -> board=true; Thread tab -> board=false
 
             string type = "threads";
