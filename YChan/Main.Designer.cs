@@ -28,7 +28,9 @@
             this.msHead = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.settingsToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.openFolderToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.changelogToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
@@ -40,20 +42,18 @@
             this.btnAdd = new System.Windows.Forms.Button();
             this.edtURL = new System.Windows.Forms.TextBox();
             this.cmThreads = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.cmBoards = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.nfTray = new System.Windows.Forms.NotifyIcon(this.components);
-            this.cmTray = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.btnClearAll = new System.Windows.Forms.Button();
-            this.openFolderToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-            this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openInBrowserToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.deleteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.cmBoards = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem3 = new System.Windows.Forms.ToolStripMenuItem();
+            this.nfTray = new System.Windows.Forms.NotifyIcon(this.components);
+            this.cmTray = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.cmTrayOpen = new System.Windows.Forms.ToolStripMenuItem();
             this.cmTrayExit = new System.Windows.Forms.ToolStripMenuItem();
+            this.btnClearAll = new System.Windows.Forms.Button();
             this.msHead.SuspendLayout();
             this.tcApp.SuspendLayout();
             this.tpThreads.SuspendLayout();
@@ -88,14 +88,31 @@
             // settingsToolStripMenuItem1
             // 
             this.settingsToolStripMenuItem1.Name = "settingsToolStripMenuItem1";
-            this.settingsToolStripMenuItem1.Size = new System.Drawing.Size(180, 22);
+            this.settingsToolStripMenuItem1.Size = new System.Drawing.Size(139, 22);
             this.settingsToolStripMenuItem1.Text = "&Settings";
             this.settingsToolStripMenuItem1.Click += new System.EventHandler(this.settingsToolStripMenuItem_Click);
+            // 
+            // openFolderToolStripMenuItem1
+            // 
+            this.openFolderToolStripMenuItem1.Image = global::YChan.Properties.Resources.OpenFolder;
+            this.openFolderToolStripMenuItem1.Name = "openFolderToolStripMenuItem1";
+            this.openFolderToolStripMenuItem1.Size = new System.Drawing.Size(139, 22);
+            this.openFolderToolStripMenuItem1.Text = "&Open Folder";
+            this.openFolderToolStripMenuItem1.Click += new System.EventHandler(this.openFolderToolStripMenuItem1_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(177, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(136, 6);
+            // 
+            // exitToolStripMenuItem
+            // 
+            this.exitToolStripMenuItem.Image = global::YChan.Properties.Resources.CloseIcon;
+            this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
+            this.exitToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Q)));
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
+            this.exitToolStripMenuItem.Text = "&Exit";
+            this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
             // helpToolStripMenuItem
             // 
@@ -203,7 +220,6 @@
             this.edtURL.TabIndex = 3;
             this.edtURL.DragDrop += new System.Windows.Forms.DragEventHandler(this.edtURL_DragDrop);
             this.edtURL.DragEnter += new System.Windows.Forms.DragEventHandler(this.edtURL_DragEnter);
-            this.edtURL.MouseDown += new System.Windows.Forms.MouseEventHandler(this.edtURL_MouseDown);
             // 
             // cmThreads
             // 
@@ -213,59 +229,6 @@
             this.deleteToolStripMenuItem});
             this.cmThreads.Name = "cmThreads";
             this.cmThreads.Size = new System.Drawing.Size(162, 70);
-            // 
-            // cmBoards
-            // 
-            this.cmBoards.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripMenuItem1,
-            this.toolStripMenuItem2,
-            this.toolStripMenuItem3});
-            this.cmBoards.Name = "cmThreads";
-            this.cmBoards.Size = new System.Drawing.Size(162, 70);
-            // 
-            // nfTray
-            // 
-            this.nfTray.ContextMenuStrip = this.cmTray;
-            this.nfTray.Icon = ((System.Drawing.Icon)(resources.GetObject("nfTray.Icon")));
-            this.nfTray.Text = "Doubleclick to open/hide";
-            this.nfTray.Visible = true;
-            this.nfTray.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.nfTray_MouseDoubleClick);
-            // 
-            // cmTray
-            // 
-            this.cmTray.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.cmTrayOpen,
-            this.cmTrayExit});
-            this.cmTray.Name = "cmTray";
-            this.cmTray.Size = new System.Drawing.Size(181, 70);
-            // 
-            // btnClearAll
-            // 
-            this.btnClearAll.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnClearAll.Location = new System.Drawing.Point(495, 28);
-            this.btnClearAll.Name = "btnClearAll";
-            this.btnClearAll.Size = new System.Drawing.Size(75, 23);
-            this.btnClearAll.TabIndex = 4;
-            this.btnClearAll.Text = "Clear";
-            this.btnClearAll.UseVisualStyleBackColor = true;
-            this.btnClearAll.Click += new System.EventHandler(this.btnClearAll_Click);
-            // 
-            // openFolderToolStripMenuItem1
-            // 
-            this.openFolderToolStripMenuItem1.Image = global::YChan.Properties.Resources.OpenFolder;
-            this.openFolderToolStripMenuItem1.Name = "openFolderToolStripMenuItem1";
-            this.openFolderToolStripMenuItem1.Size = new System.Drawing.Size(180, 22);
-            this.openFolderToolStripMenuItem1.Text = "&Open Folder";
-            this.openFolderToolStripMenuItem1.Click += new System.EventHandler(this.openFolderToolStripMenuItem1_Click);
-            // 
-            // exitToolStripMenuItem
-            // 
-            this.exitToolStripMenuItem.Image = global::YChan.Properties.Resources.CloseIcon;
-            this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Q)));
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.exitToolStripMenuItem.Text = "&Exit";
-            this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
             // openFolderToolStripMenuItem
             // 
@@ -291,6 +254,15 @@
             this.deleteToolStripMenuItem.Text = "Remove";
             this.deleteToolStripMenuItem.Click += new System.EventHandler(this.deleteToolStripMenuItem_Click);
             // 
+            // cmBoards
+            // 
+            this.cmBoards.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripMenuItem1,
+            this.toolStripMenuItem2,
+            this.toolStripMenuItem3});
+            this.cmBoards.Name = "cmThreads";
+            this.cmBoards.Size = new System.Drawing.Size(162, 70);
+            // 
             // toolStripMenuItem1
             // 
             this.toolStripMenuItem1.Image = global::YChan.Properties.Resources.OpenFolder;
@@ -315,11 +287,27 @@
             this.toolStripMenuItem3.Text = "Remove";
             this.toolStripMenuItem3.Click += new System.EventHandler(this.toolStripMenuItem3_Click);
             // 
+            // nfTray
+            // 
+            this.nfTray.ContextMenuStrip = this.cmTray;
+            this.nfTray.Icon = ((System.Drawing.Icon)(resources.GetObject("nfTray.Icon")));
+            this.nfTray.Text = "Doubleclick to open/hide";
+            this.nfTray.Visible = true;
+            this.nfTray.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.nfTray_MouseDoubleClick);
+            // 
+            // cmTray
+            // 
+            this.cmTray.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.cmTrayOpen,
+            this.cmTrayExit});
+            this.cmTray.Name = "cmTray";
+            this.cmTray.Size = new System.Drawing.Size(140, 48);
+            // 
             // cmTrayOpen
             // 
             this.cmTrayOpen.Image = global::YChan.Properties.Resources.OpenFolder;
             this.cmTrayOpen.Name = "cmTrayOpen";
-            this.cmTrayOpen.Size = new System.Drawing.Size(180, 22);
+            this.cmTrayOpen.Size = new System.Drawing.Size(139, 22);
             this.cmTrayOpen.Text = "Open Folder";
             this.cmTrayOpen.Click += new System.EventHandler(this.cmTrayOpen_Click);
             // 
@@ -327,9 +315,20 @@
             // 
             this.cmTrayExit.Image = global::YChan.Properties.Resources.CloseIcon;
             this.cmTrayExit.Name = "cmTrayExit";
-            this.cmTrayExit.Size = new System.Drawing.Size(180, 22);
+            this.cmTrayExit.Size = new System.Drawing.Size(139, 22);
             this.cmTrayExit.Text = "Exit";
             this.cmTrayExit.Click += new System.EventHandler(this.cmTrayExit_Click);
+            // 
+            // btnClearAll
+            // 
+            this.btnClearAll.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnClearAll.Location = new System.Drawing.Point(495, 28);
+            this.btnClearAll.Name = "btnClearAll";
+            this.btnClearAll.Size = new System.Drawing.Size(75, 23);
+            this.btnClearAll.TabIndex = 4;
+            this.btnClearAll.Text = "Clear";
+            this.btnClearAll.UseVisualStyleBackColor = true;
+            this.btnClearAll.Click += new System.EventHandler(this.btnClearAll_Click);
             // 
             // frmMain
             // 
