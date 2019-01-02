@@ -122,7 +122,7 @@ namespace YChan
                     updateDataSource(typeURL.thread);
                 }
             }
-              
+
             return true;
         }
 
@@ -132,9 +132,8 @@ namespace YChan
 
             if (newImageboard != null)
             {
-                if (isUnique(newImageboard.getURL(), newImageboard.isBoard()? ListBoards:ListThreads))
+                if (isUnique(newImageboard.getURL(), newImageboard.isBoard() ? ListBoards : ListThreads))
                 {
-
                     AddURLToList(newImageboard);
                 }
                 else
@@ -314,7 +313,7 @@ namespace YChan
             }
         }
 
-        private void toolStripMenuItem1_Click(object sender, EventArgs e)
+        private void openBoardFolderToolTip_Click(object sender, EventArgs e)
         {
             if (bPos != -1)
             {
@@ -325,7 +324,7 @@ namespace YChan
             }
         }
 
-        private void toolStripMenuItem2_Click(object sender, EventArgs e)
+        private void openBoardURLToolTip_Click(object sender, EventArgs e)
         {
             if (bPos != -1)
             {
@@ -334,7 +333,7 @@ namespace YChan
             }
         }
 
-        private void toolStripMenuItem3_Click(object sender, EventArgs e)
+        private void deleteBoardToolTip_Click(object sender, EventArgs e)
         {
             if (bPos != -1)
             {
@@ -488,7 +487,7 @@ namespace YChan
             if (board) type = "boards";
 
             DialogResult dialogResult = MessageBox.Show("Are you sure you want to clear all " + type + "?", "Clear all " + type,
-                MessageBoxButtons.YesNo,MessageBoxIcon.Warning,MessageBoxDefaultButton.Button2);    // confirmation prompt
+                MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2);    // confirmation prompt
             if (dialogResult == DialogResult.Yes)
             {
                 if (board)
@@ -528,6 +527,70 @@ namespace YChan
             else
             {
                 base.WndProc(ref m);
+            }
+        }
+
+        private void lbThreads_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            int pos;
+            if (e.Button == MouseButtons.Left)
+            {
+                if ((pos = lbThreads.IndexFromPoint(e.Location)) != -1)
+                {
+                    string spath = ListThreads[pos].getPath();
+                    if (!Directory.Exists(spath))
+                        Directory.CreateDirectory(spath);
+                    Process.Start(spath);
+                }
+            }
+        }
+
+        private void lbBoards_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            int pos;
+            if (e.Button == MouseButtons.Left)
+            {
+                if ((pos = lbBoards.IndexFromPoint(e.Location)) != -1)
+                {
+                    string spath = ListBoards[pos].getPath();
+                    if (!Directory.Exists(spath))
+                        Directory.CreateDirectory(spath);
+                    Process.Start(spath);
+                }
+            }
+        }
+
+        private void lbBoards_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Delete)
+            {
+                int pos = lbBoards.SelectedIndex;
+
+                if (pos > -1)
+                {
+                    lock (boardLock)
+                    {
+                        ListBoards.RemoveAt(pos);
+                        updateDataSource(typeURL.board);
+                    }
+                }
+            }
+        }
+
+        private void lbThreads_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Delete)
+            {
+                int pos = lbThreads.SelectedIndex;
+
+                if (pos > -1)
+                {
+                    lock (threadLock)
+                    {
+                        ListThreads.RemoveAt(pos);
+                        updateDataSource(typeURL.thread);
+                    }
+                }
             }
         }
     }

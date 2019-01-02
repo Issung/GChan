@@ -172,6 +172,8 @@
             this.lbThreads.Name = "lbThreads";
             this.lbThreads.Size = new System.Drawing.Size(547, 247);
             this.lbThreads.TabIndex = 0;
+            this.lbThreads.KeyUp += new System.Windows.Forms.KeyEventHandler(this.lbThreads_KeyUp);
+            this.lbThreads.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.lbThreads_MouseDoubleClick);
             this.lbThreads.MouseDown += new System.Windows.Forms.MouseEventHandler(this.lbThreads_MouseDown);
             // 
             // tpBoard
@@ -196,6 +198,8 @@
             this.lbBoards.Name = "lbBoards";
             this.lbBoards.Size = new System.Drawing.Size(547, 260);
             this.lbBoards.TabIndex = 1;
+            this.lbBoards.KeyUp += new System.Windows.Forms.KeyEventHandler(this.lbBoards_KeyUp);
+            this.lbBoards.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.lbBoards_MouseDoubleClick);
             this.lbBoards.MouseDown += new System.Windows.Forms.MouseEventHandler(this.lbBoards_MouseDown);
             // 
             // btnAdd
@@ -269,7 +273,7 @@
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
             this.toolStripMenuItem1.Size = new System.Drawing.Size(161, 22);
             this.toolStripMenuItem1.Text = "Open Folder";
-            this.toolStripMenuItem1.Click += new System.EventHandler(this.toolStripMenuItem1_Click);
+            this.toolStripMenuItem1.Click += new System.EventHandler(this.openBoardFolderToolTip_Click);
             // 
             // toolStripMenuItem2
             // 
@@ -277,7 +281,7 @@
             this.toolStripMenuItem2.Name = "toolStripMenuItem2";
             this.toolStripMenuItem2.Size = new System.Drawing.Size(161, 22);
             this.toolStripMenuItem2.Text = "Open in Browser";
-            this.toolStripMenuItem2.Click += new System.EventHandler(this.toolStripMenuItem2_Click);
+            this.toolStripMenuItem2.Click += new System.EventHandler(this.openBoardURLToolTip_Click);
             // 
             // toolStripMenuItem3
             // 
@@ -285,7 +289,7 @@
             this.toolStripMenuItem3.Name = "toolStripMenuItem3";
             this.toolStripMenuItem3.Size = new System.Drawing.Size(161, 22);
             this.toolStripMenuItem3.Text = "Remove";
-            this.toolStripMenuItem3.Click += new System.EventHandler(this.toolStripMenuItem3_Click);
+            this.toolStripMenuItem3.Click += new System.EventHandler(this.deleteBoardToolTip_Click);
             // 
             // nfTray
             // 

@@ -103,7 +103,6 @@ namespace YChan
             // if FChan, create FChan
             // if 8chan, create 8chan
 
-
             if (Fchan.urlIsThread(url))
                 return new Fchan(url, false);
             else if (Infinitechan.urlIsThread(url))
@@ -113,7 +112,7 @@ namespace YChan
                 return new Fchan(url, true);
             else if (Infinitechan.urlIsBoard(url))
                 return new Infinitechan(url, true);
-            
+
             return null;
         }
 
