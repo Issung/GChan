@@ -304,8 +304,8 @@ namespace YChan
 
             if (result == DialogResult.OK)
             {
-                //this.Hide();
                 nfTray.Visible = false;
+                nfTray.Dispose();
                 scnTimer.Enabled = false;
 
                 if (Properties.Settings.Default.saveOnClose)
