@@ -30,20 +30,22 @@ namespace YChan
 
         private void btnSSave_Click(object sender, EventArgs e)
         {
-            if ((edtPath.Text != "") && (General.IsDigitsOnly(edtTimer.Text)))
+            if ((edtPath.Text != "") && General.IsDigitsOnly(edtTimer.Text))
             {
-                if (!hasWriteAccessToFolder(edtPath.Text))
+                string reason;
+                if (!hasWriteAccessToFolder(edtPath.Text, out reason))
                 {
-                    MessageBox.Show("No Permission to write to the selected folder", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show(reason, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
                 }
                 if (int.Parse(edtTimer.Text) < 5)
                 {
                     MessageBox.Show("Timer has to be higher than 5 seconds");
+                    return;
                 }
                 else
                 {
                     General.SaveSettings(edtPath.Text, int.Parse(edtTimer.Text) * 1000, chkHTML.Checked, chkSave.Checked, chkTray.Checked, chkWarn.Checked); // save settings
-
                     this.Close();
                 }
             }
@@ -62,14 +64,13 @@ namespace YChan
         {
             FolderBrowserDialog FolD = new FolderBrowserDialog();
             FolD.Description = "Select Folder";
-            FolD.SelectedPath = @"C:\";       // Vorgabe Pfad (und danach der gewählte Pfad)
+            FolD.SelectedPath = @"C:\";
             DialogResult dRes = FolD.ShowDialog(this);
+
             if (dRes == DialogResult.OK)
             {
                 edtPath.Text = FolD.SelectedPath;
             }
-            else
-                MessageBox.Show("Aborted");
         }
 
         private void Settings_Shown(object sender, EventArgs e)
@@ -83,17 +84,24 @@ namespace YChan
         }
 
         //Source: https://stackoverflow.com/questions/1410127/c-sharp-test-if-user-has-write-access-to-a-folder?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
-        private bool hasWriteAccessToFolder(string folderPath)
+        private bool hasWriteAccessToFolder(string folderPath, out string reason)
         {
             try
             {
                 // Attempt to get a list of security permissions from the folder.
                 // This will raise an exception if the path is read only or do not have access to view the permissions.
                 System.Security.AccessControl.DirectorySecurity ds = Directory.GetAccessControl(folderPath);
+                reason = "No problem";
                 return true;
             }
             catch (UnauthorizedAccessException)
             {
+                reason = "No permission to write on that location.";
+                return false;
+            }
+            catch (DirectoryNotFoundException)
+            {
+                reason = "Directory not found.";
                 return false;
             }
         }
