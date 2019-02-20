@@ -135,6 +135,13 @@ namespace YChan
                 if (isUnique(newImageboard.getURL(), newImageboard.isBoard() ? ListBoards : ListThreads))
                 {
                     AddURLToList(newImageboard);
+
+                    if (!scnTimer.Enabled)
+                        scnTimer.Enabled = true;
+                    if (Properties.Settings.Default.saveOnClose)
+                        General.WriteURLs(ListBoards, ListThreads);
+
+                    scan(this, new EventArgs());
                 }
                 else
                 {
@@ -152,15 +159,7 @@ namespace YChan
             {
                 MessageBox.Show("Corrupt URL, unsupported website or not a board/thread!");
                 edtURL.Text = "";
-                return;
             }
-
-            if (!scnTimer.Enabled)
-                scnTimer.Enabled = true;
-            if (Properties.Settings.Default.saveOnClose)
-                General.WriteURLs(ListBoards, ListThreads);
-
-            scan(this, new EventArgs());
         }
 
         private void btnAdd_Click(object sender, EventArgs e)

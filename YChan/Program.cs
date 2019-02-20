@@ -70,7 +70,6 @@ namespace YChan
         [STAThread]
         private static void Main(string[] args)
         {
-
             if (Properties.Settings.Default.UpdateSettings)
             {
                 Properties.Settings.Default.Upgrade();
