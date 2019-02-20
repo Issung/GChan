@@ -138,8 +138,14 @@ namespace YChan
                 }
                 else
                 {
-                    MessageBox.Show("URL is already in queue!");
-                    return;
+                    DialogResult result = MessageBox.Show("URL is already in queue!\nOpen corresponding folder?", "Error", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1);
+                    if (result == DialogResult.Yes)
+                    {
+                        string spath = newImageboard.getPath();
+                        if (!Directory.Exists(spath))
+                            Directory.CreateDirectory(spath);
+                        Process.Start(spath);
+                    }
                 }
             }
             else
