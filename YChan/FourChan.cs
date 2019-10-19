@@ -25,7 +25,6 @@ using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using System.Xml;
 using System.Xml.Linq;
-using HtmlAgilityPack;
 using Microsoft.CSharp.RuntimeBinder;
 using Newtonsoft.Json.Linq;
 

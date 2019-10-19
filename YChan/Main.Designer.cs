@@ -94,7 +94,7 @@
             // 
             // openFolderToolStripMenuItem1
             // 
-            this.openFolderToolStripMenuItem1.Image = global::GChan.Properties.Resources.OpenFolder;
+            this.openFolderToolStripMenuItem1.Image = global::Properties.Resources.OpenFolder;
             this.openFolderToolStripMenuItem1.Name = "openFolderToolStripMenuItem1";
             this.openFolderToolStripMenuItem1.Size = new System.Drawing.Size(139, 22);
             this.openFolderToolStripMenuItem1.Text = "&Open Folder";
@@ -107,7 +107,7 @@
             // 
             // exitToolStripMenuItem
             // 
-            this.exitToolStripMenuItem.Image = global::GChan.Properties.Resources.CloseIcon;
+            this.exitToolStripMenuItem.Image = global::Properties.Resources.CloseIcon;
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
             this.exitToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Q)));
             this.exitToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
@@ -236,7 +236,7 @@
             // 
             // openFolderToolStripMenuItem
             // 
-            this.openFolderToolStripMenuItem.Image = global::GChan.Properties.Resources.OpenFolder;
+            this.openFolderToolStripMenuItem.Image = global::Properties.Resources.OpenFolder;
             this.openFolderToolStripMenuItem.Name = "openFolderToolStripMenuItem";
             this.openFolderToolStripMenuItem.Size = new System.Drawing.Size(161, 22);
             this.openFolderToolStripMenuItem.Text = "Open Folder";
@@ -244,7 +244,7 @@
             // 
             // openInBrowserToolStripMenuItem
             // 
-            this.openInBrowserToolStripMenuItem.Image = global::GChan.Properties.Resources.OpenInBrowserToolStrip;
+            this.openInBrowserToolStripMenuItem.Image = global::Properties.Resources.OpenInBrowserToolStrip;
             this.openInBrowserToolStripMenuItem.Name = "openInBrowserToolStripMenuItem";
             this.openInBrowserToolStripMenuItem.Size = new System.Drawing.Size(161, 22);
             this.openInBrowserToolStripMenuItem.Text = "Open in Browser";
@@ -252,7 +252,7 @@
             // 
             // deleteToolStripMenuItem
             // 
-            this.deleteToolStripMenuItem.Image = global::GChan.Properties.Resources.DeleteToolStrip;
+            this.deleteToolStripMenuItem.Image = global::Properties.Resources.DeleteToolStrip;
             this.deleteToolStripMenuItem.Name = "deleteToolStripMenuItem";
             this.deleteToolStripMenuItem.Size = new System.Drawing.Size(161, 22);
             this.deleteToolStripMenuItem.Text = "Remove";
@@ -269,7 +269,7 @@
             // 
             // toolStripMenuItem1
             // 
-            this.toolStripMenuItem1.Image = global::GChan.Properties.Resources.OpenFolder;
+            this.toolStripMenuItem1.Image = global::Properties.Resources.OpenFolder;
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
             this.toolStripMenuItem1.Size = new System.Drawing.Size(161, 22);
             this.toolStripMenuItem1.Text = "Open Folder";
@@ -277,7 +277,7 @@
             // 
             // toolStripMenuItem2
             // 
-            this.toolStripMenuItem2.Image = global::GChan.Properties.Resources.OpenInBrowserToolStrip;
+            this.toolStripMenuItem2.Image = global::Properties.Resources.OpenInBrowserToolStrip;
             this.toolStripMenuItem2.Name = "toolStripMenuItem2";
             this.toolStripMenuItem2.Size = new System.Drawing.Size(161, 22);
             this.toolStripMenuItem2.Text = "Open in Browser";
@@ -285,7 +285,7 @@
             // 
             // toolStripMenuItem3
             // 
-            this.toolStripMenuItem3.Image = global::GChan.Properties.Resources.DeleteToolStrip;
+            this.toolStripMenuItem3.Image = global::Properties.Resources.DeleteToolStrip;
             this.toolStripMenuItem3.Name = "toolStripMenuItem3";
             this.toolStripMenuItem3.Size = new System.Drawing.Size(161, 22);
             this.toolStripMenuItem3.Text = "Remove";
@@ -309,7 +309,7 @@
             // 
             // cmTrayOpen
             // 
-            this.cmTrayOpen.Image = global::GChan.Properties.Resources.OpenFolder;
+            this.cmTrayOpen.Image = global::Properties.Resources.OpenFolder;
             this.cmTrayOpen.Name = "cmTrayOpen";
             this.cmTrayOpen.Size = new System.Drawing.Size(139, 22);
             this.cmTrayOpen.Text = "Open Folder";
@@ -317,7 +317,7 @@
             // 
             // cmTrayExit
             // 
-            this.cmTrayExit.Image = global::GChan.Properties.Resources.CloseIcon;
+            this.cmTrayExit.Image = global::Properties.Resources.CloseIcon;
             this.cmTrayExit.Name = "cmTrayExit";
             this.cmTrayExit.Size = new System.Drawing.Size(139, 22);
             this.cmTrayExit.Text = "Exit";
