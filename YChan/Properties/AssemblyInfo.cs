@@ -4,11 +4,11 @@ using System.Runtime.InteropServices;
 // Allgemeine Informationen über eine Assembly werden über die folgenden
 // Attribute gesteuert. Ändern Sie diese Attributwerte, um die Informationen zu ändern,
 // die mit einer Assembly verknüpft sind.
-[assembly: AssemblyTitle("YChan")]
-[assembly: AssemblyDescription("YChan - a 4chan and 8chan image downloader")]
+[assembly: AssemblyTitle("GChan")]
+[assembly: AssemblyDescription("GChan - a 4chan and 8chan image downloader")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("YChan")]
+[assembly: AssemblyProduct("GChan")]
 [assembly: AssemblyCopyright("Copyright ©themirage")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

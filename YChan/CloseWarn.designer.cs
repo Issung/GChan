@@ -43,7 +43,7 @@ namespace GChan
             this.lblText.Name = "lblText";
             this.lblText.Size = new System.Drawing.Size(327, 13);
             this.lblText.TabIndex = 0;
-            this.lblText.Text = "Are you sure you want to close YChan? There are still open threads!";
+            this.lblText.Text = "Are you sure you want to close GChan? There are still open threads!";
             // 
             // btnClose
             // 
@@ -85,7 +85,7 @@ namespace GChan
             this.chkSave.Name = "chkSave";
             this.chkSave.Size = new System.Drawing.Size(282, 17);
             this.chkSave.TabIndex = 4;
-            this.chkSave.Text = "Save threads and load them next time you start YChan";
+            this.chkSave.Text = "Save threads and load them next time you start GChan";
             this.chkSave.UseVisualStyleBackColor = true;
             this.chkSave.CheckedChanged += new System.EventHandler(this.chkSave_CheckedChanged);
             // 
@@ -103,7 +103,7 @@ namespace GChan
             this.Controls.Add(this.lblText);
             this.MaximumSize = new System.Drawing.Size(409, 163);
             this.Name = "CloseWarn";
-            this.Text = "Closing YChan";
+            this.Text = "Closing GChan";
             this.Load += new System.EventHandler(this.CloseWarn_Load);
             this.ResumeLayout(false);
             this.PerformLayout();

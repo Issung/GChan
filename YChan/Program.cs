@@ -118,7 +118,7 @@ namespace GChan
 
         private const int HWND_BROADCAST = 0xFFFF;
         public static readonly int WM_MY_MSG = NativeMethods.RegisterWindowMessage("WM_MY_MSG");
-        private static Mutex _single = new Mutex(true, "YChanRunning");
+        private static Mutex _single = new Mutex(true, "GChanRunning");
 
         private class NativeMethods
         {

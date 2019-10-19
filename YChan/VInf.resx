@@ -124,64 +124,64 @@
 - add option to filter by extension
 - add option to filter by regex
 
-&gt; YChan 2.7
+&gt; GChan 2.7
     - Fix UI bugs
     - Add 4channel.org
     - Add doubleclick to open folder
     - Press delete key to remove entry from list
     - Other changes and fixes
 
-&gt; YChan 2.6
+&gt; GChan 2.6
     - add drag and drop support for TextBox
     - add clear all button
 
-&gt; YChan 2.4
+&gt; GChan 2.4
     - fix 4chan html file creator
     - fix 8chan html file creator
     - UI improvements and fixes
 
-&gt; YChan 2.3
-    - warning when closing YChan
+&gt; GChan 2.3
+    - warning when closing GChan
     - support for boards with numbers (/s4s/, /3/, ...)
     - save urls on crash and load them when 
        restarting
 
-&gt; YChan 2.2
+&gt; GChan 2.2
     - fixed 8ch downloader
     - added option to save URLs on exit
     - added tray icon / minimize to tray
 
-&gt; YChan 2.1
+&gt; GChan 2.1
     - fixed some smaller bugs / undefined behavior
     - added 8chan.co / 8ch.net
 
-&gt; YChan 2.0 Beta
+&gt; GChan 2.0 Beta
     - complete rewrite
     - redesign
     - fixed several bugs caused by multithreading
     - switched to 4chan API 
     - added Download HTML option
 
-&gt; YChan 1.2
+&gt; GChan 1.2
     - fixed delete-when-404
 
-&gt; YChan 1.1
+&gt; GChan 1.1
     - board downloader
     - minor UI changes
     - minor bug fixes
 
-&gt;YChan 1.0
+&gt;GChan 1.0
     - better multithreading
     - fixed some bugs
     - added icons
 
-&gt;YChan 0.9 Beta
+&gt;GChan 0.9 Beta
     - contextmenu added
     - auto-delete 404ed threads
     - fixed some minor bugs
     - some UI changes/fixes 
 
-&gt;YChan 0.8 Alpha
+&gt;GChan 0.8 Alpha
     - first release  
     - multithreading</value>
   </data>

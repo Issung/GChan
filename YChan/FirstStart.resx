@@ -118,11 +118,11 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="rtWelcome.Text" xml:space="preserve">
-    <value>Welcome to YChan! 
+    <value>Welcome to GChan! 
 
 Since the original has been marked as abandoned on SourceForge, I decided to fork it and fix a bug that was annoying me.
 
-This fork repository is over at https://github.com/Ricardo1991/YChan but you probably already know that.
+This fork repository is over at https://github.com/Ricardo1991/GChan but you probably already know that.
 
 That is all, have fun.</value>
   </data>

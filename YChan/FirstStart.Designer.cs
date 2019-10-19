@@ -66,7 +66,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MinimumSize = new System.Drawing.Size(375, 236);
             this.Name = "FirstStart";
-            this.Text = "Welcome to Ychan";
+            this.Text = "Welcome to GChan";
             this.ResumeLayout(false);
 
         }
