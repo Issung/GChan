@@ -25,13 +25,14 @@
  * download    -> Download Images from Thread                                                              *
  ***********************************************************************************************************/
 
-namespace YChan
+namespace GChan
 {
     public abstract class Imageboard
     {
         protected string URL;                            // Thread/Board URL
         protected string SaveTo;                         // Path to save to
-        protected string imName;                         // Name of the IB
+        protected string siteName;                       // Name of the site
+        protected string threadName;                     // Name of the thread.
         protected bool board;                            // Flag to distinguish Boards and Threads of an IB
         protected bool Gone = false;                     // Flag for 404
 
@@ -54,7 +55,7 @@ namespace YChan
 
         public string getImName()
         {
-            return this.imName;
+            return this.siteName;
         }
 
         public string getPath()

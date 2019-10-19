@@ -26,7 +26,7 @@ using System.Windows.Forms;
 using System.Xml;
 using System.Xml.Linq;
 
-namespace YChan
+namespace GChan
 {
     internal class Infinitechan : Imageboard
     {
@@ -36,17 +36,17 @@ namespace YChan
         public Infinitechan(string url, bool isBoard) : base(url, isBoard)
         {
             this.board = isBoard;
-            this.imName = "8ch";
+            this.siteName = "8ch";
             if (!isBoard)
             {
                 Match match = Regex.Match(url, @"8ch.net/[a-zA-Z0-9]*?/res/[0-9]*");
                 this.URL = "http://" + match.Groups[0].Value + ".html";      // simplify thread url
-                this.SaveTo = (Properties.Settings.Default.path + "\\" + this.imName + "\\" + getURL().Split('/')[3] + "\\" + getURL().Split('/')[5]).Replace(".html", ""); // set saveto path
+                this.SaveTo = (Properties.Settings.Default.path + "\\" + this.siteName + "\\" + getURL().Split('/')[3] + "\\" + getURL().Split('/')[5]).Replace(".html", ""); // set saveto path
             }
             else
             {
                 this.URL = url;
-                this.SaveTo = Properties.Settings.Default.path + "\\" + this.imName + "\\" + getURL().Split('/')[3]; // set saveto path
+                this.SaveTo = Properties.Settings.Default.path + "\\" + this.siteName + "\\" + getURL().Split('/')[3]; // set saveto path
             }
         }
 

@@ -2,7 +2,7 @@
 using System.Reflection;
 using System.Windows.Forms;
 
-namespace YChan
+namespace GChan
 {
     partial class AboutBox : Form
     {

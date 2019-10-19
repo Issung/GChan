@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
 
-namespace YChan
+namespace GChan
 {
     public partial class CloseWarn : Form
     {

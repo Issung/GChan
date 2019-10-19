@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace YChan {
+namespace GChan {
     using System;
     
     

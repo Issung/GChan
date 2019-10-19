@@ -21,7 +21,7 @@ using System.Net;
 using System.Text;
 using System.Windows.Forms;
 
-namespace YChan
+namespace GChan
 {
     internal class General
     {
@@ -97,23 +97,36 @@ namespace YChan
             Properties.Settings.Default.Save();
         }
 
-        // Create a new Imageboard
+        /// <summary>
+        /// Create a new Imageboard
+        /// </summary>
         public static Imageboard CreateNewImageboard(string url)
         {
             // if FChan, create FChan
             // if 8chan, create 8chan
 
-            if (Fchan.urlIsThread(url))
-                return new Fchan(url, false);
+            if (FourChan.urlIsThread(url))
+                return new FourChan(url, false);
             else if (Infinitechan.urlIsThread(url))
                 return new Infinitechan(url, false);
 
-            if (Fchan.urlIsBoard(url))
-                return new Fchan(url, true);
+            if (FourChan.urlIsBoard(url))
+                return new FourChan(url, true);
             else if (Infinitechan.urlIsBoard(url))
                 return new Infinitechan(url, true);
 
             return null;
+        }
+
+        public static string PrepareURL(string url)
+        {
+            url = url.Trim();
+
+            int indexOfHash = url.IndexOf('#');
+            if (indexOfHash > 0)
+                url = url.Substring(0, indexOfHash);
+
+            return url;
         }
 
         private static string GetFileName(string hrefLink)
@@ -136,6 +149,7 @@ namespace YChan
 
             string fileName = GetFileName(url);
             dir = dir + "\\" + fileName;
+
             try
             {
                 if (!File.Exists(dir))

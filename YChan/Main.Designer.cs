@@ -1,4 +1,4 @@
-﻿namespace YChan {
+﻿namespace GChan {
     partial class frmMain {
         /// <summary>
         /// Erforderliche Designervariable.
@@ -40,7 +40,7 @@
             this.tpBoard = new System.Windows.Forms.TabPage();
             this.lbBoards = new System.Windows.Forms.ListBox();
             this.btnAdd = new System.Windows.Forms.Button();
-            this.edtURL = new System.Windows.Forms.TextBox();
+            this.URLTextBox = new System.Windows.Forms.TextBox();
             this.cmThreads = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.openFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openInBrowserToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -94,7 +94,7 @@
             // 
             // openFolderToolStripMenuItem1
             // 
-            this.openFolderToolStripMenuItem1.Image = global::YChan.Properties.Resources.OpenFolder;
+            this.openFolderToolStripMenuItem1.Image = global::GChan.Properties.Resources.OpenFolder;
             this.openFolderToolStripMenuItem1.Name = "openFolderToolStripMenuItem1";
             this.openFolderToolStripMenuItem1.Size = new System.Drawing.Size(139, 22);
             this.openFolderToolStripMenuItem1.Text = "&Open Folder";
@@ -107,7 +107,7 @@
             // 
             // exitToolStripMenuItem
             // 
-            this.exitToolStripMenuItem.Image = global::YChan.Properties.Resources.CloseIcon;
+            this.exitToolStripMenuItem.Image = global::GChan.Properties.Resources.CloseIcon;
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
             this.exitToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Q)));
             this.exitToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
@@ -215,15 +215,15 @@
             // 
             // edtURL
             // 
-            this.edtURL.AllowDrop = true;
-            this.edtURL.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.URLTextBox.AllowDrop = true;
+            this.URLTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.edtURL.Location = new System.Drawing.Point(12, 30);
-            this.edtURL.Name = "edtURL";
-            this.edtURL.Size = new System.Drawing.Size(396, 20);
-            this.edtURL.TabIndex = 3;
-            this.edtURL.DragDrop += new System.Windows.Forms.DragEventHandler(this.edtURL_DragDrop);
-            this.edtURL.DragEnter += new System.Windows.Forms.DragEventHandler(this.edtURL_DragEnter);
+            this.URLTextBox.Location = new System.Drawing.Point(12, 30);
+            this.URLTextBox.Name = "edtURL";
+            this.URLTextBox.Size = new System.Drawing.Size(396, 20);
+            this.URLTextBox.TabIndex = 3;
+            this.URLTextBox.DragDrop += new System.Windows.Forms.DragEventHandler(this.edtURL_DragDrop);
+            this.URLTextBox.DragEnter += new System.Windows.Forms.DragEventHandler(this.edtURL_DragEnter);
             // 
             // cmThreads
             // 
@@ -236,7 +236,7 @@
             // 
             // openFolderToolStripMenuItem
             // 
-            this.openFolderToolStripMenuItem.Image = global::YChan.Properties.Resources.OpenFolder;
+            this.openFolderToolStripMenuItem.Image = global::GChan.Properties.Resources.OpenFolder;
             this.openFolderToolStripMenuItem.Name = "openFolderToolStripMenuItem";
             this.openFolderToolStripMenuItem.Size = new System.Drawing.Size(161, 22);
             this.openFolderToolStripMenuItem.Text = "Open Folder";
@@ -244,7 +244,7 @@
             // 
             // openInBrowserToolStripMenuItem
             // 
-            this.openInBrowserToolStripMenuItem.Image = global::YChan.Properties.Resources.OpenInBrowserToolStrip;
+            this.openInBrowserToolStripMenuItem.Image = global::GChan.Properties.Resources.OpenInBrowserToolStrip;
             this.openInBrowserToolStripMenuItem.Name = "openInBrowserToolStripMenuItem";
             this.openInBrowserToolStripMenuItem.Size = new System.Drawing.Size(161, 22);
             this.openInBrowserToolStripMenuItem.Text = "Open in Browser";
@@ -252,7 +252,7 @@
             // 
             // deleteToolStripMenuItem
             // 
-            this.deleteToolStripMenuItem.Image = global::YChan.Properties.Resources.DeleteToolStrip;
+            this.deleteToolStripMenuItem.Image = global::GChan.Properties.Resources.DeleteToolStrip;
             this.deleteToolStripMenuItem.Name = "deleteToolStripMenuItem";
             this.deleteToolStripMenuItem.Size = new System.Drawing.Size(161, 22);
             this.deleteToolStripMenuItem.Text = "Remove";
@@ -269,7 +269,7 @@
             // 
             // toolStripMenuItem1
             // 
-            this.toolStripMenuItem1.Image = global::YChan.Properties.Resources.OpenFolder;
+            this.toolStripMenuItem1.Image = global::GChan.Properties.Resources.OpenFolder;
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
             this.toolStripMenuItem1.Size = new System.Drawing.Size(161, 22);
             this.toolStripMenuItem1.Text = "Open Folder";
@@ -277,7 +277,7 @@
             // 
             // toolStripMenuItem2
             // 
-            this.toolStripMenuItem2.Image = global::YChan.Properties.Resources.OpenInBrowserToolStrip;
+            this.toolStripMenuItem2.Image = global::GChan.Properties.Resources.OpenInBrowserToolStrip;
             this.toolStripMenuItem2.Name = "toolStripMenuItem2";
             this.toolStripMenuItem2.Size = new System.Drawing.Size(161, 22);
             this.toolStripMenuItem2.Text = "Open in Browser";
@@ -285,7 +285,7 @@
             // 
             // toolStripMenuItem3
             // 
-            this.toolStripMenuItem3.Image = global::YChan.Properties.Resources.DeleteToolStrip;
+            this.toolStripMenuItem3.Image = global::GChan.Properties.Resources.DeleteToolStrip;
             this.toolStripMenuItem3.Name = "toolStripMenuItem3";
             this.toolStripMenuItem3.Size = new System.Drawing.Size(161, 22);
             this.toolStripMenuItem3.Text = "Remove";
@@ -309,7 +309,7 @@
             // 
             // cmTrayOpen
             // 
-            this.cmTrayOpen.Image = global::YChan.Properties.Resources.OpenFolder;
+            this.cmTrayOpen.Image = global::GChan.Properties.Resources.OpenFolder;
             this.cmTrayOpen.Name = "cmTrayOpen";
             this.cmTrayOpen.Size = new System.Drawing.Size(139, 22);
             this.cmTrayOpen.Text = "Open Folder";
@@ -317,7 +317,7 @@
             // 
             // cmTrayExit
             // 
-            this.cmTrayExit.Image = global::YChan.Properties.Resources.CloseIcon;
+            this.cmTrayExit.Image = global::GChan.Properties.Resources.CloseIcon;
             this.cmTrayExit.Name = "cmTrayExit";
             this.cmTrayExit.Size = new System.Drawing.Size(139, 22);
             this.cmTrayExit.Text = "Exit";
@@ -341,7 +341,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(582, 353);
             this.Controls.Add(this.btnClearAll);
-            this.Controls.Add(this.edtURL);
+            this.Controls.Add(this.URLTextBox);
             this.Controls.Add(this.btnAdd);
             this.Controls.Add(this.tcApp);
             this.Controls.Add(this.msHead);
@@ -373,7 +373,7 @@
         private System.Windows.Forms.TabPage tpBoard;
         private System.Windows.Forms.ListBox lbThreads;
         private System.Windows.Forms.Button btnAdd;
-        private System.Windows.Forms.TextBox edtURL;
+        private System.Windows.Forms.TextBox URLTextBox;
         private System.Windows.Forms.ListBox lbBoards;
         private System.Windows.Forms.ContextMenuStrip cmThreads;
         private System.Windows.Forms.ToolStripMenuItem openFolderToolStripMenuItem;

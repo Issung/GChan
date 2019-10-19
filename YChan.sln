@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.30501.0
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29326.143
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YChan", "YChan\YChan.csproj", "{B6227BCB-9008-4E3E-B1A9-018C3B175C02}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GChan", "YChan\GChan.csproj", "{B6227BCB-9008-4E3E-B1A9-018C3B175C02}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -18,5 +18,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {61770E4B-4308-411E-A89C-458025473241}
 	EndGlobalSection
 EndGlobal

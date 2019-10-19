@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace YChan.Properties {
+namespace GChan.Properties {
     using System;
     
     

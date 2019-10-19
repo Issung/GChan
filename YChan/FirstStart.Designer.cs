@@ -1,4 +1,4 @@
-﻿namespace YChan {
+﻿namespace GChan {
     partial class FirstStart {
         /// <summary>
         /// Required designer variable.

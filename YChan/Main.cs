@@ -23,7 +23,7 @@ using System.IO;
 using System.Threading;
 using System.Windows.Forms;
 
-namespace YChan
+namespace GChan
 {
     public partial class frmMain : Form
     {
@@ -158,17 +158,19 @@ namespace YChan
             else
             {
                 MessageBox.Show("Corrupt URL, unsupported website or not a board/thread!");
-                edtURL.Text = "";
+                URLTextBox.Text = "";
             }
         }
 
         private void btnAdd_Click(object sender, EventArgs e)
         {
-            string url = edtURL.Text.Trim();                                     // get url from TextBox
+            // Get url from TextBox
+            string url = General.PrepareURL(URLTextBox.Text);
 
             AddUrl(url);
 
-            edtURL.Text = "";                                                    // clear TextBox
+            // Clear TextBox
+            URLTextBox.Text = "";
         }
 
         private bool isUnique(string url, List<Imageboard> List)
@@ -268,7 +270,7 @@ namespace YChan
         {
             if (tPos != -1)
             {
-                string spath = lbThreads.Items[tPos].ToString();
+                string spath = ((Imageboard)lbThreads.Items[tPos]).getURL();
                 Process.Start(spath);
             }
         }
