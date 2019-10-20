@@ -38,8 +38,7 @@ namespace GChan
         private object threadLock = new object();
         private object boardLock = new object();
 
-        private enum typeURL
-        { thread, board };
+        private enum URLType { Thread, Board };
 
         public frmMain()
         {
@@ -96,8 +95,9 @@ namespace GChan
 
                 lbBoards.DataSource = ListBoards;
                 lbThreads.DataSource = ListThreads;
+                threadGridView.DataSource = ListThreads;
 
-                scnTimer.Enabled = true;                                        // activate the timer
+                scnTimer.Enabled = true;                                        // Activate the timer
                 scan(this, new EventArgs());                                    // and start scanning
             }
         }
@@ -111,7 +111,7 @@ namespace GChan
                 lock (boardLock)
                 {
                     ListBoards.Add(imageboard);
-                    updateDataSource(typeURL.board);
+                    updateDataSource(URLType.Board);
                 }
             }
             else
@@ -119,7 +119,7 @@ namespace GChan
                 lock (threadLock)
                 {
                     ListThreads.Add(imageboard);
-                    updateDataSource(typeURL.thread);
+                    updateDataSource(URLType.Thread);
                 }
             }
 
@@ -228,30 +228,31 @@ namespace GChan
                 lock (threadLock)
                 {
                     ListThreads.RemoveAt(tPos);
-                    updateDataSource(typeURL.thread);
+                    updateDataSource(URLType.Thread);
                 }
             }
         }
 
-        private void updateDataSource(typeURL type)
+        private void updateDataSource(URLType type)
         {
-            switch (type)
+            if (type == URLType.Board)
             {
-                case typeURL.board:
-                    lbBoards.Invoke((MethodInvoker)(() =>
-                    {
-                        lbBoards.DataSource = null;
-                        lbBoards.DataSource = ListBoards;
-                    }));
-                    break;
+                lbBoards.Invoke((MethodInvoker)(() =>
+                {
+                    lbBoards.DataSource = null;
+                    lbBoards.DataSource = ListBoards;
+                }));
+            }
+            else
+            {
+                lbThreads.Invoke((MethodInvoker)(() =>
+                {
+                    lbThreads.DataSource = null;
+                    lbThreads.DataSource = ListThreads;
 
-                case typeURL.thread:
-                    lbThreads.Invoke((MethodInvoker)(() =>
-                    {
-                        lbThreads.DataSource = null;
-                        lbThreads.DataSource = ListThreads;
-                    }));
-                    break;
+                    threadGridView.DataSource = null;
+                    threadGridView.DataSource = ListThreads;
+                }));
             }
         }
 
@@ -347,7 +348,7 @@ namespace GChan
                 lock (boardLock)
                 {
                     ListBoards.RemoveAt(bPos);
-                    updateDataSource(typeURL.board);
+                    updateDataSource(URLType.Board);
                 }
             }
         }
@@ -399,7 +400,7 @@ namespace GChan
                     if (imB.isGone())
                     {
                         ListThreads.Remove(imB);
-                        updateDataSource(typeURL.thread);
+                        updateDataSource(URLType.Thread);
 
                         if (Properties.Settings.Default.saveOnClose)
                             General.WriteURLs(ListBoards, ListThreads);
@@ -500,12 +501,12 @@ namespace GChan
                 if (board)
                 {
                     ListBoards.Clear();
-                    updateDataSource(typeURL.board);
+                    updateDataSource(URLType.Board);
                 }
                 else
                 {
                     ListThreads.Clear();
-                    updateDataSource(typeURL.thread);
+                    updateDataSource(URLType.Thread);
                 }
 
                 if (Properties.Settings.Default.saveOnClose)
@@ -578,7 +579,7 @@ namespace GChan
                     lock (boardLock)
                     {
                         ListBoards.RemoveAt(pos);
-                        updateDataSource(typeURL.board);
+                        updateDataSource(URLType.Board);
                     }
                 }
             }
@@ -595,8 +596,35 @@ namespace GChan
                     lock (threadLock)
                     {
                         ListThreads.RemoveAt(pos);
-                        updateDataSource(typeURL.thread);
+                        updateDataSource(URLType.Thread);
                     }
+                }
+            }
+        }
+
+        private void threadGridView_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == System.Windows.Forms.MouseButtons.Left)
+            {
+                DataGridView.HitTestInfo hit = threadGridView.HitTest(e.X, e.Y);
+
+                if (hit.Type == DataGridViewHitTestType.None)
+                {
+                    threadGridView.ClearSelection();
+                    threadGridView.CurrentCell = null;
+                }
+            }
+        }
+
+        private void threadGridView_CellMouseUp(object sender, DataGridViewCellMouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+            {
+                if (e.RowIndex != -1)
+                {
+                    //tPos = lbThreads.IndexFromPoint(e.Location);
+                    tPos = e.RowIndex;
+                    cmThreads.Show(threadGridView, new Point(e.X + 2, e.Y + 23));
                 }
             }
         }

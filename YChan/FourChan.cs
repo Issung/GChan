@@ -54,7 +54,7 @@ namespace GChan
                 this.SaveTo = Properties.Settings.Default.path + "\\" + this.siteName + "\\" + getURL().Split('/')[3];
             }
 
-            threadName = getThreadName();
+            subject = getThreadName();
         }
 
         public new static bool urlIsThread(string url)
@@ -67,35 +67,6 @@ namespace GChan
         {
             Regex urlMatcher = new Regex(regBoard);
             return (urlMatcher.IsMatch(url));
-        }
-
-        protected string getThreadName()
-        {
-            if (board)
-            {
-                return null;
-            }
-            else
-            { 
-                string subject = "";
-
-                string JSONUrl = "http://a.4cdn.org/" + getURL().Split('/')[3] + "/thread/" + getURL().Split('/')[5] + ".json";
-                string Content = new WebClient().DownloadString(JSONUrl);
-
-                dynamic data = JObject.Parse(Content);
-
-                try
-                {
-                    subject = data.posts[0].sub.ToString();
-                }
-                catch (RuntimeBinderException rbe)
-                {
-                    // No subject
-                    subject = null;
-                } 
-
-                return subject;
-            }
         }
 
         override protected string[] getLinks()
@@ -294,8 +265,8 @@ namespace GChan
             if (board)
                 return "NOT YET IMPLEMENTED";
             else
-                if (threadName != null)
-                    return $"\"{threadName}\" ({URL})";
+                if (subject != null)
+                    return $"\"{subject}\" ({URL})";
                 else
                     return $"No Subject ({URL})";
         }

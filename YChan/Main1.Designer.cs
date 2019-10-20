@@ -61,6 +61,16 @@ namespace GChan {
         }
         
         /// <summary>
+        ///   Looks up a localized resource of type System.Boolean similar to True.
+        /// </summary>
+        public static bool Board_UserAddedColumn {
+            get {
+                object obj = ResourceManager.GetObject("Board.UserAddedColumn", resourceCulture);
+                return ((bool)(obj));
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Point similar to {X=224,Y=17}.
         /// </summary>
         public static System.Drawing.Point cmBoards_TrayLocation {
@@ -91,6 +101,16 @@ namespace GChan {
         }
         
         /// <summary>
+        ///   Looks up a localized resource of type System.Boolean similar to True.
+        /// </summary>
+        public static bool ID_UserAddedColumn {
+            get {
+                object obj = ResourceManager.GetObject("ID.UserAddedColumn", resourceCulture);
+                return ((bool)(obj));
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Point similar to {X=17,Y=17}.
         /// </summary>
         public static System.Drawing.Point msHead_TrayLocation {
@@ -117,6 +137,16 @@ namespace GChan {
             get {
                 object obj = ResourceManager.GetObject("nfTray.TrayLocation", resourceCulture);
                 return ((System.Drawing.Point)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Boolean similar to True.
+        /// </summary>
+        public static bool Subject_UserAddedColumn {
+            get {
+                object obj = ResourceManager.GetObject("Subject.UserAddedColumn", resourceCulture);
+                return ((bool)(obj));
             }
         }
     }

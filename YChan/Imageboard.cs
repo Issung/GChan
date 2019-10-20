@@ -25,6 +25,11 @@
  * download    -> Download Images from Thread                                                              *
  ***********************************************************************************************************/
 
+using Microsoft.CSharp.RuntimeBinder;
+using Newtonsoft.Json.Linq;
+using System.Net;
+using System.Text.RegularExpressions;
+
 namespace GChan
 {
     public abstract class Imageboard
@@ -32,15 +37,27 @@ namespace GChan
         protected string URL;                            // Thread/Board URL
         protected string SaveTo;                         // Path to save to
         protected string siteName;                       // Name of the site
-        protected string threadName;                     // Name of the thread.
         protected bool board;                            // Flag to distinguish Boards and Threads of an IB
         protected bool Gone = false;                     // Flag for 404
+
+        protected string subject;                        // Name of the thread.
+        protected string boardName;
+        protected string id;
+
+        public string Subject { get { return subject; } }
+        public string BoardName { get { return boardName; } }
+        public string ID { get { return id; } }
 
         // Constructor, setting URL and Type (Board/Thread)
         public Imageboard(string url, bool isBoard)
         {
             this.URL = url;
             this.board = isBoard;
+            boardName = GetBoardName();
+            if (!board)
+            {
+                id = GetID();
+            }
         }
 
         public bool isGone()
@@ -85,6 +102,62 @@ namespace GChan
         protected abstract string[] getLinks();
 
         public abstract string[] getThreads();
+
+        public string GetBoardName()
+        {
+            Regex regex = new Regex(@"(\/(\w|\d)+\/)");
+
+            // Temporarily add a / incase url doesnt end with one.
+            var matches = regex.Matches(URL + "/"); 
+
+            if (matches.Count > 0)
+            {
+                return matches[0].Value;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        protected string getThreadName()
+        {
+            if (board)
+            {
+                return "No Subject";
+            }
+            else
+            {
+                string subject = "";
+
+                string JSONUrl = "http://a.4cdn.org/" + getURL().Split('/')[3] + "/thread/" + getURL().Split('/')[5] + ".json";
+                string Content = new WebClient().DownloadString(JSONUrl);
+
+                dynamic data = JObject.Parse(Content);
+
+                try
+                {
+                    subject = data.posts[0].sub.ToString();
+                }
+                catch (RuntimeBinderException rbe)
+                {
+                    // No subject
+                    subject = "No Subject";
+                }
+
+                return subject;
+            }
+        }
+
+        public string GetID()
+        {
+            if (!board)
+            {
+                return URL.Substring(URL.LastIndexOf('/') + 1);
+            }
+
+            return null;
+        }
 
         public override string ToString()
         {

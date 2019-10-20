@@ -24,6 +24,7 @@
         /// </summary>
         private void InitializeComponent() {
             this.components = new System.ComponentModel.Container();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmMain));
             this.msHead = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -36,6 +37,7 @@
             this.aboutToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.tcApp = new System.Windows.Forms.TabControl();
             this.tpThreads = new System.Windows.Forms.TabPage();
+            this.threadGridView = new System.Windows.Forms.DataGridView();
             this.lbThreads = new System.Windows.Forms.ListBox();
             this.tpBoard = new System.Windows.Forms.TabPage();
             this.lbBoards = new System.Windows.Forms.ListBox();
@@ -54,9 +56,13 @@
             this.cmTrayOpen = new System.Windows.Forms.ToolStripMenuItem();
             this.cmTrayExit = new System.Windows.Forms.ToolStripMenuItem();
             this.btnClearAll = new System.Windows.Forms.Button();
+            this.Subject = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Board = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ID = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.msHead.SuspendLayout();
             this.tcApp.SuspendLayout();
             this.tpThreads.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.threadGridView)).BeginInit();
             this.tpBoard.SuspendLayout();
             this.cmThreads.SuspendLayout();
             this.cmBoards.SuspendLayout();
@@ -147,19 +153,51 @@
             this.tcApp.Location = new System.Drawing.Point(12, 56);
             this.tcApp.Name = "tcApp";
             this.tcApp.SelectedIndex = 0;
-            this.tcApp.Size = new System.Drawing.Size(558, 281);
+            this.tcApp.Size = new System.Drawing.Size(558, 414);
             this.tcApp.TabIndex = 1;
             // 
             // tpThreads
             // 
+            this.tpThreads.Controls.Add(this.threadGridView);
             this.tpThreads.Controls.Add(this.lbThreads);
             this.tpThreads.Location = new System.Drawing.Point(4, 22);
             this.tpThreads.Name = "tpThreads";
             this.tpThreads.Padding = new System.Windows.Forms.Padding(3);
-            this.tpThreads.Size = new System.Drawing.Size(550, 255);
+            this.tpThreads.Size = new System.Drawing.Size(550, 388);
             this.tpThreads.TabIndex = 0;
             this.tpThreads.Text = "Threads";
             this.tpThreads.UseVisualStyleBackColor = true;
+            // 
+            // threadGridView
+            // 
+            this.threadGridView.AllowUserToAddRows = false;
+            this.threadGridView.AllowUserToDeleteRows = false;
+            this.threadGridView.AllowUserToOrderColumns = true;
+            this.threadGridView.AllowUserToResizeRows = false;
+            dataGridViewCellStyle1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(245)))), ((int)(((byte)(245)))), ((int)(((byte)(245)))));
+            this.threadGridView.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle1;
+            this.threadGridView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.threadGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.threadGridView.BackgroundColor = System.Drawing.Color.White;
+            this.threadGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.threadGridView.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.Subject,
+            this.Board,
+            this.ID});
+            this.threadGridView.GridColor = System.Drawing.SystemColors.Window;
+            this.threadGridView.Location = new System.Drawing.Point(-3, -3);
+            this.threadGridView.MultiSelect = false;
+            this.threadGridView.Name = "threadGridView";
+            this.threadGridView.ReadOnly = true;
+            this.threadGridView.RowHeadersVisible = false;
+            this.threadGridView.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.threadGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.threadGridView.Size = new System.Drawing.Size(554, 192);
+            this.threadGridView.TabIndex = 1;
+            this.threadGridView.CellMouseUp += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.threadGridView_CellMouseUp);
+            this.threadGridView.MouseDown += new System.Windows.Forms.MouseEventHandler(this.threadGridView_MouseDown);
             // 
             // lbThreads
             // 
@@ -168,9 +206,9 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.lbThreads.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.lbThreads.FormattingEnabled = true;
-            this.lbThreads.Location = new System.Drawing.Point(0, 3);
+            this.lbThreads.Location = new System.Drawing.Point(0, 198);
             this.lbThreads.Name = "lbThreads";
-            this.lbThreads.Size = new System.Drawing.Size(547, 247);
+            this.lbThreads.Size = new System.Drawing.Size(547, 182);
             this.lbThreads.TabIndex = 0;
             this.lbThreads.KeyUp += new System.Windows.Forms.KeyEventHandler(this.lbThreads_KeyUp);
             this.lbThreads.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.lbThreads_MouseDoubleClick);
@@ -182,7 +220,7 @@
             this.tpBoard.Location = new System.Drawing.Point(4, 22);
             this.tpBoard.Name = "tpBoard";
             this.tpBoard.Padding = new System.Windows.Forms.Padding(3);
-            this.tpBoard.Size = new System.Drawing.Size(550, 255);
+            this.tpBoard.Size = new System.Drawing.Size(550, 388);
             this.tpBoard.TabIndex = 1;
             this.tpBoard.Text = "Boards";
             this.tpBoard.UseVisualStyleBackColor = true;
@@ -334,12 +372,36 @@
             this.btnClearAll.UseVisualStyleBackColor = true;
             this.btnClearAll.Click += new System.EventHandler(this.btnClearAll_Click);
             // 
+            // Subject
+            // 
+            this.Subject.DataPropertyName = "Subject";
+            this.Subject.FillWeight = 114.2132F;
+            this.Subject.HeaderText = "Subject";
+            this.Subject.Name = "Subject";
+            this.Subject.ReadOnly = true;
+            // 
+            // Board
+            // 
+            this.Board.DataPropertyName = "BoardName";
+            this.Board.FillWeight = 92.8934F;
+            this.Board.HeaderText = "Board";
+            this.Board.Name = "Board";
+            this.Board.ReadOnly = true;
+            // 
+            // ID
+            // 
+            this.ID.DataPropertyName = "ID";
+            this.ID.FillWeight = 92.8934F;
+            this.ID.HeaderText = "ID";
+            this.ID.Name = "ID";
+            this.ID.ReadOnly = true;
+            // 
             // frmMain
             // 
             this.AcceptButton = this.btnAdd;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(582, 353);
+            this.ClientSize = new System.Drawing.Size(582, 486);
             this.Controls.Add(this.btnClearAll);
             this.Controls.Add(this.URLTextBox);
             this.Controls.Add(this.btnAdd);
@@ -356,6 +418,7 @@
             this.msHead.PerformLayout();
             this.tcApp.ResumeLayout(false);
             this.tpThreads.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.threadGridView)).EndInit();
             this.tpBoard.ResumeLayout(false);
             this.cmThreads.ResumeLayout(false);
             this.cmBoards.ResumeLayout(false);
@@ -396,6 +459,10 @@
         private System.Windows.Forms.ToolStripMenuItem openFolderToolStripMenuItem1;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.Button btnClearAll;
+        private System.Windows.Forms.DataGridView threadGridView;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Subject;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Board;
+        private System.Windows.Forms.DataGridViewTextBoxColumn ID;
     }
 }
 
