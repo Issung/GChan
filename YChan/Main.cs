@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
 
@@ -31,7 +32,7 @@ namespace GChan
         public List<Imageboard> ListBoards { get; set; } = new List<Imageboard>();
         private Thread Scanner = null;                                                      // thread that addes stuff
 
-        private int tPos = -1;                                                              // Item position in lbThreads
+        private int tPos = -1;                                                              // Item position in threadGridView
         private int bPos = -1;                                                              // Item position in lbBoards
         private System.Windows.Forms.Timer scnTimer = new System.Windows.Forms.Timer();     // Timmer for scanning
 
@@ -94,7 +95,6 @@ namespace GChan
                 }
 
                 lbBoards.DataSource = ListBoards;
-                lbThreads.DataSource = ListThreads;
                 threadGridView.DataSource = ListThreads;
 
                 scnTimer.Enabled = true;                                        // Activate the timer
@@ -165,9 +165,14 @@ namespace GChan
         private void btnAdd_Click(object sender, EventArgs e)
         {
             // Get url from TextBox
-            string url = General.PrepareURL(URLTextBox.Text);
+            var urls = URLTextBox.Text.Split(',');
 
-            AddUrl(url);
+            for (int i = 0; i < urls.Length; i++)
+            { 
+                urls[i] = General.PrepareURL(urls[i]);
+                AddUrl(urls[i]);
+            }
+
 
             // Clear TextBox
             URLTextBox.Text = "";
@@ -193,19 +198,6 @@ namespace GChan
                     plc = i;
             }
             return plc;
-        }
-
-        private void lbThreads_MouseDown(object sender, MouseEventArgs e)
-        {
-            if (e.Button == MouseButtons.Right)
-            {
-                tPos = -1;
-                if (lbThreads.IndexFromPoint(e.Location) != -1)
-                {
-                    tPos = lbThreads.IndexFromPoint(e.Location);
-                    cmThreads.Show(lbThreads, new Point(e.X, e.Y));
-                }
-            }
         }
 
         private void lbBoards_MouseDown(object sender, MouseEventArgs e)
@@ -245,11 +237,8 @@ namespace GChan
             }
             else
             {
-                lbThreads.Invoke((MethodInvoker)(() =>
+                threadGridView.Invoke((MethodInvoker)(() =>
                 {
-                    lbThreads.DataSource = null;
-                    lbThreads.DataSource = ListThreads;
-
                     threadGridView.DataSource = null;
                     threadGridView.DataSource = ListThreads;
                 }));
@@ -271,8 +260,17 @@ namespace GChan
         {
             if (tPos != -1)
             {
-                string spath = ((Imageboard)lbThreads.Items[tPos]).getURL();
+                string spath = ((Imageboard)ListThreads[tPos]).getURL();
                 Process.Start(spath);
+            }
+        }
+
+        private void copyURLToClipboardToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (tPos != -1)
+            {
+                string spath = ((Imageboard)ListThreads[tPos]).getURL();
+                Clipboard.SetText(spath);
             }
         }
 
@@ -538,7 +536,7 @@ namespace GChan
             }
         }
 
-        private void lbThreads_MouseDoubleClick(object sender, MouseEventArgs e)
+        /*private void lbThreads_MouseDoubleClick(object sender, MouseEventArgs e)
         {
             int pos;
             if (e.Button == MouseButtons.Left)
@@ -551,7 +549,7 @@ namespace GChan
                     Process.Start(spath);
                 }
             }
-        }
+        }*/
 
         private void lbBoards_MouseDoubleClick(object sender, MouseEventArgs e)
         {
@@ -585,11 +583,11 @@ namespace GChan
             }
         }
 
-        private void lbThreads_KeyUp(object sender, KeyEventArgs e)
+        /*private void ThreadGridView_KeyUp(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Delete)
             {
-                int pos = lbThreads.SelectedIndex;
+                int pos = threadGridView.SelectedRows;
 
                 if (pos > -1)
                 {
@@ -600,7 +598,7 @@ namespace GChan
                     }
                 }
             }
-        }
+        }*/
 
         private void threadGridView_MouseDown(object sender, MouseEventArgs e)
         {
@@ -622,11 +620,16 @@ namespace GChan
             {
                 if (e.RowIndex != -1)
                 {
-                    //tPos = lbThreads.IndexFromPoint(e.Location);
                     tPos = e.RowIndex;
-                    cmThreads.Show(threadGridView, new Point(e.X + 2, e.Y + 23));
+                    //cmThreads.Show(threadGridView, new Point(e.X + 2, e.Y + 23));
+                    cmThreads.Show(Cursor.Position);
                 }
             }
+        }
+
+        private void clipboardButton_Click(object sender, EventArgs e)
+        {
+            Clipboard.SetText(String.Join(",", ListThreads.Select(thread => thread.getURL())));
         }
     }
 }

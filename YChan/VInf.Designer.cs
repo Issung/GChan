@@ -38,7 +38,7 @@
             this.rtbChange.Location = new System.Drawing.Point(12, 12);
             this.rtbChange.Name = "rtbChange";
             this.rtbChange.ReadOnly = true;
-            this.rtbChange.Size = new System.Drawing.Size(260, 197);
+            this.rtbChange.Size = new System.Drawing.Size(486, 212);
             this.rtbChange.TabIndex = 0;
             this.rtbChange.Text = resources.GetString("rtbChange.Text");
             // 
@@ -46,9 +46,9 @@
             // 
             this.btnVIClose.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnVIClose.Location = new System.Drawing.Point(106, 215);
+            this.btnVIClose.Location = new System.Drawing.Point(12, 230);
             this.btnVIClose.Name = "btnVIClose";
-            this.btnVIClose.Size = new System.Drawing.Size(75, 23);
+            this.btnVIClose.Size = new System.Drawing.Size(486, 23);
             this.btnVIClose.TabIndex = 1;
             this.btnVIClose.Text = "Close";
             this.btnVIClose.UseVisualStyleBackColor = true;
@@ -59,7 +59,7 @@
             this.AcceptButton = this.btnVIClose;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(284, 245);
+            this.ClientSize = new System.Drawing.Size(510, 260);
             this.ControlBox = false;
             this.Controls.Add(this.btnVIClose);
             this.Controls.Add(this.rtbChange);

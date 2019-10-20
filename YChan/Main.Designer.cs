@@ -38,7 +38,9 @@
             this.tcApp = new System.Windows.Forms.TabControl();
             this.tpThreads = new System.Windows.Forms.TabPage();
             this.threadGridView = new System.Windows.Forms.DataGridView();
-            this.lbThreads = new System.Windows.Forms.ListBox();
+            this.Subject = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Board = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ID = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.tpBoard = new System.Windows.Forms.TabPage();
             this.lbBoards = new System.Windows.Forms.ListBox();
             this.btnAdd = new System.Windows.Forms.Button();
@@ -46,6 +48,7 @@
             this.cmThreads = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.openFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openInBrowserToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.copyURLToClipboardToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.deleteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cmBoards = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
@@ -56,9 +59,8 @@
             this.cmTrayOpen = new System.Windows.Forms.ToolStripMenuItem();
             this.cmTrayExit = new System.Windows.Forms.ToolStripMenuItem();
             this.btnClearAll = new System.Windows.Forms.Button();
-            this.Subject = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Board = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ID = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.clipboardButton = new System.Windows.Forms.Button();
+            this.toolTip = new System.Windows.Forms.ToolTip(this.components);
             this.msHead.SuspendLayout();
             this.tcApp.SuspendLayout();
             this.tpThreads.SuspendLayout();
@@ -153,17 +155,16 @@
             this.tcApp.Location = new System.Drawing.Point(12, 56);
             this.tcApp.Name = "tcApp";
             this.tcApp.SelectedIndex = 0;
-            this.tcApp.Size = new System.Drawing.Size(558, 414);
+            this.tcApp.Size = new System.Drawing.Size(558, 222);
             this.tcApp.TabIndex = 1;
             // 
             // tpThreads
             // 
             this.tpThreads.Controls.Add(this.threadGridView);
-            this.tpThreads.Controls.Add(this.lbThreads);
             this.tpThreads.Location = new System.Drawing.Point(4, 22);
             this.tpThreads.Name = "tpThreads";
             this.tpThreads.Padding = new System.Windows.Forms.Padding(3);
-            this.tpThreads.Size = new System.Drawing.Size(550, 388);
+            this.tpThreads.Size = new System.Drawing.Size(550, 196);
             this.tpThreads.TabIndex = 0;
             this.tpThreads.Text = "Threads";
             this.tpThreads.UseVisualStyleBackColor = true;
@@ -187,32 +188,42 @@
             this.Board,
             this.ID});
             this.threadGridView.GridColor = System.Drawing.SystemColors.Window;
-            this.threadGridView.Location = new System.Drawing.Point(-3, -3);
+            this.threadGridView.Location = new System.Drawing.Point(-1, -1);
+            this.threadGridView.Margin = new System.Windows.Forms.Padding(0);
             this.threadGridView.MultiSelect = false;
             this.threadGridView.Name = "threadGridView";
             this.threadGridView.ReadOnly = true;
             this.threadGridView.RowHeadersVisible = false;
             this.threadGridView.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.threadGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.threadGridView.Size = new System.Drawing.Size(554, 192);
+            this.threadGridView.Size = new System.Drawing.Size(552, 198);
             this.threadGridView.TabIndex = 1;
             this.threadGridView.CellMouseUp += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.threadGridView_CellMouseUp);
             this.threadGridView.MouseDown += new System.Windows.Forms.MouseEventHandler(this.threadGridView_MouseDown);
             // 
-            // lbThreads
+            // Subject
             // 
-            this.lbThreads.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.lbThreads.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.lbThreads.FormattingEnabled = true;
-            this.lbThreads.Location = new System.Drawing.Point(0, 198);
-            this.lbThreads.Name = "lbThreads";
-            this.lbThreads.Size = new System.Drawing.Size(547, 182);
-            this.lbThreads.TabIndex = 0;
-            this.lbThreads.KeyUp += new System.Windows.Forms.KeyEventHandler(this.lbThreads_KeyUp);
-            this.lbThreads.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.lbThreads_MouseDoubleClick);
-            this.lbThreads.MouseDown += new System.Windows.Forms.MouseEventHandler(this.lbThreads_MouseDown);
+            this.Subject.DataPropertyName = "Subject";
+            this.Subject.FillWeight = 300F;
+            this.Subject.HeaderText = "Subject";
+            this.Subject.Name = "Subject";
+            this.Subject.ReadOnly = true;
+            // 
+            // Board
+            // 
+            this.Board.DataPropertyName = "BoardName";
+            this.Board.FillWeight = 92.8934F;
+            this.Board.HeaderText = "Board";
+            this.Board.Name = "Board";
+            this.Board.ReadOnly = true;
+            // 
+            // ID
+            // 
+            this.ID.DataPropertyName = "ID";
+            this.ID.FillWeight = 92.8934F;
+            this.ID.HeaderText = "ID";
+            this.ID.Name = "ID";
+            this.ID.ReadOnly = true;
             // 
             // tpBoard
             // 
@@ -220,7 +231,7 @@
             this.tpBoard.Location = new System.Drawing.Point(4, 22);
             this.tpBoard.Name = "tpBoard";
             this.tpBoard.Padding = new System.Windows.Forms.Padding(3);
-            this.tpBoard.Size = new System.Drawing.Size(550, 388);
+            this.tpBoard.Size = new System.Drawing.Size(550, 196);
             this.tpBoard.TabIndex = 1;
             this.tpBoard.Text = "Boards";
             this.tpBoard.UseVisualStyleBackColor = true;
@@ -243,9 +254,9 @@
             // btnAdd
             // 
             this.btnAdd.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnAdd.Location = new System.Drawing.Point(414, 28);
+            this.btnAdd.Location = new System.Drawing.Point(384, 28);
             this.btnAdd.Name = "btnAdd";
-            this.btnAdd.Size = new System.Drawing.Size(75, 23);
+            this.btnAdd.Size = new System.Drawing.Size(74, 23);
             this.btnAdd.TabIndex = 2;
             this.btnAdd.Text = "Add";
             this.btnAdd.UseVisualStyleBackColor = true;
@@ -258,7 +269,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.URLTextBox.Location = new System.Drawing.Point(12, 30);
             this.URLTextBox.Name = "URLTextBox";
-            this.URLTextBox.Size = new System.Drawing.Size(396, 20);
+            this.URLTextBox.Size = new System.Drawing.Size(366, 20);
             this.URLTextBox.TabIndex = 3;
             this.URLTextBox.DragDrop += new System.Windows.Forms.DragEventHandler(this.edtURL_DragDrop);
             this.URLTextBox.DragEnter += new System.Windows.Forms.DragEventHandler(this.edtURL_DragEnter);
@@ -268,15 +279,16 @@
             this.cmThreads.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.openFolderToolStripMenuItem,
             this.openInBrowserToolStripMenuItem,
+            this.copyURLToClipboardToolStripMenuItem,
             this.deleteToolStripMenuItem});
             this.cmThreads.Name = "cmThreads";
-            this.cmThreads.Size = new System.Drawing.Size(162, 70);
+            this.cmThreads.Size = new System.Drawing.Size(196, 92);
             // 
             // openFolderToolStripMenuItem
             // 
             this.openFolderToolStripMenuItem.Image = global::GChan.Properties.Resources.OpenFolder;
             this.openFolderToolStripMenuItem.Name = "openFolderToolStripMenuItem";
-            this.openFolderToolStripMenuItem.Size = new System.Drawing.Size(161, 22);
+            this.openFolderToolStripMenuItem.Size = new System.Drawing.Size(195, 22);
             this.openFolderToolStripMenuItem.Text = "Open Folder";
             this.openFolderToolStripMenuItem.Click += new System.EventHandler(this.openFolderToolStripMenuItem_Click);
             // 
@@ -284,15 +296,23 @@
             // 
             this.openInBrowserToolStripMenuItem.Image = global::GChan.Properties.Resources.OpenInBrowserToolStrip;
             this.openInBrowserToolStripMenuItem.Name = "openInBrowserToolStripMenuItem";
-            this.openInBrowserToolStripMenuItem.Size = new System.Drawing.Size(161, 22);
+            this.openInBrowserToolStripMenuItem.Size = new System.Drawing.Size(195, 22);
             this.openInBrowserToolStripMenuItem.Text = "Open in Browser";
             this.openInBrowserToolStripMenuItem.Click += new System.EventHandler(this.openInBrowserToolStripMenuItem_Click);
+            // 
+            // copyURLToClipboardToolStripMenuItem
+            // 
+            this.copyURLToClipboardToolStripMenuItem.Image = global::GChan.Properties.Resources.clipboard_icon;
+            this.copyURLToClipboardToolStripMenuItem.Name = "copyURLToClipboardToolStripMenuItem";
+            this.copyURLToClipboardToolStripMenuItem.Size = new System.Drawing.Size(195, 22);
+            this.copyURLToClipboardToolStripMenuItem.Text = "Copy URL to Clipboard";
+            this.copyURLToClipboardToolStripMenuItem.Click += new System.EventHandler(this.copyURLToClipboardToolStripMenuItem_Click);
             // 
             // deleteToolStripMenuItem
             // 
             this.deleteToolStripMenuItem.Image = global::GChan.Properties.Resources.DeleteToolStrip;
             this.deleteToolStripMenuItem.Name = "deleteToolStripMenuItem";
-            this.deleteToolStripMenuItem.Size = new System.Drawing.Size(161, 22);
+            this.deleteToolStripMenuItem.Size = new System.Drawing.Size(195, 22);
             this.deleteToolStripMenuItem.Text = "Remove";
             this.deleteToolStripMenuItem.Click += new System.EventHandler(this.deleteToolStripMenuItem_Click);
             // 
@@ -364,44 +384,35 @@
             // btnClearAll
             // 
             this.btnClearAll.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnClearAll.Location = new System.Drawing.Point(495, 28);
+            this.btnClearAll.Location = new System.Drawing.Point(464, 28);
             this.btnClearAll.Name = "btnClearAll";
-            this.btnClearAll.Size = new System.Drawing.Size(75, 23);
+            this.btnClearAll.Size = new System.Drawing.Size(74, 23);
             this.btnClearAll.TabIndex = 4;
             this.btnClearAll.Text = "Clear";
             this.btnClearAll.UseVisualStyleBackColor = true;
             this.btnClearAll.Click += new System.EventHandler(this.btnClearAll_Click);
             // 
-            // Subject
+            // clipboardButton
             // 
-            this.Subject.DataPropertyName = "Subject";
-            this.Subject.FillWeight = 114.2132F;
-            this.Subject.HeaderText = "Subject";
-            this.Subject.Name = "Subject";
-            this.Subject.ReadOnly = true;
-            // 
-            // Board
-            // 
-            this.Board.DataPropertyName = "BoardName";
-            this.Board.FillWeight = 92.8934F;
-            this.Board.HeaderText = "Board";
-            this.Board.Name = "Board";
-            this.Board.ReadOnly = true;
-            // 
-            // ID
-            // 
-            this.ID.DataPropertyName = "ID";
-            this.ID.FillWeight = 92.8934F;
-            this.ID.HeaderText = "ID";
-            this.ID.Name = "ID";
-            this.ID.ReadOnly = true;
+            this.clipboardButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.clipboardButton.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.clipboardButton.Location = new System.Drawing.Point(544, 28);
+            this.clipboardButton.Name = "clipboardButton";
+            this.clipboardButton.Size = new System.Drawing.Size(26, 23);
+            this.clipboardButton.TabIndex = 5;
+            this.clipboardButton.Text = "📋";
+            this.clipboardButton.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.toolTip.SetToolTip(this.clipboardButton, "Copy Thread URLs to Clipboard (Delimited by commas)");
+            this.clipboardButton.UseVisualStyleBackColor = true;
+            this.clipboardButton.Click += new System.EventHandler(this.clipboardButton_Click);
             // 
             // frmMain
             // 
             this.AcceptButton = this.btnAdd;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(582, 486);
+            this.ClientSize = new System.Drawing.Size(582, 294);
+            this.Controls.Add(this.clipboardButton);
             this.Controls.Add(this.btnClearAll);
             this.Controls.Add(this.URLTextBox);
             this.Controls.Add(this.btnAdd);
@@ -434,7 +445,6 @@
         private System.Windows.Forms.TabControl tcApp;
         private System.Windows.Forms.TabPage tpThreads;
         private System.Windows.Forms.TabPage tpBoard;
-        private System.Windows.Forms.ListBox lbThreads;
         private System.Windows.Forms.Button btnAdd;
         private System.Windows.Forms.TextBox URLTextBox;
         private System.Windows.Forms.ListBox lbBoards;
@@ -460,9 +470,12 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.Button btnClearAll;
         private System.Windows.Forms.DataGridView threadGridView;
+        private System.Windows.Forms.Button clipboardButton;
+        private System.Windows.Forms.ToolTip toolTip;
         private System.Windows.Forms.DataGridViewTextBoxColumn Subject;
         private System.Windows.Forms.DataGridViewTextBoxColumn Board;
         private System.Windows.Forms.DataGridViewTextBoxColumn ID;
+        private System.Windows.Forms.ToolStripMenuItem copyURLToClipboardToolStripMenuItem;
     }
 }
 

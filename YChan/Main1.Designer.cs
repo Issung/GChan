@@ -149,5 +149,15 @@ namespace GChan {
                 return ((bool)(obj));
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Point similar to {X=505,Y=17}.
+        /// </summary>
+        public static System.Drawing.Point toolTip_TrayLocation {
+            get {
+                object obj = ResourceManager.GetObject("toolTip.TrayLocation", resourceCulture);
+                return ((System.Drawing.Point)(obj));
+            }
+        }
     }
 }

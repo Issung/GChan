@@ -122,13 +122,14 @@ namespace GChan
 
         protected string getThreadName()
         {
+            string subject;
+
             if (board)
             {
-                return "No Subject";
+                subject = "No Subject";
             }
             else
             {
-                string subject = "";
 
                 string JSONUrl = "http://a.4cdn.org/" + getURL().Split('/')[3] + "/thread/" + getURL().Split('/')[5] + ".json";
                 string Content = new WebClient().DownloadString(JSONUrl);
@@ -141,12 +142,12 @@ namespace GChan
                 }
                 catch (RuntimeBinderException rbe)
                 {
-                    // No subject
                     subject = "No Subject";
                 }
 
-                return subject;
             }
+
+            return subject;
         }
 
         public string GetID()

@@ -121,13 +121,16 @@
   <data name="CloseIcon" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\icons\CloseIcon.ico;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="DeleteToolStrip" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icons\DeleteToolStrip.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="OpenInBrowserToolStrip" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icons\OpenBrowser.ico;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="OpenFolder" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\icons\OpenFolder.ico;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="OpenInBrowserToolStrip" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\icons\OpenBrowser.ico;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="DeleteToolStrip" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icons\DeleteToolStrip.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="clipboard-icon" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icons\clipboard-icon.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>
