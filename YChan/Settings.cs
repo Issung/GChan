@@ -1,5 +1,4 @@
-﻿using System;/************************************************************************
-
+﻿/************************************************************************
  * Copyright (C) 2015 by themirage <mirage@secure-mail.biz>             *
  *                                                                      *
  * This program is free software: you can redistribute it and/or modify *
@@ -16,16 +15,34 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/> *
  ************************************************************************/
 
+using Microsoft.Win32;
+using System;
 using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace GChan
 {
     public partial class Settings : Form
     {
+        private const string PROGRAM_NAME = "GChan";
+
         public Settings()
         {
             InitializeComponent();
+        }
+
+        private void Settings_Shown(object sender, EventArgs e)
+        {
+            // Load settings into controls
+            edtPath.Text = Properties.Settings.Default.path;
+            edtTimer.Text = (Properties.Settings.Default.timer / 1000).ToString();
+            chkHTML.Checked = Properties.Settings.Default.loadHTML;
+            chkSave.Checked = Properties.Settings.Default.saveOnClose;
+            chkTray.Checked = Properties.Settings.Default.minimizeToTray;
+            chkWarn.Checked = Properties.Settings.Default.warnOnClose;
+
+            chkStartWithWindows.Checked = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true).GetValueNames().Contains(PROGRAM_NAME);
         }
 
         private void btnSSave_Click(object sender, EventArgs e)
@@ -45,7 +62,22 @@ namespace GChan
                 }
                 else
                 {
-                    General.SaveSettings(edtPath.Text, int.Parse(edtTimer.Text) * 1000, chkHTML.Checked, chkSave.Checked, chkTray.Checked, chkWarn.Checked); // save settings
+                    RegistryKey registryKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+
+                    if (chkStartWithWindows.Checked)
+                        registryKey.SetValue(PROGRAM_NAME, '"' + Application.ExecutablePath + '"' + " -tray");
+                    else
+                        registryKey.DeleteValue(PROGRAM_NAME);
+
+                    General.SaveSettings(
+                        edtPath.Text, 
+                        int.Parse(edtTimer.Text) * 1000,
+                        chkHTML.Checked,
+                        chkSave.Checked,
+                        chkTray.Checked,
+                        chkWarn.Checked
+                    );
+
                     this.Close();
                 }
             }
@@ -60,30 +92,7 @@ namespace GChan
             this.Close();
         }
 
-        private void edtPath_Click(object sender, EventArgs e)
-        {
-            FolderBrowserDialog FolD = new FolderBrowserDialog();
-            FolD.Description = "Select Folder";
-            FolD.SelectedPath = @"C:\";
-            DialogResult dRes = FolD.ShowDialog(this);
-
-            if (dRes == DialogResult.OK)
-            {
-                edtPath.Text = FolD.SelectedPath;
-            }
-        }
-
-        private void Settings_Shown(object sender, EventArgs e)
-        { // load settings into controls
-            edtPath.Text = Properties.Settings.Default.path;
-            edtTimer.Text = (Properties.Settings.Default.timer / 1000).ToString();
-            chkHTML.Checked = Properties.Settings.Default.loadHTML;
-            chkSave.Checked = Properties.Settings.Default.saveOnClose;
-            chkTray.Checked = Properties.Settings.Default.minimizeToTray;
-            chkWarn.Checked = Properties.Settings.Default.warnOnClose;
-        }
-
-        //Source: https://stackoverflow.com/questions/1410127/c-sharp-test-if-user-has-write-access-to-a-folder?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
+        //Source: https://stackoverflow.com/q/1410127/8306962
         private bool hasWriteAccessToFolder(string folderPath, out string reason)
         {
             try
@@ -103,6 +112,19 @@ namespace GChan
             {
                 reason = "Directory not found.";
                 return false;
+            }
+        }
+
+        private void SetPathButton_Click(object sender, EventArgs e)
+        {
+            FolderBrowserDialog FolD = new FolderBrowserDialog();
+            FolD.Description = "Select Folder";
+            FolD.SelectedPath = @"C:\";
+            DialogResult dRes = FolD.ShowDialog(this);
+
+            if (dRes == DialogResult.OK)
+            {
+                edtPath.Text = FolD.SelectedPath;
             }
         }
     }

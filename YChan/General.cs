@@ -166,5 +166,23 @@ namespace GChan
                 throw WebE;
             }
         }
+
+        public static string MessageBoxGetString(string currentSubject)
+        {
+            GetStringMessageBox dialog = new GetStringMessageBox(currentSubject);
+
+            // Show testDialog as a modal dialog and determine if DialogResult = OK.
+            if (dialog.ShowDialog() == DialogResult.OK)
+            {
+                // Read the contents of testDialog's TextBox.
+                return dialog.UserEntry;
+            }
+            else
+            {
+                return null;
+            }
+
+            dialog.Dispose();
+        }
     }
 }

@@ -54,7 +54,7 @@ namespace GChan
                 this.SaveTo = Properties.Settings.Default.path + "\\" + this.siteName + "\\" + getURL().Split('/')[3];
             }
 
-            subject = getThreadName();
+            subject = GetThreadName();
         }
 
         public new static bool urlIsThread(string url)

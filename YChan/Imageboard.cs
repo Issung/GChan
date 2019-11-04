@@ -1,4 +1,4 @@
-﻿/************************************************************************
+/************************************************************************
  * Copyright (C) 2015 by themirage <mirage@secure-mail.biz>             *
  *                                                                      *
  * This program is free software: you can redistribute it and/or modify *
@@ -34,6 +34,8 @@ namespace GChan
 {
     public abstract class Imageboard
     {
+        public const string NO_SUBJECT = "No Subject";
+
         protected string URL;                            // Thread/Board URL
         protected string SaveTo;                         // Path to save to
         protected string siteName;                       // Name of the site
@@ -54,6 +56,7 @@ namespace GChan
             this.URL = url;
             this.board = isBoard;
             boardName = GetBoardName();
+
             if (!board)
             {
                 id = GetID();
@@ -120,7 +123,7 @@ namespace GChan
             }
         }
 
-        protected string getThreadName()
+        protected string GetThreadName()
         {
             string subject;
 
@@ -142,12 +145,17 @@ namespace GChan
                 }
                 catch (RuntimeBinderException rbe)
                 {
-                    subject = "No Subject";
+                    subject = NO_SUBJECT;
                 }
 
             }
 
             return subject;
+        }
+
+        public void SetSubject(string newSubject)
+        {
+            subject = newSubject;
         }
 
         public string GetID()

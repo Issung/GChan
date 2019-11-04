@@ -46,21 +46,22 @@
             this.btnAdd = new System.Windows.Forms.Button();
             this.URLTextBox = new System.Windows.Forms.TextBox();
             this.cmThreads = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.openFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.openInBrowserToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.copyURLToClipboardToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.deleteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cmBoards = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem3 = new System.Windows.Forms.ToolStripMenuItem();
             this.nfTray = new System.Windows.Forms.NotifyIcon(this.components);
             this.cmTray = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.cmTrayOpen = new System.Windows.Forms.ToolStripMenuItem();
-            this.cmTrayExit = new System.Windows.Forms.ToolStripMenuItem();
             this.btnClearAll = new System.Windows.Forms.Button();
             this.clipboardButton = new System.Windows.Forms.Button();
             this.toolTip = new System.Windows.Forms.ToolTip(this.components);
+            this.openFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.openInBrowserToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.copyURLToClipboardToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.renameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.deleteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.cmTrayOpen = new System.Windows.Forms.ToolStripMenuItem();
+            this.cmTrayExit = new System.Windows.Forms.ToolStripMenuItem();
             this.msHead.SuspendLayout();
             this.tcApp.SuspendLayout();
             this.tpThreads.SuspendLayout();
@@ -102,7 +103,6 @@
             // 
             // openFolderToolStripMenuItem1
             // 
-            this.openFolderToolStripMenuItem1.Image = global::GChan.Properties.Resources.OpenFolder;
             this.openFolderToolStripMenuItem1.Name = "openFolderToolStripMenuItem1";
             this.openFolderToolStripMenuItem1.Size = new System.Drawing.Size(139, 22);
             this.openFolderToolStripMenuItem1.Text = "&Open Folder";
@@ -115,7 +115,6 @@
             // 
             // exitToolStripMenuItem
             // 
-            this.exitToolStripMenuItem.Image = global::GChan.Properties.Resources.CloseIcon;
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
             this.exitToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Q)));
             this.exitToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
@@ -280,41 +279,10 @@
             this.openFolderToolStripMenuItem,
             this.openInBrowserToolStripMenuItem,
             this.copyURLToClipboardToolStripMenuItem,
+            this.renameToolStripMenuItem,
             this.deleteToolStripMenuItem});
             this.cmThreads.Name = "cmThreads";
-            this.cmThreads.Size = new System.Drawing.Size(196, 92);
-            // 
-            // openFolderToolStripMenuItem
-            // 
-            this.openFolderToolStripMenuItem.Image = global::GChan.Properties.Resources.OpenFolder;
-            this.openFolderToolStripMenuItem.Name = "openFolderToolStripMenuItem";
-            this.openFolderToolStripMenuItem.Size = new System.Drawing.Size(195, 22);
-            this.openFolderToolStripMenuItem.Text = "Open Folder";
-            this.openFolderToolStripMenuItem.Click += new System.EventHandler(this.openFolderToolStripMenuItem_Click);
-            // 
-            // openInBrowserToolStripMenuItem
-            // 
-            this.openInBrowserToolStripMenuItem.Image = global::GChan.Properties.Resources.OpenInBrowserToolStrip;
-            this.openInBrowserToolStripMenuItem.Name = "openInBrowserToolStripMenuItem";
-            this.openInBrowserToolStripMenuItem.Size = new System.Drawing.Size(195, 22);
-            this.openInBrowserToolStripMenuItem.Text = "Open in Browser";
-            this.openInBrowserToolStripMenuItem.Click += new System.EventHandler(this.openInBrowserToolStripMenuItem_Click);
-            // 
-            // copyURLToClipboardToolStripMenuItem
-            // 
-            this.copyURLToClipboardToolStripMenuItem.Image = global::GChan.Properties.Resources.clipboard_icon;
-            this.copyURLToClipboardToolStripMenuItem.Name = "copyURLToClipboardToolStripMenuItem";
-            this.copyURLToClipboardToolStripMenuItem.Size = new System.Drawing.Size(195, 22);
-            this.copyURLToClipboardToolStripMenuItem.Text = "Copy URL to Clipboard";
-            this.copyURLToClipboardToolStripMenuItem.Click += new System.EventHandler(this.copyURLToClipboardToolStripMenuItem_Click);
-            // 
-            // deleteToolStripMenuItem
-            // 
-            this.deleteToolStripMenuItem.Image = global::GChan.Properties.Resources.DeleteToolStrip;
-            this.deleteToolStripMenuItem.Name = "deleteToolStripMenuItem";
-            this.deleteToolStripMenuItem.Size = new System.Drawing.Size(195, 22);
-            this.deleteToolStripMenuItem.Text = "Remove";
-            this.deleteToolStripMenuItem.Click += new System.EventHandler(this.deleteToolStripMenuItem_Click);
+            this.cmThreads.Size = new System.Drawing.Size(196, 114);
             // 
             // cmBoards
             // 
@@ -327,7 +295,6 @@
             // 
             // toolStripMenuItem1
             // 
-            this.toolStripMenuItem1.Image = global::GChan.Properties.Resources.OpenFolder;
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
             this.toolStripMenuItem1.Size = new System.Drawing.Size(161, 22);
             this.toolStripMenuItem1.Text = "Open Folder";
@@ -335,7 +302,6 @@
             // 
             // toolStripMenuItem2
             // 
-            this.toolStripMenuItem2.Image = global::GChan.Properties.Resources.OpenInBrowserToolStrip;
             this.toolStripMenuItem2.Name = "toolStripMenuItem2";
             this.toolStripMenuItem2.Size = new System.Drawing.Size(161, 22);
             this.toolStripMenuItem2.Text = "Open in Browser";
@@ -343,7 +309,6 @@
             // 
             // toolStripMenuItem3
             // 
-            this.toolStripMenuItem3.Image = global::GChan.Properties.Resources.DeleteToolStrip;
             this.toolStripMenuItem3.Name = "toolStripMenuItem3";
             this.toolStripMenuItem3.Size = new System.Drawing.Size(161, 22);
             this.toolStripMenuItem3.Text = "Remove";
@@ -364,22 +329,6 @@
             this.cmTrayExit});
             this.cmTray.Name = "cmTray";
             this.cmTray.Size = new System.Drawing.Size(140, 48);
-            // 
-            // cmTrayOpen
-            // 
-            this.cmTrayOpen.Image = global::GChan.Properties.Resources.OpenFolder;
-            this.cmTrayOpen.Name = "cmTrayOpen";
-            this.cmTrayOpen.Size = new System.Drawing.Size(139, 22);
-            this.cmTrayOpen.Text = "Open Folder";
-            this.cmTrayOpen.Click += new System.EventHandler(this.cmTrayOpen_Click);
-            // 
-            // cmTrayExit
-            // 
-            this.cmTrayExit.Image = global::GChan.Properties.Resources.CloseIcon;
-            this.cmTrayExit.Name = "cmTrayExit";
-            this.cmTrayExit.Size = new System.Drawing.Size(139, 22);
-            this.cmTrayExit.Text = "Exit";
-            this.cmTrayExit.Click += new System.EventHandler(this.cmTrayExit_Click);
             // 
             // btnClearAll
             // 
@@ -405,6 +354,63 @@
             this.toolTip.SetToolTip(this.clipboardButton, "Copy Thread URLs to Clipboard (Delimited by commas)");
             this.clipboardButton.UseVisualStyleBackColor = true;
             this.clipboardButton.Click += new System.EventHandler(this.clipboardButton_Click);
+            // 
+            // openFolderToolStripMenuItem
+            // 
+            this.openFolderToolStripMenuItem.Image = global::GChan.Properties.Resources.folder;
+            this.openFolderToolStripMenuItem.Name = "openFolderToolStripMenuItem";
+            this.openFolderToolStripMenuItem.Size = new System.Drawing.Size(195, 22);
+            this.openFolderToolStripMenuItem.Text = "Open &Folder";
+            this.openFolderToolStripMenuItem.Click += new System.EventHandler(this.openFolderToolStripMenuItem_Click);
+            // 
+            // openInBrowserToolStripMenuItem
+            // 
+            this.openInBrowserToolStripMenuItem.AutoSize = false;
+            this.openInBrowserToolStripMenuItem.Image = global::GChan.Properties.Resources.world;
+            this.openInBrowserToolStripMenuItem.Name = "openInBrowserToolStripMenuItem";
+            this.openInBrowserToolStripMenuItem.Size = new System.Drawing.Size(195, 22);
+            this.openInBrowserToolStripMenuItem.Text = "Open in &Browser";
+            this.openInBrowserToolStripMenuItem.Click += new System.EventHandler(this.openInBrowserToolStripMenuItem_Click);
+            // 
+            // copyURLToClipboardToolStripMenuItem
+            // 
+            this.copyURLToClipboardToolStripMenuItem.Image = global::GChan.Properties.Resources.clipboard;
+            this.copyURLToClipboardToolStripMenuItem.Name = "copyURLToClipboardToolStripMenuItem";
+            this.copyURLToClipboardToolStripMenuItem.Size = new System.Drawing.Size(195, 22);
+            this.copyURLToClipboardToolStripMenuItem.Text = "Copy &URL to Clipboard";
+            this.copyURLToClipboardToolStripMenuItem.Click += new System.EventHandler(this.copyURLToClipboardToolStripMenuItem_Click);
+            // 
+            // renameToolStripMenuItem
+            // 
+            this.renameToolStripMenuItem.Image = global::GChan.Properties.Resources.Rename;
+            this.renameToolStripMenuItem.Name = "renameToolStripMenuItem";
+            this.renameToolStripMenuItem.Size = new System.Drawing.Size(195, 22);
+            this.renameToolStripMenuItem.Text = "&Rename";
+            this.renameToolStripMenuItem.Click += new System.EventHandler(this.renameToolStripMenuItem_Click);
+            // 
+            // deleteToolStripMenuItem
+            // 
+            this.deleteToolStripMenuItem.Image = global::GChan.Properties.Resources.close;
+            this.deleteToolStripMenuItem.Name = "deleteToolStripMenuItem";
+            this.deleteToolStripMenuItem.Size = new System.Drawing.Size(195, 22);
+            this.deleteToolStripMenuItem.Text = "R&emove";
+            this.deleteToolStripMenuItem.Click += new System.EventHandler(this.deleteToolStripMenuItem_Click);
+            // 
+            // cmTrayOpen
+            // 
+            this.cmTrayOpen.Image = global::GChan.Properties.Resources.folder;
+            this.cmTrayOpen.Name = "cmTrayOpen";
+            this.cmTrayOpen.Size = new System.Drawing.Size(139, 22);
+            this.cmTrayOpen.Text = "Open Folder";
+            this.cmTrayOpen.Click += new System.EventHandler(this.cmTrayOpen_Click);
+            // 
+            // cmTrayExit
+            // 
+            this.cmTrayExit.Image = global::GChan.Properties.Resources.close;
+            this.cmTrayExit.Name = "cmTrayExit";
+            this.cmTrayExit.Size = new System.Drawing.Size(139, 22);
+            this.cmTrayExit.Text = "Exit";
+            this.cmTrayExit.Click += new System.EventHandler(this.cmTrayExit_Click);
             // 
             // frmMain
             // 
@@ -476,6 +482,7 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn Board;
         private System.Windows.Forms.DataGridViewTextBoxColumn ID;
         private System.Windows.Forms.ToolStripMenuItem copyURLToClipboardToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem renameToolStripMenuItem;
     }
 }
 

@@ -1,0 +1,15 @@
+﻿Todo items:
+	Archived thread indicator (with red text or seperate column).
+	Thread file/image count indicator (new column).
+	Right click column headers -> choose visible columns.
+	Column sorting?
+
+	Right click thread -> Set custom subject text.
+		This is done but does not persist across application shutdown/startup.
+		Need to find how threads are saved and associate names with them.
+
+
+Done items:
+	Changed icon.
+	Add start with windows checkbox.
+	Resize settings window.
