@@ -1,7 +1,3 @@
-*Fork of [YChan](https://github.com/Ricardo1991/YChan/). [Mirage](https://sourceforge.net/u/themirage/profile/) is the original author, donate him at PayPal (mirage@secure-mail.biz) or at [Steam](http://steamcommunity.com/id/cptgrunge/wishlist).*
-
----
-
 # GChan
 GChan is a fork of YChan which aims to improve on it and add some extra features which some may find useful. YChan is an automatic imageboard scraper, it supports multithreading and auto-rechecking of threads with a custom set timer.
 
