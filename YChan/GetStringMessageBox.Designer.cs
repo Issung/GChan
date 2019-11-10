@@ -42,11 +42,11 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.promptLabel.AutoSize = true;
-            this.promptLabel.Location = new System.Drawing.Point(159, 12);
+            this.promptLabel.Location = new System.Drawing.Point(82, 9);
             this.promptLabel.Name = "promptLabel";
-            this.promptLabel.Size = new System.Drawing.Size(103, 13);
+            this.promptLabel.Size = new System.Drawing.Size(262, 13);
             this.promptLabel.TabIndex = 0;
-            this.promptLabel.Text = "Please enter a string";
+            this.promptLabel.Text = "Please enter a string. Some characters are disallowed.";
             this.promptLabel.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             // 
             // entryTextBox
@@ -57,6 +57,7 @@
             this.entryTextBox.Name = "entryTextBox";
             this.entryTextBox.Size = new System.Drawing.Size(391, 20);
             this.entryTextBox.TabIndex = 1;
+            this.entryTextBox.TextChanged += new System.EventHandler(this.entryTextBox_TextChanged);
             this.entryTextBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.entryTextBox_KeyPress);
             // 
             // okButton

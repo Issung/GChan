@@ -15,8 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/> *
  ************************************************************************/
 
+using Microsoft.Win32;
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
 using System.Net;
 using System.Text;
@@ -26,55 +26,46 @@ namespace GChan
 {
     internal class General
     {
-        /// <summary>
-        /// Returns all saved threads or boards
-        /// </summary>
-        /// <param name="board">Set true to load boards, false to load threads</param>
-        /// <returns></returns>
-        public static string LoadURLs(bool board)
-        {                                         // read saved URLS
-            if (board && File.Exists(Application.CommonAppDataPath + "\\boards.dat"))
-                return File.ReadAllText(Application.CommonAppDataPath + "\\boards.dat");
-            else if (!board && File.Exists(Application.CommonAppDataPath + "\\threads.dat"))
-                return File.ReadAllText(Application.CommonAppDataPath + "\\threads.dat");
-            else
-                return "";
-        }
+        public const string PROGRAM_NAME = "GChan";
 
         /// <summary>
         /// Saves the thread and board list to disk
         /// </summary>
-        /// <param name="Boards">List of boards</param>
-        /// <param name="Threads">List of threads</param>
-        public static void WriteURLs(List<Imageboard> Boards, List<Imageboard> Threads)
+        public static void SaveURLs(List<Imageboard> Boards, List<Imageboard> Threads)
         {
             StringBuilder sb = new StringBuilder();
 
             for (int i = 0; i < Boards.Count; i++)
                 sb.AppendLine(Boards[i].getURL());
+
             File.WriteAllText(Application.CommonAppDataPath + "\\boards.dat", sb.ToString());
 
-            sb = new StringBuilder();
+            sb.Clear();
 
             for (int i = 0; i < Threads.Count; i++)
-                sb.AppendLine(Threads[i].getURL());
+                sb.AppendLine(Threads[i].getURL() + (Threads[i].HasCustomSubject()  ? ("/?customSubject=" + Threads[i].Subject.Replace(' ', '_')) : ""));
+
             File.WriteAllText(Application.CommonAppDataPath + "\\threads.dat", sb.ToString());
         }
 
         /// <summary>
-        /// Validates if the string only contains digits
+        /// Returns all saved threads or boards
         /// </summary>
-        /// <param name="str">String to validate</param>
-        /// <returns></returns>
-        public static bool IsDigitsOnly(string str)
+        /// <param name="board">Set true to load boards, false to load threads</param>
+        public static string LoadURLs(bool board)
         {
-            foreach (char c in str)
+            if (board && File.Exists(Application.CommonAppDataPath + "\\boards.dat"))
             {
-                if (c < '0' || c > '9')
-                    return false;
+                return File.ReadAllText(Application.CommonAppDataPath + "\\boards.dat");
             }
-
-            return true;
+            else if (!board && File.Exists(Application.CommonAppDataPath + "\\threads.dat"))
+            {
+                return File.ReadAllText(Application.CommonAppDataPath + "\\threads.dat");
+            }
+            else
+            { 
+                return "";
+            }
         }
 
         /// <summary>
@@ -86,7 +77,7 @@ namespace GChan
         /// <param name="saveOnclose">Save URLs or not</param>
         /// <param name="tray">Minimize to tray or not</param>
         /// <param name="closeWarn">Warn before closing or not</param>
-        public static void SaveSettings(string path, int time, bool loadHTML, bool saveOnclose, bool tray, bool closeWarn)
+        public static void SaveSettings(string path, int time, bool loadHTML, bool saveOnclose, bool tray, bool closeWarn, bool startWithWindows)
         {
             Properties.Settings.Default.path = path;
             Properties.Settings.Default.timer = time;
@@ -96,6 +87,28 @@ namespace GChan
             Properties.Settings.Default.warnOnClose = closeWarn;
 
             Properties.Settings.Default.Save();
+
+            RegistryKey registryKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+
+            if (startWithWindows)
+                registryKey.SetValue(PROGRAM_NAME, '"' + Application.ExecutablePath + '"' + " -tray");
+            else
+                registryKey.DeleteValue(PROGRAM_NAME);
+        }
+
+        /// <summary>
+        /// Validates if the string only contains digits
+        /// </summary>
+        /// <param name="str">String to validate</param>
+        public static bool IsDigitsOnly(string str)
+        {
+            foreach(char c in str)
+            {
+                if (c < '0' || c > '9')
+                    return false;
+            }
+
+            return true;
         }
 
         /// <summary>
@@ -181,8 +194,14 @@ namespace GChan
             {
                 return null;
             }
+        }
 
-            dialog.Dispose();
+        public static string RemoveCharactersFromString(string haystack, params char[] removeThese)
+        {
+            string ret = haystack;
+            for (int i = 0; i < removeThese.Length; i++)
+                ret = ret.Replace(removeThese[i].ToString(), "");
+            return ret;
         }
     }
 }

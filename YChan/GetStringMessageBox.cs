@@ -38,5 +38,12 @@ namespace GChan
                 cancelButton_Click(null, null);
             }
         }
+
+        private void entryTextBox_TextChanged(object sender, EventArgs e)
+        {
+            char[] disallowedCharacters = "_/\\!@#$%^&*()[]{};':\"?".ToCharArray();
+
+            entryTextBox.Text = General.RemoveCharactersFromString(entryTextBox.Text, disallowedCharacters);
+        }
     }
 }

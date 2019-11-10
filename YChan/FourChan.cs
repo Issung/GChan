@@ -25,8 +25,6 @@ using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using System.Xml;
 using System.Xml.Linq;
-using Microsoft.CSharp.RuntimeBinder;
-using Newtonsoft.Json.Linq;
 
 // see Infinitechan.cs for explanation
 
@@ -34,24 +32,31 @@ namespace GChan
 {
     internal class FourChan : Imageboard
     {
-        public static string regThread = "boards.(4chan|4channel).org/[a-zA-Z0-9]*?/thread/[0-9]*";
-        public static string regBoard = "boards.(4chan|4channel).org/[a-zA-Z0-9]*?/*$";
+        public const string regThread = "boards.(4chan|4channel).org/[a-zA-Z0-9]*?/thread/[0-9]*";
+        public const string regBoard = "boards.(4chan|4channel).org/[a-zA-Z0-9]*?/*$";
 
         public FourChan(string url, bool isBoard) : base(url, isBoard)
         {
             this.board = isBoard;
             this.siteName = "4chan";
 
-            if (!isBoard)
+            if (isBoard)
+            {
+                this.URL = url;
+                this.SaveTo = Properties.Settings.Default.path + "\\" + this.siteName + "\\" + getURL().Split('/')[3];
+            }
+            else
             {
                 Match match = Regex.Match(url, @"boards.(4chan|4channel).org/[a-zA-Z0-9]*?/thread/\d*");
                 this.URL = "http://" + match.Groups[0].Value;
                 this.SaveTo = Properties.Settings.Default.path + "\\" + this.siteName + "\\" + getURL().Split('/')[3] + "\\" + getURL().Split('/')[5];
-            }
-            else
-            {
-                this.URL = url;
-                this.SaveTo = Properties.Settings.Default.path + "\\" + this.siteName + "\\" + getURL().Split('/')[3];
+
+                if (url.Contains("?"))
+                {
+                    customSubject = url.Substring(url.LastIndexOf('=') + 1).Replace('_', ' ');
+                    this.URL = url.Substring(0, url.LastIndexOf('/'));
+                    id = GetID();
+                }
             }
 
             subject = GetThreadName();

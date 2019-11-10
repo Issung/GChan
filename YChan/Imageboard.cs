@@ -46,7 +46,12 @@ namespace GChan
         protected string boardName;
         protected string id;
 
-        public string Subject { get { return subject; } }
+        protected string customSubject = null;                     // A custom subject able to be set by the user.
+
+        /// <summary>
+        /// Returns the thread's subject name, if there is a custom subject name then that is set instead.
+        /// </summary>
+        public string Subject { get { return customSubject == null ? subject : customSubject; } }
         public string BoardName { get { return boardName; } }
         public string ID { get { return id; } }
 
@@ -153,9 +158,14 @@ namespace GChan
             return subject;
         }
 
-        public void SetSubject(string newSubject)
+        public bool HasCustomSubject()
         {
-            subject = newSubject;
+            return customSubject != null;
+        }
+
+        public void SetCustomSubject(string newCustomSubject)
+        {
+            customSubject = newCustomSubject;
         }
 
         public string GetID()

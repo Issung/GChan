@@ -23,24 +23,27 @@
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
+            this.components = new System.ComponentModel.Container();
             this.btnSSave = new System.Windows.Forms.Button();
             this.btnSCan = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
-            this.edtPath = new System.Windows.Forms.TextBox();
-            this.edtTimer = new System.Windows.Forms.TextBox();
             this.chkHTML = new System.Windows.Forms.CheckBox();
             this.chkSave = new System.Windows.Forms.CheckBox();
             this.chkTray = new System.Windows.Forms.CheckBox();
             this.chkWarn = new System.Windows.Forms.CheckBox();
             this.setPathButton = new System.Windows.Forms.Button();
             this.chkStartWithWindows = new System.Windows.Forms.CheckBox();
+            this.timerNumeric = new System.Windows.Forms.NumericUpDown();
+            this.directoryTextBox = new System.Windows.Forms.TextBox();
+            this.tooltip = new System.Windows.Forms.ToolTip(this.components);
+            ((System.ComponentModel.ISupportInitialize)(this.timerNumeric)).BeginInit();
             this.SuspendLayout();
             // 
             // btnSSave
             // 
             this.btnSSave.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
-            this.btnSSave.Location = new System.Drawing.Point(12, 180);
+            this.btnSSave.Location = new System.Drawing.Point(11, 180);
             this.btnSSave.Name = "btnSSave";
             this.btnSSave.Size = new System.Drawing.Size(92, 23);
             this.btnSSave.TabIndex = 0;
@@ -51,7 +54,7 @@
             // btnSCan
             // 
             this.btnSCan.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
-            this.btnSCan.Location = new System.Drawing.Point(110, 180);
+            this.btnSCan.Location = new System.Drawing.Point(109, 180);
             this.btnSCan.Name = "btnSCan";
             this.btnSCan.Size = new System.Drawing.Size(94, 23);
             this.btnSCan.TabIndex = 1;
@@ -76,20 +79,6 @@
             this.label2.Size = new System.Drawing.Size(59, 13);
             this.label2.TabIndex = 3;
             this.label2.Text = "Timer (sec)";
-            // 
-            // edtPath
-            // 
-            this.edtPath.Location = new System.Drawing.Point(77, 9);
-            this.edtPath.Name = "edtPath";
-            this.edtPath.Size = new System.Drawing.Size(96, 20);
-            this.edtPath.TabIndex = 4;
-            // 
-            // edtTimer
-            // 
-            this.edtTimer.Location = new System.Drawing.Point(77, 35);
-            this.edtTimer.Name = "edtTimer";
-            this.edtTimer.Size = new System.Drawing.Size(126, 20);
-            this.edtTimer.TabIndex = 5;
             // 
             // chkHTML
             // 
@@ -151,14 +140,39 @@
             this.chkStartWithWindows.Text = "Start GChan with Windows";
             this.chkStartWithWindows.UseVisualStyleBackColor = true;
             // 
+            // timerNumeric
+            // 
+            this.timerNumeric.Location = new System.Drawing.Point(77, 35);
+            this.timerNumeric.Maximum = new decimal(new int[] {
+            -1,
+            -1,
+            -1,
+            0});
+            this.timerNumeric.Name = "timerNumeric";
+            this.timerNumeric.Size = new System.Drawing.Size(126, 20);
+            this.timerNumeric.TabIndex = 12;
+            // 
+            // directoryTextBox
+            // 
+            this.directoryTextBox.Location = new System.Drawing.Point(77, 9);
+            this.directoryTextBox.Name = "directoryTextBox";
+            this.directoryTextBox.ReadOnly = true;
+            this.directoryTextBox.Size = new System.Drawing.Size(96, 20);
+            this.directoryTextBox.TabIndex = 13;
+            this.tooltip.SetToolTip(this.directoryTextBox, "The directory that GChan will save files in. Double click to open or go File->Ope" +
+        "n Folder in GChan\'s main window.");
+            this.directoryTextBox.DoubleClick += new System.EventHandler(this.textBox1_DoubleClick);
+            // 
             // Settings
             // 
             this.AcceptButton = this.btnSSave;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.ClientSize = new System.Drawing.Size(216, 213);
+            this.ClientSize = new System.Drawing.Size(216, 215);
             this.ControlBox = false;
+            this.Controls.Add(this.directoryTextBox);
+            this.Controls.Add(this.timerNumeric);
             this.Controls.Add(this.chkStartWithWindows);
             this.Controls.Add(this.setPathButton);
             this.Controls.Add(this.chkHTML);
@@ -169,8 +183,6 @@
             this.Controls.Add(this.chkSave);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
-            this.Controls.Add(this.edtTimer);
-            this.Controls.Add(this.edtPath);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.MinimumSize = new System.Drawing.Size(232, 252);
@@ -179,6 +191,7 @@
             this.ShowInTaskbar = false;
             this.Text = "Settings";
             this.Shown += new System.EventHandler(this.Settings_Shown);
+            ((System.ComponentModel.ISupportInitialize)(this.timerNumeric)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -190,13 +203,14 @@
         private System.Windows.Forms.Button btnSCan;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.TextBox edtPath;
-        private System.Windows.Forms.TextBox edtTimer;
         private System.Windows.Forms.CheckBox chkHTML;
         private System.Windows.Forms.CheckBox chkSave;
         private System.Windows.Forms.CheckBox chkTray;
         private System.Windows.Forms.CheckBox chkWarn;
         private System.Windows.Forms.Button setPathButton;
         private System.Windows.Forms.CheckBox chkStartWithWindows;
+        private System.Windows.Forms.NumericUpDown timerNumeric;
+        private System.Windows.Forms.TextBox directoryTextBox;
+        private System.Windows.Forms.ToolTip tooltip;
     }
 }

@@ -35,9 +35,10 @@ namespace GChan
         {
             Properties.Settings.Default.saveOnClose = true;
             Properties.Settings.Default.Save();
+
             try
             {
-                General.WriteURLs(MainFrame.ListBoards, MainFrame.ThreadList);
+                General.SaveURLs(MainFrame.ListBoards, MainFrame.ThreadList);
             }
             catch (Exception eX)
             {
@@ -56,7 +57,7 @@ namespace GChan
             Properties.Settings.Default.Save();
             try
             {
-                General.WriteURLs(MainFrame.ListBoards, MainFrame.ThreadList);
+                General.SaveURLs(MainFrame.ListBoards, MainFrame.ThreadList);
             }
             catch (Exception eX)
             {

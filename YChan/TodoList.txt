@@ -1,15 +1,23 @@
 ﻿Todo items:
-	Archived thread indicator (with red text or seperate column).
-	Thread file/image count indicator (new column).
-	Right click column headers -> choose visible columns.
-	Column sorting?
+	Add icons to all context menus.
+	Thread file/image count indicator (new column), save file count on scan.
+	Archived thread indicator (with red text or seperate column (archived yes/no)).
 
-	Right click thread -> Set custom subject text.
-		This is done but does not persist across application shutdown/startup.
-		Need to find how threads are saved and associate names with them.
+Maybes:
+	Column sorting?
+	Right click column headers -> choose visible columns.
+	Add option to add subject text to folder name once thread is finished?
 
 
 Done items:
+	Thread count in tab text.
+	Changed Settings Page:
+		Directory textbox is now readonly, opens directory on double click.
+		Timer field is now a NumericUpDown.
+	Custom subjects are now saved by appending it so saved URL as a GET URL parameter.
+	Added disallowed characters to GetStringMessageBox.
+	Removed annoying FocusCues thing on DataGridView by making custom class CustomDataGridView and overriding the bool.
+
 	Changed icon.
 	Add start with windows checkbox.
 	Resize settings window.

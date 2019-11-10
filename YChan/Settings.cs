@@ -25,7 +25,7 @@ namespace GChan
 {
     public partial class Settings : Form
     {
-        private const string PROGRAM_NAME = "GChan";
+        string directory;
 
         public Settings()
         {
@@ -35,55 +35,45 @@ namespace GChan
         private void Settings_Shown(object sender, EventArgs e)
         {
             // Load settings into controls
-            edtPath.Text = Properties.Settings.Default.path;
-            edtTimer.Text = (Properties.Settings.Default.timer / 1000).ToString();
+            directory = Properties.Settings.Default.path;
+            directoryTextBox.Text = directory;
+
+            timerNumeric.Value = (Properties.Settings.Default.timer / 1000);
             chkHTML.Checked = Properties.Settings.Default.loadHTML;
             chkSave.Checked = Properties.Settings.Default.saveOnClose;
             chkTray.Checked = Properties.Settings.Default.minimizeToTray;
             chkWarn.Checked = Properties.Settings.Default.warnOnClose;
 
-            chkStartWithWindows.Checked = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true).GetValueNames().Contains(PROGRAM_NAME);
+            chkStartWithWindows.Checked = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true).GetValueNames().Contains(General.PROGRAM_NAME);
         }
 
         private void btnSSave_Click(object sender, EventArgs e)
         {
-            if ((edtPath.Text != "") && General.IsDigitsOnly(edtTimer.Text))
+            string reason;
+
+            if (!hasWriteAccessToFolder(directory, out reason))
             {
-                string reason;
-                if (!hasWriteAccessToFolder(edtPath.Text, out reason))
-                {
-                    MessageBox.Show(reason, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-                if (int.Parse(edtTimer.Text) < 5)
-                {
-                    MessageBox.Show("Timer has to be higher than 5 seconds");
-                    return;
-                }
-                else
-                {
-                    RegistryKey registryKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
-
-                    if (chkStartWithWindows.Checked)
-                        registryKey.SetValue(PROGRAM_NAME, '"' + Application.ExecutablePath + '"' + " -tray");
-                    else
-                        registryKey.DeleteValue(PROGRAM_NAME);
-
-                    General.SaveSettings(
-                        edtPath.Text, 
-                        int.Parse(edtTimer.Text) * 1000,
-                        chkHTML.Checked,
-                        chkSave.Checked,
-                        chkTray.Checked,
-                        chkWarn.Checked
-                    );
-
-                    this.Close();
-                }
+                MessageBox.Show(reason, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+            if (timerNumeric.Value < 5)
+            {
+                MessageBox.Show("Timer has to be higher than 5 seconds");
+                return;
             }
             else
             {
-                MessageBox.Show("Check value for timer and path");
+                General.SaveSettings(
+                    directory, 
+                    (int)timerNumeric.Value * 1000,
+                    chkHTML.Checked,
+                    chkSave.Checked,
+                    chkTray.Checked,
+                    chkWarn.Checked,
+                    chkStartWithWindows.Checked
+                );
+
+                this.Close();
             }
         }
 
@@ -124,8 +114,14 @@ namespace GChan
 
             if (dRes == DialogResult.OK)
             {
-                edtPath.Text = FolD.SelectedPath;
+                directory = FolD.SelectedPath;
+                directoryTextBox.Text = directory;
             }
+        }
+
+        private void textBox1_DoubleClick(object sender, EventArgs e)
+        {
+            System.Diagnostics.Process.Start("explorer.exe", string.Format(directory));
         }
     }
 }
