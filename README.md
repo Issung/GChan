@@ -7,13 +7,15 @@ Requires .NET Framework 4.5 or higher, GUI is made with Winforms.
 
 ![GChan Window](https://i.imgur.com/K3gBBsM.png)
 
-## This Fork
-* Fixes the HTML page downloader on 4chan.
-* Improvements to the user interface and quality of life   .
+## New Features
+* Improvements to the user interface and quality of life.
     * New thread layout using grid.
-        * New columns which say thread subject, board and ID.
+        * Columns that seperate thread subject, board and ID.
         * Subject renaming useful for threads with no subject (WIP).
-* Can add multiple threads at once seperated by a comma (,).
-* Can copy links to all followed threads seperated by a comma (,).
-* New settings layout.
-* Added option to start GChan with Windows.
+* Add multiple threads at once seperated by a comma (,).
+* Copy URLs of all followed threads to clipboard seperated by a comma (,).
+* Right click a thread and copy URL to clipboard.
+* Set a custom subject to be displayed for a thread, useful if the thread has no subject or a non-descriptive subject.
+* New settings layout and new settings.
+	* Option to start GChan with Windows.
+	* Option to automatically add thread's subject to thread's folder name when automatically or manually removed.
