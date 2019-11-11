@@ -45,6 +45,8 @@ namespace GChan
             chkWarn.Checked = Properties.Settings.Default.warnOnClose;
 
             chkStartWithWindows.Checked = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true).GetValueNames().Contains(General.PROGRAM_NAME);
+
+            addThreadSubjectToFolderCheckBox.Checked = Properties.Settings.Default.addThreadSubjectToFolder;
         }
 
         private void btnSSave_Click(object sender, EventArgs e)
@@ -70,7 +72,8 @@ namespace GChan
                     chkSave.Checked,
                     chkTray.Checked,
                     chkWarn.Checked,
-                    chkStartWithWindows.Checked
+                    chkStartWithWindows.Checked,
+                    addThreadSubjectToFolderCheckBox.Checked
                 );
 
                 this.Close();

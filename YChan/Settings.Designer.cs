@@ -24,6 +24,7 @@
         /// </summary>
         private void InitializeComponent() {
             this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Settings));
             this.btnSSave = new System.Windows.Forms.Button();
             this.btnSCan = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
@@ -37,13 +38,14 @@
             this.timerNumeric = new System.Windows.Forms.NumericUpDown();
             this.directoryTextBox = new System.Windows.Forms.TextBox();
             this.tooltip = new System.Windows.Forms.ToolTip(this.components);
+            this.addThreadSubjectToFolderCheckBox = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.timerNumeric)).BeginInit();
             this.SuspendLayout();
             // 
             // btnSSave
             // 
             this.btnSSave.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
-            this.btnSSave.Location = new System.Drawing.Point(11, 180);
+            this.btnSSave.Location = new System.Drawing.Point(59, 201);
             this.btnSSave.Name = "btnSSave";
             this.btnSSave.Size = new System.Drawing.Size(92, 23);
             this.btnSSave.TabIndex = 0;
@@ -54,7 +56,7 @@
             // btnSCan
             // 
             this.btnSCan.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
-            this.btnSCan.Location = new System.Drawing.Point(109, 180);
+            this.btnSCan.Location = new System.Drawing.Point(157, 201);
             this.btnSCan.Name = "btnSCan";
             this.btnSCan.Size = new System.Drawing.Size(94, 23);
             this.btnSCan.TabIndex = 1;
@@ -122,7 +124,7 @@
             // 
             // setPathButton
             // 
-            this.setPathButton.Location = new System.Drawing.Point(179, 8);
+            this.setPathButton.Location = new System.Drawing.Point(270, 8);
             this.setPathButton.Name = "setPathButton";
             this.setPathButton.Size = new System.Drawing.Size(25, 22);
             this.setPathButton.TabIndex = 10;
@@ -149,7 +151,7 @@
             -1,
             0});
             this.timerNumeric.Name = "timerNumeric";
-            this.timerNumeric.Size = new System.Drawing.Size(126, 20);
+            this.timerNumeric.Size = new System.Drawing.Size(218, 20);
             this.timerNumeric.TabIndex = 12;
             // 
             // directoryTextBox
@@ -157,11 +159,22 @@
             this.directoryTextBox.Location = new System.Drawing.Point(77, 9);
             this.directoryTextBox.Name = "directoryTextBox";
             this.directoryTextBox.ReadOnly = true;
-            this.directoryTextBox.Size = new System.Drawing.Size(96, 20);
+            this.directoryTextBox.Size = new System.Drawing.Size(187, 20);
             this.directoryTextBox.TabIndex = 13;
             this.tooltip.SetToolTip(this.directoryTextBox, "The directory that GChan will save files in. Double click to open or go File->Ope" +
         "n Folder in GChan\'s main window.");
             this.directoryTextBox.DoubleClick += new System.EventHandler(this.textBox1_DoubleClick);
+            // 
+            // addThreadSubjectToFolderCheckBox
+            // 
+            this.addThreadSubjectToFolderCheckBox.AutoSize = true;
+            this.addThreadSubjectToFolderCheckBox.Location = new System.Drawing.Point(15, 176);
+            this.addThreadSubjectToFolderCheckBox.Name = "addThreadSubjectToFolderCheckBox";
+            this.addThreadSubjectToFolderCheckBox.Size = new System.Drawing.Size(272, 17);
+            this.addThreadSubjectToFolderCheckBox.TabIndex = 14;
+            this.addThreadSubjectToFolderCheckBox.Text = "Add thread subject to folder when thread is removed\r\n";
+            this.tooltip.SetToolTip(this.addThreadSubjectToFolderCheckBox, resources.GetString("addThreadSubjectToFolderCheckBox.ToolTip"));
+            this.addThreadSubjectToFolderCheckBox.UseVisualStyleBackColor = true;
             // 
             // Settings
             // 
@@ -169,8 +182,9 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.ClientSize = new System.Drawing.Size(216, 215);
+            this.ClientSize = new System.Drawing.Size(310, 236);
             this.ControlBox = false;
+            this.Controls.Add(this.addThreadSubjectToFolderCheckBox);
             this.Controls.Add(this.directoryTextBox);
             this.Controls.Add(this.timerNumeric);
             this.Controls.Add(this.chkStartWithWindows);
@@ -212,5 +226,6 @@
         private System.Windows.Forms.NumericUpDown timerNumeric;
         private System.Windows.Forms.TextBox directoryTextBox;
         private System.Windows.Forms.ToolTip tooltip;
+        private System.Windows.Forms.CheckBox addThreadSubjectToFolderCheckBox;
     }
 }

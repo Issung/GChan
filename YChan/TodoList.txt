@@ -6,10 +6,9 @@
 Maybes:
 	Column sorting?
 	Right click column headers -> choose visible columns.
-	Add option to add subject text to folder name once thread is finished?
-
 
 Done items:
+	Added option to add subject text to folder name once thread is archived or manually removed.
 	Thread count in tab text.
 	Changed Settings Page:
 		Directory textbox is now readonly, opens directory on double click.

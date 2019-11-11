@@ -83,7 +83,7 @@ namespace GChan
             return this.siteName;
         }
 
-        public string getPath()
+        public string GetPath()
         {
             return this.SaveTo;
         }

@@ -77,7 +77,15 @@ namespace GChan
         /// <param name="saveOnclose">Save URLs or not</param>
         /// <param name="tray">Minimize to tray or not</param>
         /// <param name="closeWarn">Warn before closing or not</param>
-        public static void SaveSettings(string path, int time, bool loadHTML, bool saveOnclose, bool tray, bool closeWarn, bool startWithWindows)
+        public static void SaveSettings(
+            string path, 
+            int time, 
+            bool loadHTML, 
+            bool saveOnclose, 
+            bool tray, 
+            bool closeWarn, 
+            bool startWithWindows,
+            bool addThreadSubjectToFolder)
         {
             Properties.Settings.Default.path = path;
             Properties.Settings.Default.timer = time;
@@ -85,6 +93,7 @@ namespace GChan
             Properties.Settings.Default.saveOnClose = saveOnclose;
             Properties.Settings.Default.minimizeToTray = tray;
             Properties.Settings.Default.warnOnClose = closeWarn;
+            Properties.Settings.Default.addThreadSubjectToFolder = addThreadSubjectToFolder;
 
             Properties.Settings.Default.Save();
 

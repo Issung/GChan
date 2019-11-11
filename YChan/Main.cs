@@ -150,7 +150,7 @@ namespace GChan
                     DialogResult result = MessageBox.Show("URL is already in queue!\nOpen corresponding folder?", "Error", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1);
                     if (result == DialogResult.Yes)
                     {
-                        string spath = newImageboard.getPath();
+                        string spath = newImageboard.GetPath();
                         if (!Directory.Exists(spath))
                             Directory.CreateDirectory(spath);
                         Process.Start(spath);
@@ -221,6 +221,16 @@ namespace GChan
             {
                 lock (threadLock)
                 {
+                    try
+                    {
+                        if (Properties.Settings.Default.addThreadSubjectToFolder)
+                            Directory.Move(ThreadList[threadIndex].GetPath(), ThreadList[threadIndex].GetPath() + " - " + ThreadList[threadIndex].Subject);
+                    }
+                    catch
+                    {
+
+                    }
+
                     ThreadList.RemoveAt(threadIndex);
                     updateDataSource(URLType.Thread);
                 }
@@ -253,7 +263,7 @@ namespace GChan
         {
             if (threadIndex != -1)
             {
-                string spath = ThreadList[threadIndex].getPath();
+                string spath = ThreadList[threadIndex].GetPath();
                 if (!Directory.Exists(spath))
                     Directory.CreateDirectory(spath);
                 Process.Start(spath);
@@ -328,7 +338,7 @@ namespace GChan
         {
             if (bPos != -1)
             {
-                string spath = ListBoards[bPos].getPath();
+                string spath = ListBoards[bPos].GetPath();
                 if (!Directory.Exists(spath))
                     Directory.CreateDirectory(spath);
                 Process.Start(spath);
@@ -403,6 +413,16 @@ namespace GChan
                 { 
                     if (ThreadList[i].isGone())
                     {
+                        try
+                        {
+                            if (Properties.Settings.Default.addThreadSubjectToFolder)
+                                Directory.Move(ThreadList[i].GetPath(), ThreadList[i].GetPath() + " - " + ThreadList[i].Subject);
+                        }
+                        catch 
+                        {
+                            
+                        }
+
                         ThreadList.RemoveAt(i);
                         i--;    // Move back in list because of removal
                     }
@@ -573,7 +593,7 @@ namespace GChan
             {
                 if ((pos = lbBoards.IndexFromPoint(e.Location)) != -1)
                 {
-                    string spath = ListBoards[pos].getPath();
+                    string spath = ListBoards[pos].GetPath();
                     if (!Directory.Exists(spath))
                         Directory.CreateDirectory(spath);
                     Process.Start(spath);

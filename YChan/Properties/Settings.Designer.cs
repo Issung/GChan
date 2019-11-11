@@ -118,5 +118,17 @@ namespace GChan.Properties {
                 this["UpdateSettings"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool addThreadSubjectToFolder {
+            get {
+                return ((bool)(this["addThreadSubjectToFolder"]));
+            }
+            set {
+                this["addThreadSubjectToFolder"] = value;
+            }
+        }
     }
 }
