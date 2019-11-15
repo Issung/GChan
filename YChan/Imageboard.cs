@@ -45,6 +45,7 @@ namespace GChan
         protected string subject;                        // Name of the thread.
         protected string boardName;
         protected string id;
+        protected int fileCount;
 
         protected string customSubject = null;                     // A custom subject able to be set by the user.
 
@@ -54,6 +55,8 @@ namespace GChan
         public string Subject { get { return customSubject == null ? subject : customSubject; } }
         public string BoardName { get { return boardName; } }
         public string ID { get { return id; } }
+
+        public int FileCount { get { return fileCount; } }
 
         // Constructor, setting URL and Type (Board/Thread)
         public Imageboard(string url, bool isBoard)

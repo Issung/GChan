@@ -116,6 +116,7 @@ namespace GChan
                 throw;
             }
 
+            fileCount = links.Count;
             return links.ToArray();
         }
 

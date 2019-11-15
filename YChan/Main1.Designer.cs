@@ -103,6 +103,16 @@ namespace GChan {
         /// <summary>
         ///   Looks up a localized resource of type System.Boolean similar to True.
         /// </summary>
+        public static bool FileCount_UserAddedColumn {
+            get {
+                object obj = ResourceManager.GetObject("FileCount.UserAddedColumn", resourceCulture);
+                return ((bool)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Boolean similar to True.
+        /// </summary>
         public static bool ID_UserAddedColumn {
             get {
                 object obj = ResourceManager.GetObject("ID.UserAddedColumn", resourceCulture);

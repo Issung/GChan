@@ -1,6 +1,6 @@
 ﻿Todo items:
 	Add icons to all context menus.
-	Thread file/image count indicator (new column), save file count on scan.
+	
 	Archived thread indicator (with red text or seperate column (archived yes/no)).
 
 Maybes:
@@ -8,7 +8,10 @@ Maybes:
 	Right click column headers -> choose visible columns.
 
 Done items:
+	Added new column displaying thread file count.
+
 	Added option to add subject text to folder name once thread is archived or manually removed.
+	
 	Thread count in tab text.
 	Changed Settings Page:
 		Directory textbox is now readonly, opens directory on double click.

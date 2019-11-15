@@ -38,9 +38,6 @@
             this.tcApp = new System.Windows.Forms.TabControl();
             this.tpThreads = new System.Windows.Forms.TabPage();
             this.threadGridView = new GChan.CustomDataGridView();
-            this.Subject = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Board = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ID = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.tpBoard = new System.Windows.Forms.TabPage();
             this.lbBoards = new System.Windows.Forms.ListBox();
             this.btnAdd = new System.Windows.Forms.Button();
@@ -62,6 +59,10 @@
             this.btnClearAll = new System.Windows.Forms.Button();
             this.clipboardButton = new System.Windows.Forms.Button();
             this.toolTip = new System.Windows.Forms.ToolTip(this.components);
+            this.Subject = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Board = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ID = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.FileCount = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.msHead.SuspendLayout();
             this.tcApp.SuspendLayout();
             this.tpThreads.SuspendLayout();
@@ -98,7 +99,7 @@
             // 
             this.settingsToolStripMenuItem1.Image = global::GChan.Properties.Resources.settings;
             this.settingsToolStripMenuItem1.Name = "settingsToolStripMenuItem1";
-            this.settingsToolStripMenuItem1.Size = new System.Drawing.Size(180, 22);
+            this.settingsToolStripMenuItem1.Size = new System.Drawing.Size(139, 22);
             this.settingsToolStripMenuItem1.Text = "&Settings";
             this.settingsToolStripMenuItem1.Click += new System.EventHandler(this.settingsToolStripMenuItem_Click);
             // 
@@ -106,21 +107,21 @@
             // 
             this.openFolderToolStripMenuItem1.Image = global::GChan.Properties.Resources.folder;
             this.openFolderToolStripMenuItem1.Name = "openFolderToolStripMenuItem1";
-            this.openFolderToolStripMenuItem1.Size = new System.Drawing.Size(180, 22);
+            this.openFolderToolStripMenuItem1.Size = new System.Drawing.Size(139, 22);
             this.openFolderToolStripMenuItem1.Text = "Open &Folder";
             this.openFolderToolStripMenuItem1.Click += new System.EventHandler(this.openFolderToolStripMenuItem1_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(177, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(136, 6);
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Image = global::GChan.Properties.Resources.close;
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
             this.exitToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Q)));
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
             this.exitToolStripMenuItem.Text = "&Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
@@ -188,7 +189,8 @@
             this.threadGridView.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.Subject,
             this.Board,
-            this.ID});
+            this.ID,
+            this.FileCount});
             this.threadGridView.GridColor = System.Drawing.SystemColors.Window;
             this.threadGridView.Location = new System.Drawing.Point(-1, -1);
             this.threadGridView.Margin = new System.Windows.Forms.Padding(0);
@@ -202,30 +204,6 @@
             this.threadGridView.TabIndex = 1;
             this.threadGridView.CellMouseUp += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.threadGridView_CellMouseUp);
             this.threadGridView.MouseDown += new System.Windows.Forms.MouseEventHandler(this.threadGridView_MouseDown);
-            // 
-            // Subject
-            // 
-            this.Subject.DataPropertyName = "Subject";
-            this.Subject.FillWeight = 300F;
-            this.Subject.HeaderText = "Subject";
-            this.Subject.Name = "Subject";
-            this.Subject.ReadOnly = true;
-            // 
-            // Board
-            // 
-            this.Board.DataPropertyName = "BoardName";
-            this.Board.FillWeight = 92.8934F;
-            this.Board.HeaderText = "Board";
-            this.Board.Name = "Board";
-            this.Board.ReadOnly = true;
-            // 
-            // ID
-            // 
-            this.ID.DataPropertyName = "ID";
-            this.ID.FillWeight = 92.8934F;
-            this.ID.HeaderText = "ID";
-            this.ID.Name = "ID";
-            this.ID.ReadOnly = true;
             // 
             // tpBoard
             // 
@@ -415,6 +393,37 @@
             this.clipboardButton.UseVisualStyleBackColor = true;
             this.clipboardButton.Click += new System.EventHandler(this.clipboardButton_Click);
             // 
+            // Subject
+            // 
+            this.Subject.DataPropertyName = "Subject";
+            this.Subject.FillWeight = 300F;
+            this.Subject.HeaderText = "Subject";
+            this.Subject.Name = "Subject";
+            this.Subject.ReadOnly = true;
+            // 
+            // Board
+            // 
+            this.Board.DataPropertyName = "BoardName";
+            this.Board.FillWeight = 92.8934F;
+            this.Board.HeaderText = "Board";
+            this.Board.Name = "Board";
+            this.Board.ReadOnly = true;
+            // 
+            // ID
+            // 
+            this.ID.DataPropertyName = "ID";
+            this.ID.FillWeight = 92.8934F;
+            this.ID.HeaderText = "ID";
+            this.ID.Name = "ID";
+            this.ID.ReadOnly = true;
+            // 
+            // FileCount
+            // 
+            this.FileCount.DataPropertyName = "FileCount";
+            this.FileCount.HeaderText = "File Count";
+            this.FileCount.Name = "FileCount";
+            this.FileCount.ReadOnly = true;
+            // 
             // frmMain
             // 
             this.AcceptButton = this.btnAdd;
@@ -481,11 +490,12 @@
         private GChan.CustomDataGridView threadGridView;
         private System.Windows.Forms.Button clipboardButton;
         private System.Windows.Forms.ToolTip toolTip;
+        private System.Windows.Forms.ToolStripMenuItem copyURLToClipboardToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem renameToolStripMenuItem;
         private System.Windows.Forms.DataGridViewTextBoxColumn Subject;
         private System.Windows.Forms.DataGridViewTextBoxColumn Board;
         private System.Windows.Forms.DataGridViewTextBoxColumn ID;
-        private System.Windows.Forms.ToolStripMenuItem copyURLToClipboardToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem renameToolStripMenuItem;
+        private System.Windows.Forms.DataGridViewTextBoxColumn FileCount;
     }
 }
 
