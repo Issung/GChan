@@ -16,6 +16,7 @@
  ************************************************************************/
 
 using System;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Forms;
@@ -26,44 +27,8 @@ namespace GChan
     {
         public static frmMain MainFrame;
 
-        /// <summary>
-        /// Main thread exception handler
-        /// </summary>
-        /// <param name="sender">sender</param>
-        /// <param name="e">event</param>
-        public static void Application_ThreadException(object sender, System.Threading.ThreadExceptionEventArgs e)
-        {
-            Properties.Settings.Default.saveOnClose = true;
-            Properties.Settings.Default.Save();
-
-            try
-            {
-                General.SaveURLs(MainFrame.ListBoards, MainFrame.ThreadList);
-            }
-            catch (Exception eX)
-            {
-                MessageBox.Show(eX.Message);
-            }
-        }
-
-        /// <summary>
-        /// Application domain exception handler
-        /// </summary>
-        /// <param name="sender">sender</param>
-        /// <param name="e">event</param>
-        public static void AppDomain_UnhandledException(object sender, System.UnhandledExceptionEventArgs e)
-        {
-            Properties.Settings.Default.saveOnClose = true;
-            Properties.Settings.Default.Save();
-            try
-            {
-                General.SaveURLs(MainFrame.ListBoards, MainFrame.ThreadList);
-            }
-            catch (Exception eX)
-            {
-                MessageBox.Show(eX.Message);
-            }
-        }
+        public static string APPLICATION_INSTALL_DIRECTORY { get; } = AppDomain.CurrentDomain.BaseDirectory;
+        public static string LOG_FILE { get; } = Application.CommonAppDataPath + "\\crash.logs";
 
         /// <summary>
         /// The main entry point for the application.
@@ -87,6 +52,7 @@ namespace GChan
 
                 // Unhandled exceptions for the executing UI thread
                 Application.ThreadException += new ThreadExceptionEventHandler(Application_ThreadException);
+
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
 
@@ -112,6 +78,60 @@ namespace GChan
                     WM_MY_MSG,
                     new IntPtr(0xCDCD),
                     new IntPtr(0xEFEF));
+            }
+        }
+
+        /// <summary>
+        /// Main thread exception handler
+        /// </summary>
+        public static void Application_ThreadException(object sender, System.Threading.ThreadExceptionEventArgs e)
+        {
+            Properties.Settings.Default.saveOnClose = true;
+            Properties.Settings.Default.Save();
+
+            try
+            {
+                General.SaveURLs(MainFrame.ListBoards, MainFrame.ThreadList);
+
+                string[] log = new string[] { $"[{DateTime.Now.ToString()}] - Application_ThreadException - {e.Exception.Message}", e.Exception.StackTrace };
+
+
+                if (File.Exists(LOG_FILE))
+                    File.AppendAllLines(LOG_FILE, log);
+                else
+                    File.WriteAllLines(LOG_FILE, log);
+
+            }
+            catch (Exception eX)
+            {
+                MessageBox.Show(eX.Message);
+            }
+        }
+
+        /// <summary>
+        /// Application domain exception handler
+        /// </summary>
+        public static void AppDomain_UnhandledException(object sender, System.UnhandledExceptionEventArgs e)
+        {
+            Properties.Settings.Default.saveOnClose = true;
+            Properties.Settings.Default.Save();
+
+            try
+            {
+                General.SaveURLs(MainFrame.ListBoards, MainFrame.ThreadList);
+
+                Exception ex = (Exception)e.ExceptionObject;
+                string[] log = new string[] { $"[{DateTime.Now.ToString()}] - AppDomain_UnhandledException - {ex.Message}", ex.StackTrace };
+
+
+                if (File.Exists(LOG_FILE))
+                    File.AppendAllLines(LOG_FILE, log);
+                else
+                    File.WriteAllLines(LOG_FILE, log);
+            }
+            catch (Exception eX)
+            {
+                MessageBox.Show(eX.Message);
             }
         }
 

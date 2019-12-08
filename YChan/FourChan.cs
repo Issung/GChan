@@ -50,13 +50,6 @@ namespace GChan
                 Match match = Regex.Match(url, @"boards.(4chan|4channel).org/[a-zA-Z0-9]*?/thread/\d*");
                 this.URL = "http://" + match.Groups[0].Value;
                 this.SaveTo = Properties.Settings.Default.path + "\\" + this.siteName + "\\" + getURL().Split('/')[3] + "\\" + getURL().Split('/')[5];
-
-                if (url.Contains("?"))
-                {
-                    customSubject = url.Substring(url.LastIndexOf('=') + 1).Replace('_', ' ');
-                    this.URL = url.Substring(0, url.LastIndexOf('/'));
-                    id = GetID();
-                }
             }
 
             subject = GetThreadName();

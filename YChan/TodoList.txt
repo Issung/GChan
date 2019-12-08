@@ -1,13 +1,17 @@
 ﻿Todo items:
 	Add icons to all context menus.
-	
 	Archived thread indicator (with red text or seperate column (archived yes/no)).
+	Refactor code to seperate "Imageboard" into thread and board...
+	Add support for 8kun.top.
 
 Maybes:
 	Column sorting?
 	Right click column headers -> choose visible columns.
 
 Done items:
+	Copying all threads to clipboard also includes the custom subject text now.
+	Copying URL to clipboard now includes the custom subject text in the URL as a parameter.
+
 	Added new column displaying thread file count.
 
 	Added option to add subject text to folder name once thread is archived or manually removed.

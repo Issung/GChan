@@ -175,7 +175,6 @@ namespace GChan
                 AddUrl(urls[i]);
             }
 
-
             // Clear TextBox
             URLTextBox.Text = "";
         }
@@ -663,7 +662,8 @@ namespace GChan
 
         private void clipboardButton_Click(object sender, EventArgs e)
         {
-            Clipboard.SetText(String.Join(",", ThreadList.Select(thread => thread.getURL())));
+            string text = String.Join(",", ThreadList.Select(thread => thread.getURL())).Replace("\n", "").Replace("\r", "");
+            Clipboard.SetText(text);
         }
 
         private void renameToolStripMenuItem_Click(object sender, EventArgs e)
@@ -673,7 +673,7 @@ namespace GChan
                 lock (threadLock)
                 {
                     string currentSubject = ThreadList[threadIndex].Subject;
-                    string entry = General.MessageBoxGetString(currentSubject);
+                    string entry = General.MessageBoxGetString(currentSubject, Left + 50, Top + 50);
 
                     if (entry.Length < 1)
                     {
@@ -687,6 +687,11 @@ namespace GChan
                     updateDataSource(URLType.Thread);
                 }
             }
+        }
+
+        private void openProgramDataFolderToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Process.Start(Application.CommonAppDataPath);
         }
     }
 }

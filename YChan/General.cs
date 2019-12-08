@@ -43,7 +43,7 @@ namespace GChan
             sb.Clear();
 
             for (int i = 0; i < Threads.Count; i++)
-                sb.AppendLine(Threads[i].getURL() + (Threads[i].HasCustomSubject()  ? ("/?customSubject=" + Threads[i].Subject.Replace(' ', '_')) : ""));
+                sb.AppendLine(Threads[i].getURL());
 
             File.WriteAllText(Application.CommonAppDataPath + "\\threads.dat", sb.ToString());
         }
@@ -130,13 +130,13 @@ namespace GChan
 
             if (FourChan.urlIsThread(url))
                 return new FourChan(url, false);
-            else if (Infinitechan.urlIsThread(url))
-                return new Infinitechan(url, false);
+            else if (EightKun.urlIsThread(url))
+                return new EightKun(url, false);
 
             if (FourChan.urlIsBoard(url))
                 return new FourChan(url, true);
-            else if (Infinitechan.urlIsBoard(url))
-                return new Infinitechan(url, true);
+            else if (EightKun.urlIsBoard(url))
+                return new EightKun(url, true);
 
             return null;
         }
@@ -189,15 +189,22 @@ namespace GChan
             }
         }
 
-        public static string MessageBoxGetString(string currentSubject)
+        public static string MessageBoxGetString(string currentSubject, int x = 0, int y = 0)
         {
             GetStringMessageBox dialog = new GetStringMessageBox(currentSubject);
+            dialog.TopMost = true;
+
+            if (x != 0 && y != 0)
+            {
+                dialog.Left = x;
+                dialog.Top = y;
+            }
 
             // Show testDialog as a modal dialog and determine if DialogResult = OK.
             if (dialog.ShowDialog() == DialogResult.OK)
             {
                 // Read the contents of testDialog's TextBox.
-                return dialog.UserEntry;
+                return dialog.UserEntry.Replace("\n", "").Replace("\r", "");
             }
             else
             {

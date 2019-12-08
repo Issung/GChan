@@ -85,7 +85,7 @@
     <Compile Include="GetStringMessageBox.Designer.cs">
       <DependentUpon>GetStringMessageBox.cs</DependentUpon>
     </Compile>
-    <Compile Include="Infinitechan.cs" />
+    <Compile Include="EightKun.cs" />
     <Compile Include="FourChan.cs" />
     <Compile Include="FirstStart.cs">
       <SubType>Form</SubType>

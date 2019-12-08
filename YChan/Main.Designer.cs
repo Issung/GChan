@@ -24,8 +24,8 @@
         /// </summary>
         private void InitializeComponent() {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmMain));
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             this.msHead = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.settingsToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
@@ -37,7 +37,6 @@
             this.aboutToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.tcApp = new System.Windows.Forms.TabControl();
             this.tpThreads = new System.Windows.Forms.TabPage();
-            this.threadGridView = new GChan.CustomDataGridView();
             this.tpBoard = new System.Windows.Forms.TabPage();
             this.lbBoards = new System.Windows.Forms.ListBox();
             this.btnAdd = new System.Windows.Forms.Button();
@@ -59,18 +58,20 @@
             this.btnClearAll = new System.Windows.Forms.Button();
             this.clipboardButton = new System.Windows.Forms.Button();
             this.toolTip = new System.Windows.Forms.ToolTip(this.components);
+            this.threadGridView = new GChan.CustomDataGridView();
             this.Subject = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Board = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ID = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.FileCount = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.openProgramDataFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.msHead.SuspendLayout();
             this.tcApp.SuspendLayout();
             this.tpThreads.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.threadGridView)).BeginInit();
             this.tpBoard.SuspendLayout();
             this.cmThreads.SuspendLayout();
             this.cmBoards.SuspendLayout();
             this.cmTray.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.threadGridView)).BeginInit();
             this.SuspendLayout();
             // 
             // msHead
@@ -90,6 +91,7 @@
             this.settingsToolStripMenuItem1,
             this.openFolderToolStripMenuItem1,
             this.toolStripSeparator1,
+            this.openProgramDataFolderToolStripMenuItem,
             this.exitToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
             this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
@@ -99,7 +101,7 @@
             // 
             this.settingsToolStripMenuItem1.Image = global::GChan.Properties.Resources.settings;
             this.settingsToolStripMenuItem1.Name = "settingsToolStripMenuItem1";
-            this.settingsToolStripMenuItem1.Size = new System.Drawing.Size(139, 22);
+            this.settingsToolStripMenuItem1.Size = new System.Drawing.Size(212, 22);
             this.settingsToolStripMenuItem1.Text = "&Settings";
             this.settingsToolStripMenuItem1.Click += new System.EventHandler(this.settingsToolStripMenuItem_Click);
             // 
@@ -107,21 +109,21 @@
             // 
             this.openFolderToolStripMenuItem1.Image = global::GChan.Properties.Resources.folder;
             this.openFolderToolStripMenuItem1.Name = "openFolderToolStripMenuItem1";
-            this.openFolderToolStripMenuItem1.Size = new System.Drawing.Size(139, 22);
+            this.openFolderToolStripMenuItem1.Size = new System.Drawing.Size(212, 22);
             this.openFolderToolStripMenuItem1.Text = "Open &Folder";
             this.openFolderToolStripMenuItem1.Click += new System.EventHandler(this.openFolderToolStripMenuItem1_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(136, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(209, 6);
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Image = global::GChan.Properties.Resources.close;
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
             this.exitToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Q)));
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(212, 22);
             this.exitToolStripMenuItem.Text = "&Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
@@ -171,39 +173,6 @@
             this.tpThreads.TabIndex = 0;
             this.tpThreads.Text = "Threads (0)";
             this.tpThreads.UseVisualStyleBackColor = true;
-            // 
-            // threadGridView
-            // 
-            this.threadGridView.AllowUserToAddRows = false;
-            this.threadGridView.AllowUserToDeleteRows = false;
-            this.threadGridView.AllowUserToOrderColumns = true;
-            this.threadGridView.AllowUserToResizeRows = false;
-            dataGridViewCellStyle1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(245)))), ((int)(((byte)(245)))), ((int)(((byte)(245)))));
-            this.threadGridView.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle1;
-            this.threadGridView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.threadGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
-            this.threadGridView.BackgroundColor = System.Drawing.Color.White;
-            this.threadGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.threadGridView.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.Subject,
-            this.Board,
-            this.ID,
-            this.FileCount});
-            this.threadGridView.GridColor = System.Drawing.SystemColors.Window;
-            this.threadGridView.Location = new System.Drawing.Point(-1, -1);
-            this.threadGridView.Margin = new System.Windows.Forms.Padding(0);
-            this.threadGridView.MultiSelect = false;
-            this.threadGridView.Name = "threadGridView";
-            this.threadGridView.ReadOnly = true;
-            this.threadGridView.RowHeadersVisible = false;
-            this.threadGridView.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.threadGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.threadGridView.Size = new System.Drawing.Size(552, 198);
-            this.threadGridView.TabIndex = 1;
-            this.threadGridView.CellMouseUp += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.threadGridView_CellMouseUp);
-            this.threadGridView.MouseDown += new System.Windows.Forms.MouseEventHandler(this.threadGridView_MouseDown);
             // 
             // tpBoard
             // 
@@ -357,7 +326,7 @@
             this.cmTrayOpen.Image = global::GChan.Properties.Resources.folder;
             this.cmTrayOpen.Name = "cmTrayOpen";
             this.cmTrayOpen.Size = new System.Drawing.Size(139, 22);
-            this.cmTrayOpen.Text = "Open Folder";
+            this.cmTrayOpen.Text = "Open &Folder";
             this.cmTrayOpen.Click += new System.EventHandler(this.cmTrayOpen_Click);
             // 
             // cmTrayExit
@@ -365,7 +334,7 @@
             this.cmTrayExit.Image = global::GChan.Properties.Resources.close;
             this.cmTrayExit.Name = "cmTrayExit";
             this.cmTrayExit.Size = new System.Drawing.Size(139, 22);
-            this.cmTrayExit.Text = "Exit";
+            this.cmTrayExit.Text = "&Exit";
             this.cmTrayExit.Click += new System.EventHandler(this.cmTrayExit_Click);
             // 
             // btnClearAll
@@ -392,6 +361,39 @@
             this.toolTip.SetToolTip(this.clipboardButton, "Copy Thread URLs to Clipboard (Delimited by commas)");
             this.clipboardButton.UseVisualStyleBackColor = true;
             this.clipboardButton.Click += new System.EventHandler(this.clipboardButton_Click);
+            // 
+            // threadGridView
+            // 
+            this.threadGridView.AllowUserToAddRows = false;
+            this.threadGridView.AllowUserToDeleteRows = false;
+            this.threadGridView.AllowUserToOrderColumns = true;
+            this.threadGridView.AllowUserToResizeRows = false;
+            dataGridViewCellStyle1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(245)))), ((int)(((byte)(245)))), ((int)(((byte)(245)))));
+            this.threadGridView.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle1;
+            this.threadGridView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.threadGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.threadGridView.BackgroundColor = System.Drawing.Color.White;
+            this.threadGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.threadGridView.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.Subject,
+            this.Board,
+            this.ID,
+            this.FileCount});
+            this.threadGridView.GridColor = System.Drawing.SystemColors.Window;
+            this.threadGridView.Location = new System.Drawing.Point(-1, -1);
+            this.threadGridView.Margin = new System.Windows.Forms.Padding(0);
+            this.threadGridView.MultiSelect = false;
+            this.threadGridView.Name = "threadGridView";
+            this.threadGridView.ReadOnly = true;
+            this.threadGridView.RowHeadersVisible = false;
+            this.threadGridView.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.threadGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.threadGridView.Size = new System.Drawing.Size(552, 198);
+            this.threadGridView.TabIndex = 1;
+            this.threadGridView.CellMouseUp += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.threadGridView_CellMouseUp);
+            this.threadGridView.MouseDown += new System.Windows.Forms.MouseEventHandler(this.threadGridView_MouseDown);
             // 
             // Subject
             // 
@@ -424,6 +426,14 @@
             this.FileCount.Name = "FileCount";
             this.FileCount.ReadOnly = true;
             // 
+            // openProgramDataFolderToolStripMenuItem
+            // 
+            this.openProgramDataFolderToolStripMenuItem.Image = global::GChan.Properties.Resources.folder;
+            this.openProgramDataFolderToolStripMenuItem.Name = "openProgramDataFolderToolStripMenuItem";
+            this.openProgramDataFolderToolStripMenuItem.Size = new System.Drawing.Size(212, 22);
+            this.openProgramDataFolderToolStripMenuItem.Text = "Open &ProgramData Folder";
+            this.openProgramDataFolderToolStripMenuItem.Click += new System.EventHandler(this.openProgramDataFolderToolStripMenuItem_Click);
+            // 
             // frmMain
             // 
             this.AcceptButton = this.btnAdd;
@@ -447,11 +457,11 @@
             this.msHead.PerformLayout();
             this.tcApp.ResumeLayout(false);
             this.tpThreads.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.threadGridView)).EndInit();
             this.tpBoard.ResumeLayout(false);
             this.cmThreads.ResumeLayout(false);
             this.cmBoards.ResumeLayout(false);
             this.cmTray.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.threadGridView)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -496,6 +506,7 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn Board;
         private System.Windows.Forms.DataGridViewTextBoxColumn ID;
         private System.Windows.Forms.DataGridViewTextBoxColumn FileCount;
+        private System.Windows.Forms.ToolStripMenuItem openProgramDataFolderToolStripMenuItem;
     }
 }
 

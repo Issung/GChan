@@ -68,6 +68,13 @@ namespace GChan
             if (!board)
             {
                 id = GetID();
+
+                if (url.Contains("?"))
+                {
+                    customSubject = url.Substring(url.LastIndexOf('=') + 1).Replace('_', ' ');
+                    this.URL = url.Substring(0, url.LastIndexOf('/'));
+                    id = GetID();
+                }
             }
         }
 
@@ -78,7 +85,7 @@ namespace GChan
 
         public string getURL()
         {
-            return this.URL;
+            return this.URL + (HasCustomSubject() ? ("/?customSubject=" + Subject.Replace(' ', '_')) : "");
         }
 
         public string getImName()
