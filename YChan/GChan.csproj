@@ -76,6 +76,8 @@
     <Compile Include="AboutBox.Designer.cs">
       <DependentUpon>AboutBox.cs</DependentUpon>
     </Compile>
+    <Compile Include="EnumHelper.cs" />
+    <Compile Include="ImageLink.cs" />
     <Compile Include="CustomDataGridView.cs">
       <SubType>Component</SubType>
     </Compile>

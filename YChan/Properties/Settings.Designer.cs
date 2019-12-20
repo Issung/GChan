@@ -130,5 +130,17 @@ namespace GChan.Properties {
                 this["addThreadSubjectToFolder"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public byte imageFilenameFormat {
+            get {
+                return ((byte)(this["imageFilenameFormat"]));
+            }
+            set {
+                this["imageFilenameFormat"] = value;
+            }
+        }
     }
 }

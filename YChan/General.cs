@@ -16,10 +16,14 @@
  ************************************************************************/
 
 using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace GChan
@@ -69,7 +73,7 @@ namespace GChan
         }
 
         /// <summary>
-        /// Save settings to disk
+        /// Save settings to disk.
         /// </summary>
         /// <param name="path">Path to where the application downloads</param>
         /// <param name="time">Thrad refresh timer in seconds</param>
@@ -78,17 +82,19 @@ namespace GChan
         /// <param name="tray">Minimize to tray or not</param>
         /// <param name="closeWarn">Warn before closing or not</param>
         public static void SaveSettings(
-            string path, 
-            int time, 
-            bool loadHTML, 
-            bool saveOnclose, 
-            bool tray, 
-            bool closeWarn, 
+            string path,
+            int time,
+            ImageFileNameFormat imageFileNameFormat,
+            bool loadHTML,
+            bool saveOnclose,
+            bool tray,
+            bool closeWarn,
             bool startWithWindows,
             bool addThreadSubjectToFolder)
         {
             Properties.Settings.Default.path = path;
             Properties.Settings.Default.timer = time;
+            Properties.Settings.Default.imageFilenameFormat = (byte)imageFileNameFormat;
             Properties.Settings.Default.loadHTML = loadHTML;
             Properties.Settings.Default.saveOnClose = saveOnclose;
             Properties.Settings.Default.minimizeToTray = tray;
@@ -152,13 +158,13 @@ namespace GChan
             return url;
         }
 
-        private static string GetFileName(string hrefLink)
+        private static string GetFileNameFromURL(string hrefLink)
         {
             string[] parts = hrefLink.Split('/');
             string fileName = "";
 
             if (parts.Length > 0)
-                fileName = parts[parts.Length - 1];
+                fileName = parts.Last();
             else
                 fileName = hrefLink;
 
@@ -170,7 +176,7 @@ namespace GChan
             if (!Directory.Exists(dir))
                 Directory.CreateDirectory(dir);
 
-            string fileName = GetFileName(url);
+            string fileName = GetFileNameFromURL(url);
             dir = dir + "\\" + fileName;
 
             try
@@ -187,6 +193,93 @@ namespace GChan
                 return false;
                 throw WebE;
             }
+        }
+
+        /// <summary>
+        /// New DownloadToDir overload that takes a new ImageLink class, this is used to retain the image's uploaded filename.
+        /// </summary>
+        public static bool DownloadToDir(ImageLink link, string dir)
+        {
+            //Program.Log(true, $"DownloadToDir called for link {link.URL} downloading to {dir}");
+
+            if (!Directory.Exists(dir))
+                Directory.CreateDirectory(dir);
+
+            string destFilepath = CombinePathAndFilename(dir, link.GenerateNewFilename((ImageFileNameFormat)Properties.Settings.Default.imageFilenameFormat));
+
+            int formatCount = Enum.GetValues(typeof(ImageFileNameFormat)).Length;
+            List<ImageFileNameFormat> formatsNotInUse = new List<ImageFileNameFormat>();
+
+            for (int i = 0; i < formatCount; i++)
+            {
+                if (i != Properties.Settings.Default.imageFilenameFormat)
+                    formatsNotInUse.Add((ImageFileNameFormat)i);
+            }
+
+            try
+            {
+                // Incase imageFileNameFormat has changed and the file is already saved, instead of downloading another copy with a
+                // new name, check if it already exists and if it does then rename it to the new imageFileNameFormat.
+                for (int i = 0; i < formatsNotInUse.Count; i++)
+                {
+                    string potentialFilepath = CombinePathAndFilename(dir, link.GenerateNewFilename(formatsNotInUse[i]));
+                    if (File.Exists(potentialFilepath))
+                    {
+                        File.Move(potentialFilepath, destFilepath);
+                        return true;
+                    }
+                }
+
+                //if (!File.Exists(destFilepath) || new System.IO.FileInfo(destFilepath).Length < 1)
+                if( (File.Exists(destFilepath) && new System.IO.FileInfo(destFilepath).Length < 1) || !File.Exists(destFilepath))
+                {
+                    WebClient webClient = new WebClient();
+                    webClient.DownloadFile(link.URL, destFilepath);
+
+                    // This line is currently not working and downloads 0 byte files 100% of the time.
+                    //webClient.DownloadFileAsync(new Uri(link.URL), destFilepath);
+                    /*Task.Run(() => { 
+                        webClient.DownloadFileAsync(new Uri(link.URL), destFilepath);
+                        while (webClient.IsBusy)
+                        { 
+                            //Do nothing?
+                        }
+                    });*/
+
+                    //new Thread(() => { webClient.DownloadFile(link.URL, destFilepath); }).Start();
+
+                    return true;
+                }
+
+                return false;
+            }
+            catch (WebException WebE)
+            {
+                return false;
+                throw WebE;
+            }
+        }
+
+        /// <summary>
+        /// Combine a path and filename with two backslashes \\ and clamp the final return out at a constant 255 length.
+        /// </summary>
+        public static string CombinePathAndFilename(string directory, string filename)
+        {
+            /// https://stackoverflow.com/a/265803/8306962
+            /// This could be off by a few 1s. Information that floats around is conflicted, can't be bothered to research more.
+            const int FILEPATH_MAX_LENGTH = 255;
+
+            string fullpath = directory + "\\" + filename;
+            //Program.Log($"destFilepath Generated: {destFilepath}. Length: {destFilepath.Length}");
+
+            if (fullpath.Length >= FILEPATH_MAX_LENGTH)
+            {
+                //int oldLength = fullpath.Length;
+                fullpath = fullpath.Substring(0, FILEPATH_MAX_LENGTH - Path.GetExtension(fullpath).Length) + Path.GetExtension(fullpath);
+                //Program.Log(true, $"destFilepath max length exceeded new destfilepath: {fullpath}. Old Length: {oldLength}. New Length: {fullpath.Length}");
+            }
+
+            return fullpath;
         }
 
         public static string MessageBoxGetString(string currentSubject, int x = 0, int y = 0)

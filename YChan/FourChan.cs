@@ -22,6 +22,7 @@ using System.Net;
 using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
 using System.Xml.Linq;
@@ -67,13 +68,14 @@ namespace GChan
             return (urlMatcher.IsMatch(url));
         }
 
-        override protected string[] getLinks()
+        override protected ImageLink[] getLinks()
         {
-            List<string> links = new List<string>();
+            List<ImageLink> links = new List<ImageLink>();
             string JSONUrl = "http://a.4cdn.org/" + getURL().Split('/')[3] + "/thread/" + getURL().Split('/')[5] + ".json";
             string baseURL = "http://i.4cdn.org/" + getURL().Split('/')[3] + "/";
             string str = "";
             XmlNodeList xmlTim;
+            XmlNodeList xmlFilenames;
             XmlNodeList xmlExt;
 
             try
@@ -92,20 +94,23 @@ namespace GChan
                 XmlDocument doc = new XmlDocument();
                 doc.LoadXml(str);
 
+                // The /f/ board (flash) saves the files with their uploaded name.
                 if (getURL().Split('/')[3] == "f")
                     xmlTim = doc.DocumentElement.SelectNodes("/root/posts/item/filename");
                 else
                     xmlTim = doc.DocumentElement.SelectNodes("/root/posts/item/tim");
 
+                xmlFilenames = doc.DocumentElement.SelectNodes("/root/posts/item/filename");
                 xmlExt = doc.DocumentElement.SelectNodes("/root/posts/item/ext");
 
                 for (int i = 0; i < xmlExt.Count; i++)
                 {
-                    links.Add(baseURL + xmlTim[i].InnerText + xmlExt[i].InnerText);
+                    links.Add(new ImageLink(baseURL + xmlTim[i].InnerText + xmlExt[i].InnerText, xmlFilenames[i].InnerText));
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                Program.Log(true, $"Encountered an exception in FourChan.getLinks(). Thread Board/ID/Subject: {boardName}/{ID}/{Subject}");
                 throw;
             }
 
@@ -144,11 +149,25 @@ namespace GChan
             }
             catch (WebException webEx)
             {
+                Program.Log(webEx);
 #if DEBUG
                 MessageBox.Show("Connection Error: " + webEx.Message);
 #endif
             }
             return Res.ToArray();
+        }
+
+        public override void download(object callback)
+        {
+            if (isGone())
+            {
+                Program.Log(true, $"Download(object callback) called on thread {boardName}{ID}, but will not download because isGone is true: {URL}");
+            }
+            else
+            {
+                //Program.Log(true, $"Downloading: {URL}");
+                download();
+            }
         }
 
         override public void download()
@@ -158,23 +177,36 @@ namespace GChan
                 if (!Directory.Exists(this.SaveTo))
                     Directory.CreateDirectory(this.SaveTo);
 
+                ImageLink[] images = getLinks();
+
                 if (Properties.Settings.Default.loadHTML)
+                {
+                    //Program.Log(true, $"Downloading HTML for {URL}");
                     downloadHTMLPage();
+                }
 
-                string[] URLs = getLinks();
-
-                for (int y = 0; y < URLs.Length; y++)
-                    General.DownloadToDir(URLs[y], this.SaveTo);
+                //Program.Log(true, $"Downloading Images for {URL}");
+                Parallel.ForEach(images, (link) => {
+                    General.DownloadToDir(link, this.SaveTo);
+                });
+                //for (int y = 0; y < images.Length; y++)
+                //    General.DownloadToDir(images[y], this.SaveTo);
             }
             catch (WebException webEx)
             {
-                if (webEx.Status == WebExceptionStatus.ProtocolError)
+                Program.Log(webEx);
+                var httpWebResponse = (webEx.Response as HttpWebResponse);
+                if (webEx.Status == WebExceptionStatus.ProtocolError || (httpWebResponse != null && httpWebResponse.StatusCode == HttpStatusCode.NotFound))
+                {
+                    Program.Log(true, $"WebException encountered in FourChan.download(). Gone marked as true. {URL}");
                     this.Gone = true;
+                }
             }
-            catch (UnauthorizedAccessException ex)
+            catch (UnauthorizedAccessException uaex)
             {
-                MessageBox.Show(ex.Message, "No Permission to access folder");
-                throw;
+                MessageBox.Show(uaex.Message, "No Permission to access folder");
+                Program.Log(uaex);
+                //throw;
             }
         }
 
@@ -247,16 +279,11 @@ namespace GChan
                 if (!string.IsNullOrWhiteSpace(htmlPage))
                     File.WriteAllText(this.SaveTo + "\\Thread.html", htmlPage);
             }
-            catch
+            catch (Exception ex)
             {
-                throw;
+                Program.Log(ex);
+                //throw;
             }
-        }
-
-        public override void download(object callback)
-        {
-            Console.WriteLine("Downloading: " + URL);
-            download();
         }
 
         public override string ToString()
@@ -265,9 +292,9 @@ namespace GChan
                 return "NOT YET IMPLEMENTED";
             else
                 if (subject != null)
-                    return $"\"{subject}\" ({URL})";
-                else
-                    return $"No Subject ({URL})";
+                return $"\"{subject}\" ({URL})";
+            else
+                return $"No Subject ({URL})";
         }
     }
 }

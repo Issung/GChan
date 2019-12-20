@@ -2,13 +2,20 @@
 	Add icons to all context menus.
 	Archived thread indicator (with red text or seperate column (archived yes/no)).
 	Refactor code to seperate "Imageboard" into thread and board...
+		Naming issue with "Thread" conflicting with an actual system thread.
 	Add support for 8kun.top.
-
+	Asynchronous General.DownloadToDir downloads files as 0bytes empty files, fix this immediately.
+	DataBinding on thread and boards datagridviews.
+	
 Maybes:
 	Column sorting?
 	Right click column headers -> choose visible columns.
+		Add more column choices?
+			Archived...
 
 Done items:
+	Added dropdown box (ComboBox) to settings to allow choice for saved files filename format.
+
 	Copying all threads to clipboard also includes the custom subject text now.
 	Copying URL to clipboard now includes the custom subject text in the URL as a parameter.
 

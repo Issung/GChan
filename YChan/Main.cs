@@ -30,11 +30,11 @@ namespace GChan
     {
         public List<Imageboard> ThreadList { get; set; } = new List<Imageboard>();
         public List<Imageboard> ListBoards { get; set; } = new List<Imageboard>();
-        private Thread Scanner = null;                                                      // thread that addes stuff
+        private Thread Scanner = null;                                                      // thread that adds stuff
 
         private int threadIndex = -1;                                                              // Item position in threadGridView
         private int bPos = -1;                                                              // Item position in lbBoards
-        private System.Windows.Forms.Timer scnTimer = new System.Windows.Forms.Timer();     // Timmer for scanning
+        private System.Windows.Forms.Timer scnTimer = new System.Windows.Forms.Timer();     // Timer for scanning
 
         private object threadLock = new object();
         private object boardLock = new object();
@@ -44,6 +44,8 @@ namespace GChan
         public frmMain()
         {
             InitializeComponent();
+
+            threadGridView.AutoGenerateColumns = false;
         }
 
         private void frmMain_Load(object sender, EventArgs e)
@@ -65,7 +67,10 @@ namespace GChan
                 Properties.Settings.Default.Save();
             }
 
-            if (Properties.Settings.Default.saveOnClose)                                // If enabled load URLs from file
+            ///Require the save on close setting to be true to load threads on application open.
+            const bool requireSaveOnCloseToBeTrueToLoadThreadsAndBoards = false;
+
+            if (!requireSaveOnCloseToBeTrueToLoadThreadsAndBoards || Properties.Settings.Default.saveOnClose)                                // If enabled load URLs from file
             {
                 string boards = General.LoadURLs(true);
                 string threads = General.LoadURLs(false);                               // Load threads
@@ -222,15 +227,23 @@ namespace GChan
                 {
                     try
                     {
-                        if (Properties.Settings.Default.addThreadSubjectToFolder)
-                            Directory.Move(ThreadList[threadIndex].GetPath(), ThreadList[threadIndex].GetPath() + " - " + ThreadList[threadIndex].Subject);
+                        /*if (Properties.Settings.Default.addThreadSubjectToFolder)
+                            Directory.Move(ThreadList[threadIndex].GetPath(), ThreadList[threadIndex].GetPath() + " - " + ThreadList[threadIndex].Subject);*/
+
+                        /*if (Properties.Settings.Default.addThreadSubjectToFolder)
+                        {
+                            string currentPath = ThreadList[threadIndex].GetPath();
+                            string destPath = ThreadList[threadIndex].GetPath() + " " + ThreadList[threadIndex].Subject;
+                            Program.Log(true, $"Attempting to rename folder because addThreadSubjectToFolder is enabled.",
+                                $"Moving {currentPath} to {destPath}");
+                            Directory.Move(currentPath, destPath);
+                        }*/
+                        RemoveThread(ThreadList[threadIndex]);
                     }
                     catch
                     {
 
                     }
-
-                    ThreadList.RemoveAt(threadIndex);
                     updateDataSource(URLType.Thread);
                 }
             }
@@ -373,6 +386,7 @@ namespace GChan
             {
                 this.Show();
                 this.WindowState = FormWindowState.Normal;
+                Activate();
             }
         }
 
@@ -405,25 +419,16 @@ namespace GChan
 
         private void ScanThread()
         {
+            List<Imageboard> goneThreads = new List<Imageboard>();
+
             lock (threadLock)
             {
                 // Removes 404'd threads
-                for (int i = 0; i < ThreadList.Count; i++)
+                foreach (Imageboard thread in ThreadList.ToArray())
                 { 
-                    if (ThreadList[i].isGone())
+                    if (thread.isGone())
                     {
-                        try
-                        {
-                            if (Properties.Settings.Default.addThreadSubjectToFolder)
-                                Directory.Move(ThreadList[i].GetPath(), ThreadList[i].GetPath() + " - " + ThreadList[i].Subject);
-                        }
-                        catch 
-                        {
-                            
-                        }
-
-                        ThreadList.RemoveAt(i);
-                        i--;    // Move back in list because of removal
+                        goneThreads.Add(thread);
                     }
                 }
 
@@ -431,18 +436,23 @@ namespace GChan
                     General.SaveURLs(ListBoards, ThreadList);
             }
 
+            foreach (Imageboard thread in goneThreads)
+            {
+                RemoveThread(thread);
+            }
+
             updateDataSource(URLType.Thread);
 
             lock (boardLock)
             {
                 // Searches for new threads on the watched boards
-                foreach (Imageboard imB in ListBoards)
+                foreach (Imageboard board in ListBoards)
                 {
                     string[] Threads = { };
 
                     try
                     {
-                        Threads = imB.getThreads();
+                        Threads = board.getThreads();
                     }
                     catch
                     {
@@ -461,6 +471,8 @@ namespace GChan
                 }
             }
 
+            updateDataSource(URLType.Board);
+
             lock (threadLock)
             {
                 // Download threads
@@ -469,6 +481,27 @@ namespace GChan
                     ThreadPool.QueueUserWorkItem(new WaitCallback(ThreadList[i].download));
                 }
             }
+        }
+
+        private void RemoveThread(Imageboard thread)
+        {
+            Program.Log(true, $"Removing thread! {thread.BoardName}/{thread.ID}/{thread.Subject} Gone: {thread.isGone()}");
+
+            if (Properties.Settings.Default.addThreadSubjectToFolder)
+            {
+                string currentPath = thread.GetPath();
+
+                // There are \r characters appearing from the custom subjects, TODO: need to get to the bottom of the cause of this.
+                string destPath = (thread.GetPath() + " - " + thread.Subject).Replace("\r", ""); 
+
+                Program.Log(true, "Removing thread and attempting to rename folder because addThreadSubjectToFolder is enabled.",
+                    $"Directory.Moving {currentPath} to {destPath}");
+
+                Directory.Move(currentPath, destPath);
+            }
+
+            ThreadList.Remove(thread);
+            updateDataSource(URLType.Thread);
         }
 
         private void frmMain_SizeChanged(object sender, EventArgs e)
@@ -692,6 +725,11 @@ namespace GChan
         private void openProgramDataFolderToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Process.Start(Application.CommonAppDataPath);
+        }
+
+        private void downloadNowToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

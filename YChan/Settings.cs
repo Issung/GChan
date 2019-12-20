@@ -15,14 +15,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/> *
  ************************************************************************/
 
-using Microsoft.Win32;
 using System;
+using System.ComponentModel;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
+using Microsoft.Win32;
 
 namespace GChan
 {
+    public enum ImageFileNameFormat {
+        [Description("ID (eg. '1570301.jpg')")]
+        ID = 0,
+        [Description("OriginalFilename (eg. 'LittleSaintJames.jpg')")]
+        OriginalFilename = 1,
+        [Description("ID - OriginalFilename (eg. '1570301 - LittleSaintJames.jpg')")]
+        IDAndOriginalFilename = 2
+    };
+
     public partial class Settings : Form
     {
         string directory;
@@ -30,6 +41,7 @@ namespace GChan
         public Settings()
         {
             InitializeComponent();
+            this.imageFilenameFormatComboBox.DataSource = EnumHelper.GetEnumDescriptions(typeof(ImageFileNameFormat));
         }
 
         private void Settings_Shown(object sender, EventArgs e)
@@ -39,6 +51,9 @@ namespace GChan
             directoryTextBox.Text = directory;
 
             timerNumeric.Value = (Properties.Settings.Default.timer / 1000);
+
+            imageFilenameFormatComboBox.SelectedIndex = Properties.Settings.Default.imageFilenameFormat;
+
             chkHTML.Checked = Properties.Settings.Default.loadHTML;
             chkSave.Checked = Properties.Settings.Default.saveOnClose;
             chkTray.Checked = Properties.Settings.Default.minimizeToTray;
@@ -68,6 +83,7 @@ namespace GChan
                 General.SaveSettings(
                     directory, 
                     (int)timerNumeric.Value * 1000,
+                    (ImageFileNameFormat)imageFilenameFormatComboBox.SelectedIndex,
                     chkHTML.Checked,
                     chkSave.Checked,
                     chkTray.Checked,
@@ -125,6 +141,26 @@ namespace GChan
         private void textBox1_DoubleClick(object sender, EventArgs e)
         {
             System.Diagnostics.Process.Start("explorer.exe", string.Format(directory));
+        }
+
+        /// <summary>
+        /// Extends the ComboBox's dropdown horizontally to accomodate for long length items.
+        /// https://stackoverflow.com/a/28271652/8306962
+        /// </summary>
+        private void imageFilenameFormatComboBox_DropDown(object sender, EventArgs e)
+        {
+            Graphics g = imageFilenameFormatComboBox.CreateGraphics();
+            float largestSize = 0;
+
+            for (int i = 0; i < imageFilenameFormatComboBox.Items.Count; i++)
+            {
+                SizeF textSize = g.MeasureString(imageFilenameFormatComboBox.Items[i].ToString(), imageFilenameFormatComboBox.Font);
+                if (textSize.Width > largestSize)
+                    largestSize = textSize.Width;
+            }
+
+            if (largestSize > 0)
+                imageFilenameFormatComboBox.DropDownWidth = (int)largestSize;
         }
     }
 }

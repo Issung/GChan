@@ -29,6 +29,7 @@ namespace GChan
 
         public static string APPLICATION_INSTALL_DIRECTORY { get; } = AppDomain.CurrentDomain.BaseDirectory;
         public static string LOG_FILE { get; } = Application.CommonAppDataPath + "\\crash.logs";
+        public static StreamWriter streamWriter;
 
         /// <summary>
         /// The main entry point for the application.
@@ -93,14 +94,7 @@ namespace GChan
             {
                 General.SaveURLs(MainFrame.ListBoards, MainFrame.ThreadList);
 
-                string[] log = new string[] { $"[{DateTime.Now.ToString()}] - Application_ThreadException - {e.Exception.Message}", e.Exception.StackTrace };
-
-
-                if (File.Exists(LOG_FILE))
-                    File.AppendAllLines(LOG_FILE, log);
-                else
-                    File.WriteAllLines(LOG_FILE, log);
-
+                Log(true, $"Application_ThreadException - {e.Exception.Message}", e.Exception.StackTrace);
             }
             catch (Exception eX)
             {
@@ -121,17 +115,48 @@ namespace GChan
                 General.SaveURLs(MainFrame.ListBoards, MainFrame.ThreadList);
 
                 Exception ex = (Exception)e.ExceptionObject;
-                string[] log = new string[] { $"[{DateTime.Now.ToString()}] - AppDomain_UnhandledException - {ex.Message}", ex.StackTrace };
-
-
-                if (File.Exists(LOG_FILE))
-                    File.AppendAllLines(LOG_FILE, log);
-                else
-                    File.WriteAllLines(LOG_FILE, log);
+                Log(true, $"AppDomain_UnhandledException - {ex.GetType().Name} - {ex.Message}", ex.StackTrace);
             }
             catch (Exception eX)
             {
                 MessageBox.Show(eX.Message);
+            }
+        }
+
+        private static void InitialiseStreamWriter()
+        {
+            streamWriter = new StreamWriter(LOG_FILE);
+            streamWriter.AutoFlush = false;
+        }
+
+        public static void Log(Exception ex)
+        {
+            Log(true, $"Logged Exception - {ex.GetType().Name} - {ex.Message}", ex.StackTrace);
+        }
+
+        public static void Log(bool timestampFirstLine, params string[] lines)
+        {
+            try 
+            {
+                if (streamWriter == null)
+                    InitialiseStreamWriter();
+
+                if (timestampFirstLine)
+                    lines[0] = $"[{DateTime.Now.ToString()}] - " + lines[0];
+
+                foreach (string line in lines)
+                    streamWriter.WriteLine(line);
+                
+                streamWriter.Flush();
+
+                /*if (File.Exists(LOG_FILE))
+                    File.AppendAllLines(LOG_FILE, lines);
+                else
+                    File.WriteAllLines(LOG_FILE, lines);*/
+            }
+            catch (Exception ex)
+            { 
+                
             }
         }
 

@@ -39,13 +39,15 @@
             this.directoryTextBox = new System.Windows.Forms.TextBox();
             this.tooltip = new System.Windows.Forms.ToolTip(this.components);
             this.addThreadSubjectToFolderCheckBox = new System.Windows.Forms.CheckBox();
+            this.label3 = new System.Windows.Forms.Label();
+            this.imageFilenameFormatComboBox = new System.Windows.Forms.ComboBox();
             ((System.ComponentModel.ISupportInitialize)(this.timerNumeric)).BeginInit();
             this.SuspendLayout();
             // 
             // btnSSave
             // 
             this.btnSSave.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
-            this.btnSSave.Location = new System.Drawing.Point(59, 201);
+            this.btnSSave.Location = new System.Drawing.Point(59, 244);
             this.btnSSave.Name = "btnSSave";
             this.btnSSave.Size = new System.Drawing.Size(92, 23);
             this.btnSSave.TabIndex = 0;
@@ -56,7 +58,7 @@
             // btnSCan
             // 
             this.btnSCan.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
-            this.btnSCan.Location = new System.Drawing.Point(157, 201);
+            this.btnSCan.Location = new System.Drawing.Point(157, 244);
             this.btnSCan.Name = "btnSCan";
             this.btnSCan.Size = new System.Drawing.Size(94, 23);
             this.btnSCan.TabIndex = 1;
@@ -85,7 +87,7 @@
             // chkHTML
             // 
             this.chkHTML.AutoSize = true;
-            this.chkHTML.Location = new System.Drawing.Point(15, 61);
+            this.chkHTML.Location = new System.Drawing.Point(15, 95);
             this.chkHTML.Name = "chkHTML";
             this.chkHTML.Size = new System.Drawing.Size(107, 17);
             this.chkHTML.TabIndex = 6;
@@ -95,7 +97,7 @@
             // chkSave
             // 
             this.chkSave.AutoSize = true;
-            this.chkSave.Location = new System.Drawing.Point(15, 130);
+            this.chkSave.Location = new System.Drawing.Point(15, 164);
             this.chkSave.Name = "chkSave";
             this.chkSave.Size = new System.Drawing.Size(115, 17);
             this.chkSave.TabIndex = 7;
@@ -105,7 +107,7 @@
             // chkTray
             // 
             this.chkTray.AutoSize = true;
-            this.chkTray.Location = new System.Drawing.Point(15, 107);
+            this.chkTray.Location = new System.Drawing.Point(15, 141);
             this.chkTray.Name = "chkTray";
             this.chkTray.Size = new System.Drawing.Size(102, 17);
             this.chkTray.TabIndex = 8;
@@ -115,7 +117,7 @@
             // chkWarn
             // 
             this.chkWarn.AutoSize = true;
-            this.chkWarn.Location = new System.Drawing.Point(15, 84);
+            this.chkWarn.Location = new System.Drawing.Point(15, 118);
             this.chkWarn.Name = "chkWarn";
             this.chkWarn.Size = new System.Drawing.Size(116, 17);
             this.chkWarn.TabIndex = 9;
@@ -135,7 +137,7 @@
             // chkStartWithWindows
             // 
             this.chkStartWithWindows.AutoSize = true;
-            this.chkStartWithWindows.Location = new System.Drawing.Point(15, 153);
+            this.chkStartWithWindows.Location = new System.Drawing.Point(15, 187);
             this.chkStartWithWindows.Name = "chkStartWithWindows";
             this.chkStartWithWindows.Size = new System.Drawing.Size(153, 17);
             this.chkStartWithWindows.TabIndex = 11;
@@ -151,7 +153,7 @@
             -1,
             0});
             this.timerNumeric.Name = "timerNumeric";
-            this.timerNumeric.Size = new System.Drawing.Size(218, 20);
+            this.timerNumeric.Size = new System.Drawing.Size(217, 20);
             this.timerNumeric.TabIndex = 12;
             // 
             // directoryTextBox
@@ -168,7 +170,7 @@
             // addThreadSubjectToFolderCheckBox
             // 
             this.addThreadSubjectToFolderCheckBox.AutoSize = true;
-            this.addThreadSubjectToFolderCheckBox.Location = new System.Drawing.Point(15, 176);
+            this.addThreadSubjectToFolderCheckBox.Location = new System.Drawing.Point(15, 210);
             this.addThreadSubjectToFolderCheckBox.Name = "addThreadSubjectToFolderCheckBox";
             this.addThreadSubjectToFolderCheckBox.Size = new System.Drawing.Size(272, 17);
             this.addThreadSubjectToFolderCheckBox.TabIndex = 14;
@@ -176,14 +178,34 @@
             this.tooltip.SetToolTip(this.addThreadSubjectToFolderCheckBox, resources.GetString("addThreadSubjectToFolderCheckBox.ToolTip"));
             this.addThreadSubjectToFolderCheckBox.UseVisualStyleBackColor = true;
             // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(12, 65);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(116, 13);
+            this.label3.TabIndex = 15;
+            this.label3.Text = "Image Filename Format";
+            // 
+            // imageFilenameFormatComboBox
+            // 
+            this.imageFilenameFormatComboBox.FormattingEnabled = true;
+            this.imageFilenameFormatComboBox.Location = new System.Drawing.Point(134, 62);
+            this.imageFilenameFormatComboBox.Name = "imageFilenameFormatComboBox";
+            this.imageFilenameFormatComboBox.Size = new System.Drawing.Size(160, 21);
+            this.imageFilenameFormatComboBox.TabIndex = 16;
+            this.imageFilenameFormatComboBox.DropDown += new System.EventHandler(this.imageFilenameFormatComboBox_DropDown);
+            // 
             // Settings
             // 
             this.AcceptButton = this.btnSSave;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.ClientSize = new System.Drawing.Size(310, 236);
+            this.ClientSize = new System.Drawing.Size(310, 279);
             this.ControlBox = false;
+            this.Controls.Add(this.imageFilenameFormatComboBox);
+            this.Controls.Add(this.label3);
             this.Controls.Add(this.addThreadSubjectToFolderCheckBox);
             this.Controls.Add(this.directoryTextBox);
             this.Controls.Add(this.timerNumeric);
@@ -227,5 +249,7 @@
         private System.Windows.Forms.TextBox directoryTextBox;
         private System.Windows.Forms.ToolTip tooltip;
         private System.Windows.Forms.CheckBox addThreadSubjectToFolderCheckBox;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.ComboBox imageFilenameFormatComboBox;
     }
 }

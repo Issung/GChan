@@ -41,7 +41,7 @@ namespace GChan
 
         private void entryTextBox_TextChanged(object sender, EventArgs e)
         {
-            char[] disallowedCharacters = "_/\\!@#$%^&*()[]{};':\"?".ToCharArray();
+            char[] disallowedCharacters = "_/\\!@#$%^&*()[]{};':\"?\r".ToCharArray();
 
             entryTextBox.Text = General.RemoveCharactersFromString(entryTextBox.Text, disallowedCharacters);
         }

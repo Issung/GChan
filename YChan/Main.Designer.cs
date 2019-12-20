@@ -31,6 +31,7 @@
             this.settingsToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.openFolderToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.openProgramDataFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.changelogToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
@@ -63,7 +64,6 @@
             this.Board = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ID = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.FileCount = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.openProgramDataFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.msHead.SuspendLayout();
             this.tcApp.SuspendLayout();
             this.tpThreads.SuspendLayout();
@@ -117,6 +117,14 @@
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
             this.toolStripSeparator1.Size = new System.Drawing.Size(209, 6);
+            // 
+            // openProgramDataFolderToolStripMenuItem
+            // 
+            this.openProgramDataFolderToolStripMenuItem.Image = global::GChan.Properties.Resources.folder;
+            this.openProgramDataFolderToolStripMenuItem.Name = "openProgramDataFolderToolStripMenuItem";
+            this.openProgramDataFolderToolStripMenuItem.Size = new System.Drawing.Size(212, 22);
+            this.openProgramDataFolderToolStripMenuItem.Text = "Open &ProgramData Folder";
+            this.openProgramDataFolderToolStripMenuItem.Click += new System.EventHandler(this.openProgramDataFolderToolStripMenuItem_Click);
             // 
             // exitToolStripMenuItem
             // 
@@ -425,14 +433,6 @@
             this.FileCount.HeaderText = "File Count";
             this.FileCount.Name = "FileCount";
             this.FileCount.ReadOnly = true;
-            // 
-            // openProgramDataFolderToolStripMenuItem
-            // 
-            this.openProgramDataFolderToolStripMenuItem.Image = global::GChan.Properties.Resources.folder;
-            this.openProgramDataFolderToolStripMenuItem.Name = "openProgramDataFolderToolStripMenuItem";
-            this.openProgramDataFolderToolStripMenuItem.Size = new System.Drawing.Size(212, 22);
-            this.openProgramDataFolderToolStripMenuItem.Text = "Open &ProgramData Folder";
-            this.openProgramDataFolderToolStripMenuItem.Click += new System.EventHandler(this.openProgramDataFolderToolStripMenuItem_Click);
             // 
             // frmMain
             // 

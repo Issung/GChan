@@ -27,6 +27,7 @@
 
 using Microsoft.CSharp.RuntimeBinder;
 using Newtonsoft.Json.Linq;
+using System;
 using System.Net;
 using System.Text.RegularExpressions;
 
@@ -117,7 +118,7 @@ namespace GChan
 
         public abstract void download(object callback);
 
-        protected abstract string[] getLinks();
+        protected abstract ImageLink[] getLinks();
 
         public abstract string[] getThreads();
 
@@ -138,6 +139,8 @@ namespace GChan
             }
         }
 
+        //TODO: Make this abstract and move actual code to FourChan.cs
+        //TODO: Rewrite code to not use json and that one external library. Use XML like in download() methods.
         protected string GetThreadName()
         {
             string subject;
@@ -148,18 +151,18 @@ namespace GChan
             }
             else
             {
-
-                string JSONUrl = "http://a.4cdn.org/" + getURL().Split('/')[3] + "/thread/" + getURL().Split('/')[5] + ".json";
-                string Content = new WebClient().DownloadString(JSONUrl);
-
-                dynamic data = JObject.Parse(Content);
-
                 try
                 {
+                    string JSONUrl = "http://a.4cdn.org/" + getURL().Split('/')[3] + "/thread/" + getURL().Split('/')[5] + ".json";
+                    string Content = new WebClient().DownloadString(JSONUrl);
+
+                    dynamic data = JObject.Parse(Content);
+
                     subject = data.posts[0].sub.ToString();
                 }
-                catch (RuntimeBinderException rbe)
+                catch (Exception ex)
                 {
+                    Program.Log(ex);
                     subject = NO_SUBJECT;
                 }
 
