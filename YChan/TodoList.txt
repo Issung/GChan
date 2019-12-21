@@ -6,6 +6,7 @@
 	Add support for 8kun.top.
 	Asynchronous General.DownloadToDir downloads files as 0bytes empty files, fix this immediately.
 	DataBinding on thread and boards datagridviews.
+	Load threads and boards on program load on a seperate thread.
 	
 Maybes:
 	Column sorting?

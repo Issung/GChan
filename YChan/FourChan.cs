@@ -120,10 +120,10 @@ namespace GChan
 
         override public string[] getThreads()
         {
-            string URL = "http://a.4cdn.org/" + getURL().Split('/')[3] + "/catalog.json";
+            string URL = "http://a.4cdn.org/" + getURL().Split('/')[3] + "/catalog.json"; //example: http://a.4cdn.org/b/catalog.json
             List<string> Res = new List<string>();
             string str = "";
-            XmlNodeList tNa;
+            //XmlNodeList tNa;
             XmlNodeList tNo;
 
             try
@@ -141,10 +141,10 @@ namespace GChan
                 XmlDocument doc = new XmlDocument();
                 doc.LoadXml(str);
                 tNo = doc.DocumentElement.SelectNodes("/root/item/threads/item/no");
-                tNa = doc.DocumentElement.SelectNodes("/root/item/threads/item/semantic_url");
+                //tNa = doc.DocumentElement.SelectNodes("/root/item/threads/item/semantic_url");
                 for (int i = 0; i < tNo.Count; i++)
                 {
-                    Res.Add("http://boards.4chan.org/" + getURL().Split('/')[3] + "/thread/" + tNo[i].InnerText + "/" + tNa[i].InnerText);
+                    Res.Add("http://boards.4chan.org/" + getURL().Split('/')[3] + "/thread/" + tNo[i].InnerText);// + "/" + tNa[i].InnerText);
                 }
             }
             catch (WebException webEx)
@@ -289,7 +289,7 @@ namespace GChan
         public override string ToString()
         {
             if (board)
-                return "NOT YET IMPLEMENTED";
+                return URL;
             else
                 if (subject != null)
                 return $"\"{subject}\" ({URL})";

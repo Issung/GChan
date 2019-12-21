@@ -22,40 +22,56 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
+using Be.Timvw.Framework.ComponentModel;
 
 namespace GChan
 {
-    public partial class frmMain : Form
+    public partial class MainForm : Form
     {
         public List<Imageboard> ThreadList { get; set; } = new List<Imageboard>();
-        public List<Imageboard> ListBoards { get; set; } = new List<Imageboard>();
+        public SortableBindingList<Imageboard> ThreadListBindingSource;
+
+        public List<Imageboard> BoardList { get; set; } = new List<Imageboard>();
+        public BindingSource BoardListBindingSource;
+
         private Thread Scanner = null;                                                      // thread that adds stuff
 
-        private int threadIndex = -1;                                                              // Item position in threadGridView
+        private int threadIndex = -1;                                                       // Item position in threadGridView
         private int bPos = -1;                                                              // Item position in lbBoards
-        private System.Windows.Forms.Timer scnTimer = new System.Windows.Forms.Timer();     // Timer for scanning
+        private System.Windows.Forms.Timer scanTimer = new System.Windows.Forms.Timer();     // Timer for scanning
 
         private object threadLock = new object();
         private object boardLock = new object();
 
         private enum URLType { Thread, Board };
 
-        public frmMain()
+        public MainForm()
         {
             InitializeComponent();
 
             threadGridView.AutoGenerateColumns = false;
+
+            ThreadListBindingSource = new SortableBindingList<Imageboard>(ThreadList);
+            //ThreadListBindingSource.DataSource = ThreadList;
+            ThreadListBindingSource.ListChanged += ThreadListBindingSource_ListChanged;
+            threadGridView.DataSource = ThreadListBindingSource;
+
+            BoardListBindingSource = new BindingSource();
+            BoardListBindingSource.DataSource = BoardList;
+            BoardListBindingSource.ListChanged += BoardListBindingSource_ListChanged;
+            boardsListBox.DataSource = BoardListBindingSource;
         }
 
-        private void frmMain_Load(object sender, EventArgs e)
+        private void MainForm_Load(object sender, EventArgs e)
         {
             if (!Properties.Settings.Default.minimizeToTray)                            // If trayicon deactivated
                 nfTray.Visible = false;                                                 // Hide it
 
-            scnTimer.Enabled = false;                                                   // Disable timer
-            scnTimer.Interval = Properties.Settings.Default.timer;                      // Set interval
-            scnTimer.Tick += new EventHandler(this.Scan);                               // When Timer ticks call scan()
+            scanTimer.Enabled = false;                                                   // Disable timer
+            scanTimer.Interval = Properties.Settings.Default.timer;                      // Set interval
+            scanTimer.Tick += new EventHandler(this.Scan);                               // When Timer ticks call scan()
 
             ThreadPool.SetMaxThreads(Environment.ProcessorCount, Environment.ProcessorCount);
 
@@ -68,22 +84,25 @@ namespace GChan
             }
 
             ///Require the save on close setting to be true to load threads on application open.
-            const bool requireSaveOnCloseToBeTrueToLoadThreadsAndBoards = false;
+            const bool requireSaveOnCloseToBeTrueToLoadThreadsAndBoards = true;
 
             if (!requireSaveOnCloseToBeTrueToLoadThreadsAndBoards || Properties.Settings.Default.saveOnClose)                                // If enabled load URLs from file
             {
                 string boards = General.LoadURLs(true);
-                string threads = General.LoadURLs(false);                               // Load threads
+                string threads = General.LoadURLs(false);
 
                 if (!String.IsNullOrWhiteSpace(boards))
                 {
                     lock (boardLock)
                     {
                         string[] URLs = boards.Split('\n');
-                        for (int i = 0; i < URLs.Length - 1; i++)
+                        for (int i = 0; i < URLs.Length; i++)
                         {
-                            Imageboard newImageboard = General.CreateNewImageboard(URLs[i]);    // and add them
-                            AddURLToList(newImageboard);
+                            if (!string.IsNullOrWhiteSpace(URLs[i]))
+                            { 
+                                Imageboard newImageboard = General.CreateNewImageboard(URLs[i].Trim());
+                                AddURLToList(newImageboard);
+                            }
                         }
                     }
                 }
@@ -93,45 +112,60 @@ namespace GChan
                     lock (threadLock)
                     {
                         string[] URLs = threads.Split('\n');
-                        for (int i = 0; i < URLs.Length - 1; i++)
+                        //for (int i = 0; i < URLs.Length - 1; i++)
+                        //{
+                        //Imageboard newImageboard = General.CreateNewImageboard(URLs[i]);
+                        //AddURLToList(newImageboard);
+                        //}
+
+                        new Thread(() =>
                         {
-                            Imageboard newImageboard = General.CreateNewImageboard(URLs[i]);
-                            AddURLToList(newImageboard);
-                        }
+
+                            //Without setting ScrollBars to none and then resetting to 
+                            CheckForIllegalCrossThreadCalls = false;
+                            this.Invoke((MethodInvoker)delegate { threadGridView.ScrollBars = ScrollBars.None; });
+
+                            ParallelOptions options = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
+
+                            //TODO: Experiment with Parallel.ForEach for speed boost.
+                            Parallel.ForEach(URLs, options, (url) =>
+                            {
+                                if (!string.IsNullOrWhiteSpace(url))
+                                {
+                                    Imageboard newImageboard = General.CreateNewImageboard(url.Trim());
+                                    AddURLToList(newImageboard);
+                                }
+                            });
+
+                            /*for (int i = 0; i < URLs.Length - 1; i++) //Length - 1 because there will be an empty \n last.
+                            {
+                                Imageboard newImageboard = General.CreateNewImageboard(URLs[i]);
+                                AddURLToList(newImageboard);
+                            }*/
+
+                            this.Invoke((MethodInvoker)delegate {
+                                Done();
+                            });
+                        }).Start();
                     }
                 }
-
-                lbBoards.DataSource = ListBoards;
-                threadGridView.DataSource = ThreadList;
-
-                scnTimer.Enabled = true;                                        // Activate the timer
-                Scan(this, new EventArgs());                                    // and start scanning
-            }
-        }
-
-        private bool AddURLToList(Imageboard imageboard)
-        {
-            if (imageboard == null) return false;
-
-            if (imageboard.isBoard())
-            {
-                lock (boardLock)
+                else
                 {
-                    ListBoards.Add(imageboard);
-                    updateDataSource(URLType.Board);
-                }
-            }
-            else
-            {
-                lock (threadLock)
-                {
-                    ThreadList.Add(imageboard);
-                    updateDataSource(URLType.Thread);
+                    Done();
                 }
             }
 
-            return true;
+            ///Executed once everything has finished loading.
+            void Done()
+            {
+                threadGridView.ScrollBars = ScrollBars.Vertical;
+
+                scanTimer.Enabled = true;
+                Scan(this, new EventArgs());
+            }
         }
+
+        #region Methods
 
         private void AddUrl(string url)
         {
@@ -139,20 +173,23 @@ namespace GChan
 
             if (newImageboard != null)
             {
-                if (isUnique(newImageboard.getURL(), newImageboard.isBoard() ? ListBoards : ThreadList))
+                if (isUnique(newImageboard.getURL(), newImageboard.isBoard() ? BoardList : ThreadList))
                 {
                     AddURLToList(newImageboard);
 
-                    if (!scnTimer.Enabled)
-                        scnTimer.Enabled = true;
+                    if (!scanTimer.Enabled)
+                        scanTimer.Enabled = true;
                     if (Properties.Settings.Default.saveOnClose)
-                        General.SaveURLs(ListBoards, ThreadList);
+                        General.SaveURLs(BoardList, ThreadList);
 
                     Scan(this, new EventArgs());
                 }
                 else
                 {
-                    DialogResult result = MessageBox.Show("URL is already in queue!\nOpen corresponding folder?", "Error", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1);
+                    DialogResult result = MessageBox.Show(
+                        "URL is already being tracked!\nOpen corresponding folder?",
+                        "Error", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1);
+
                     if (result == DialogResult.Yes)
                     {
                         string spath = newImageboard.GetPath();
@@ -169,19 +206,102 @@ namespace GChan
             }
         }
 
-        private void btnAdd_Click(object sender, EventArgs e)
+        private bool AddURLToList(Imageboard imageboard)
         {
-            // Get url from TextBox
-            var urls = URLTextBox.Text.Split(',');
+            if (imageboard == null) return false;
 
-            for (int i = 0; i < urls.Length; i++)
-            { 
-                urls[i] = General.PrepareURL(urls[i]);
-                AddUrl(urls[i]);
+            if (imageboard.isBoard())
+            {
+                lock (boardLock)
+                {
+                    this.Invoke((MethodInvoker)delegate () {
+                        BoardListBindingSource.Add(imageboard);
+                    });
+                }
+            }
+            else
+            {
+                //lock (threadLock)
+                //{
+                    this.Invoke((MethodInvoker)delegate() { 
+                        ThreadListBindingSource.Add(imageboard);
+                    });
+                //}
             }
 
-            // Clear TextBox
-            URLTextBox.Text = "";
+            return true;
+        }
+
+        private void Scan(object sender, EventArgs e)
+        {
+            if (Scanner == null || !Scanner.IsAlive)
+            {
+                Scanner = new Thread(new ThreadStart(ScanThread))
+                {
+                    Name = "Scan Thread",
+                    IsBackground = true
+                };
+
+                Scanner.Start();
+            }
+        }
+
+        private void ScanThread()
+        {
+            //List<Imageboard> goneThreads = new List<Imageboard>();
+
+            lock (threadLock)
+            {
+                // Removes 404'd threads
+                foreach (Imageboard thread in ThreadList.ToArray())
+                {
+                    if (thread.isGone())
+                    {
+                        RemoveThread(thread);
+                        //goneThreads.Add(thread);
+                    }
+                }
+
+                if (Properties.Settings.Default.saveOnClose)
+                    General.SaveURLs(BoardList, ThreadList);
+            }
+
+            lock (boardLock)
+            {
+                // Searches for new threads on the watched boards
+                foreach (Imageboard board in BoardList)
+                {
+                    string[] threads = { };
+
+                    try
+                    {
+                        threads = board.getThreads();
+                    }
+                    catch
+                    {
+                    }
+                    finally
+                    {
+                        foreach (string thread in threads)
+                        {
+                            Imageboard newImageboard = General.CreateNewImageboard(thread);
+                            if (newImageboard != null && isUnique(newImageboard.getURL(), ThreadList))
+                            {
+                                AddURLToList(newImageboard);
+                            }
+                        }
+                    }
+                }
+            }
+
+            lock (threadLock)
+            {
+                // Download threads
+                for (int i = 0; i < ThreadList.Count; i++)
+                {
+                    ThreadPool.QueueUserWorkItem(new WaitCallback(ThreadList[i].download));
+                }
+            }
         }
 
         private bool isUnique(string url, List<Imageboard> List)
@@ -206,15 +326,44 @@ namespace GChan
             return plc;
         }
 
+        #endregion
+
+        #region Events
+
+        private void ThreadListBindingSource_ListChanged(object sender, System.ComponentModel.ListChangedEventArgs e)
+        {
+            tpThreads.Text = $"Threads ({ThreadList.Count})";
+        }
+
+        private void BoardListBindingSource_ListChanged(object sender, System.ComponentModel.ListChangedEventArgs e)
+        {
+            tpBoard.Text = $"Boards ({BoardList.Count})";
+        }
+
+        private void AddButton_Click(object sender, EventArgs e)
+        {
+            // Get url from TextBox
+            var urls = URLTextBox.Text.Split(',');
+
+            for (int i = 0; i < urls.Length; i++)
+            { 
+                urls[i] = General.PrepareURL(urls[i]);
+                AddUrl(urls[i]);
+            }
+
+            // Clear TextBox
+            URLTextBox.Text = "";
+        }
+
         private void lbBoards_MouseDown(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Right)
             {
                 bPos = -1;
-                if (lbBoards.IndexFromPoint(e.Location) != -1)
+                if (boardsListBox.IndexFromPoint(e.Location) != -1)
                 {
-                    bPos = lbBoards.IndexFromPoint(e.Location);
-                    cmBoards.Show(lbBoards, new Point(e.X, e.Y));
+                    bPos = boardsListBox.IndexFromPoint(e.Location);
+                    cmBoards.Show(boardsListBox, new Point(e.X, e.Y));
                 }
             }
         }
@@ -238,36 +387,13 @@ namespace GChan
                                 $"Moving {currentPath} to {destPath}");
                             Directory.Move(currentPath, destPath);
                         }*/
-                        RemoveThread(ThreadList[threadIndex]);
+                        RemoveThread(ThreadListBindingSource[threadIndex] as Imageboard);
                     }
                     catch
                     {
 
                     }
-                    updateDataSource(URLType.Thread);
                 }
-            }
-        }
-
-        private void updateDataSource(URLType type)
-        {
-            if (type == URLType.Board)
-            {
-                lbBoards.Invoke((MethodInvoker)(() =>
-                {
-                    tpBoard.Text = $"Boards ({ListBoards.Count})";
-                    lbBoards.DataSource = null;
-                    lbBoards.DataSource = ListBoards;
-                }));
-            }
-            else
-            {
-                threadGridView.Invoke((MethodInvoker)(() =>
-                {
-                    tpThreads.Text = $"Threads ({ThreadList.Count})";
-                    threadGridView.DataSource = null;
-                    threadGridView.DataSource = ThreadList;
-                }));
             }
         }
 
@@ -275,7 +401,7 @@ namespace GChan
         {
             if (threadIndex != -1)
             {
-                string spath = ThreadList[threadIndex].GetPath();
+                string spath = (ThreadListBindingSource[threadIndex] as Imageboard).GetPath();
                 if (!Directory.Exists(spath))
                     Directory.CreateDirectory(spath);
                 Process.Start(spath);
@@ -286,7 +412,7 @@ namespace GChan
         {
             if (threadIndex != -1)
             {
-                string spath = ((Imageboard)ThreadList[threadIndex]).getURL();
+                string spath = (ThreadListBindingSource[threadIndex] as Imageboard).getURL();
                 Process.Start(spath);
             }
         }
@@ -321,36 +447,14 @@ namespace GChan
             else
                 nfTray.Visible = false;
 
-            scnTimer.Interval = Properties.Settings.Default.timer;
-        }
-
-        private void frmMain_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            DialogResult result = DialogResult.OK;
-
-            if (Properties.Settings.Default.warnOnClose && ThreadList.Count > 0)
-            {
-                CloseWarn clw = new CloseWarn();
-                result = clw.ShowDialog();
-                e.Cancel = (result == DialogResult.Cancel);
-            }
-
-            if (result == DialogResult.OK)
-            {
-                nfTray.Visible = false;
-                nfTray.Dispose();
-                scnTimer.Enabled = false;
-
-                if (Properties.Settings.Default.saveOnClose)
-                    General.SaveURLs(ListBoards, ThreadList);
-            }
+            scanTimer.Interval = Properties.Settings.Default.timer;
         }
 
         private void openBoardFolderToolTip_Click(object sender, EventArgs e)
         {
             if (bPos != -1)
             {
-                string spath = ListBoards[bPos].GetPath();
+                string spath = (BoardListBindingSource[bPos] as Imageboard).GetPath();
                 if (!Directory.Exists(spath))
                     Directory.CreateDirectory(spath);
                 Process.Start(spath);
@@ -361,7 +465,7 @@ namespace GChan
         {
             if (bPos != -1)
             {
-                string spath = lbBoards.Items[bPos].ToString();
+                string spath = boardsListBox.Items[bPos].ToString();
                 Process.Start(spath);
             }
         }
@@ -372,8 +476,7 @@ namespace GChan
             {
                 lock (boardLock)
                 {
-                    ListBoards.RemoveAt(bPos);
-                    updateDataSource(URLType.Board);
+                    BoardListBindingSource.RemoveAt(bPos);
                 }
             }
         }
@@ -403,86 +506,6 @@ namespace GChan
             Process.Start(spath);
         }
 
-        private void Scan(object sender, EventArgs e)
-        {
-            if (Scanner == null || !Scanner.IsAlive)
-            {
-                Scanner = new Thread(new ThreadStart(ScanThread))
-                {
-                    Name = "Scan Thread",
-                    IsBackground = true
-                };
-
-                Scanner.Start();
-            }
-        }
-
-        private void ScanThread()
-        {
-            List<Imageboard> goneThreads = new List<Imageboard>();
-
-            lock (threadLock)
-            {
-                // Removes 404'd threads
-                foreach (Imageboard thread in ThreadList.ToArray())
-                { 
-                    if (thread.isGone())
-                    {
-                        goneThreads.Add(thread);
-                    }
-                }
-
-                if (Properties.Settings.Default.saveOnClose)
-                    General.SaveURLs(ListBoards, ThreadList);
-            }
-
-            foreach (Imageboard thread in goneThreads)
-            {
-                RemoveThread(thread);
-            }
-
-            updateDataSource(URLType.Thread);
-
-            lock (boardLock)
-            {
-                // Searches for new threads on the watched boards
-                foreach (Imageboard board in ListBoards)
-                {
-                    string[] Threads = { };
-
-                    try
-                    {
-                        Threads = board.getThreads();
-                    }
-                    catch
-                    {
-                    }
-                    finally
-                    {
-                        foreach (string thread in Threads)
-                        {
-                            Imageboard newImageboard = General.CreateNewImageboard(thread);
-                            if (newImageboard != null && isUnique(newImageboard.getURL(), ThreadList))
-                            {
-                                AddURLToList(newImageboard);
-                            }
-                        }
-                    }
-                }
-            }
-
-            updateDataSource(URLType.Board);
-
-            lock (threadLock)
-            {
-                // Download threads
-                for (int i = 0; i < ThreadList.Count; i++)
-                {
-                    ThreadPool.QueueUserWorkItem(new WaitCallback(ThreadList[i].download));
-                }
-            }
-        }
-
         private void RemoveThread(Imageboard thread)
         {
             Program.Log(true, $"Removing thread! {thread.BoardName}/{thread.ID}/{thread.Subject} Gone: {thread.isGone()}");
@@ -497,14 +520,14 @@ namespace GChan
                 Program.Log(true, "Removing thread and attempting to rename folder because addThreadSubjectToFolder is enabled.",
                     $"Directory.Moving {currentPath} to {destPath}");
 
+                //TODO: Account for possibility that destPath already exists.
                 Directory.Move(currentPath, destPath);
             }
 
-            ThreadList.Remove(thread);
-            updateDataSource(URLType.Thread);
+            ThreadListBindingSource.Remove(thread);
         }
 
-        private void frmMain_SizeChanged(object sender, EventArgs e)
+        private void MainForm_SizeChanged(object sender, EventArgs e)
         {
             if (Properties.Settings.Default.minimizeToTray && this.WindowState == FormWindowState.Minimized)
             {
@@ -563,69 +586,26 @@ namespace GChan
             {
                 if (board)
                 {
-                    ListBoards.Clear();
-                    updateDataSource(URLType.Board);
+                    BoardListBindingSource.Clear();
                 }
                 else
                 {
-                    ThreadList.Clear();
-                    updateDataSource(URLType.Thread);
+                    ThreadListBindingSource.Clear();
                 }
 
                 if (Properties.Settings.Default.saveOnClose)
-                    General.SaveURLs(ListBoards, ThreadList);
+                    General.SaveURLs(BoardList, ThreadList);
             }
         }
-
-        protected override void WndProc(ref Message m)
-        {
-            if (m.Msg == Program.WM_MY_MSG)
-            {
-                if ((m.WParam.ToInt32() == 0xCDCD) && (m.LParam.ToInt32() == 0xEFEF))
-                {
-                    if (WindowState == FormWindowState.Minimized)
-                    {
-                        WindowState = FormWindowState.Normal;
-                    }
-
-                    // Bring window to front.
-                    bool temp = TopMost;
-                    TopMost = true;
-                    TopMost = temp;
-
-                    // Set focus to the window.
-                    Activate();
-                }
-            }
-            else
-            {
-                base.WndProc(ref m);
-            }
-        }
-
-        /*private void lbThreads_MouseDoubleClick(object sender, MouseEventArgs e)
-        {
-            int pos;
-            if (e.Button == MouseButtons.Left)
-            {
-                if ((pos = lbThreads.IndexFromPoint(e.Location)) != -1)
-                {
-                    string spath = ListThreads[pos].getPath();
-                    if (!Directory.Exists(spath))
-                        Directory.CreateDirectory(spath);
-                    Process.Start(spath);
-                }
-            }
-        }*/
 
         private void lbBoards_MouseDoubleClick(object sender, MouseEventArgs e)
         {
             int pos;
             if (e.Button == MouseButtons.Left)
             {
-                if ((pos = lbBoards.IndexFromPoint(e.Location)) != -1)
+                if ((pos = boardsListBox.IndexFromPoint(e.Location)) != -1)
                 {
-                    string spath = ListBoards[pos].GetPath();
+                    string spath = (BoardListBindingSource[pos]as Imageboard).GetPath();
                     if (!Directory.Exists(spath))
                         Directory.CreateDirectory(spath);
                     Process.Start(spath);
@@ -637,35 +617,17 @@ namespace GChan
         {
             if (e.KeyCode == Keys.Delete)
             {
-                int pos = lbBoards.SelectedIndex;
+                int pos = boardsListBox.SelectedIndex;
 
                 if (pos > -1)
                 {
                     lock (boardLock)
                     {
-                        ListBoards.RemoveAt(pos);
-                        updateDataSource(URLType.Board);
+                        BoardListBindingSource.RemoveAt(pos);
                     }
                 }
             }
         }
-
-        /*private void ThreadGridView_KeyUp(object sender, KeyEventArgs e)
-        {
-            if (e.KeyCode == Keys.Delete)
-            {
-                int pos = threadGridView.SelectedRows;
-
-                if (pos > -1)
-                {
-                    lock (threadLock)
-                    {
-                        ListThreads.RemoveAt(pos);
-                        updateDataSource(URLType.Thread);
-                    }
-                }
-            }
-        }*/
 
         private void threadGridView_MouseDown(object sender, MouseEventArgs e)
         {
@@ -705,19 +667,17 @@ namespace GChan
             {
                 lock (threadLock)
                 {
-                    string currentSubject = ThreadList[threadIndex].Subject;
+                    string currentSubject = (ThreadListBindingSource[threadIndex] as Imageboard).Subject;
                     string entry = General.MessageBoxGetString(currentSubject, Left + 50, Top + 50);
 
                     if (entry.Length < 1)
                     {
-                        ThreadList[threadIndex].SetCustomSubject(Imageboard.NO_SUBJECT);
+                        (ThreadListBindingSource[threadIndex] as Imageboard).SetCustomSubject(Imageboard.NO_SUBJECT);
                     }
                     else
                     {
-                        ThreadList[threadIndex].SetCustomSubject(entry);
+                        (ThreadListBindingSource[threadIndex] as Imageboard).SetCustomSubject(entry);
                     }
-
-                    updateDataSource(URLType.Thread);
                 }
             }
         }
@@ -731,5 +691,55 @@ namespace GChan
         {
 
         }
+
+        protected override void WndProc(ref Message m)
+        {
+            if (m.Msg == Program.WM_MY_MSG)
+            {
+                if ((m.WParam.ToInt32() == 0xCDCD) && (m.LParam.ToInt32() == 0xEFEF))
+                {
+                    if (WindowState == FormWindowState.Minimized)
+                    {
+                        WindowState = FormWindowState.Normal;
+                    }
+
+                    // Bring window to front.
+                    bool temp = TopMost;
+                    TopMost = true;
+                    TopMost = temp;
+
+                    // Set focus to the window.
+                    Activate();
+                }
+            }
+            else
+            {
+                base.WndProc(ref m);
+            }
+        }
+
+        private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            DialogResult result = DialogResult.OK;
+
+            if (Properties.Settings.Default.warnOnClose && ThreadList.Count > 0)
+            {
+                CloseWarn clw = new CloseWarn();
+                result = clw.ShowDialog();
+                e.Cancel = (result == DialogResult.Cancel);
+            }
+
+            if (result == DialogResult.OK)
+            {
+                nfTray.Visible = false;
+                nfTray.Dispose();
+                scanTimer.Enabled = false;
+
+                if (Properties.Settings.Default.saveOnClose)
+                    General.SaveURLs(BoardList, ThreadList);
+            }
+        }
+
+        #endregion
     }
 }

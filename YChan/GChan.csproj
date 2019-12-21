@@ -115,6 +115,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="PropertyComparer.cs" />
     <Compile Include="Settings.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -133,6 +134,7 @@
     <Compile Include="Changelog.designer.cs">
       <DependentUpon>Changelog.cs</DependentUpon>
     </Compile>
+    <Compile Include="SortableBindingList.cs" />
     <EmbeddedResource Include="AboutBox.resx">
       <DependentUpon>AboutBox.cs</DependentUpon>
     </EmbeddedResource>

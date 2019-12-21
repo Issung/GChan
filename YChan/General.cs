@@ -40,14 +40,14 @@ namespace GChan
             StringBuilder sb = new StringBuilder();
 
             for (int i = 0; i < Boards.Count; i++)
-                sb.AppendLine(Boards[i].getURL());
+                sb.AppendLine(Boards[i].getURL().Replace("\r", ""));
 
             File.WriteAllText(Application.CommonAppDataPath + "\\boards.dat", sb.ToString());
 
             sb.Clear();
 
             for (int i = 0; i < Threads.Count; i++)
-                sb.AppendLine(Threads[i].getURL());
+                sb.AppendLine(Threads[i].getURL().Replace("\r", ""));
 
             File.WriteAllText(Application.CommonAppDataPath + "\\threads.dat", sb.ToString());
         }

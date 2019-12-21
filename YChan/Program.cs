@@ -25,7 +25,7 @@ namespace GChan
 {
     internal static class Program
     {
-        public static frmMain MainFrame;
+        public static MainForm MainFrame;
 
         public static string APPLICATION_INSTALL_DIRECTORY { get; } = AppDomain.CurrentDomain.BaseDirectory;
         public static string LOG_FILE { get; } = Application.CommonAppDataPath + "\\crash.logs";
@@ -59,7 +59,7 @@ namespace GChan
 
                 try
                 {
-                    MainFrame = new frmMain();
+                    MainFrame = new MainForm();
                     Application.Run(MainFrame);
                 }
                 catch
@@ -92,7 +92,7 @@ namespace GChan
 
             try
             {
-                General.SaveURLs(MainFrame.ListBoards, MainFrame.ThreadList);
+                General.SaveURLs(MainFrame.BoardList, MainFrame.ThreadList);
 
                 Log(true, $"Application_ThreadException - {e.Exception.Message}", e.Exception.StackTrace);
             }
@@ -112,7 +112,7 @@ namespace GChan
 
             try
             {
-                General.SaveURLs(MainFrame.ListBoards, MainFrame.ThreadList);
+                General.SaveURLs(MainFrame.BoardList, MainFrame.ThreadList);
 
                 Exception ex = (Exception)e.ExceptionObject;
                 Log(true, $"AppDomain_UnhandledException - {ex.GetType().Name} - {ex.Message}", ex.StackTrace);
@@ -125,7 +125,7 @@ namespace GChan
 
         private static void InitialiseStreamWriter()
         {
-            streamWriter = new StreamWriter(LOG_FILE);
+            streamWriter = new StreamWriter(LOG_FILE, true);
             streamWriter.AutoFlush = false;
         }
 
@@ -141,18 +141,13 @@ namespace GChan
                 if (streamWriter == null)
                     InitialiseStreamWriter();
 
-                if (timestampFirstLine)
+                if (timestampFirstLine && lines.Length > 0)
                     lines[0] = $"[{DateTime.Now.ToString()}] - " + lines[0];
 
                 foreach (string line in lines)
                     streamWriter.WriteLine(line);
                 
                 streamWriter.Flush();
-
-                /*if (File.Exists(LOG_FILE))
-                    File.AppendAllLines(LOG_FILE, lines);
-                else
-                    File.WriteAllLines(LOG_FILE, lines);*/
             }
             catch (Exception ex)
             { 
