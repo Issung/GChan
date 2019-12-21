@@ -3,19 +3,25 @@ GChan is a fork of YChan which aims to improve on it and add some extra features
 
 Supported Websites: [4chan.org](http://4chan.org/) and will attempt to support 8Chan (now called 8kun) once I get a chance.
 
-Requires .NET Framework 4.5 or higher, GUI is made with Winforms.
+Requires .NET Framework 4.8 or higher, GUI is made with Winforms.
 
-![GChan Window](https://i.imgur.com/K3gBBsM.png)
+![GChan Window](http://puu.sh/ERKQ8.png)
 
 ## New Features
 * Improvements to the user interface and quality of life.
     * New thread layout using grid.
-        * Columns that seperate thread subject, board and ID.
-        * Subject renaming useful for threads with no subject (WIP).
+        * Columns that display thread Subject, Board, ID and File Count.
+        * Subject renaming, useful for threads with no subject.
+        * Sorting via clicking column headers, supports ascending and descending.
+    * Display of tracking threads and board count on tabs.
 * Add multiple threads at once seperated by a comma (,).
 * Copy URLs of all followed threads to clipboard seperated by a comma (,).
 * Right click a thread and copy URL to clipboard.
 * Set a custom subject to be displayed for a thread, useful if the thread has no subject or a non-descriptive subject.
-* New settings layout and new settings.
-	* Option to start GChan with Windows.
-	* Option to automatically add thread's subject to thread's folder name when automatically or manually removed.
+* New settings layout.
+* Option to start GChan with Windows.
+* Option to automatically add a thread's subject to thread's directory when thread automatically or manually removed.
+* Choices for saved files filename format:
+  * ID Only (eg. '1570301.jpg')
+  * Original Filename Only (eg. 'LittleSaintJames.jpg')
+  * ID - OriginalFilename (eg. '1570301 - LittleSaintJames.jpg')

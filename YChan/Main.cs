@@ -30,7 +30,8 @@ namespace GChan
 {
     public partial class MainForm : Form
     {
-        public List<Imageboard> ThreadList { get; set; } = new List<Imageboard>();
+        //public List<Imageboard> ThreadList { get; set; } = new List<Imageboard>();
+        //public List<Imageboard> ThreadList { get { return ThreadListBindingSource.ToList(); } }
         public SortableBindingList<Imageboard> ThreadListBindingSource;
 
         public List<Imageboard> BoardList { get; set; } = new List<Imageboard>();
@@ -53,7 +54,7 @@ namespace GChan
 
             threadGridView.AutoGenerateColumns = false;
 
-            ThreadListBindingSource = new SortableBindingList<Imageboard>(ThreadList);
+            ThreadListBindingSource = new SortableBindingList<Imageboard>();
             //ThreadListBindingSource.DataSource = ThreadList;
             ThreadListBindingSource.ListChanged += ThreadListBindingSource_ListChanged;
             threadGridView.DataSource = ThreadListBindingSource;
@@ -173,14 +174,14 @@ namespace GChan
 
             if (newImageboard != null)
             {
-                if (isUnique(newImageboard.getURL(), newImageboard.isBoard() ? BoardList : ThreadList))
+                if (isUnique(newImageboard.getURL(), newImageboard.isBoard() ? BoardList : ThreadListBindingSource.ToList()))
                 {
                     AddURLToList(newImageboard);
 
                     if (!scanTimer.Enabled)
                         scanTimer.Enabled = true;
                     if (Properties.Settings.Default.saveOnClose)
-                        General.SaveURLs(BoardList, ThreadList);
+                        General.SaveURLs(BoardList, ThreadListBindingSource.ToList());
 
                     Scan(this, new EventArgs());
                 }
@@ -253,7 +254,7 @@ namespace GChan
             lock (threadLock)
             {
                 // Removes 404'd threads
-                foreach (Imageboard thread in ThreadList.ToArray())
+                foreach (Imageboard thread in ThreadListBindingSource.ToArray())
                 {
                     if (thread.isGone())
                     {
@@ -263,7 +264,7 @@ namespace GChan
                 }
 
                 if (Properties.Settings.Default.saveOnClose)
-                    General.SaveURLs(BoardList, ThreadList);
+                    General.SaveURLs(BoardList, ThreadListBindingSource.ToList());
             }
 
             lock (boardLock)
@@ -285,7 +286,7 @@ namespace GChan
                         foreach (string thread in threads)
                         {
                             Imageboard newImageboard = General.CreateNewImageboard(thread);
-                            if (newImageboard != null && isUnique(newImageboard.getURL(), ThreadList))
+                            if (newImageboard != null && isUnique(newImageboard.getURL(), ThreadListBindingSource.ToList()))
                             {
                                 AddURLToList(newImageboard);
                             }
@@ -297,9 +298,9 @@ namespace GChan
             lock (threadLock)
             {
                 // Download threads
-                for (int i = 0; i < ThreadList.Count; i++)
+                for (int i = 0; i < ThreadListBindingSource.Count; i++)
                 {
-                    ThreadPool.QueueUserWorkItem(new WaitCallback(ThreadList[i].download));
+                    ThreadPool.QueueUserWorkItem(new WaitCallback(ThreadListBindingSource[i].download));
                 }
             }
         }
@@ -318,9 +319,9 @@ namespace GChan
         private int getPlace(string url)
         {
             int plc = -1;
-            for (int i = 0; i < ThreadList.Count; i++)
+            for (int i = 0; i < ThreadListBindingSource.Count; i++)
             {
-                if (ThreadList[i].getURL() == url)
+                if (ThreadListBindingSource[i].getURL() == url)
                     plc = i;
             }
             return plc;
@@ -332,7 +333,7 @@ namespace GChan
 
         private void ThreadListBindingSource_ListChanged(object sender, System.ComponentModel.ListChangedEventArgs e)
         {
-            tpThreads.Text = $"Threads ({ThreadList.Count})";
+            tpThreads.Text = $"Threads ({ThreadListBindingSource.Count})";
         }
 
         private void BoardListBindingSource_ListChanged(object sender, System.ComponentModel.ListChangedEventArgs e)
@@ -421,7 +422,7 @@ namespace GChan
         {
             if (threadIndex != -1)
             {
-                string spath = ((Imageboard)ThreadList[threadIndex]).getURL();
+                string spath = ThreadListBindingSource[threadIndex].getURL();
                 Clipboard.SetText(spath);
             }
         }
@@ -594,7 +595,7 @@ namespace GChan
                 }
 
                 if (Properties.Settings.Default.saveOnClose)
-                    General.SaveURLs(BoardList, ThreadList);
+                    General.SaveURLs(BoardList, ThreadListBindingSource.ToList());
             }
         }
 
@@ -657,7 +658,7 @@ namespace GChan
 
         private void clipboardButton_Click(object sender, EventArgs e)
         {
-            string text = String.Join(",", ThreadList.Select(thread => thread.getURL())).Replace("\n", "").Replace("\r", "");
+            string text = String.Join(",", ThreadListBindingSource.Select(thread => thread.getURL())).Replace("\n", "").Replace("\r", "");
             Clipboard.SetText(text);
         }
 
@@ -722,7 +723,7 @@ namespace GChan
         {
             DialogResult result = DialogResult.OK;
 
-            if (Properties.Settings.Default.warnOnClose && ThreadList.Count > 0)
+            if (Properties.Settings.Default.warnOnClose && ThreadListBindingSource.Count > 0)
             {
                 CloseWarn clw = new CloseWarn();
                 result = clw.ShowDialog();
@@ -736,7 +737,7 @@ namespace GChan
                 scanTimer.Enabled = false;
 
                 if (Properties.Settings.Default.saveOnClose)
-                    General.SaveURLs(BoardList, ThreadList);
+                    General.SaveURLs(BoardList, ThreadListBindingSource.ToList());
             }
         }
 
