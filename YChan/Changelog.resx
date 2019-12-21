@@ -118,15 +118,22 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="rtbChange.Text" xml:space="preserve">
-    <value>Changed icon to 4chan icon.
-Added start program with Windows setting.
-Added button to copy list of threads to clipboard seperated by commas (,).
-Added support for adding a list of threads seperated by commas (,).
-Changed thread list from ListBox to DataGridView.
-Added "Copy thread URL to Clipboard" in context menu.
-Changed name to GChan.
+    <value>&gt;GChan 3.0
+ - Changed name to GChan.
+ - Changed icon to 4chan icon.
+ - Added "Copy thread URL to Clipboard" in context menu.
+ - Added support for adding a list of threads seperated by commas (,).
+ - Added button to copy list of threads to clipboard seperated by commas (,).
+ - Added start program with Windows setting.
+ - Changed thread list from ListBox to DataGridView.
+ - Added thread list sorting by clicking column headers.
+ - Added new columns; subject, board, id, and file count.
+ - Added Custom Subject functionality.
+ - Added rename thread directory when removed option.
+ - Added filename format choices as options.
+ - Major code refactoring (still not done).
 
--- At this point (18th Oct 2019) development started by Issun and program renamed to GChan --
+-- At this point (18th Oct 2019) development forked by Issun and program renamed to GChan --
 
 ToDo: 
 - add other chans
@@ -134,64 +141,64 @@ ToDo:
 - add option to filter by extension
 - add option to filter by regex
 
-&gt; GChan 2.7
+&gt; YChan 2.7
     - Fix UI bugs
     - Add 4channel.org
     - Add doubleclick to open folder
     - Press delete key to remove entry from list
     - Other changes and fixes
 
-&gt; GChan 2.6
+&gt; YChan 2.6
     - add drag and drop support for TextBox
     - add clear all button
 
-&gt; GChan 2.4
+&gt; YChan 2.4
     - fix 4chan html file creator
     - fix 8chan html file creator
     - UI improvements and fixes
 
-&gt; GChan 2.3
+&gt; YChan 2.3
     - warning when closing GChan
     - support for boards with numbers (/s4s/, /3/, ...)
     - save urls on crash and load them when 
        restarting
 
-&gt; GChan 2.2
+&gt; YChan 2.2
     - fixed 8ch downloader
     - added option to save URLs on exit
     - added tray icon / minimize to tray
 
-&gt; GChan 2.1
+&gt; YChan 2.1
     - fixed some smaller bugs / undefined behavior
     - added 8chan.co / 8ch.net
 
-&gt; GChan 2.0 Beta
+&gt; YChan 2.0 Beta
     - complete rewrite
     - redesign
     - fixed several bugs caused by multithreading
     - switched to 4chan API 
     - added Download HTML option
 
-&gt; GChan 1.2
+&gt; YChan 1.2
     - fixed delete-when-404
 
-&gt; GChan 1.1
+&gt; YChan 1.1
     - board downloader
     - minor UI changes
     - minor bug fixes
 
-&gt;GChan 1.0
+&gt; YChan 1.0
     - better multithreading
     - fixed some bugs
     - added icons
 
-&gt;GChan 0.9 Beta
+&gt; YChan 0.9 Beta
     - contextmenu added
     - auto-delete 404ed threads
     - fixed some minor bugs
     - some UI changes/fixes 
 
-&gt;GChan 0.8 Alpha
+&gt; YChan 0.8 Alpha
     - first release  
     - multithreading</value>
   </data>
