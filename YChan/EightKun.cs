@@ -173,7 +173,7 @@ namespace GChan
                 ImageLink[] URLs = getLinks();
 
                 for (int y = 0; y < URLs.Length; y++)
-                    General.DownloadToDir(URLs[y], this.SaveTo);
+                    Utils.DownloadToDir(URLs[y], this.SaveTo);
             }
             catch (WebException webEx)
             {
@@ -252,7 +252,7 @@ namespace GChan
 
                 for (int i = 0; i < thumbs.Count; i++)
                 {
-                    General.DownloadToDir(thumbs[i], this.SaveTo + "\\thumb");
+                    Utils.DownloadToDir(thumbs[i], this.SaveTo + "\\thumb");
                 }
 
                 if (!String.IsNullOrWhiteSpace(htmlPage))

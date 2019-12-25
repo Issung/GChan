@@ -93,7 +93,7 @@ namespace GChan
 
             try
             {
-                General.SaveURLs(MainFrame.BoardList, MainFrame.ThreadListBindingSource.ToList());
+                Utils.SaveURLs(MainFrame.BoardList, MainFrame.ThreadListBindingSource.ToList());
 
                 Log(true, $"Application_ThreadException - {e.Exception.Message}", e.Exception.StackTrace);
             }
@@ -113,7 +113,7 @@ namespace GChan
 
             try
             {
-                General.SaveURLs(MainFrame.BoardList, MainFrame.ThreadListBindingSource.ToList());
+                Utils.SaveURLs(MainFrame.BoardList, MainFrame.ThreadListBindingSource.ToList());
 
                 Exception ex = (Exception)e.ExceptionObject;
                 Log(true, $"AppDomain_UnhandledException - {ex.GetType().Name} - {ex.Message}", ex.StackTrace);

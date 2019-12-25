@@ -186,8 +186,9 @@ namespace GChan
                 }
 
                 //Program.Log(true, $"Downloading Images for {URL}");
-                Parallel.ForEach(images, (link) => {
-                    General.DownloadToDir(link, this.SaveTo);
+                Parallel.ForEach(images, (link) =>
+                {
+                    Utils.DownloadToDir(link, this.SaveTo);
                 });
                 //for (int y = 0; y < images.Length; y++)
                 //    General.DownloadToDir(images[y], this.SaveTo);
@@ -207,6 +208,10 @@ namespace GChan
                 MessageBox.Show(uaex.Message, "No Permission to access folder");
                 Program.Log(uaex);
                 //throw;
+            }
+            catch (Exception ex)
+            {
+                Program.Log(ex);
             }
         }
 
@@ -274,7 +279,7 @@ namespace GChan
 
                 //Save thumbs for files that need it
                 for (int i = 0; i < thumbs.Count; i++)
-                    General.DownloadToDir(thumbs[i], this.SaveTo + "\\thumb");
+                    Utils.DownloadToDir(thumbs[i], this.SaveTo + "\\thumb");
 
                 if (!string.IsNullOrWhiteSpace(htmlPage))
                     File.WriteAllText(this.SaveTo + "\\Thread.html", htmlPage);

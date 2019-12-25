@@ -89,8 +89,8 @@ namespace GChan
 
             if (!requireSaveOnCloseToBeTrueToLoadThreadsAndBoards || Properties.Settings.Default.saveOnClose)                                // If enabled load URLs from file
             {
-                string boards = General.LoadURLs(true);
-                string threads = General.LoadURLs(false);
+                string boards = Utils.LoadURLs(true);
+                string threads = Utils.LoadURLs(false);
 
                 if (!String.IsNullOrWhiteSpace(boards))
                 {
@@ -101,7 +101,7 @@ namespace GChan
                         {
                             if (!string.IsNullOrWhiteSpace(URLs[i]))
                             { 
-                                Imageboard newImageboard = General.CreateNewImageboard(URLs[i].Trim());
+                                Imageboard newImageboard = Utils.CreateNewImageboard(URLs[i].Trim());
                                 AddURLToList(newImageboard);
                             }
                         }
@@ -133,7 +133,7 @@ namespace GChan
                             {
                                 if (!string.IsNullOrWhiteSpace(url))
                                 {
-                                    Imageboard newImageboard = General.CreateNewImageboard(url.Trim());
+                                    Imageboard newImageboard = Utils.CreateNewImageboard(url.Trim());
                                     AddURLToList(newImageboard);
                                 }
                             });
@@ -170,7 +170,7 @@ namespace GChan
 
         private void AddUrl(string url)
         {
-            Imageboard newImageboard = General.CreateNewImageboard(url);
+            Imageboard newImageboard = Utils.CreateNewImageboard(url);
 
             if (newImageboard != null)
             {
@@ -181,7 +181,7 @@ namespace GChan
                     if (!scanTimer.Enabled)
                         scanTimer.Enabled = true;
                     if (Properties.Settings.Default.saveOnClose)
-                        General.SaveURLs(BoardList, ThreadListBindingSource.ToList());
+                        Utils.SaveURLs(BoardList, ThreadListBindingSource.ToList());
 
                     Scan(this, new EventArgs());
                 }
@@ -264,7 +264,7 @@ namespace GChan
                 }
 
                 if (Properties.Settings.Default.saveOnClose)
-                    General.SaveURLs(BoardList, ThreadListBindingSource.ToList());
+                    Utils.SaveURLs(BoardList, ThreadListBindingSource.ToList());
             }
 
             lock (boardLock)
@@ -285,7 +285,7 @@ namespace GChan
                     {
                         foreach (string thread in threads)
                         {
-                            Imageboard newImageboard = General.CreateNewImageboard(thread);
+                            Imageboard newImageboard = Utils.CreateNewImageboard(thread);
                             if (newImageboard != null && isUnique(newImageboard.getURL(), ThreadListBindingSource.ToList()))
                             {
                                 AddURLToList(newImageboard);
@@ -348,7 +348,7 @@ namespace GChan
 
             for (int i = 0; i < urls.Length; i++)
             { 
-                urls[i] = General.PrepareURL(urls[i]);
+                urls[i] = Utils.PrepareURL(urls[i]);
                 AddUrl(urls[i]);
             }
 
@@ -509,20 +509,47 @@ namespace GChan
 
         private void RemoveThread(Imageboard thread)
         {
-            Program.Log(true, $"Removing thread! {thread.BoardName}/{thread.ID}/{thread.Subject} Gone: {thread.isGone()}");
+            Program.Log(true, $"Removing thread {thread.getURL()}! thread.isGone: {thread.isGone()}");
 
             if (Properties.Settings.Default.addThreadSubjectToFolder)
             {
-                string currentPath = thread.GetPath();
+                string currentPath = thread.GetPath().Replace("\r", "");
 
                 // There are \r characters appearing from the custom subjects, TODO: need to get to the bottom of the cause of this.
-                string destPath = (thread.GetPath() + " - " + thread.Subject).Replace("\r", ""); 
+                string destinationPath = (thread.GetPath() + " - " + thread.Subject).Replace("\r", ""); 
 
                 Program.Log(true, "Removing thread and attempting to rename folder because addThreadSubjectToFolder is enabled.",
-                    $"Directory.Moving {currentPath} to {destPath}");
+                    $"Directory.Moving {currentPath} to {destinationPath}");
 
-                //TODO: Account for possibility that destPath already exists.
-                Directory.Move(currentPath, destPath);
+                if (Directory.Exists(currentPath))
+                {
+                    if (Directory.Exists(destinationPath))
+                    {
+                        // error - move all files into existing directory or abandon ship?
+
+                        destinationPath = destinationPath.Trim('\\', '/');
+
+                        int number = 1;
+                        string numberText() => $" ({number})";
+
+                        string calculatedDestination() => $"{Path.GetDirectoryName(destinationPath)}\\{Path.GetFileName(destinationPath)}{numberText()}";
+
+                        while (Directory.Exists(calculatedDestination()))
+                        {
+                            number++;
+                        }
+
+                        Directory.Move(currentPath, calculatedDestination());
+                    }
+                    else
+                    {
+                        Directory.Move(currentPath, destinationPath);
+                    }
+                }
+                else
+                {
+                    Program.Log(true, $"While attempting to rename thread {thread.getURL()} the current folder could not be found, renaming abandoned.");
+                }
             }
 
             ThreadListBindingSource.Remove(thread);
@@ -595,7 +622,7 @@ namespace GChan
                 }
 
                 if (Properties.Settings.Default.saveOnClose)
-                    General.SaveURLs(BoardList, ThreadListBindingSource.ToList());
+                    Utils.SaveURLs(BoardList, ThreadListBindingSource.ToList());
             }
         }
 
@@ -669,7 +696,7 @@ namespace GChan
                 lock (threadLock)
                 {
                     string currentSubject = (ThreadListBindingSource[threadIndex] as Imageboard).Subject;
-                    string entry = General.MessageBoxGetString(currentSubject, Left + 50, Top + 50);
+                    string entry = Utils.MessageBoxGetString(currentSubject, Left + 50, Top + 50);
 
                     if (entry.Length < 1)
                     {
@@ -737,7 +764,7 @@ namespace GChan
                 scanTimer.Enabled = false;
 
                 if (Properties.Settings.Default.saveOnClose)
-                    General.SaveURLs(BoardList, ThreadListBindingSource.ToList());
+                    Utils.SaveURLs(BoardList, ThreadListBindingSource.ToList());
             }
         }
 

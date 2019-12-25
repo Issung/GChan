@@ -43,7 +43,7 @@ namespace GChan
         {
             char[] disallowedCharacters = "_/\\!@#$%^&*()[]{};':\"?\r".ToCharArray();
 
-            entryTextBox.Text = General.RemoveCharactersFromString(entryTextBox.Text, disallowedCharacters);
+            entryTextBox.Text = Utils.RemoveCharactersFromString(entryTextBox.Text, disallowedCharacters);
         }
     }
 }

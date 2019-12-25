@@ -59,7 +59,7 @@ namespace GChan
             chkTray.Checked = Properties.Settings.Default.minimizeToTray;
             chkWarn.Checked = Properties.Settings.Default.warnOnClose;
 
-            chkStartWithWindows.Checked = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true).GetValueNames().Contains(General.PROGRAM_NAME);
+            chkStartWithWindows.Checked = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true).GetValueNames().Contains(Utils.PROGRAM_NAME);
 
             addThreadSubjectToFolderCheckBox.Checked = Properties.Settings.Default.addThreadSubjectToFolder;
         }
@@ -80,7 +80,7 @@ namespace GChan
             }
             else
             {
-                General.SaveSettings(
+                Utils.SaveSettings(
                     directory, 
                     (int)timerNumeric.Value * 1000,
                     (ImageFileNameFormat)imageFilenameFormatComboBox.SelectedIndex,

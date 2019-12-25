@@ -95,7 +95,7 @@
     <Compile Include="FirstStart.Designer.cs">
       <DependentUpon>FirstStart.cs</DependentUpon>
     </Compile>
-    <Compile Include="General.cs" />
+    <Compile Include="Utils.cs" />
     <Compile Include="Imageboard.cs" />
     <Compile Include="Main.cs">
       <SubType>Form</SubType>
