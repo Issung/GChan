@@ -70,40 +70,40 @@
     <Reference Include="System.Xml.Serialization" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AboutBox.cs">
+    <Compile Include="Forms\AboutBox.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="AboutBox.Designer.cs">
+    <Compile Include="Forms\AboutBox.Designer.cs">
       <DependentUpon>AboutBox.cs</DependentUpon>
     </Compile>
     <Compile Include="EnumHelper.cs" />
     <Compile Include="ImageLink.cs" />
-    <Compile Include="CustomDataGridView.cs">
+    <Compile Include="Controls\CustomDataGridView.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="GetStringMessageBox.cs">
+    <Compile Include="Forms\GetStringMessageBox.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="GetStringMessageBox.Designer.cs">
+    <Compile Include="Forms\GetStringMessageBox.Designer.cs">
       <DependentUpon>GetStringMessageBox.cs</DependentUpon>
     </Compile>
-    <Compile Include="EightKun.cs" />
-    <Compile Include="FourChan.cs" />
-    <Compile Include="FirstStart.cs">
+    <Compile Include="Boards\EightKun.cs" />
+    <Compile Include="Boards\FourChan.cs" />
+    <Compile Include="Forms\FirstStart.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FirstStart.Designer.cs">
+    <Compile Include="Forms\FirstStart.Designer.cs">
       <DependentUpon>FirstStart.cs</DependentUpon>
     </Compile>
     <Compile Include="Utils.cs" />
-    <Compile Include="Imageboard.cs" />
-    <Compile Include="Main.cs">
+    <Compile Include="Boards\Imageboard.cs" />
+    <Compile Include="Forms\Main.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Main.Designer.cs">
+    <Compile Include="Forms\Main.Designer.cs">
       <DependentUpon>Main.cs</DependentUpon>
     </Compile>
-    <Compile Include="Main1.Designer.cs">
+    <Compile Include="Forms\Main1.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Main.resx</DependentUpon>
@@ -115,36 +115,36 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="PropertyComparer.cs" />
-    <Compile Include="Settings.cs">
+    <Compile Include="Controls\SortableBindingList\PropertyComparer.cs" />
+    <Compile Include="Forms\Settings.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Settings.designer.cs">
+    <Compile Include="Forms\Settings.designer.cs">
       <DependentUpon>Settings.cs</DependentUpon>
     </Compile>
-    <Compile Include="CloseWarn.cs">
+    <Compile Include="Forms\CloseWarn.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="CloseWarn.designer.cs">
+    <Compile Include="Forms\CloseWarn.designer.cs">
       <DependentUpon>CloseWarn.cs</DependentUpon>
     </Compile>
-    <Compile Include="Changelog.cs">
+    <Compile Include="Forms\Changelog.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Changelog.designer.cs">
+    <Compile Include="Forms\Changelog.designer.cs">
       <DependentUpon>Changelog.cs</DependentUpon>
     </Compile>
-    <Compile Include="SortableBindingList.cs" />
-    <EmbeddedResource Include="AboutBox.resx">
+    <Compile Include="Controls\SortableBindingList\SortableBindingList.cs" />
+    <EmbeddedResource Include="Forms\AboutBox.resx">
       <DependentUpon>AboutBox.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="FirstStart.resx">
+    <EmbeddedResource Include="Forms\FirstStart.resx">
       <DependentUpon>FirstStart.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="GetStringMessageBox.resx">
+    <EmbeddedResource Include="Forms\GetStringMessageBox.resx">
       <DependentUpon>GetStringMessageBox.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Main.resx">
+    <EmbeddedResource Include="Forms\Main.resx">
       <DependentUpon>Main.cs</DependentUpon>
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Main1.Designer.cs</LastGenOutput>
@@ -154,13 +154,13 @@
       <SubType>Designer</SubType>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Include="Settings.resx">
+    <EmbeddedResource Include="Forms\Settings.resx">
       <DependentUpon>Settings.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="CloseWarn.resx">
+    <EmbeddedResource Include="Forms\CloseWarn.resx">
       <DependentUpon>CloseWarn.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Changelog.resx">
+    <EmbeddedResource Include="Forms\Changelog.resx">
       <DependentUpon>Changelog.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="packages.config" />

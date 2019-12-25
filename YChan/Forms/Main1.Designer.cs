@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace GChan {
+namespace GChan.Forms {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace GChan {
         public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("GChan.Main", typeof(Main).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("GChan.Forms.Main", typeof(Main).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;

@@ -1,9 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using Be.Timvw.Framework.Collections.Generic;
 
-namespace Be.Timvw.Framework.ComponentModel
+namespace GChan.Controls
 {
     public class SortableBindingList<T> : BindingList<T>
     {
