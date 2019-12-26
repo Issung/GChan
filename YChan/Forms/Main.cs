@@ -39,7 +39,13 @@ namespace GChan
 
         private Thread Scanner = null;                                                      // thread that adds stuff
 
-        private int threadIndex = -1;                                                       // Item position in threadGridView
+        //private int threadIndex = -1;     // Item position in threadGridView
+
+        /// <summary>
+        /// Get the index of the selected row in the thread grid view.
+        /// </summary>
+        private int ThreadGridViewSelectedRowIndex { get { return threadGridView.CurrentCell.RowIndex; } }
+
         private int bPos = -1;                                                              // Item position in lbBoards
         private System.Windows.Forms.Timer scanTimer = new System.Windows.Forms.Timer();     // Timer for scanning
 
@@ -100,7 +106,7 @@ namespace GChan
                         for (int i = 0; i < URLs.Length; i++)
                         {
                             if (!string.IsNullOrWhiteSpace(URLs[i]))
-                            { 
+                            {
                                 Imageboard newImageboard = Utils.CreateNewImageboard(URLs[i].Trim());
                                 AddURLToList(newImageboard);
                             }
@@ -224,9 +230,9 @@ namespace GChan
             {
                 //lock (threadLock)
                 //{
-                    this.Invoke((MethodInvoker)delegate() { 
-                        ThreadListBindingSource.Add(imageboard);
-                    });
+                this.Invoke((MethodInvoker)delegate () {
+                    ThreadListBindingSource.Add(imageboard);
+                });
                 //}
             }
 
@@ -327,6 +333,70 @@ namespace GChan
             return plc;
         }
 
+        private void RenameThreadSubjectPrompt(int threadBindingSourceIndex)
+        {
+            lock (threadLock)
+            {
+                string currentSubject = (ThreadListBindingSource[threadBindingSourceIndex] as Imageboard).Subject;
+                string entry = Utils.MessageBoxGetString(currentSubject, Left + 50, Top + 50);
+
+                if (entry.Length < 1)
+                {
+                    (ThreadListBindingSource[threadBindingSourceIndex] as Imageboard).SetCustomSubject(Imageboard.NO_SUBJECT);
+                }
+                else
+                {
+                    (ThreadListBindingSource[threadBindingSourceIndex] as Imageboard).SetCustomSubject(entry);
+                }
+            }
+        }
+
+        private void RemoveThread(Imageboard thread)
+        {
+            Program.Log(true, $"Removing thread {thread.getURL()}! thread.isGone: {thread.isGone()}");
+
+            if (Properties.Settings.Default.addThreadSubjectToFolder)
+            {
+                string currentPath = thread.GetPath().Replace("\r", "");
+
+                // There are \r characters appearing from the custom subjects, TODO: need to get to the bottom of the cause of this.
+                string destinationPath = (thread.GetPath() + " - " + thread.Subject).Replace("\r", "");
+
+                Program.Log(true, "Removing thread and attempting to rename folder because addThreadSubjectToFolder is enabled.",
+                    $"Directory.Moving {currentPath} to {destinationPath}");
+
+                if (Directory.Exists(currentPath))
+                {
+                    if (Directory.Exists(destinationPath))
+                    {
+                        destinationPath = destinationPath.Trim('\\', '/');
+
+                        int number = 1;
+                        string numberText() => $" ({number})";
+
+                        string calculatedDestination() => $"{Path.GetDirectoryName(destinationPath)}\\{Path.GetFileName(destinationPath)}{numberText()}";
+
+                        while (Directory.Exists(calculatedDestination()))
+                        {
+                            number++;
+                        }
+
+                        Directory.Move(currentPath, calculatedDestination());
+                    }
+                    else
+                    {
+                        Directory.Move(currentPath, destinationPath);
+                    }
+                }
+                else
+                {
+                    Program.Log(true, $"While attempting to rename thread {thread.getURL()} the current folder could not be found, renaming abandoned.");
+                }
+            }
+
+            ThreadListBindingSource.Remove(thread);
+        }
+
         #endregion
 
         #region Events
@@ -347,7 +417,7 @@ namespace GChan
             var urls = URLTextBox.Text.Split(',');
 
             for (int i = 0; i < urls.Length; i++)
-            { 
+            {
                 urls[i] = Utils.PrepareURL(urls[i]);
                 AddUrl(urls[i]);
             }
@@ -371,24 +441,13 @@ namespace GChan
 
         private void deleteToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (threadIndex != -1)
+            if (ThreadGridViewSelectedRowIndex != -1)
             {
                 lock (threadLock)
                 {
                     try
                     {
-                        /*if (Properties.Settings.Default.addThreadSubjectToFolder)
-                            Directory.Move(ThreadList[threadIndex].GetPath(), ThreadList[threadIndex].GetPath() + " - " + ThreadList[threadIndex].Subject);*/
-
-                        /*if (Properties.Settings.Default.addThreadSubjectToFolder)
-                        {
-                            string currentPath = ThreadList[threadIndex].GetPath();
-                            string destPath = ThreadList[threadIndex].GetPath() + " " + ThreadList[threadIndex].Subject;
-                            Program.Log(true, $"Attempting to rename folder because addThreadSubjectToFolder is enabled.",
-                                $"Moving {currentPath} to {destPath}");
-                            Directory.Move(currentPath, destPath);
-                        }*/
-                        RemoveThread(ThreadListBindingSource[threadIndex] as Imageboard);
+                        RemoveThread(ThreadListBindingSource[ThreadGridViewSelectedRowIndex] as Imageboard);
                     }
                     catch
                     {
@@ -400,9 +459,9 @@ namespace GChan
 
         private void openFolderToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (threadIndex != -1)
+            if (ThreadGridViewSelectedRowIndex != -1)
             {
-                string spath = (ThreadListBindingSource[threadIndex] as Imageboard).GetPath();
+                string spath = (ThreadListBindingSource[ThreadGridViewSelectedRowIndex] as Imageboard).GetPath();
                 if (!Directory.Exists(spath))
                     Directory.CreateDirectory(spath);
                 Process.Start(spath);
@@ -411,18 +470,18 @@ namespace GChan
 
         private void openInBrowserToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (threadIndex != -1)
+            if (ThreadGridViewSelectedRowIndex != -1)
             {
-                string spath = (ThreadListBindingSource[threadIndex] as Imageboard).getURL();
+                string spath = (ThreadListBindingSource[ThreadGridViewSelectedRowIndex] as Imageboard).getURL();
                 Process.Start(spath);
             }
         }
 
         private void copyURLToClipboardToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (threadIndex != -1)
+            if (ThreadGridViewSelectedRowIndex != -1)
             {
-                string spath = ThreadListBindingSource[threadIndex].getURL();
+                string spath = ThreadListBindingSource[ThreadGridViewSelectedRowIndex].getURL();
                 Clipboard.SetText(spath);
             }
         }
@@ -507,54 +566,6 @@ namespace GChan
             Process.Start(spath);
         }
 
-        private void RemoveThread(Imageboard thread)
-        {
-            Program.Log(true, $"Removing thread {thread.getURL()}! thread.isGone: {thread.isGone()}");
-
-            if (Properties.Settings.Default.addThreadSubjectToFolder)
-            {
-                string currentPath = thread.GetPath().Replace("\r", "");
-
-                // There are \r characters appearing from the custom subjects, TODO: need to get to the bottom of the cause of this.
-                string destinationPath = (thread.GetPath() + " - " + thread.Subject).Replace("\r", ""); 
-
-                Program.Log(true, "Removing thread and attempting to rename folder because addThreadSubjectToFolder is enabled.",
-                    $"Directory.Moving {currentPath} to {destinationPath}");
-
-                if (Directory.Exists(currentPath))
-                {
-                    if (Directory.Exists(destinationPath))
-                    {
-                        // error - move all files into existing directory or abandon ship?
-
-                        destinationPath = destinationPath.Trim('\\', '/');
-
-                        int number = 1;
-                        string numberText() => $" ({number})";
-
-                        string calculatedDestination() => $"{Path.GetDirectoryName(destinationPath)}\\{Path.GetFileName(destinationPath)}{numberText()}";
-
-                        while (Directory.Exists(calculatedDestination()))
-                        {
-                            number++;
-                        }
-
-                        Directory.Move(currentPath, calculatedDestination());
-                    }
-                    else
-                    {
-                        Directory.Move(currentPath, destinationPath);
-                    }
-                }
-                else
-                {
-                    Program.Log(true, $"While attempting to rename thread {thread.getURL()} the current folder could not be found, renaming abandoned.");
-                }
-            }
-
-            ThreadListBindingSource.Remove(thread);
-        }
-
         private void MainForm_SizeChanged(object sender, EventArgs e)
         {
             if (Properties.Settings.Default.minimizeToTray && this.WindowState == FormWindowState.Minimized)
@@ -604,10 +615,10 @@ namespace GChan
             if (board) type = "boards";
 
             DialogResult dialogResult = MessageBox.Show(
-                "Are you sure you want to clear all " + type + "?", 
+                "Are you sure you want to clear all " + type + "?",
                 "Clear all " + type,
-                MessageBoxButtons.YesNo, 
-                MessageBoxIcon.Warning, 
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Warning,
                 MessageBoxDefaultButton.Button2);    // Confirmation prompt
 
             if (dialogResult == DialogResult.Yes)
@@ -633,7 +644,7 @@ namespace GChan
             {
                 if ((pos = boardsListBox.IndexFromPoint(e.Location)) != -1)
                 {
-                    string spath = (BoardListBindingSource[pos]as Imageboard).GetPath();
+                    string spath = (BoardListBindingSource[pos] as Imageboard).GetPath();
                     if (!Directory.Exists(spath))
                         Directory.CreateDirectory(spath);
                     Process.Start(spath);
@@ -677,7 +688,10 @@ namespace GChan
             {
                 if (e.RowIndex != -1)
                 {
-                    threadIndex = e.RowIndex;
+                    threadGridView.ClearSelection();
+                    threadGridView.Rows[e.RowIndex].Selected = true;
+                    threadGridView.CurrentCell = threadGridView.Rows[e.RowIndex].Cells[0];
+                    //threadIndex = e.RowIndex;
                     cmThreads.Show(Cursor.Position);
                 }
             }
@@ -691,33 +705,23 @@ namespace GChan
 
         private void renameToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (threadIndex != -1)
+            if (ThreadGridViewSelectedRowIndex != -1)
             {
-                lock (threadLock)
-                {
-                    string currentSubject = (ThreadListBindingSource[threadIndex] as Imageboard).Subject;
-                    string entry = Utils.MessageBoxGetString(currentSubject, Left + 50, Top + 50);
+                RenameThreadSubjectPrompt(ThreadGridViewSelectedRowIndex);
+            }
+        }
 
-                    if (entry.Length < 1)
-                    {
-                        (ThreadListBindingSource[threadIndex] as Imageboard).SetCustomSubject(Imageboard.NO_SUBJECT);
-                    }
-                    else
-                    {
-                        (ThreadListBindingSource[threadIndex] as Imageboard).SetCustomSubject(entry);
-                    }
-                }
+        private void threadGridView_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.F2)
+            {
+                RenameThreadSubjectPrompt(threadGridView.CurrentCell.RowIndex);
             }
         }
 
         private void openProgramDataFolderToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Process.Start(Application.CommonAppDataPath);
-        }
-
-        private void downloadNowToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-
         }
 
         protected override void WndProc(ref Message m)
