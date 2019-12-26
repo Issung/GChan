@@ -121,6 +121,7 @@
             // 
             // richTextBoxDescription
             // 
+            this.richTextBoxDescription.BackColor = System.Drawing.SystemColors.Control;
             this.richTextBoxDescription.Dock = System.Windows.Forms.DockStyle.Fill;
             this.richTextBoxDescription.Location = new System.Drawing.Point(3, 107);
             this.richTextBoxDescription.Name = "richTextBoxDescription";

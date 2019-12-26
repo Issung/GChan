@@ -30,8 +30,6 @@ namespace GChan
 {
     public partial class MainForm : Form
     {
-        //public List<Imageboard> ThreadList { get; set; } = new List<Imageboard>();
-        //public List<Imageboard> ThreadList { get { return ThreadListBindingSource.ToList(); } }
         public SortableBindingList<Imageboard> ThreadListBindingSource;
 
         public List<Imageboard> BoardList { get; set; } = new List<Imageboard>();
@@ -46,7 +44,7 @@ namespace GChan
         /// </summary>
         private int ThreadGridViewSelectedRowIndex { get { return threadGridView.CurrentCell.RowIndex; } }
 
-        private int bPos = -1;                                                              // Item position in lbBoards
+        private int bPos = -1;                                                               // Item position in lbBoards
         private System.Windows.Forms.Timer scanTimer = new System.Windows.Forms.Timer();     // Timer for scanning
 
         private object threadLock = new object();
@@ -61,7 +59,6 @@ namespace GChan
             threadGridView.AutoGenerateColumns = false;
 
             ThreadListBindingSource = new SortableBindingList<Imageboard>();
-            //ThreadListBindingSource.DataSource = ThreadList;
             ThreadListBindingSource.ListChanged += ThreadListBindingSource_ListChanged;
             threadGridView.DataSource = ThreadListBindingSource;
 
@@ -119,22 +116,19 @@ namespace GChan
                     lock (threadLock)
                     {
                         string[] URLs = threads.Split('\n');
-                        //for (int i = 0; i < URLs.Length - 1; i++)
-                        //{
-                        //Imageboard newImageboard = General.CreateNewImageboard(URLs[i]);
-                        //AddURLToList(newImageboard);
-                        //}
 
                         new Thread(() =>
                         {
+                            // Without setting ScrollBars to None and then setting to Vertical the program will crash.
+                            // It doesnt like items being added in parallel in this method...
+                            // User cannot also resize columns while adding, or else program crashes.
 
-                            //Without setting ScrollBars to none and then resetting to 
                             CheckForIllegalCrossThreadCalls = false;
                             this.Invoke((MethodInvoker)delegate { threadGridView.ScrollBars = ScrollBars.None; });
+                            threadGridView.AllowUserToResizeColumns = false;
 
                             ParallelOptions options = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
 
-                            //TODO: Experiment with Parallel.ForEach for speed boost.
                             Parallel.ForEach(URLs, options, (url) =>
                             {
                                 if (!string.IsNullOrWhiteSpace(url))
@@ -143,12 +137,6 @@ namespace GChan
                                     AddURLToList(newImageboard);
                                 }
                             });
-
-                            /*for (int i = 0; i < URLs.Length - 1; i++) //Length - 1 because there will be an empty \n last.
-                            {
-                                Imageboard newImageboard = General.CreateNewImageboard(URLs[i]);
-                                AddURLToList(newImageboard);
-                            }*/
 
                             this.Invoke((MethodInvoker)delegate {
                                 Done();
@@ -162,10 +150,11 @@ namespace GChan
                 }
             }
 
-            ///Executed once everything has finished loading.
+            ///Executed once everything has finished being loaded.
             void Done()
             {
                 threadGridView.ScrollBars = ScrollBars.Vertical;
+                threadGridView.AllowUserToResizeColumns = true;
 
                 scanTimer.Enabled = true;
                 Scan(this, new EventArgs());
