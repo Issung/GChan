@@ -21,6 +21,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -348,8 +349,24 @@ namespace GChan
             {
                 string currentPath = thread.GetPath().Replace("\r", "");
 
+                /// Clean the subject of illegal path characters
+                
+                StringBuilder sb = new StringBuilder();
+
+                for (int i = 0; i < thread.Subject.Length; i++)
+                {
+                    if (!Path.GetInvalidPathChars().Contains(thread.Subject[i]) && !"\\/".Contains(thread.Subject[i]))
+                    {
+                        sb.Append(thread.Subject[i]);
+                    }
+                }
+
+                string cleanSubject = sb.ToString();
+
+                /// Clean the subject of illegal characters
+
                 // There are \r characters appearing from the custom subjects, TODO: need to get to the bottom of the cause of this.
-                string destinationPath = (thread.GetPath() + " - " + thread.Subject).Replace("\r", "");
+                string destinationPath = (thread.GetPath() + " - " + cleanSubject).Replace("\r", "");
 
                 Program.Log(true, "Removing thread and attempting to rename folder because addThreadSubjectToFolder is enabled.",
                     $"Directory.Moving {currentPath} to {destinationPath}");
