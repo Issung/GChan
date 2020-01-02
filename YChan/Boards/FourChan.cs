@@ -15,6 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/> *
  ************************************************************************/
 
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -51,9 +52,8 @@ namespace GChan
                 Match match = Regex.Match(url, @"boards.(4chan|4channel).org/[a-zA-Z0-9]*?/thread/\d*");
                 this.URL = "http://" + match.Groups[0].Value;
                 this.SaveTo = Properties.Settings.Default.path + "\\" + this.siteName + "\\" + getURL().Split('/')[3] + "\\" + getURL().Split('/')[5];
+                originalSubject = GetThreadSubject();
             }
-
-            subject = GetThreadName();
         }
 
         public new static bool urlIsThread(string url)
@@ -155,6 +155,36 @@ namespace GChan
 #endif
             }
             return Res.ToArray();
+        }
+
+        //TODO: Rewrite code to not use json and that one external library. Use XML like in download() methods.
+        protected override string GetThreadSubject()
+        {
+            string subject;
+
+            if (board)
+            {
+                subject = NO_SUBJECT;
+            }
+            else
+            {
+                try
+                {
+                    string JSONUrl = "http://a.4cdn.org/" + getURL().Split('/')[3] + "/thread/" + getURL().Split('/')[5] + ".json";
+                    string Content = new WebClient().DownloadString(JSONUrl);
+
+                    dynamic data = JObject.Parse(Content);
+
+                    subject = data.posts[0].sub.ToString();
+                }
+                catch
+                {
+                    subject = NO_SUBJECT;
+                }
+
+            }
+
+            return subject;
         }
 
         public override void download(object callback)
@@ -296,10 +326,7 @@ namespace GChan
             if (board)
                 return URL;
             else
-                if (subject != null)
-                return $"\"{subject}\" ({URL})";
-            else
-                return $"No Subject ({URL})";
+                return $"\"{Subject}\" ({URL})";
         }
     }
 }

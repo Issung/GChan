@@ -30,8 +30,8 @@ namespace GChan
 {
     internal class EightKun : Imageboard
     {
-        public static string regThread = "8kun.top/[a-zA-Z0-9]*?/res/[0-9]*.[^0-9]*";  // Regex to check whether is Thread or not
-        public static string regBoard = "8kun.top/[a-zA-Z0-9]*?/";                     // Regex to check whether is Board or not
+        public const string regThread = "8kun.top/[a-zA-Z0-9]*?/res/[0-9]*.[^0-9]*";  // Regex to check whether is Thread or not
+        public const string regBoard = "8kun.top/[a-zA-Z0-9]*?/";                     // Regex to check whether is Board or not
 
         public EightKun(string url, bool isBoard) : base(url, isBoard)
         {
@@ -157,6 +157,12 @@ namespace GChan
             }
 
             return Res.ToArray();
+        }
+
+        protected override string GetThreadSubject()
+        {
+            //TODO: Implement.
+            throw new NotImplementedException();
         }
 
         override public void download()

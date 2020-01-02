@@ -128,7 +128,9 @@ namespace GChan
                             this.Invoke((MethodInvoker)delegate { threadGridView.ScrollBars = ScrollBars.None; });
                             threadGridView.AllowUserToResizeColumns = false;
 
-                            ParallelOptions options = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
+                            ParallelOptions options = new ParallelOptions { 
+                                MaxDegreeOfParallelism = Environment.ProcessorCount 
+                            };
 
                             Parallel.ForEach(URLs, options, (url) =>
                             {
@@ -349,50 +351,28 @@ namespace GChan
             {
                 string currentPath = thread.GetPath().Replace("\r", "");
 
-                /// Clean the subject of illegal path characters
-                
-                StringBuilder sb = new StringBuilder();
-
-                for (int i = 0; i < thread.Subject.Length; i++)
-                {
-                    if (!Path.GetInvalidPathChars().Contains(thread.Subject[i]) && !"\\/".Contains(thread.Subject[i]))
-                    {
-                        sb.Append(thread.Subject[i]);
-                    }
-                }
-
-                string cleanSubject = sb.ToString();
-
-                /// Clean the subject of illegal characters
-
+                string cleanSubject = Utils.CleanThreadSubjectForFolderName(thread.Subject);
+                 
                 // There are \r characters appearing from the custom subjects, TODO: need to get to the bottom of the cause of this.
                 string destinationPath = (thread.GetPath() + " - " + cleanSubject).Replace("\r", "");
-
-                Program.Log(true, "Removing thread and attempting to rename folder because addThreadSubjectToFolder is enabled.",
-                    $"Directory.Moving {currentPath} to {destinationPath}");
+                destinationPath = destinationPath.Trim('\\', '/');
 
                 if (Directory.Exists(currentPath))
                 {
-                    if (Directory.Exists(destinationPath))
+                    int number = 0;
+                    string numberText() => (number == 0) ? "" : $" ({number})";
+
+                    //string calculatedDestination() => Path.GetDirectoryName(destinationPath) + "\\" + Path.GetFileName(destinationPath) + numberText();
+                    string calculatedDestination() => destinationPath + numberText();
+
+                    while (Directory.Exists(calculatedDestination()))
                     {
-                        destinationPath = destinationPath.Trim('\\', '/');
-
-                        int number = 1;
-                        string numberText() => $" ({number})";
-
-                        string calculatedDestination() => $"{Path.GetDirectoryName(destinationPath)}\\{Path.GetFileName(destinationPath)}{numberText()}";
-
-                        while (Directory.Exists(calculatedDestination()))
-                        {
-                            number++;
-                        }
-
-                        Directory.Move(currentPath, calculatedDestination());
+                        number++;
                     }
-                    else
-                    {
-                        Directory.Move(currentPath, destinationPath);
-                    }
+
+                    Program.Log(true, $"Directory.Moving {currentPath} to {destinationPath}");
+
+                    Directory.Move(currentPath, calculatedDestination());
                 }
                 else
                 {

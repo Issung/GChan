@@ -320,5 +320,29 @@ namespace GChan
                 ret = ret.Replace(removeThese[i].ToString(), "");
             return ret;
         }
+
+        readonly static char[] invalidFolderCharacters = { '"', '<', '>', '|', '\0', ':', '*', '?', '/', '\\',
+            '\u0001', '\u0002', '\u0003', '\u0004', '\u0005', '\u0006', '\a', '\b', '\t', '\n', '\v', '\f', 
+            '\r', '\u000e', '\u000f', '\u0010', '\u0011', '\u0012', '\u0013', '\u0014', '\u0015', '\u0016', 
+            '\u0017', '\u0018', '\u0019', '\u001a', '\u001b', '\u001c', '\u001d', '\u001e', '\u001f' };
+
+        /// <summary>
+        /// Remove a string of characters illegal for a folder name. Used for thread subjects if 
+        /// addThreadSubjectToFolder setting is enabled.
+        /// </summary>
+        public static string CleanThreadSubjectForFolderName(string subject)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            for (int i = 0; i < subject.Length; i++)
+            {
+                if (!invalidFolderCharacters.Contains(subject[i]))
+                {
+                    sb.Append(subject[i]);
+                }
+            }
+
+            return sb.ToString();
+        }
     }
 }

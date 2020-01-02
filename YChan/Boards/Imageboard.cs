@@ -43,17 +43,17 @@ namespace GChan
         protected bool board;                            // Flag to distinguish Boards and Threads of an IB
         protected bool Gone = false;                     // Flag for 404
 
-        protected string subject;                        // Name of the thread.
         protected string boardName;
         protected string id;
         protected int fileCount;
 
+        protected string originalSubject = null;                   // The original subject of the thread.
         protected string customSubject = null;                     // A custom subject able to be set by the user.
 
         /// <summary>
         /// Returns the thread's subject name, if there is a custom subject name then that is set instead.
         /// </summary>
-        public string Subject { get { return customSubject == null ? subject : customSubject; } }
+        public string Subject { get { return customSubject == null ? originalSubject : customSubject; } }
         public string BoardName { get { return boardName; } }
         public string ID { get { return id; } }
 
@@ -72,6 +72,7 @@ namespace GChan
 
                 if (url.Contains("?"))
                 {
+                    //TODO: Do this with Regex or Uri and HTTPUtility HttpUtility.ParseQueryString (https://stackoverflow.com/a/659929/8306962)
                     customSubject = url.Substring(url.LastIndexOf('=') + 1).Replace('_', ' ');
                     this.URL = url.Substring(0, url.LastIndexOf('/'));
                     id = GetID();
@@ -139,37 +140,7 @@ namespace GChan
             }
         }
 
-        //TODO: Make this abstract and move actual code to FourChan.cs
-        //TODO: Rewrite code to not use json and that one external library. Use XML like in download() methods.
-        protected string GetThreadName()
-        {
-            string subject;
-
-            if (board)
-            {
-                subject = "No Subject";
-            }
-            else
-            {
-                try
-                {
-                    string JSONUrl = "http://a.4cdn.org/" + getURL().Split('/')[3] + "/thread/" + getURL().Split('/')[5] + ".json";
-                    string Content = new WebClient().DownloadString(JSONUrl);
-
-                    dynamic data = JObject.Parse(Content);
-
-                    subject = data.posts[0].sub.ToString();
-                }
-                catch (Exception ex)
-                {
-                    Program.Log(ex);
-                    subject = NO_SUBJECT;
-                }
-
-            }
-
-            return subject;
-        }
+        protected abstract string GetThreadSubject();
 
         public bool HasCustomSubject()
         {
