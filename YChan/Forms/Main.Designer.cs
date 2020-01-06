@@ -226,7 +226,7 @@
             // 
             // Board
             // 
-            this.Board.DataPropertyName = "BoardName";
+            this.Board.DataPropertyName = "BoardCode";
             this.Board.FillWeight = 92.8934F;
             this.Board.HeaderText = "Board";
             this.Board.Name = "Board";
@@ -380,9 +380,9 @@
             // 
             this.nfTray.ContextMenuStrip = this.cmTray;
             this.nfTray.Icon = ((System.Drawing.Icon)(resources.GetObject("nfTray.Icon")));
-            this.nfTray.Text = "Doubleclick to open/hide";
+            this.nfTray.Text = "Click to open/hide";
             this.nfTray.Visible = true;
-            this.nfTray.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.nfTray_MouseDoubleClick);
+            this.nfTray.MouseDown += new System.Windows.Forms.MouseEventHandler(this.nfTray_MouseDown);
             // 
             // cmTray
             // 
@@ -501,11 +501,11 @@
         private System.Windows.Forms.ToolTip toolTip;
         private System.Windows.Forms.ToolStripMenuItem copyURLToClipboardToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem renameToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem openProgramDataFolderToolStripMenuItem;
         private System.Windows.Forms.DataGridViewTextBoxColumn Subject;
         private System.Windows.Forms.DataGridViewTextBoxColumn Board;
         private System.Windows.Forms.DataGridViewTextBoxColumn ID;
         private System.Windows.Forms.DataGridViewTextBoxColumn FileCount;
-        private System.Windows.Forms.ToolStripMenuItem openProgramDataFolderToolStripMenuItem;
     }
 }
 

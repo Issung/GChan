@@ -15,7 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/> *
  ************************************************************************/
 
-using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -23,6 +22,8 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Windows.Forms;
+using Microsoft.Win32;
+using GChan.Trackers;
 
 namespace GChan
 {
@@ -36,21 +37,21 @@ namespace GChan
         /// <summary>
         /// Saves the thread and board list to disk
         /// </summary>
-        public static void SaveURLs(List<Imageboard> Boards, List<Imageboard> Threads)
+        public static void SaveURLs(List<Board> Boards, List<Thread> Threads)
         {
             try
             {
                 StringBuilder sb = new StringBuilder();
 
                 for (int i = 0; i < Boards.Count; i++)
-                    sb.AppendLine(Boards[i].getURL().Replace("\r", ""));
+                    sb.AppendLine(Boards[i].URL.Replace("\r", ""));
 
                 File.WriteAllText(Application.CommonAppDataPath + "\\boards.dat", sb.ToString());
 
                 sb.Clear();
 
                 for (int i = 0; i < Threads.Count; i++)
-                    sb.AppendLine(Threads[i].getURL().Replace("\r", ""));
+                    sb.AppendLine(Threads[i].GetURLWithSubject());
 
                 File.WriteAllText(Application.CommonAppDataPath + "\\threads.dat", sb.ToString());
             }
@@ -137,20 +138,17 @@ namespace GChan
         /// <summary>
         /// Create a new Imageboard
         /// </summary>
-        public static Imageboard CreateNewImageboard(string url)
+        public static Tracker CreateNewTracker(string url)
         {
-            // if FChan, create FChan
-            // if 8chan, create 8chan
+            if (Thread_4Chan.UrlIsThread(url))
+                return new Thread_4Chan(url);
+            else if (Thread_8Kun.UrlIsThread(url))
+                return new Thread_8Kun(url);
 
-            if (FourChan.urlIsThread(url))
-                return new FourChan(url, false);
-            else if (EightKun.urlIsThread(url))
-                return new EightKun(url, false);
-
-            if (FourChan.urlIsBoard(url))
-                return new FourChan(url, true);
-            else if (EightKun.urlIsBoard(url))
-                return new EightKun(url, true);
+            if (Board_4Chan.UrlIsBoard(url))
+                return new Board_4Chan(url);
+            else if (Board_8Kun.UrlIsBoard(url))
+                return new Board_8Kun(url);
 
             return null;
         }
@@ -244,6 +242,7 @@ namespace GChan
                     WebClient webClient = new WebClient();
                     webClient.DownloadFile(link.URL, destFilepath);
 
+                    //TODO: Figure out how to make the async downloading work properly.
                     // This line is currently not working and downloads 0 byte files 100% of the time.
                     //webClient.DownloadFileAsync(new Uri(link.URL), destFilepath);
                     /*Task.Run(() => { 
@@ -321,7 +320,7 @@ namespace GChan
             return ret;
         }
 
-        readonly static char[] invalidFolderCharacters = { '"', '<', '>', '|', '\0', ':', '*', '?', '/', '\\',
+        readonly static char[] subjectIllegalCharacters = { '"', '<', '>', '|', '\0', ':', '*', '?', '/', '\\',
             '\u0001', '\u0002', '\u0003', '\u0004', '\u0005', '\u0006', '\a', '\b', '\t', '\n', '\v', '\f', 
             '\r', '\u000e', '\u000f', '\u0010', '\u0011', '\u0012', '\u0013', '\u0014', '\u0015', '\u0016', 
             '\u0017', '\u0018', '\u0019', '\u001a', '\u001b', '\u001c', '\u001d', '\u001e', '\u001f' };
@@ -330,13 +329,13 @@ namespace GChan
         /// Remove a string of characters illegal for a folder name. Used for thread subjects if 
         /// addThreadSubjectToFolder setting is enabled.
         /// </summary>
-        public static string CleanThreadSubjectForFolderName(string subject)
+        public static string CleanSubjectString(string subject)
         {
             StringBuilder sb = new StringBuilder();
 
             for (int i = 0; i < subject.Length; i++)
             {
-                if (!invalidFolderCharacters.Contains(subject[i]))
+                if (!subjectIllegalCharacters.Contains(subject[i]))
                 {
                     sb.Append(subject[i]);
                 }

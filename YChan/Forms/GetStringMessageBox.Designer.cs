@@ -43,7 +43,7 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.promptLabel.AutoSize = true;
-            this.promptLabel.Location = new System.Drawing.Point(82, 9);
+            this.promptLabel.Location = new System.Drawing.Point(82, 12);
             this.promptLabel.Name = "promptLabel";
             this.promptLabel.Size = new System.Drawing.Size(262, 13);
             this.promptLabel.TabIndex = 0;
@@ -106,6 +106,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(419, 101);
+            this.ControlBox = false;
             this.Controls.Add(this.buttonTableLayoutPanel);
             this.Controls.Add(this.entryTextBox);
             this.Controls.Add(this.promptLabel);

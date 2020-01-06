@@ -16,27 +16,31 @@
  ************************************************************************/
 
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+using System.Drawing;
+using System.Diagnostics;
 using System.Windows.Forms;
+using System.Threading.Tasks;
+using System.Collections.Generic;
 using GChan.Controls;
+
+using System.Threading;
+using SysThread = System.Threading.Thread;
+using GChan.Trackers;
+using Thread = GChan.Trackers.Thread;
+using Type = GChan.Trackers.Type;
 
 namespace GChan
 {
     public partial class MainForm : Form
     {
-        public SortableBindingList<Imageboard> ThreadListBindingSource;
+        public SortableBindingList<Thread> ThreadListBindingSource;
 
-        public List<Imageboard> BoardList { get; set; } = new List<Imageboard>();
+        public List<Board> BoardList = new List<Board>();
         public BindingSource BoardListBindingSource;
 
-        private Thread Scanner = null;                                                      // thread that adds stuff
+        private System.Threading.Thread Scanner = null;                                                      // thread that adds stuff
 
         //private int threadIndex = -1;     // Item position in threadGridView
 
@@ -59,7 +63,7 @@ namespace GChan
 
             threadGridView.AutoGenerateColumns = false;
 
-            ThreadListBindingSource = new SortableBindingList<Imageboard>();
+            ThreadListBindingSource = new SortableBindingList<Thread>();
             ThreadListBindingSource.ListChanged += ThreadListBindingSource_ListChanged;
             threadGridView.DataSource = ThreadListBindingSource;
 
@@ -105,8 +109,8 @@ namespace GChan
                         {
                             if (!string.IsNullOrWhiteSpace(URLs[i]))
                             {
-                                Imageboard newImageboard = Utils.CreateNewImageboard(URLs[i].Trim());
-                                AddURLToList(newImageboard);
+                                Board newBoard = (Board)Utils.CreateNewTracker(URLs[i].Trim());
+                                AddURLToList(newBoard);
                             }
                         }
                     }
@@ -118,7 +122,7 @@ namespace GChan
                     {
                         string[] URLs = threads.Split('\n');
 
-                        new Thread(() =>
+                        new SysThread(() =>
                         {
                             // Without setting ScrollBars to None and then setting to Vertical the program will crash.
                             // It doesnt like items being added in parallel in this method...
@@ -136,8 +140,8 @@ namespace GChan
                             {
                                 if (!string.IsNullOrWhiteSpace(url))
                                 {
-                                    Imageboard newImageboard = Utils.CreateNewImageboard(url.Trim());
-                                    AddURLToList(newImageboard);
+                                    Thread newThread = (Thread)Utils.CreateNewTracker(url.Trim());
+                                    AddURLToList(newThread);
                                 }
                             });
 
@@ -168,13 +172,14 @@ namespace GChan
 
         private void AddUrl(string url)
         {
-            Imageboard newImageboard = Utils.CreateNewImageboard(url);
+            Tracker newTracker = Utils.CreateNewTracker(url);
 
-            if (newImageboard != null)
+            if (newTracker != null)
             {
-                if (isUnique(newImageboard.getURL(), newImageboard.isBoard() ? BoardList : ThreadListBindingSource.ToList()))
+                List<Tracker> trackerList = ((newTracker.Type == Type.Board) ? BoardList.Cast<Tracker>() : ThreadListBindingSource.Cast<Tracker>()).ToList();
+                if (IsUnique(newTracker.URL, trackerList))
                 {
-                    AddURLToList(newImageboard);
+                    AddURLToList(newTracker);
 
                     if (!scanTimer.Enabled)
                         scanTimer.Enabled = true;
@@ -191,7 +196,7 @@ namespace GChan
 
                     if (result == DialogResult.Yes)
                     {
-                        string spath = newImageboard.GetPath();
+                        string spath = newTracker.SaveTo;
                         if (!Directory.Exists(spath))
                             Directory.CreateDirectory(spath);
                         Process.Start(spath);
@@ -205,25 +210,26 @@ namespace GChan
             }
         }
 
-        private bool AddURLToList(Imageboard imageboard)
+        private bool AddURLToList(Tracker tracker)
         {
-            if (imageboard == null) return false;
+            if (tracker == null) 
+                return false;
 
-            if (imageboard.isBoard())
+            if (tracker.GetType().BaseType == typeof(Board))
             {
                 lock (boardLock)
                 {
                     this.Invoke((MethodInvoker)delegate () {
-                        BoardListBindingSource.Add(imageboard);
+                        BoardListBindingSource.Add(tracker);
                     });
                 }
             }
-            else
+            else //Thread
             {
                 //lock (threadLock)
                 //{
                 this.Invoke((MethodInvoker)delegate () {
-                    ThreadListBindingSource.Add(imageboard);
+                    ThreadListBindingSource.Add((Thread)tracker);
                 });
                 //}
             }
@@ -235,7 +241,7 @@ namespace GChan
         {
             if (Scanner == null || !Scanner.IsAlive)
             {
-                Scanner = new Thread(new ThreadStart(ScanThread))
+                Scanner = new SysThread(new ThreadStart(ScanThread))
                 {
                     Name = "Scan Thread",
                     IsBackground = true
@@ -252,9 +258,9 @@ namespace GChan
             lock (threadLock)
             {
                 // Removes 404'd threads
-                foreach (Imageboard thread in ThreadListBindingSource.ToArray())
+                foreach (Thread thread in ThreadListBindingSource.ToArray())
                 {
-                    if (thread.isGone())
+                    if (thread.Gone)
                     {
                         RemoveThread(thread);
                         //goneThreads.Add(thread);
@@ -268,13 +274,13 @@ namespace GChan
             lock (boardLock)
             {
                 // Searches for new threads on the watched boards
-                foreach (Imageboard board in BoardList)
+                foreach (Board board in BoardList)
                 {
                     string[] threads = { };
 
                     try
                     {
-                        threads = board.getThreads();
+                        threads = board.GetThreadLinks();
                     }
                     catch
                     {
@@ -283,10 +289,10 @@ namespace GChan
                     {
                         foreach (string thread in threads)
                         {
-                            Imageboard newImageboard = Utils.CreateNewImageboard(thread);
-                            if (newImageboard != null && isUnique(newImageboard.getURL(), ThreadListBindingSource.ToList()))
+                            Thread newThread = (Thread)Utils.CreateNewTracker(thread);
+                            if (newThread != null && IsUnique(newThread.URL, ThreadListBindingSource.Cast<Tracker>() as List<Tracker>))
                             {
-                                AddURLToList(newImageboard);
+                                AddURLToList(newThread);
                             }
                         }
                     }
@@ -298,20 +304,20 @@ namespace GChan
                 // Download threads
                 for (int i = 0; i < ThreadListBindingSource.Count; i++)
                 {
-                    ThreadPool.QueueUserWorkItem(new WaitCallback(ThreadListBindingSource[i].download));
+                    ThreadPool.QueueUserWorkItem(new WaitCallback(ThreadListBindingSource[i].Download));
                 }
             }
         }
 
-        private bool isUnique(string url, List<Imageboard> List)
+        private bool IsUnique(string url, List<Tracker> list)
         {
-            bool flag = true;
-            for (int i = 0; i < List.Count; i++)
+            for (int i = 0; i < list.Count(); i++)
             {
-                if (List[i].getURL() == url)
-                    flag = false;
+                if (list[i].URL == url)
+                    return false;
             }
-            return flag;
+
+            return true;
         }
 
         private int getPlace(string url)
@@ -319,7 +325,7 @@ namespace GChan
             int plc = -1;
             for (int i = 0; i < ThreadListBindingSource.Count; i++)
             {
-                if (ThreadListBindingSource[i].getURL() == url)
+                if (ThreadListBindingSource[i].URL == url)
                     plc = i;
             }
             return plc;
@@ -329,32 +335,32 @@ namespace GChan
         {
             lock (threadLock)
             {
-                string currentSubject = (ThreadListBindingSource[threadBindingSourceIndex] as Imageboard).Subject;
+                string currentSubject = (ThreadListBindingSource[threadBindingSourceIndex] as Thread).Subject;
                 string entry = Utils.MessageBoxGetString(currentSubject, Left + 50, Top + 50);
 
                 if (entry.Length < 1)
                 {
-                    (ThreadListBindingSource[threadBindingSourceIndex] as Imageboard).SetCustomSubject(Imageboard.NO_SUBJECT);
+                    (ThreadListBindingSource[threadBindingSourceIndex] as Thread).SetSubject(Thread.NO_SUBJECT);
                 }
                 else
                 {
-                    (ThreadListBindingSource[threadBindingSourceIndex] as Imageboard).SetCustomSubject(entry);
+                    (ThreadListBindingSource[threadBindingSourceIndex] as Thread).SetSubject(entry);
                 }
             }
         }
 
-        private void RemoveThread(Imageboard thread)
+        private void RemoveThread(Thread thread)
         {
-            Program.Log(true, $"Removing thread {thread.getURL()}! thread.isGone: {thread.isGone()}");
+            Program.Log(true, $"Removing thread {thread.URL}! thread.isGone: {thread.Gone}");
 
             if (Properties.Settings.Default.addThreadSubjectToFolder)
             {
-                string currentPath = thread.GetPath().Replace("\r", "");
+                string currentPath = thread.SaveTo.Replace("\r", "");
 
-                string cleanSubject = Utils.CleanThreadSubjectForFolderName(thread.Subject);
+                string cleanSubject = Utils.CleanSubjectString(thread.Subject);
                  
                 // There are \r characters appearing from the custom subjects, TODO: need to get to the bottom of the cause of this.
-                string destinationPath = (thread.GetPath() + " - " + cleanSubject).Replace("\r", "");
+                string destinationPath = (thread.SaveTo + " - " + cleanSubject).Replace("\r", "");
                 destinationPath = destinationPath.Trim('\\', '/');
 
                 if (Directory.Exists(currentPath))
@@ -376,7 +382,7 @@ namespace GChan
                 }
                 else
                 {
-                    Program.Log(true, $"While attempting to rename thread {thread.getURL()} the current folder could not be found, renaming abandoned.");
+                    Program.Log(true, $"While attempting to rename thread {thread.URL} the current folder could not be found, renaming abandoned.");
                 }
             }
 
@@ -433,7 +439,7 @@ namespace GChan
                 {
                     try
                     {
-                        RemoveThread(ThreadListBindingSource[ThreadGridViewSelectedRowIndex] as Imageboard);
+                        RemoveThread(ThreadListBindingSource[ThreadGridViewSelectedRowIndex] as Thread);
                     }
                     catch
                     {
@@ -447,7 +453,7 @@ namespace GChan
         {
             if (ThreadGridViewSelectedRowIndex != -1)
             {
-                string spath = (ThreadListBindingSource[ThreadGridViewSelectedRowIndex] as Imageboard).GetPath();
+                string spath = (ThreadListBindingSource[ThreadGridViewSelectedRowIndex] as Thread).SaveTo;
                 if (!Directory.Exists(spath))
                     Directory.CreateDirectory(spath);
                 Process.Start(spath);
@@ -458,7 +464,7 @@ namespace GChan
         {
             if (ThreadGridViewSelectedRowIndex != -1)
             {
-                string spath = (ThreadListBindingSource[ThreadGridViewSelectedRowIndex] as Imageboard).getURL();
+                string spath = (ThreadListBindingSource[ThreadGridViewSelectedRowIndex] as Thread).URL;
                 Process.Start(spath);
             }
         }
@@ -467,7 +473,7 @@ namespace GChan
         {
             if (ThreadGridViewSelectedRowIndex != -1)
             {
-                string spath = ThreadListBindingSource[ThreadGridViewSelectedRowIndex].getURL();
+                string spath = ThreadListBindingSource[ThreadGridViewSelectedRowIndex].URL;
                 Clipboard.SetText(spath);
             }
         }
@@ -500,7 +506,7 @@ namespace GChan
         {
             if (bPos != -1)
             {
-                string spath = (BoardListBindingSource[bPos] as Imageboard).GetPath();
+                string spath = (BoardListBindingSource[bPos] as Board).SaveTo;
                 if (!Directory.Exists(spath))
                     Directory.CreateDirectory(spath);
                 Process.Start(spath);
@@ -527,15 +533,18 @@ namespace GChan
             }
         }
 
-        private void nfTray_MouseDoubleClick(object sender, MouseEventArgs e)
+        private void nfTray_MouseDown(object sender, MouseEventArgs e)
         {
-            if (this.Visible)
-                this.Hide();
-            else
+            if (e.Button == MouseButtons.Left)
             {
-                this.Show();
-                this.WindowState = FormWindowState.Normal;
-                Activate();
+                if (this.Visible)
+                    this.Hide();
+                else
+                {
+                    this.Show();
+                    this.WindowState = FormWindowState.Normal;
+                    Activate();
+                }
             }
         }
 
@@ -630,7 +639,7 @@ namespace GChan
             {
                 if ((pos = boardsListBox.IndexFromPoint(e.Location)) != -1)
                 {
-                    string spath = (BoardListBindingSource[pos] as Imageboard).GetPath();
+                    string spath = (BoardListBindingSource[pos] as Board).SaveTo;
                     if (!Directory.Exists(spath))
                         Directory.CreateDirectory(spath);
                     Process.Start(spath);
@@ -685,7 +694,7 @@ namespace GChan
 
         private void clipboardButton_Click(object sender, EventArgs e)
         {
-            string text = String.Join(",", ThreadListBindingSource.Select(thread => thread.getURL())).Replace("\n", "").Replace("\r", "");
+            string text = String.Join(",", ThreadListBindingSource.Select(thread => thread.SaveTo)).Replace("\n", "").Replace("\r", "");
             Clipboard.SetText(text);
         }
 
