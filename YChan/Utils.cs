@@ -153,6 +153,9 @@ namespace GChan
             return null;
         }
 
+        /// <summary>
+        /// Remove the reply specifier from a thread url, eg 4chan.org/gif/thread/16245377#p16245377 becomes 4chan.org/gif/thread/16245377
+        /// </summary>
         public static string PrepareURL(string url)
         {
             url = url.Trim();

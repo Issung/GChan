@@ -406,7 +406,7 @@ namespace GChan
         private void AddButton_Click(object sender, EventArgs e)
         {
             // Get url from TextBox
-            var urls = URLTextBox.Text.Split(',');
+            var urls = URLTextBox.Text.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
             for (int i = 0; i < urls.Length; i++)
             {
@@ -416,6 +416,35 @@ namespace GChan
 
             // Clear TextBox
             URLTextBox.Text = "";
+        }
+
+        private void edtURL_DragDrop(object sender, DragEventArgs e)
+        {
+            string entry = (string)e.Data.GetData(DataFormats.Text);               // Get url from drag and drop
+
+            // Get url from TextBox
+            var urls = entry.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+
+            for (int i = 0; i < urls.Length; i++)
+            {
+                urls[i] = Utils.PrepareURL(urls[i]);
+                AddUrl(urls[i]);
+            }
+        }
+
+        private void edtURL_DragEnter(object sender, DragEventArgs e)
+        {
+            // See if this is a copy and the data includes text.
+            if (e.Data.GetDataPresent(DataFormats.Text) && (e.AllowedEffect & DragDropEffects.Copy) != 0)
+            {
+                // Allow this.
+                e.Effect = DragDropEffects.Copy;
+            }
+            else
+            {
+                // Don't allow any other drop.
+                e.Effect = DragDropEffects.None;
+            }
         }
 
         private void lbBoards_MouseDown(object sender, MouseEventArgs e)
@@ -578,27 +607,6 @@ namespace GChan
         private void openFolderToolStripMenuItem1_Click(object sender, EventArgs e)
         {
             Process.Start(Properties.Settings.Default.path);
-        }
-
-        private void edtURL_DragEnter(object sender, DragEventArgs e)
-        {
-            // See if this is a copy and the data includes text.
-            if (e.Data.GetDataPresent(DataFormats.Text) && (e.AllowedEffect & DragDropEffects.Copy) != 0)
-            {
-                // Allow this.
-                e.Effect = DragDropEffects.Copy;
-            }
-            else
-            {
-                // Don't allow any other drop.
-                e.Effect = DragDropEffects.None;
-            }
-        }
-
-        private void edtURL_DragDrop(object sender, DragEventArgs e)
-        {
-            string url = (string)e.Data.GetData(DataFormats.Text);               // Get url from drag and drop
-            AddUrl(url);
         }
 
         private void btnClearAll_Click(object sender, EventArgs e)
