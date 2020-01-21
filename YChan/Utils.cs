@@ -154,7 +154,9 @@ namespace GChan
         }
 
         /// <summary>
-        /// Remove the reply specifier from a thread url, eg 4chan.org/gif/thread/16245377#p16245377 becomes 4chan.org/gif/thread/16245377
+        /// Remove the reply specifier from a thread url.
+        /// eg "4chan.org/gif/thread/16245377#p16245377" becomes "4chan.org/gif/thread/16245377".
+        /// (hashtag and any following characters are trimmed).
         /// </summary>
         public static string PrepareURL(string url)
         {
