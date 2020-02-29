@@ -25,3 +25,4 @@ Requires .NET Framework 4.8 or higher, GUI is made with Winforms.
   * ID Only (eg. '1570301.jpg')
   * Original Filename Only (eg. 'LittleSaintJames.jpg')
   * ID - OriginalFilename (eg. '1570301 - LittleSaintJames.jpg')
+* Add URLs by just clicking the Add Button, no need to paste it in the box (Lazy Entry)
