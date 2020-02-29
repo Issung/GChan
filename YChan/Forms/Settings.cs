@@ -62,6 +62,8 @@ namespace GChan
             chkStartWithWindows.Checked = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true).GetValueNames().Contains(Utils.PROGRAM_NAME);
 
             addThreadSubjectToFolderCheckBox.Checked = Properties.Settings.Default.addThreadSubjectToFolder;
+
+            addUrlFromClipboardWhenTextboxEmpty.Checked = Properties.Settings.Default.addUrlFromClipboardWhenTextboxEmpty;
         }
 
         private void btnSSave_Click(object sender, EventArgs e)
@@ -89,7 +91,8 @@ namespace GChan
                     chkTray.Checked,
                     chkWarn.Checked,
                     chkStartWithWindows.Checked,
-                    addThreadSubjectToFolderCheckBox.Checked
+                    addThreadSubjectToFolderCheckBox.Checked,
+                    addUrlFromClipboardWhenTextboxEmpty.Checked
                 );
 
                 this.Close();

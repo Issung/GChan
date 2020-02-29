@@ -41,13 +41,14 @@
             this.addThreadSubjectToFolderCheckBox = new System.Windows.Forms.CheckBox();
             this.label3 = new System.Windows.Forms.Label();
             this.imageFilenameFormatComboBox = new System.Windows.Forms.ComboBox();
+            this.addUrlFromClipboardWhenTextboxEmpty = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.timerNumeric)).BeginInit();
             this.SuspendLayout();
             // 
             // btnSSave
             // 
             this.btnSSave.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
-            this.btnSSave.Location = new System.Drawing.Point(59, 244);
+            this.btnSSave.Location = new System.Drawing.Point(59, 268);
             this.btnSSave.Name = "btnSSave";
             this.btnSSave.Size = new System.Drawing.Size(92, 23);
             this.btnSSave.TabIndex = 0;
@@ -58,7 +59,7 @@
             // btnSCan
             // 
             this.btnSCan.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
-            this.btnSCan.Location = new System.Drawing.Point(157, 244);
+            this.btnSCan.Location = new System.Drawing.Point(157, 268);
             this.btnSCan.Name = "btnSCan";
             this.btnSCan.Size = new System.Drawing.Size(94, 23);
             this.btnSCan.TabIndex = 1;
@@ -196,14 +197,25 @@
             this.imageFilenameFormatComboBox.TabIndex = 16;
             this.imageFilenameFormatComboBox.DropDown += new System.EventHandler(this.imageFilenameFormatComboBox_DropDown);
             // 
+            // addUrlFromClipboardWhenTextboxEmpty
+            // 
+            this.addUrlFromClipboardWhenTextboxEmpty.AutoSize = true;
+            this.addUrlFromClipboardWhenTextboxEmpty.Location = new System.Drawing.Point(15, 233);
+            this.addUrlFromClipboardWhenTextboxEmpty.Name = "addUrlFromClipboardWhenTextboxEmpty";
+            this.addUrlFromClipboardWhenTextboxEmpty.Size = new System.Drawing.Size(225, 17);
+            this.addUrlFromClipboardWhenTextboxEmpty.TabIndex = 17;
+            this.addUrlFromClipboardWhenTextboxEmpty.Text = "Add URL from clipboard if textbox is empty";
+            this.addUrlFromClipboardWhenTextboxEmpty.UseVisualStyleBackColor = true;
+            // 
             // Settings
             // 
             this.AcceptButton = this.btnSSave;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.ClientSize = new System.Drawing.Size(310, 279);
+            this.ClientSize = new System.Drawing.Size(310, 303);
             this.ControlBox = false;
+            this.Controls.Add(this.addUrlFromClipboardWhenTextboxEmpty);
             this.Controls.Add(this.imageFilenameFormatComboBox);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.addThreadSubjectToFolderCheckBox);
@@ -251,5 +263,6 @@
         private System.Windows.Forms.CheckBox addThreadSubjectToFolderCheckBox;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.ComboBox imageFilenameFormatComboBox;
+        private System.Windows.Forms.CheckBox addUrlFromClipboardWhenTextboxEmpty;
     }
 }

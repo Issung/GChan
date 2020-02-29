@@ -411,7 +411,7 @@ namespace GChan
             // Clear TextBox faster
             URLTextBox.Text = "";
 
-            if (string.IsNullOrWhiteSpace(textBox) && Clipboard.ContainsText())
+            if (string.IsNullOrWhiteSpace(textBox) && Clipboard.ContainsText() && Properties.Settings.Default.addUrlFromClipboardWhenTextboxEmpty == true)
                 textBox = Clipboard.GetText();
 
             // Get url from TextBox
