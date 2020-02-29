@@ -117,7 +117,7 @@ namespace GChan
             if (startWithWindows)
                 registryKey.SetValue(PROGRAM_NAME, '"' + Application.ExecutablePath + '"' + " -tray");
             else if (registryKey.GetValue(PROGRAM_NAME) != null)
-                registryKey.DeleteValue(PROGRAM_NAME); registryKey.DeleteValue(PROGRAM_NAME);
+                registryKey.DeleteValue(PROGRAM_NAME);
         }
 
         /// <summary>
