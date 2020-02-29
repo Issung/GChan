@@ -153,6 +153,7 @@ namespace GChan.Trackers
                 doc.LoadXml(str);
                 XmlNodeList xmlTim = doc.DocumentElement.SelectNodes("/root/posts/item/tim");
                 XmlNodeList xmlExt = doc.DocumentElement.SelectNodes("/root/posts/item/ext");
+                XmlNodeList xmlFilenames = doc.DocumentElement.SelectNodes("/root/posts/item/filename");
 
                 for (int i = 0; i < xmlExt.Count; i++)
                 {
@@ -160,13 +161,17 @@ namespace GChan.Trackers
                     string rep = xmlTim[i].InnerText + xmlExt[i].InnerText;
                     htmlPage = htmlPage.Replace(old, rep);
 
+                    //get the actual filename saved
+                    string filename = Path.GetFileNameWithoutExtension(new ImageLink(baseURL + xmlTim[i].InnerText + xmlExt[i].InnerText, xmlFilenames[i].InnerText).GenerateNewFilename((ImageFileNameFormat)Properties.Settings.Default.imageFilenameFormat));
+
                     //Save thumbs for files that need it
                     if (rep.Split('.')[1] == "webm" /*|| rep.Split('.')[1] == ""*/)
                     {
                         old = "//t.4cdn.org/" + URL.Split('/')[3] + "/" + xmlTim[i].InnerText + "s.jpg";
                         thumbs.Add("http:" + old);
 
-                        htmlPage = htmlPage.Replace("//i.4cdn.org/" + URL.Split('/')[3] + "/" + xmlTim[i].InnerText, "thumb/" + xmlTim[i].InnerText);
+                        htmlPage = htmlPage.Replace(xmlTim[i].InnerText, filename);
+                        htmlPage = htmlPage.Replace("//i.4cdn.org/" + URL.Split('/')[3] + "/" + filename, "thumb/" + xmlTim[i].InnerText);
                     }
                     else
                     {
@@ -175,6 +180,7 @@ namespace GChan.Trackers
                         htmlPage = htmlPage.Replace("/" + thumbName, thumbName);
 
                         htmlPage = htmlPage.Replace("//i.4cdn.org/" + URL.Split('/')[3] + "/" + xmlTim[i].InnerText, xmlTim[i].InnerText);
+                        htmlPage = htmlPage.Replace(xmlTim[i].InnerText, filename); //easy fix for images
                     }
 
                     htmlPage = htmlPage.Replace("/" + rep, rep);
