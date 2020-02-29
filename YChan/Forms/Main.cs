@@ -702,7 +702,7 @@ namespace GChan
 
         private void clipboardButton_Click(object sender, EventArgs e)
         {
-            string text = String.Join(",", ThreadListBindingSource.Select(thread => thread.SaveTo)).Replace("\n", "").Replace("\r", "");
+            string text = String.Join(",", ThreadListBindingSource.Select(thread => thread.URL)).Replace("\n", "").Replace("\r", "");
             Clipboard.SetText(text);
         }
 
