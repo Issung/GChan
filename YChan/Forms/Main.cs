@@ -405,17 +405,23 @@ namespace GChan
 
         private void AddButton_Click(object sender, EventArgs e)
         {
+            // This way, it doesn't flash text during lazy entry
+            string textBox = URLTextBox.Text; 
+
+            // Clear TextBox faster
+            URLTextBox.Text = "";
+
+            if (string.IsNullOrWhiteSpace(textBox) && Clipboard.ContainsText())
+                textBox = Clipboard.GetText();
+
             // Get url from TextBox
-            var urls = URLTextBox.Text.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            var urls = textBox.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
             for (int i = 0; i < urls.Length; i++)
             {
                 urls[i] = Utils.PrepareURL(urls[i]);
                 AddUrl(urls[i]);
             }
-
-            // Clear TextBox
-            URLTextBox.Text = "";
         }
 
         private void edtURL_DragDrop(object sender, DragEventArgs e)
