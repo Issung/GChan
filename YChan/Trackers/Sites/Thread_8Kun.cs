@@ -22,8 +22,8 @@ namespace GChan.Trackers
             SiteName = "8kun";
 
             Match match = Regex.Match(url, threadRegex);
-            this.URL = "https://" + match.Groups[0].Value;      // simplify thread url
-            this.SaveTo = (Properties.Settings.Default.path + "\\" + SiteName + "\\" + url.Split('/')[3] + "\\" + url.Split('/')[5]).Replace(".html", ""); // set saveto path
+            URL = "https://" + match.Groups[0].Value;      // simplify thread url
+            SaveTo = (Properties.Settings.Default.path + "\\" + SiteName + "\\" + url.Split('/')[3] + "\\" + url.Split('/')[5]).Replace(".html", ""); // set saveto path
         }
 
         public static bool UrlIsThread(string url)
@@ -36,8 +36,8 @@ namespace GChan.Trackers
         {
             try
             {
-                if (!Directory.Exists(this.SaveTo))
-                    Directory.CreateDirectory(this.SaveTo);
+                if (!Directory.Exists(SaveTo))
+                    Directory.CreateDirectory(SaveTo);
 
                 if (Properties.Settings.Default.loadHTML)
                     DownloadHTMLPage();
@@ -45,12 +45,12 @@ namespace GChan.Trackers
                 ImageLink[] URLs = GetImageLinks();
 
                 for (int y = 0; y < URLs.Length; y++)
-                    Utils.DownloadToDir(URLs[y], this.SaveTo);
+                    Utils.DownloadToDir(URLs[y], SaveTo);
             }
             catch (WebException webEx)
             {
                 if (((int)webEx.Status) == 7)
-                    this.Gone = true;
+                    Gone = true;
             }
             catch (UnauthorizedAccessException ex)
             {
@@ -178,11 +178,11 @@ namespace GChan.Trackers
 
                 for (int i = 0; i < thumbs.Count; i++)
                 {
-                    Utils.DownloadToDir(thumbs[i], this.SaveTo + "\\thumb");
+                    Utils.DownloadToDir(thumbs[i], SaveTo + "\\thumb");
                 }
 
                 if (!String.IsNullOrWhiteSpace(htmlPage))
-                    File.WriteAllText(this.SaveTo + "\\Thread.html", htmlPage); // save thread
+                    File.WriteAllText(SaveTo + "\\Thread.html", htmlPage); // save thread
             }
             catch
             {

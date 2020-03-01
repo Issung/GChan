@@ -80,7 +80,7 @@ namespace GChan
 
             scanTimer.Enabled = false;                                                   // Disable timer
             scanTimer.Interval = Properties.Settings.Default.timer;                      // Set interval
-            scanTimer.Tick += new EventHandler(this.Scan);                               // When Timer ticks call scan()
+            scanTimer.Tick += new EventHandler(Scan);                               // When Timer ticks call scan()
 
             ThreadPool.SetMaxThreads(Environment.ProcessorCount, Environment.ProcessorCount);
 
@@ -129,7 +129,7 @@ namespace GChan
                             // User cannot also resize columns while adding, or else program crashes.
 
                             CheckForIllegalCrossThreadCalls = false;
-                            this.Invoke((MethodInvoker)delegate { threadGridView.ScrollBars = ScrollBars.None; });
+                            Invoke((MethodInvoker)delegate { threadGridView.ScrollBars = ScrollBars.None; });
                             threadGridView.AllowUserToResizeColumns = false;
 
                             ParallelOptions options = new ParallelOptions { 
@@ -145,7 +145,7 @@ namespace GChan
                                 }
                             });
 
-                            this.Invoke((MethodInvoker)delegate {
+                            Invoke((MethodInvoker)delegate {
                                 Done();
                             });
                         }).Start();
@@ -219,7 +219,7 @@ namespace GChan
             {
                 lock (boardLock)
                 {
-                    this.Invoke((MethodInvoker)delegate () {
+                    Invoke((MethodInvoker)delegate () {
                         BoardListBindingSource.Add(tracker);
                     });
                 }
@@ -228,7 +228,7 @@ namespace GChan
             {
                 //lock (threadLock)
                 //{
-                this.Invoke((MethodInvoker)delegate () {
+                Invoke((MethodInvoker)delegate () {
                     ThreadListBindingSource.Add((Thread)tracker);
                 });
                 //}
@@ -572,12 +572,12 @@ namespace GChan
         {
             if (e.Button == MouseButtons.Left)
             {
-                if (this.Visible)
-                    this.Hide();
+                if (Visible)
+                    Hide();
                 else
                 {
-                    this.Show();
-                    this.WindowState = FormWindowState.Normal;
+                    Show();
+                    WindowState = FormWindowState.Normal;
                     Activate();
                 }
             }
@@ -585,7 +585,7 @@ namespace GChan
 
         private void cmTrayExit_Click(object sender, EventArgs e)
         {
-            this.Close();
+            Close();
         }
 
         private void cmTrayOpen_Click(object sender, EventArgs e)
@@ -598,16 +598,16 @@ namespace GChan
 
         private void MainForm_SizeChanged(object sender, EventArgs e)
         {
-            if (Properties.Settings.Default.minimizeToTray && this.WindowState == FormWindowState.Minimized)
+            if (Properties.Settings.Default.minimizeToTray && WindowState == FormWindowState.Minimized)
             {
                 // When minimized hide from taskbar if trayicon enabled
-                this.Hide();
+                Hide();
             }
         }
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            this.Close();
+            Close();
         }
 
         private void openFolderToolStripMenuItem1_Click(object sender, EventArgs e)

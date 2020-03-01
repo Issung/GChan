@@ -14,35 +14,35 @@ namespace GChan.Controls
 
         public PropertyComparer(PropertyDescriptor property, ListSortDirection direction)
         {
-            this.propertyDescriptor = property;
+            propertyDescriptor = property;
             Type comparerForPropertyType = typeof(Comparer<>).MakeGenericType(property.PropertyType);
-            this.comparer = (IComparer)comparerForPropertyType.InvokeMember("Default", BindingFlags.Static | BindingFlags.GetProperty | BindingFlags.Public, null, null, null);
-            this.SetListSortDirection(direction);
+            comparer = (IComparer)comparerForPropertyType.InvokeMember("Default", BindingFlags.Static | BindingFlags.GetProperty | BindingFlags.Public, null, null, null);
+            SetListSortDirection(direction);
         }
 
         #region IComparer<T> Members
 
         public int Compare(T x, T y)
         {
-            return this.reverse * this.comparer.Compare(this.propertyDescriptor.GetValue(x), this.propertyDescriptor.GetValue(y));
+            return reverse * comparer.Compare(propertyDescriptor.GetValue(x), propertyDescriptor.GetValue(y));
         }
 
         #endregion
 
         private void SetPropertyDescriptor(PropertyDescriptor descriptor)
         {
-            this.propertyDescriptor = descriptor;
+            propertyDescriptor = descriptor;
         }
 
         private void SetListSortDirection(ListSortDirection direction)
         {
-            this.reverse = direction == ListSortDirection.Ascending ? 1 : -1;
+            reverse = direction == ListSortDirection.Ascending ? 1 : -1;
         }
 
         public void SetPropertyAndDirection(PropertyDescriptor descriptor, ListSortDirection direction)
         {
-            this.SetPropertyDescriptor(descriptor);
-            this.SetListSortDirection(direction);
+            SetPropertyDescriptor(descriptor);
+            SetListSortDirection(direction);
         }
     }
 }

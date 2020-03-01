@@ -41,7 +41,7 @@ namespace GChan
         public Settings()
         {
             InitializeComponent();
-            this.imageFilenameFormatComboBox.DataSource = EnumHelper.GetEnumDescriptions(typeof(ImageFileNameFormat));
+            imageFilenameFormatComboBox.DataSource = EnumHelper.GetEnumDescriptions(typeof(ImageFileNameFormat));
         }
 
         private void Settings_Shown(object sender, EventArgs e)
@@ -95,13 +95,13 @@ namespace GChan
                     addUrlFromClipboardWhenTextboxEmpty.Checked
                 );
 
-                this.Close();
+                Close();
             }
         }
 
         private void btnSCan_Click(object sender, EventArgs e)
         {
-            this.Close();
+            Close();
         }
 
         //Source: https://stackoverflow.com/q/1410127/8306962

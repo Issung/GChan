@@ -23,8 +23,8 @@ namespace GChan.Trackers
             SiteName = "4chan";
 
             Match match = Regex.Match(url, @"boards.(4chan|4channel).org/[a-zA-Z0-9]*?/thread/\d*");
-            this.URL = "http://" + match.Groups[0].Value;
-            this.SaveTo = Properties.Settings.Default.path + "\\" + SiteName + "\\" + url.Split('/')[3] + "\\" + url.Split('/')[5];
+            URL = "http://" + match.Groups[0].Value;
+            SaveTo = Properties.Settings.Default.path + "\\" + SiteName + "\\" + url.Split('/')[3] + "\\" + url.Split('/')[5];
             if (subject == null)
                 subject = GetThreadSubject();
         }
@@ -40,7 +40,7 @@ namespace GChan.Trackers
             try
             {
                 if (!Directory.Exists(SaveTo))
-                    Directory.CreateDirectory(this.SaveTo);
+                    Directory.CreateDirectory(SaveTo);
 
                 ImageLink[] images = GetImageLinks();
 
