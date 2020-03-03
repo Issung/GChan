@@ -237,6 +237,7 @@
             this.Name = "Settings";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Settings";
             this.Shown += new System.EventHandler(this.Settings_Shown);
             ((System.ComponentModel.ISupportInitialize)(this.timerNumeric)).EndInit();
