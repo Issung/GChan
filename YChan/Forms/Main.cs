@@ -88,6 +88,7 @@ namespace GChan
             {
                 FirstStart tFirstStart = new FirstStart();                              // If first start, show first start message
                 tFirstStart.ShowDialog();
+                tFirstStart.Dispose();
                 Properties.Settings.Default.firstStart = false;
                 Properties.Settings.Default.Save();
             }
@@ -519,18 +520,21 @@ namespace GChan
         {
             AboutBox tAbout = new AboutBox();
             tAbout.ShowDialog();
+            tAbout.Dispose();
         }
 
         private void changelogToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Changelog tvInf = new Changelog();
             tvInf.ShowDialog();
+            tvInf.Dispose();
         }
 
         private void settingsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Settings tSettings = new Settings();
             tSettings.ShowDialog();
+            tSettings.Dispose();
             if (Properties.Settings.Default.minimizeToTray)
                 nfTray.Visible = true;
             else
@@ -769,6 +773,7 @@ namespace GChan
             {
                 CloseWarn clw = new CloseWarn();
                 result = clw.ShowDialog();
+                clw.Dispose();
                 e.Cancel = (result == DialogResult.Cancel);
             }
 

@@ -150,7 +150,7 @@ namespace GChan
                 
                 streamWriter.Flush();
             }
-            catch (Exception ex)
+            catch (Exception)
             { 
                 
             }

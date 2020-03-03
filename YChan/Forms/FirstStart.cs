@@ -32,6 +32,7 @@ namespace GChan
             Hide();
             Settings tSettings = new Settings();
             tSettings.ShowDialog();
+            tSettings.Dispose();
             Close();
         }
 

@@ -82,15 +82,18 @@ namespace GChan.Trackers
 
             try
             {
-                string Content = new WebClient().DownloadString(JSONUrl);
-                byte[] bytes = Encoding.ASCII.GetBytes(Content);
-
-                using (var stream = new MemoryStream(bytes))
+                using (var web = new WebClient())
                 {
-                    var quotas = new XmlDictionaryReaderQuotas();
-                    var jsonReader = JsonReaderWriterFactory.CreateJsonReader(stream, quotas);
-                    var xml = XDocument.Load(jsonReader);
-                    str = xml.ToString();
+                    string Content = web.DownloadString(JSONUrl);
+                    byte[] bytes = Encoding.ASCII.GetBytes(Content);
+
+                    using (var stream = new MemoryStream(bytes))
+                    {
+                        var quotas = new XmlDictionaryReaderQuotas();
+                        var jsonReader = JsonReaderWriterFactory.CreateJsonReader(stream, quotas);
+                        var xml = XDocument.Load(jsonReader);
+                        str = xml.ToString();
+                    }
                 }
 
                 XmlDocument doc = new XmlDocument();
@@ -110,7 +113,7 @@ namespace GChan.Trackers
                     links.Add(new ImageLink(baseURL + xmlTim[i].InnerText + xmlExt[i].InnerText, xmlFilenames[i].InnerText));
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 Program.Log(true, $"Encountered an exception in FourChan.getLinks(). Thread Board/ID/Subject: {BoardCode}{ID}/{Subject}");
                 throw;
@@ -131,22 +134,24 @@ namespace GChan.Trackers
             try
             {
                 //Add a UserAgent to prevent 403
-                WebClient web = new WebClient();
-                web.Headers["User-Agent"] = "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0";
-
-                htmlPage = web.DownloadString(URL);
-
-                //Prevent the html from being destroyed by the anti adblock script
-                htmlPage = htmlPage.Replace("f=\"to\"", "f=\"penis\"");
-
-                string json = web.DownloadString(JURL);
-                byte[] bytes = Encoding.ASCII.GetBytes(json);
-                using (var stream = new MemoryStream(bytes))
+                using (var web = new WebClient())
                 {
-                    var quotas = new XmlDictionaryReaderQuotas();
-                    var jsonReader = JsonReaderWriterFactory.CreateJsonReader(stream, quotas);
-                    var xml = XDocument.Load(jsonReader);
-                    str = xml.ToString();
+                    web.Headers["User-Agent"] = "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0";
+
+                    htmlPage = web.DownloadString(URL);
+
+                    //Prevent the html from being destroyed by the anti adblock script
+                    htmlPage = htmlPage.Replace("f=\"to\"", "f=\"penis\"");
+
+                    string json = web.DownloadString(JURL);
+                    byte[] bytes = Encoding.ASCII.GetBytes(json);
+                    using (var stream = new MemoryStream(bytes))
+                    {
+                        var quotas = new XmlDictionaryReaderQuotas();
+                        var jsonReader = JsonReaderWriterFactory.CreateJsonReader(stream, quotas);
+                        var xml = XDocument.Load(jsonReader);
+                        str = xml.ToString();
+                    }
                 }
 
                 XmlDocument doc = new XmlDocument();
@@ -208,11 +213,11 @@ namespace GChan.Trackers
             try
             {
                 string JSONUrl = "http://a.4cdn.org/" + URL.Split('/')[3] + "/thread/" + URL.Split('/')[5] + ".json";
-                string Content = new WebClient().DownloadString(JSONUrl);
-
-                dynamic data = JObject.Parse(Content);
-
-                subject = data.posts[0].sub.ToString();
+                using (var web = new WebClient())
+                {
+                    dynamic data = JObject.Parse(web.DownloadString(JSONUrl));
+                    subject = data.posts[0].sub.ToString();
+                }
             }
             catch
             {
