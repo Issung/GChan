@@ -47,7 +47,7 @@
             this.promptLabel.Name = "promptLabel";
             this.promptLabel.Size = new System.Drawing.Size(262, 13);
             this.promptLabel.TabIndex = 0;
-            this.promptLabel.Text = "Please enter a string. Some characters are disallowed.";
+            this.promptLabel.Text = "Please enter a subject. Some characters are disallowed.";
             this.promptLabel.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             // 
             // entryTextBox
@@ -113,8 +113,9 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximumSize = new System.Drawing.Size(435, 140);
             this.MinimumSize = new System.Drawing.Size(435, 140);
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Name = "GetStringMessageBox";
-            this.Text = "GetStringMessageBox";
+            this.Text = "Subject";
             this.buttonTableLayoutPanel.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
