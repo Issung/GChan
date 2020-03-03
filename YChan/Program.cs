@@ -145,9 +145,9 @@ namespace GChan
                 if (timestampFirstLine && lines.Length > 0)
                     lines[0] = $"[{DateTime.Now.ToString()}] - " + lines[0];
 
-                foreach (string line in lines)
-                    streamWriter.WriteLine(line);
-                
+                for (int i = 0; i < lines.Length; i++)
+                    streamWriter.WriteLine(lines[i]);
+
                 streamWriter.Flush();
             }
             catch (Exception)

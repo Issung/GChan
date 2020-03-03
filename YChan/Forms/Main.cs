@@ -259,8 +259,10 @@ namespace GChan
             lock (threadLock)
             {
                 // Removes 404'd threads
-                foreach (Thread thread in ThreadListBindingSource.ToArray())
+                Thread[] array = ThreadListBindingSource.ToArray();
+                for (int i = 0; i < array.Length; i++)
                 {
+                    Thread thread = array[i];
                     if (thread.Gone)
                     {
                         RemoveThread(thread);
@@ -275,22 +277,22 @@ namespace GChan
             lock (boardLock)
             {
                 // Searches for new threads on the watched boards
-                foreach (Board board in BoardList)
+                for (int i = 0; i < BoardList.Count; i++)
                 {
                     string[] threads = { };
 
                     try
                     {
-                        threads = board.GetThreadLinks();
+                        threads = BoardList[i].GetThreadLinks();
                     }
                     catch
                     {
                     }
                     finally
                     {
-                        foreach (string thread in threads)
+                        for (int i1 = 0; i1 < threads.Length; i1++)
                         {
-                            Thread newThread = (Thread)Utils.CreateNewTracker(thread);
+                            Thread newThread = (Thread)Utils.CreateNewTracker(threads[i1]);
                             if (newThread != null && IsUnique(newThread.URL, ThreadListBindingSource.Cast<Tracker>() as List<Tracker>))
                             {
                                 AddURLToList(newThread);
