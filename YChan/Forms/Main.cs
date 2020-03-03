@@ -386,7 +386,9 @@ namespace GChan
                 }
             }
 
-            ThreadListBindingSource.Remove(thread);
+            Invoke((MethodInvoker)delegate () {
+                ThreadListBindingSource.Remove(thread);
+            });
         }
 
         #endregion
