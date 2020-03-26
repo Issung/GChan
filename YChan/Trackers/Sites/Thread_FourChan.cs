@@ -23,8 +23,8 @@ namespace GChan.Trackers
             SiteName = "4chan";
 
             Match match = Regex.Match(url, @"boards.(4chan|4channel).org/[a-zA-Z0-9]*?/thread/\d*");
-            this.URL = "http://" + match.Groups[0].Value;
-            this.SaveTo = Properties.Settings.Default.path + "\\" + SiteName + "\\" + url.Split('/')[3] + "\\" + url.Split('/')[5];
+            URL = "http://" + match.Groups[0].Value;
+            SaveTo = Properties.Settings.Default.path + "\\" + SiteName + "\\" + url.Split('/')[3] + "\\" + url.Split('/')[5];
             if (subject == null)
                 subject = GetThreadSubject();
         }
@@ -40,7 +40,7 @@ namespace GChan.Trackers
             try
             {
                 if (!Directory.Exists(SaveTo))
-                    Directory.CreateDirectory(this.SaveTo);
+                    Directory.CreateDirectory(SaveTo);
 
                 ImageLink[] images = GetImageLinks();
 
@@ -82,15 +82,18 @@ namespace GChan.Trackers
 
             try
             {
-                string Content = new WebClient().DownloadString(JSONUrl);
-                byte[] bytes = Encoding.ASCII.GetBytes(Content);
-
-                using (var stream = new MemoryStream(bytes))
+                using (var web = new WebClient())
                 {
-                    var quotas = new XmlDictionaryReaderQuotas();
-                    var jsonReader = JsonReaderWriterFactory.CreateJsonReader(stream, quotas);
-                    var xml = XDocument.Load(jsonReader);
-                    str = xml.ToString();
+                    string Content = web.DownloadString(JSONUrl);
+                    byte[] bytes = Encoding.ASCII.GetBytes(Content);
+
+                    using (var stream = new MemoryStream(bytes))
+                    {
+                        var quotas = new XmlDictionaryReaderQuotas();
+                        var jsonReader = JsonReaderWriterFactory.CreateJsonReader(stream, quotas);
+                        var xml = XDocument.Load(jsonReader);
+                        str = xml.ToString();
+                    }
                 }
 
                 XmlDocument doc = new XmlDocument();
@@ -110,7 +113,7 @@ namespace GChan.Trackers
                     links.Add(new ImageLink(baseURL + xmlTim[i].InnerText + xmlExt[i].InnerText, xmlFilenames[i].InnerText));
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 Program.Log(true, $"Encountered an exception in FourChan.getLinks(). Thread Board/ID/Subject: {BoardCode}{ID}/{Subject}");
                 throw;
@@ -131,28 +134,31 @@ namespace GChan.Trackers
             try
             {
                 //Add a UserAgent to prevent 403
-                WebClient web = new WebClient();
-                web.Headers["User-Agent"] = "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0";
-
-                htmlPage = web.DownloadString(URL);
-
-                //Prevent the html from being destroyed by the anti adblock script
-                htmlPage = htmlPage.Replace("f=\"to\"", "f=\"penis\"");
-
-                string json = web.DownloadString(JURL);
-                byte[] bytes = Encoding.ASCII.GetBytes(json);
-                using (var stream = new MemoryStream(bytes))
+                using (var web = new WebClient())
                 {
-                    var quotas = new XmlDictionaryReaderQuotas();
-                    var jsonReader = JsonReaderWriterFactory.CreateJsonReader(stream, quotas);
-                    var xml = XDocument.Load(jsonReader);
-                    str = xml.ToString();
+                    web.Headers["User-Agent"] = "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0";
+
+                    htmlPage = web.DownloadString(URL);
+
+                    //Prevent the html from being destroyed by the anti adblock script
+                    htmlPage = htmlPage.Replace("f=\"to\"", "f=\"penis\"");
+
+                    string json = web.DownloadString(JURL);
+                    byte[] bytes = Encoding.ASCII.GetBytes(json);
+                    using (var stream = new MemoryStream(bytes))
+                    {
+                        var quotas = new XmlDictionaryReaderQuotas();
+                        var jsonReader = JsonReaderWriterFactory.CreateJsonReader(stream, quotas);
+                        var xml = XDocument.Load(jsonReader);
+                        str = xml.ToString();
+                    }
                 }
 
                 XmlDocument doc = new XmlDocument();
                 doc.LoadXml(str);
                 XmlNodeList xmlTim = doc.DocumentElement.SelectNodes("/root/posts/item/tim");
                 XmlNodeList xmlExt = doc.DocumentElement.SelectNodes("/root/posts/item/ext");
+                XmlNodeList xmlFilenames = doc.DocumentElement.SelectNodes("/root/posts/item/filename");
 
                 for (int i = 0; i < xmlExt.Count; i++)
                 {
@@ -160,13 +166,17 @@ namespace GChan.Trackers
                     string rep = xmlTim[i].InnerText + xmlExt[i].InnerText;
                     htmlPage = htmlPage.Replace(old, rep);
 
+                    //get the actual filename saved
+                    string filename = Path.GetFileNameWithoutExtension(new ImageLink(baseURL + xmlTim[i].InnerText + xmlExt[i].InnerText, xmlFilenames[i].InnerText).GenerateNewFilename((ImageFileNameFormat)Properties.Settings.Default.imageFilenameFormat));
+
                     //Save thumbs for files that need it
                     if (rep.Split('.')[1] == "webm" /*|| rep.Split('.')[1] == ""*/)
                     {
                         old = "//t.4cdn.org/" + URL.Split('/')[3] + "/" + xmlTim[i].InnerText + "s.jpg";
                         thumbs.Add("http:" + old);
 
-                        htmlPage = htmlPage.Replace("//i.4cdn.org/" + URL.Split('/')[3] + "/" + xmlTim[i].InnerText, "thumb/" + xmlTim[i].InnerText);
+                        htmlPage = htmlPage.Replace(xmlTim[i].InnerText, filename);
+                        htmlPage = htmlPage.Replace("//i.4cdn.org/" + URL.Split('/')[3] + "/" + filename, "thumb/" + xmlTim[i].InnerText);
                     }
                     else
                     {
@@ -175,6 +185,7 @@ namespace GChan.Trackers
                         htmlPage = htmlPage.Replace("/" + thumbName, thumbName);
 
                         htmlPage = htmlPage.Replace("//i.4cdn.org/" + URL.Split('/')[3] + "/" + xmlTim[i].InnerText, xmlTim[i].InnerText);
+                        htmlPage = htmlPage.Replace(xmlTim[i].InnerText, filename); //easy fix for images
                     }
 
                     htmlPage = htmlPage.Replace("/" + rep, rep);
@@ -202,11 +213,11 @@ namespace GChan.Trackers
             try
             {
                 string JSONUrl = "http://a.4cdn.org/" + URL.Split('/')[3] + "/thread/" + URL.Split('/')[5] + ".json";
-                string Content = new WebClient().DownloadString(JSONUrl);
-
-                dynamic data = JObject.Parse(Content);
-
-                subject = data.posts[0].sub.ToString();
+                using (var web = new WebClient())
+                {
+                    dynamic data = JObject.Parse(web.DownloadString(JSONUrl));
+                    subject = data.posts[0].sub.ToString();
+                }
             }
             catch
             {

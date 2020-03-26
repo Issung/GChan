@@ -118,7 +118,16 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="rtbChange.Text" xml:space="preserve">
-    <value>&gt;GChan 3.0
+    <value>&gt; GChan 3.2
+- Fixed bug that would throw an index out of range exception when adding a new url
+
+&gt; GChan 3.1
+- Added support for grabbing URLs from the clipboard if the textbox is empty
+- Fixed bug that didn't allow the Save button in the settings to actually close the window
+- Fixed copy all thread URLs to clipboard
+- Fixed issue that caused the HTML downloader for 4Chan to not properly use the updated filename format
+
+&gt; GChan 3.0
  - Changed name to GChan.
  - Changed icon to 4chan icon.
  - Added "Copy thread URL to Clipboard" in context menu.

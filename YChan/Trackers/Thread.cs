@@ -33,7 +33,7 @@ namespace GChan.Trackers
             {
                 //TODO: Do this with Regex or Uri and HTTPUtility HttpUtility.ParseQueryString (https://stackoverflow.com/a/659929/8306962)
                 subject = url.Substring(url.LastIndexOf('=') + 1).Replace('_', ' ');
-                this.URL = url.Substring(0, url.LastIndexOf('/'));
+                URL = url.Substring(0, url.LastIndexOf('/'));
             }
         }
 
@@ -74,7 +74,7 @@ namespace GChan.Trackers
 
         public string GetURLWithSubject()
         {
-            return (this.URL + ("/?subject=" + Utils.CleanSubjectString(Subject).Replace(' ', '_'))).Replace("\r", "");
+            return (URL + ("/?subject=" + Utils.CleanSubjectString(Subject).Replace(' ', '_'))).Replace("\r", "");
         }
     }
 }

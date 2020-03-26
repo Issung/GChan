@@ -99,7 +99,8 @@ namespace GChan
             bool tray,
             bool closeWarn,
             bool startWithWindows,
-            bool addThreadSubjectToFolder)
+            bool addThreadSubjectToFolder,
+            bool addUrlFromClipboardWhenTextboxEmpty)
         {
             Properties.Settings.Default.path = path;
             Properties.Settings.Default.timer = time;
@@ -109,6 +110,7 @@ namespace GChan
             Properties.Settings.Default.minimizeToTray = tray;
             Properties.Settings.Default.warnOnClose = closeWarn;
             Properties.Settings.Default.addThreadSubjectToFolder = addThreadSubjectToFolder;
+            Properties.Settings.Default.addUrlFromClipboardWhenTextboxEmpty = addUrlFromClipboardWhenTextboxEmpty;
 
             Properties.Settings.Default.Save();
 
@@ -116,7 +118,7 @@ namespace GChan
 
             if (startWithWindows)
                 registryKey.SetValue(PROGRAM_NAME, '"' + Application.ExecutablePath + '"' + " -tray");
-            else
+            else if (registryKey.GetValue(PROGRAM_NAME) != null)
                 registryKey.DeleteValue(PROGRAM_NAME);
         }
 

@@ -14,13 +14,13 @@ namespace GChan.Controls
         public SortableBindingList()
             : base(new List<T>())
         {
-            this.comparers = new Dictionary<Type, PropertyComparer<T>>();
+            comparers = new Dictionary<Type, PropertyComparer<T>>();
         }
 
         public SortableBindingList(IEnumerable<T> enumeration)
             : base(new List<T>(enumeration))
         {
-            this.comparers = new Dictionary<Type, PropertyComparer<T>>();
+            comparers = new Dictionary<Type, PropertyComparer<T>>();
         }
 
         protected override bool SupportsSortingCore
@@ -30,17 +30,17 @@ namespace GChan.Controls
 
         protected override bool IsSortedCore
         {
-            get { return this.isSorted; }
+            get { return isSorted; }
         }
 
         protected override PropertyDescriptor SortPropertyCore
         {
-            get { return this.propertyDescriptor; }
+            get { return propertyDescriptor; }
         }
 
         protected override ListSortDirection SortDirectionCore
         {
-            get { return this.listSortDirection; }
+            get { return listSortDirection; }
         }
 
         protected override bool SupportsSearchingCore
@@ -50,38 +50,38 @@ namespace GChan.Controls
 
         protected override void ApplySortCore(PropertyDescriptor property, ListSortDirection direction)
         {
-            List<T> itemsList = (List<T>)this.Items;
+            List<T> itemsList = (List<T>)Items;
 
             Type propertyType = property.PropertyType;
             PropertyComparer<T> comparer;
-            if (!this.comparers.TryGetValue(propertyType, out comparer))
+            if (!comparers.TryGetValue(propertyType, out comparer))
             {
                 comparer = new PropertyComparer<T>(property, direction);
-                this.comparers.Add(propertyType, comparer);
+                comparers.Add(propertyType, comparer);
             }
 
             comparer.SetPropertyAndDirection(property, direction);
             itemsList.Sort(comparer);
 
-            this.propertyDescriptor = property;
-            this.listSortDirection = direction;
-            this.isSorted = true;
+            propertyDescriptor = property;
+            listSortDirection = direction;
+            isSorted = true;
 
-            this.OnListChanged(new ListChangedEventArgs(ListChangedType.Reset, -1));
+            OnListChanged(new ListChangedEventArgs(ListChangedType.Reset, -1));
         }
 
         protected override void RemoveSortCore()
         {
-            this.isSorted = false;
-            this.propertyDescriptor = base.SortPropertyCore;
-            this.listSortDirection = base.SortDirectionCore;
+            isSorted = false;
+            propertyDescriptor = base.SortPropertyCore;
+            listSortDirection = base.SortDirectionCore;
 
-            this.OnListChanged(new ListChangedEventArgs(ListChangedType.Reset, -1));
+            OnListChanged(new ListChangedEventArgs(ListChangedType.Reset, -1));
         }
 
         protected override int FindCore(PropertyDescriptor property, object key)
         {
-            int count = this.Count;
+            int count = Count;
             for (int i = 0; i < count; ++i)
             {
                 T element = this[i];

@@ -126,6 +126,7 @@ namespace GChan
             this.MaximumSize = new System.Drawing.Size(451, 170);
             this.MinimumSize = new System.Drawing.Size(451, 170);
             this.Name = "CloseWarn";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Closing GChan";
             this.Load += new System.EventHandler(this.CloseWarn_Load);
             this.buttonTableLayoutPanel.ResumeLayout(false);

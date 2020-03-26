@@ -80,7 +80,7 @@ namespace GChan
 
             scanTimer.Enabled = false;                                                   // Disable timer
             scanTimer.Interval = Properties.Settings.Default.timer;                      // Set interval
-            scanTimer.Tick += new EventHandler(this.Scan);                               // When Timer ticks call scan()
+            scanTimer.Tick += new EventHandler(Scan);                               // When Timer ticks call scan()
 
             ThreadPool.SetMaxThreads(Environment.ProcessorCount, Environment.ProcessorCount);
 
@@ -88,6 +88,7 @@ namespace GChan
             {
                 FirstStart tFirstStart = new FirstStart();                              // If first start, show first start message
                 tFirstStart.ShowDialog();
+                tFirstStart.Dispose();
                 Properties.Settings.Default.firstStart = false;
                 Properties.Settings.Default.Save();
             }
@@ -129,7 +130,7 @@ namespace GChan
                             // User cannot also resize columns while adding, or else program crashes.
 
                             CheckForIllegalCrossThreadCalls = false;
-                            this.Invoke((MethodInvoker)delegate { threadGridView.ScrollBars = ScrollBars.None; });
+                            Invoke((MethodInvoker)delegate { threadGridView.ScrollBars = ScrollBars.None; });
                             threadGridView.AllowUserToResizeColumns = false;
 
                             ParallelOptions options = new ParallelOptions { 
@@ -145,7 +146,7 @@ namespace GChan
                                 }
                             });
 
-                            this.Invoke((MethodInvoker)delegate {
+                            Invoke((MethodInvoker)delegate {
                                 Done();
                             });
                         }).Start();
@@ -219,7 +220,7 @@ namespace GChan
             {
                 lock (boardLock)
                 {
-                    this.Invoke((MethodInvoker)delegate () {
+                    Invoke((MethodInvoker)delegate () {
                         BoardListBindingSource.Add(tracker);
                     });
                 }
@@ -228,7 +229,7 @@ namespace GChan
             {
                 //lock (threadLock)
                 //{
-                this.Invoke((MethodInvoker)delegate () {
+                Invoke((MethodInvoker)delegate () {
                     ThreadListBindingSource.Add((Thread)tracker);
                 });
                 //}
@@ -258,8 +259,10 @@ namespace GChan
             lock (threadLock)
             {
                 // Removes 404'd threads
-                foreach (Thread thread in ThreadListBindingSource.ToArray())
+                Thread[] array = ThreadListBindingSource.ToArray();
+                for (int i = 0; i < array.Length; i++)
                 {
+                    Thread thread = array[i];
                     if (thread.Gone)
                     {
                         RemoveThread(thread);
@@ -274,22 +277,22 @@ namespace GChan
             lock (boardLock)
             {
                 // Searches for new threads on the watched boards
-                foreach (Board board in BoardList)
+                for (int i = 0; i < BoardList.Count; i++)
                 {
                     string[] threads = { };
 
                     try
                     {
-                        threads = board.GetThreadLinks();
+                        threads = BoardList[i].GetThreadLinks();
                     }
                     catch
                     {
                     }
                     finally
                     {
-                        foreach (string thread in threads)
+                        for (int i1 = 0; i1 < threads.Length; i1++)
                         {
-                            Thread newThread = (Thread)Utils.CreateNewTracker(thread);
+                            Thread newThread = (Thread)Utils.CreateNewTracker(threads[i1]);
                             if (newThread != null && IsUnique(newThread.URL, ThreadListBindingSource.Cast<Tracker>() as List<Tracker>))
                             {
                                 AddURLToList(newThread);
@@ -386,7 +389,9 @@ namespace GChan
                 }
             }
 
-            ThreadListBindingSource.Remove(thread);
+            Invoke((MethodInvoker)delegate () {
+                ThreadListBindingSource.Remove(thread);
+            });
         }
 
         #endregion
@@ -405,17 +410,23 @@ namespace GChan
 
         private void AddButton_Click(object sender, EventArgs e)
         {
+            // This way, it doesn't flash text during lazy entry
+            string textBox = URLTextBox.Text; 
+
+            // Clear TextBox faster
+            URLTextBox.Text = "";
+
+            if (string.IsNullOrWhiteSpace(textBox) && Clipboard.ContainsText() && Properties.Settings.Default.addUrlFromClipboardWhenTextboxEmpty == true)
+                textBox = Clipboard.GetText();
+
             // Get url from TextBox
-            var urls = URLTextBox.Text.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            var urls = textBox.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
             for (int i = 0; i < urls.Length; i++)
             {
                 urls[i] = Utils.PrepareURL(urls[i]);
                 AddUrl(urls[i]);
             }
-
-            // Clear TextBox
-            URLTextBox.Text = "";
         }
 
         private void edtURL_DragDrop(object sender, DragEventArgs e)
@@ -511,18 +522,21 @@ namespace GChan
         {
             AboutBox tAbout = new AboutBox();
             tAbout.ShowDialog();
+            tAbout.Dispose();
         }
 
         private void changelogToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Changelog tvInf = new Changelog();
             tvInf.ShowDialog();
+            tvInf.Dispose();
         }
 
         private void settingsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Settings tSettings = new Settings();
             tSettings.ShowDialog();
+            tSettings.Dispose();
             if (Properties.Settings.Default.minimizeToTray)
                 nfTray.Visible = true;
             else
@@ -566,12 +580,12 @@ namespace GChan
         {
             if (e.Button == MouseButtons.Left)
             {
-                if (this.Visible)
-                    this.Hide();
+                if (Visible)
+                    Hide();
                 else
                 {
-                    this.Show();
-                    this.WindowState = FormWindowState.Normal;
+                    Show();
+                    WindowState = FormWindowState.Normal;
                     Activate();
                 }
             }
@@ -579,7 +593,7 @@ namespace GChan
 
         private void cmTrayExit_Click(object sender, EventArgs e)
         {
-            this.Close();
+            Close();
         }
 
         private void cmTrayOpen_Click(object sender, EventArgs e)
@@ -592,16 +606,16 @@ namespace GChan
 
         private void MainForm_SizeChanged(object sender, EventArgs e)
         {
-            if (Properties.Settings.Default.minimizeToTray && this.WindowState == FormWindowState.Minimized)
+            if (Properties.Settings.Default.minimizeToTray && WindowState == FormWindowState.Minimized)
             {
                 // When minimized hide from taskbar if trayicon enabled
-                this.Hide();
+                Hide();
             }
         }
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            this.Close();
+            Close();
         }
 
         private void openFolderToolStripMenuItem1_Click(object sender, EventArgs e)
@@ -702,7 +716,7 @@ namespace GChan
 
         private void clipboardButton_Click(object sender, EventArgs e)
         {
-            string text = String.Join(",", ThreadListBindingSource.Select(thread => thread.SaveTo)).Replace("\n", "").Replace("\r", "");
+            string text = String.Join(",", ThreadListBindingSource.Select(thread => thread.URL)).Replace("\n", "").Replace("\r", "");
             Clipboard.SetText(text);
         }
 
@@ -761,6 +775,7 @@ namespace GChan
             {
                 CloseWarn clw = new CloseWarn();
                 result = clw.ShowDialog();
+                clw.Dispose();
                 e.Cancel = (result == DialogResult.Cancel);
             }
 

@@ -130,7 +130,22 @@ namespace GChan.Properties {
                 this["addThreadSubjectToFolder"] = value;
             }
         }
-        
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool addUrlFromClipboardWhenTextboxEmpty
+        {
+            get
+            {
+                return ((bool)(this["addUrlFromClipboardWhenTextboxEmpty"]));
+            }
+            set
+            {
+                this["addUrlFromClipboardWhenTextboxEmpty"] = value;
+            }
+        }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0")]

@@ -18,7 +18,7 @@ namespace GChan.Trackers
 
         protected Tracker(string url)
         {
-            this.URL = url;
+            URL = url;
             BoardCode = FindBoardCode();
         }
 

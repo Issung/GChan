@@ -29,10 +29,11 @@ namespace GChan
 
         private void btnAClose_Click(object sender, EventArgs e)
         {
-            this.Hide();
+            Hide();
             Settings tSettings = new Settings();
             tSettings.ShowDialog();
-            this.Close();
+            tSettings.Dispose();
+            Close();
         }
 
         private void rtWelcome_LinkClicked(object sender, LinkClickedEventArgs e)

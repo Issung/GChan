@@ -64,6 +64,7 @@
             this.Controls.Add(this.closeButton);
             this.Controls.Add(this.rtbChange);
             this.Name = "Changelog";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Changelog";
             this.ResumeLayout(false);
 

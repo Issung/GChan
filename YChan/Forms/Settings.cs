@@ -41,7 +41,7 @@ namespace GChan
         public Settings()
         {
             InitializeComponent();
-            this.imageFilenameFormatComboBox.DataSource = EnumHelper.GetEnumDescriptions(typeof(ImageFileNameFormat));
+            imageFilenameFormatComboBox.DataSource = EnumHelper.GetEnumDescriptions(typeof(ImageFileNameFormat));
         }
 
         private void Settings_Shown(object sender, EventArgs e)
@@ -62,6 +62,8 @@ namespace GChan
             chkStartWithWindows.Checked = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true).GetValueNames().Contains(Utils.PROGRAM_NAME);
 
             addThreadSubjectToFolderCheckBox.Checked = Properties.Settings.Default.addThreadSubjectToFolder;
+
+            addUrlFromClipboardWhenTextboxEmpty.Checked = Properties.Settings.Default.addUrlFromClipboardWhenTextboxEmpty;
         }
 
         private void btnSSave_Click(object sender, EventArgs e)
@@ -89,16 +91,17 @@ namespace GChan
                     chkTray.Checked,
                     chkWarn.Checked,
                     chkStartWithWindows.Checked,
-                    addThreadSubjectToFolderCheckBox.Checked
+                    addThreadSubjectToFolderCheckBox.Checked,
+                    addUrlFromClipboardWhenTextboxEmpty.Checked
                 );
 
-                this.Close();
+                Close();
             }
         }
 
         private void btnSCan_Click(object sender, EventArgs e)
         {
-            this.Close();
+            Close();
         }
 
         //Source: https://stackoverflow.com/q/1410127/8306962

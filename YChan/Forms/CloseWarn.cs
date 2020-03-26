@@ -13,35 +13,35 @@ namespace GChan
 
         public CloseWarn()
         {
-            this.InitializeComponent();
+            InitializeComponent();
         }
 
         private void btnClose_Click(object sender, EventArgs e)
         {
-            this.Close();
+            Close();
         }
 
         private void btnNoClose_Click(object sender, EventArgs e)
         {
-            this.Close();
+            Close();
         }
 
         private void chkWarning_CheckedChanged(object sender, EventArgs e)
         {
-            Properties.Settings.Default.warnOnClose = !this.chkWarning.Checked;
+            Properties.Settings.Default.warnOnClose = !chkWarning.Checked;
             Properties.Settings.Default.Save();
         }
 
         private void chkSave_CheckedChanged(object sender, EventArgs e)
         {
-            Properties.Settings.Default.saveOnClose = this.chkSave.Checked;
+            Properties.Settings.Default.saveOnClose = chkSave.Checked;
             Properties.Settings.Default.Save();
         }
 
         private void CloseWarn_Load(object sender, EventArgs e)
         {
-            this.chkSave.Checked = Properties.Settings.Default.saveOnClose;
-            this.chkWarning.Checked = !Properties.Settings.Default.warnOnClose;
+            chkSave.Checked = Properties.Settings.Default.saveOnClose;
+            chkWarning.Checked = !Properties.Settings.Default.warnOnClose;
         }
     }
 }
