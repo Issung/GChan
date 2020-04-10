@@ -87,12 +87,6 @@
     <Compile Include="Forms\GetStringMessageBox.Designer.cs">
       <DependentUpon>GetStringMessageBox.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\FirstStart.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\FirstStart.Designer.cs">
-      <DependentUpon>FirstStart.cs</DependentUpon>
-    </Compile>
     <Compile Include="Trackers\Board.cs" />
     <Compile Include="Trackers\Sites\Board_8Kun.cs" />
     <Compile Include="Trackers\Sites\Board_4Chan.cs" />
@@ -141,9 +135,6 @@
     <Compile Include="Controls\SortableBindingList\SortableBindingList.cs" />
     <EmbeddedResource Include="Forms\AboutBox.resx">
       <DependentUpon>AboutBox.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\FirstStart.resx">
-      <DependentUpon>FirstStart.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\GetStringMessageBox.resx">
       <DependentUpon>GetStringMessageBox.cs</DependentUpon>

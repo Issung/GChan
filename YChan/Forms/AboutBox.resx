@@ -118,17 +118,17 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="richTextBoxDescription.Text" xml:space="preserve">
-    <value>GChan forked and updated by LunaAshai at
-https://github.com/LunaAshai/GChan
-
-YChan forked and became GChan by Issung at
+    <value>YChan forked and became GChan by Issung at
 https://github.com/Issung/GChan
+
+List of contributers to GChan (Thank you!)
+ - LunaAshai
 
 YChan updated by Ricardo1991 and FugiMuffi at
 https://github.com/Ricardo1991/YChan
 https://github.com/FugiMuffi/YChan
 
-Original Project YChan: https://sourceforge.net/projects/ychan/
+Original project (YChan): https://sourceforge.net/projects/ychan/
 Created by mirage (mirage@secure-mail.biz)</value>
   </data>
 </root>

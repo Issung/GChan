@@ -111,5 +111,10 @@ namespace GChan
         {
             System.Diagnostics.Process.Start(e.LinkText);
         }
+
+        private void richTextBoxDescription_TextChanged(object sender, EventArgs e)
+        {
+
+        }
     }
 }

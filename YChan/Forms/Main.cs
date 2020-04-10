@@ -84,15 +84,6 @@ namespace GChan
 
             ThreadPool.SetMaxThreads(Environment.ProcessorCount, Environment.ProcessorCount);
 
-            if (Properties.Settings.Default.firstStart)
-            {
-                FirstStart tFirstStart = new FirstStart();                              // If first start, show first start message
-                tFirstStart.ShowDialog();
-                tFirstStart.Dispose();
-                Properties.Settings.Default.firstStart = false;
-                Properties.Settings.Default.Save();
-            }
-
             ///Require the save on close setting to be true to load threads on application open.
             const bool requireSaveOnCloseToBeTrueToLoadThreadsAndBoards = true;
 
