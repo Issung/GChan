@@ -130,6 +130,7 @@
             this.richTextBoxDescription.TabIndex = 25;
             this.richTextBoxDescription.Text = resources.GetString("richTextBoxDescription.Text");
             this.richTextBoxDescription.LinkClicked += new System.Windows.Forms.LinkClickedEventHandler(this.richTextBoxDescription_LinkClicked);
+            this.richTextBoxDescription.TextChanged += new System.EventHandler(this.richTextBoxDescription_TextChanged);
             // 
             // AboutBox
             // 
