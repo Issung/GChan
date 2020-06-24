@@ -5,13 +5,21 @@ namespace GChan
 {
     public class ImageLink
     {
+        /// <summary>
+        /// URL to the access the image.
+        /// </summary>
         public string URL;
-        public string Filename;
 
-        public ImageLink(string url, string filename)
+        /// <summary>
+        /// The filename the image was uploaded with. 
+        /// e.g. "LittleSaintJames.jpg", NOT the stored filename e.g. "1265123123.jpg".
+        /// </summary>
+        public string UploadedFilename;
+
+        public ImageLink(string url, string uploadedFilename)
         {
             URL = url;
-            Filename = filename;
+            UploadedFilename = uploadedFilename;
         }
 
         public string GenerateNewFilename(ImageFileNameFormat format)
@@ -20,7 +28,7 @@ namespace GChan
             string[] parts = URL.Split('/');
             string lastPart = (parts.Length > 0) ? parts.Last() : URL;
 
-            string extension = Path.GetExtension(URL); /// Contains fullstop dot (.).
+            string extension = Path.GetExtension(URL); // Contains period (.).
 
             string result;
 
@@ -30,12 +38,29 @@ namespace GChan
                     result = lastPart;
                     break;
                 case ImageFileNameFormat.OriginalFilename:
-                    result = Filename + extension;
+                    result = UploadedFilename + extension;
                     break;
                 case ImageFileNameFormat.IDAndOriginalFilename:
                 default:
-                    result = Path.GetFileNameWithoutExtension(URL) + " - " + Filename + extension;
+                    result = Path.GetFileNameWithoutExtension(URL) + " - " + UploadedFilename + extension;
                     break;
+            }
+
+            if (format == ImageFileNameFormat.ID)
+            {
+                result = lastPart;
+            }
+            else if (format == ImageFileNameFormat.OriginalFilename)
+            {
+                result = UploadedFilename + extension;
+            }
+            else if (format == ImageFileNameFormat.IDAndOriginalFilename)
+            {
+                result = Path.GetFileNameWithoutExtension(URL) + " - " + UploadedFilename + extension;
+            }
+            else //ImageFileFormat == OriginalFilenameAndID
+            {
+                result = UploadedFilename + " - " + Path.GetFileNameWithoutExtension(URL) + extension;
             }
 
             //if (result.Length > FILENAME_MAX_LENGTH)
@@ -44,7 +69,13 @@ namespace GChan
             //}
 
             //Program.Log($"Filename generated: {result}. Length: {result.Length}");
+
             return result;
+        }
+
+        public override string ToString()
+        {
+            return $"GChan.ImageLink {{ URL = \"{URL}\", UploadedFilename = \"{UploadedFilename}\" }}";
         }
     }
 }

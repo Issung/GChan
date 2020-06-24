@@ -31,7 +31,9 @@ namespace GChan
         [Description("OriginalFilename (eg. 'LittleSaintJames.jpg')")]
         OriginalFilename = 1,
         [Description("ID - OriginalFilename (eg. '1570301 - LittleSaintJames.jpg')")]
-        IDAndOriginalFilename = 2
+        IDAndOriginalFilename = 2,
+        [Description("ID - OriginalFilename (eg. 'LittleSaintJames.jpg - 1570301.jpg')")]
+        OriginalFilenameAndID = 3
     };
 
     public partial class Settings : Form
