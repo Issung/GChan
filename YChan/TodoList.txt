@@ -4,7 +4,10 @@
 	Add support for 8kun.top.
 	Asynchronous General.DownloadToDir downloads files as 0bytes empty files, fix this immediately.
 	Make boards view a datagridview and make it use databinding.
-	
+	Add options to task bar right click
+		Toggle Stop & Go (Allow users to pause timer while gaming, etc).
+		Quick set interval with a little popup box.
+		
 Maybes:
 	Right click column headers -> choose visible columns.
 		Add more column choices?
