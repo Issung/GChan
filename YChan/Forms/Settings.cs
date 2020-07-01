@@ -32,7 +32,7 @@ namespace GChan
         OriginalFilename = 1,
         [Description("ID - OriginalFilename (eg. '1570301 - LittleSaintJames.jpg')")]
         IDAndOriginalFilename = 2,
-        [Description("ID - OriginalFilename (eg. 'LittleSaintJames.jpg - 1570301.jpg')")]
+        [Description("OriginalFilename - ID (eg. 'LittleSaintJames.jpg - 1570301.jpg')")]
         OriginalFilenameAndID = 3
     };
 
