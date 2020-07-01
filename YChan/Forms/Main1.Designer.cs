@@ -61,6 +61,16 @@ namespace GChan.Forms {
         }
         
         /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        public static System.Drawing.Bitmap changelogToolStripMenuItem1_Image {
+            get {
+                object obj = ResourceManager.GetObject("changelogToolStripMenuItem1.Image", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Point similar to {X=224,Y=17}.
         /// </summary>
         public static System.Drawing.Point cmBoards_TrayLocation {

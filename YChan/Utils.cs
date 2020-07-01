@@ -33,6 +33,8 @@ namespace GChan
     internal class Utils
     {
         public const string PROGRAM_NAME = "GChan";
+        public static string boardsFilepath => Application.CommonAppDataPath + "\\boards.dat";
+        public static string threadsFilepath => Application.CommonAppDataPath + "\\threads.dat";
 
         /// <summary>
         /// Saves the thread and board list to disk
@@ -46,14 +48,14 @@ namespace GChan
                 for (int i = 0; i < Boards.Count; i++)
                     sb.AppendLine(Boards[i].URL.Replace("\r", ""));
 
-                File.WriteAllText(Application.CommonAppDataPath + "\\boards.dat", sb.ToString());
+                File.WriteAllText(boardsFilepath, sb.ToString());
 
                 sb.Clear();
 
                 for (int i = 0; i < Threads.Count; i++)
                     sb.AppendLine(Threads[i].GetURLWithSubject());
 
-                File.WriteAllText(Application.CommonAppDataPath + "\\threads.dat", sb.ToString());
+                File.WriteAllText(threadsFilepath, sb.ToString());
             }
             catch (Exception ex)
             {
@@ -67,13 +69,13 @@ namespace GChan
         /// <param name="board">Set true to load boards, false to load threads</param>
         public static string LoadURLs(bool board)
         {
-            if (board && File.Exists(Application.CommonAppDataPath + "\\boards.dat"))
+            if (board && File.Exists(boardsFilepath))
             {
-                return File.ReadAllText(Application.CommonAppDataPath + "\\boards.dat");
+                return File.ReadAllText(boardsFilepath);
             }
-            else if (!board && File.Exists(Application.CommonAppDataPath + "\\threads.dat"))
+            else if (!board && File.Exists(threadsFilepath))
             {
-                return File.ReadAllText(Application.CommonAppDataPath + "\\threads.dat");
+                return File.ReadAllText(threadsFilepath);
             }
             else
             { 
