@@ -118,7 +118,12 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="rtbChange.Text" xml:space="preserve">
-    <value>&gt; GChan 3.2
+    <value>&gt; GChan 3.3
+- Added option to start GChan in system tray when starting with windows using "-tray" cmd line argument.
+- Added new option for selecting thread folder renaming format (Subject - ID /or/ ID - Subject)
+- Replaced icons with new ones that shouldn't have pixelation or blur issues.
+
+&gt; GChan 3.2
 - Fixed bug that would throw an index out of range exception when adding a new url
 
 &gt; GChan 3.1

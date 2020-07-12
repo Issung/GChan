@@ -24,7 +24,6 @@ using System.Windows.Forms;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using GChan.Controls;
-
 using System.Threading;
 using SysThread = System.Threading.Thread;
 using GChan.Trackers;
@@ -157,6 +156,16 @@ namespace GChan
 
                 scanTimer.Enabled = true;
                 Scan(this, new EventArgs());
+            }
+        }
+
+        private void MainForm_Shown(object sender, EventArgs e)
+        {
+            //Start minimized if program was started with Program.TRAY_CMDLINE_ARG (-tray) command line argument.
+            if (Program.arguments.Contains(Program.TRAY_CMDLINE_ARG))
+            {
+                WindowState = FormWindowState.Minimized;
+                Hide();
             }
         }
 
@@ -352,10 +361,20 @@ namespace GChan
                 string currentPath = thread.SaveTo.Replace("\r", "");
 
                 string cleanSubject = Utils.CleanSubjectString(thread.Subject);
-                 
+
                 // There are \r characters appearing from the custom subjects, TODO: need to get to the bottom of the cause of this.
-                string destinationPath = (thread.SaveTo + " - " + cleanSubject).Replace("\r", "");
-                destinationPath = destinationPath.Trim('\\', '/');
+                string destinationPath;
+
+                if ((ThreadFolderNameFormat)Properties.Settings.Default.threadFolderNameFormat == ThreadFolderNameFormat.IdName)
+                {
+                    destinationPath = (thread.SaveTo + " - " + cleanSubject);
+                }
+                else //NameId
+                {
+                    destinationPath = Path.Combine(Path.GetDirectoryName(thread.SaveTo), $"{thread.Subject} - {thread.ID}");
+                }
+                
+                destinationPath = destinationPath.Replace("\r", "").Trim('\\', '/');
 
                 if (Directory.Exists(currentPath))
                 {
@@ -699,7 +718,6 @@ namespace GChan
                     threadGridView.ClearSelection();
                     threadGridView.Rows[e.RowIndex].Selected = true;
                     threadGridView.CurrentCell = threadGridView.Rows[e.RowIndex].Cells[0];
-                    //threadIndex = e.RowIndex;
                     cmThreads.Show(Cursor.Position);
                 }
             }

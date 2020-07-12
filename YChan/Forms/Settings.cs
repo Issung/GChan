@@ -36,6 +36,13 @@ namespace GChan
         OriginalFilenameAndID = 3
     };
 
+    public enum ThreadFolderNameFormat {
+        [Description("ThreadID - ThreadName")]
+        IdName = 0,
+        [Description("ThreadName - ThreadID")]
+        NameId = 1
+    }
+
     public partial class Settings : Form
     {
         string directory;
@@ -44,6 +51,7 @@ namespace GChan
         {
             InitializeComponent();
             imageFilenameFormatComboBox.DataSource = EnumHelper.GetEnumDescriptions(typeof(ImageFileNameFormat));
+            threadFolderNameFormatComboBox.DataSource = EnumHelper.GetEnumDescriptions(typeof(ThreadFolderNameFormat));
         }
 
         private void Settings_Shown(object sender, EventArgs e)
@@ -55,6 +63,7 @@ namespace GChan
             timerNumeric.Value = (Properties.Settings.Default.timer / 1000);
 
             imageFilenameFormatComboBox.SelectedIndex = Properties.Settings.Default.imageFilenameFormat;
+            threadFolderNameFormatComboBox.SelectedIndex = Properties.Settings.Default.threadFolderNameFormat;
 
             chkHTML.Checked = Properties.Settings.Default.loadHTML;
             chkSave.Checked = Properties.Settings.Default.saveOnClose;
@@ -62,8 +71,9 @@ namespace GChan
             chkWarn.Checked = Properties.Settings.Default.warnOnClose;
 
             chkStartWithWindows.Checked = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true).GetValueNames().Contains(Utils.PROGRAM_NAME);
+            chkStartWithWindowsMinimized.Checked = Properties.Settings.Default.startWithWindowsMinimized;
 
-            addThreadSubjectToFolderCheckBox.Checked = Properties.Settings.Default.addThreadSubjectToFolder;
+            renameThreadFolderCheckBox.Checked = Properties.Settings.Default.addThreadSubjectToFolder;
 
             addUrlFromClipboardWhenTextboxEmpty.Checked = Properties.Settings.Default.addUrlFromClipboardWhenTextboxEmpty;
         }
@@ -88,12 +98,14 @@ namespace GChan
                     directory, 
                     (int)timerNumeric.Value * 1000,
                     (ImageFileNameFormat)imageFilenameFormatComboBox.SelectedIndex,
+                    (ThreadFolderNameFormat)threadFolderNameFormatComboBox.SelectedIndex,
                     chkHTML.Checked,
                     chkSave.Checked,
                     chkTray.Checked,
                     chkWarn.Checked,
                     chkStartWithWindows.Checked,
-                    addThreadSubjectToFolderCheckBox.Checked,
+                    chkStartWithWindowsMinimized.Checked,
+                    renameThreadFolderCheckBox.Checked,
                     addUrlFromClipboardWhenTextboxEmpty.Checked
                 );
 
@@ -166,6 +178,30 @@ namespace GChan
 
             if (largestSize > 0)
                 imageFilenameFormatComboBox.DropDownWidth = (int)largestSize;
+        }
+
+        private void chkStartWithWindows_CheckedChanged(object sender, EventArgs e)
+        {
+            EnableChkStartWithWindowsMinimizedCheckBox();
+        }
+
+        private void chkTray_CheckedChanged(object sender, EventArgs e)
+        {
+            EnableChkStartWithWindowsMinimizedCheckBox();
+        }
+
+        private void EnableChkStartWithWindowsMinimizedCheckBox()
+        {
+            if (chkTray.Checked && chkStartWithWindows.Checked)
+                chkStartWithWindowsMinimized.Enabled = true;
+            else
+                chkStartWithWindowsMinimized.Enabled = false;
+        }
+
+        private void renameThreadFolderCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            threadFolderNameFormatLabel.Enabled = renameThreadFolderCheckBox.Checked;
+            threadFolderNameFormatComboBox.Enabled = renameThreadFolderCheckBox.Checked;
         }
     }
 }

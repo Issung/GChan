@@ -90,27 +90,31 @@ namespace GChan
         /// <param name="time">Thrad refresh timer in seconds</param>
         /// <param name="loadHTML">Save HTML or not</param>
         /// <param name="saveOnclose">Save URLs or not</param>
-        /// <param name="tray">Minimize to tray or not</param>
+        /// <param name="minimizeToTray">Minimize to tray or not</param>
         /// <param name="closeWarn">Warn before closing or not</param>
         public static void SaveSettings(
             string path,
             int time,
             ImageFileNameFormat imageFileNameFormat,
+            ThreadFolderNameFormat threadFolderNameFormat,
             bool loadHTML,
             bool saveOnclose,
-            bool tray,
+            bool minimizeToTray,
             bool closeWarn,
             bool startWithWindows,
+            bool startWithWindowsMinimized,
             bool addThreadSubjectToFolder,
             bool addUrlFromClipboardWhenTextboxEmpty)
         {
             Properties.Settings.Default.path = path;
             Properties.Settings.Default.timer = time;
             Properties.Settings.Default.imageFilenameFormat = (byte)imageFileNameFormat;
+            Properties.Settings.Default.threadFolderNameFormat = (byte)threadFolderNameFormat;
             Properties.Settings.Default.loadHTML = loadHTML;
             Properties.Settings.Default.saveOnClose = saveOnclose;
-            Properties.Settings.Default.minimizeToTray = tray;
+            Properties.Settings.Default.minimizeToTray = minimizeToTray;
             Properties.Settings.Default.warnOnClose = closeWarn;
+            Properties.Settings.Default.startWithWindowsMinimized = startWithWindowsMinimized;
             Properties.Settings.Default.addThreadSubjectToFolder = addThreadSubjectToFolder;
             Properties.Settings.Default.addUrlFromClipboardWhenTextboxEmpty = addUrlFromClipboardWhenTextboxEmpty;
 
@@ -119,7 +123,7 @@ namespace GChan
             RegistryKey registryKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
 
             if (startWithWindows)
-                registryKey.SetValue(PROGRAM_NAME, '"' + Application.ExecutablePath + '"' + " -tray");
+                registryKey.SetValue(PROGRAM_NAME, '"' + Application.ExecutablePath + '"' + (minimizeToTray && startWithWindowsMinimized ? $" {Program.TRAY_CMDLINE_ARG}" : ""));
             else if (registryKey.GetValue(PROGRAM_NAME) != null)
                 registryKey.DeleteValue(PROGRAM_NAME);
         }

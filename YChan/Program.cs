@@ -32,15 +32,22 @@ namespace GChan
         public static string LOG_FILE { get; } = Application.CommonAppDataPath + "\\crash.logs";
         public static StreamWriter streamWriter;
 
+        public const string TRAY_CMDLINE_ARG = "-tray";
+
+        public static string[] arguments;
+
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
         private static void Main(string[] args)
         {
+            arguments = args;
+
             if (Properties.Settings.Default.UpdateSettings)
             {
                 Properties.Settings.Default.Upgrade();
+                Properties.Settings.Default.Reload();
                 Properties.Settings.Default.UpdateSettings = false;
                 Properties.Settings.Default.Save();
             }
