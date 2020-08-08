@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="rtbChange.Text" xml:space="preserve">
-    <value>&gt; GChan 3.3.1 
+    <value>&gt; GChan 3.3.2 
 - Made a small fix to stop a null error when scraping a board. Thanks for the issue report Dante-7!
 
 &gt; GChan 3.3
