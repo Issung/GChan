@@ -63,5 +63,10 @@ namespace GChan.Trackers
             }
             return threadLinks.ToArray();
         }
+
+        public override string ToString()
+        {
+            return URL;
+        }
     }
 }

@@ -27,9 +27,18 @@ namespace GChan
     internal static class Program
     {
         public static MainForm MainFrame;
-
         public static string APPLICATION_INSTALL_DIRECTORY { get; } = AppDomain.CurrentDomain.BaseDirectory;
-        public static string LOG_FILE { get; } = Application.CommonAppDataPath + "\\crash.logs";
+
+#if DEBUG
+        public static string BOARDS_PATH => Path.Combine(Application.CommonAppDataPath, "DEBUG", "boards.dat");
+        public static string THREADS_PATH => Path.Combine(Application.CommonAppDataPath, "DEBUG", "threads.dat");
+        public static string LOGS_PATH { get; } = Path.Combine(Application.CommonAppDataPath, "DEBUG", "crash.logs");
+#else
+        public static string BOARDS_PATH => Path.Combine(Application.CommonAppDataPath, "boards.dat");
+        public static string THREADS_PATH => Path.Combine(Application.CommonAppDataPath, "threads.dat");
+        public static string LOGS_PATH { get; } = Path.Combine(Application.CommonAppDataPath, "crash.logs");
+#endif
+
         public static StreamWriter streamWriter;
 
         public const string TRAY_CMDLINE_ARG = "-tray";
@@ -133,7 +142,7 @@ namespace GChan
 
         private static void InitialiseStreamWriter()
         {
-            streamWriter = new StreamWriter(LOG_FILE, true);
+            streamWriter = new StreamWriter(LOGS_PATH, true);
             streamWriter.AutoFlush = false;
         }
 

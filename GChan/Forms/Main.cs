@@ -293,7 +293,7 @@ namespace GChan
                         for (int i1 = 0; i1 < threads.Length; i1++)
                         {
                             Thread newThread = (Thread)Utils.CreateNewTracker(threads[i1]);
-                            if (newThread != null && IsUnique(newThread.URL, ThreadListBindingSource.Cast<Tracker>() as List<Tracker>))
+                            if (newThread != null && IsUnique(newThread.URL, ThreadListBindingSource))
                             {
                                 AddURLToList(newThread);
                             }
@@ -312,15 +312,12 @@ namespace GChan
             }
         }
 
-        private bool IsUnique(string url, List<Tracker> list)
+        /// <summary>
+        /// Returns true if a url is not contained within a list of trackers. 
+        /// </summary>
+        private bool IsUnique(string url, IEnumerable<Tracker> list)
         {
-            for (int i = 0; i < list.Count(); i++)
-            {
-                if (list[i].URL == url)
-                    return false;
-            }
-
-            return true;
+            return !list.Any(t => t.URL == url);
         }
 
         private int getPlace(string url)
