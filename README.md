@@ -1,4 +1,7 @@
-# GChan
+# GChan      <img align="right" width="90" height="90" src="http://puu.sh/Grv6g.jpg">
+[![Release](https://img.shields.io/github/release/Issung/GChan.svg)](https://github.com/Issung/GChan/releases)
+[![Downloads](https://img.shields.io/github/downloads/Issung/GChan/total.svg)](https://github.com/Issung/GChan/releases)
+
 GChan is a fork of YChan which aims to improve on it and add some extra features which some may find useful. YChan is an automatic imageboard scraper, it supports multithreading and auto-rechecking of threads with a custom set timer.
 
 Supported Websites: [4chan.org](http://4chan.org/) and will attempt to support 8Chan (now called 8kun) once I get a chance.
