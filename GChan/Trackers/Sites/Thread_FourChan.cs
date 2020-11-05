@@ -188,6 +188,7 @@ namespace GChan.Trackers
                         htmlPage = htmlPage.Replace(xmlTim[i].InnerText, filename); //easy fix for images
                     }
 
+                    htmlPage = htmlPage.Replace("//is2.4chan.org/" + URL.Split('/')[3] + "/" + xmlTim[i].InnerText, xmlTim[i].InnerText); //bandaid fix for is2 urls
                     htmlPage = htmlPage.Replace("/" + rep, rep);
                 }
 
