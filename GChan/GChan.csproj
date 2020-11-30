@@ -105,7 +105,7 @@
     <Compile Include="Trackers\Sites\Board_4Chan.cs" />
     <Compile Include="Trackers\Sites\Thread_8Kun.cs" />
     <Compile Include="Trackers\Thread.cs" />
-    <Compile Include="Trackers\Sites\Thread_FourChan.cs" />
+    <Compile Include="Trackers\Sites\Thread_4Chan.cs" />
     <Compile Include="Trackers\Tracker.cs" />
     <Compile Include="Utils.cs" />
     <Compile Include="Forms\Main.cs">
@@ -167,6 +167,7 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\CloseWarn.resx">
       <DependentUpon>CloseWarn.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\Changelog.resx">
       <DependentUpon>Changelog.cs</DependentUpon>

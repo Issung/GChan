@@ -5,6 +5,8 @@ namespace GChan
 {
     public class ImageLink
     {
+        public long Tim;
+
         /// <summary>
         /// URL to the access the image.
         /// </summary>
@@ -18,6 +20,13 @@ namespace GChan
 
         public ImageLink(string url, string uploadedFilename)
         {
+            URL = url;
+            UploadedFilename = uploadedFilename;
+        }
+
+        public ImageLink(long tim, string url, string uploadedFilename)
+        {
+            Tim = tim;
             URL = url;
             UploadedFilename = uploadedFilename;
         }
@@ -75,7 +84,7 @@ namespace GChan
 
         public override string ToString()
         {
-            return $"GChan.ImageLink {{ URL = \"{URL}\", UploadedFilename = \"{UploadedFilename}\" }}";
+            return $"GChan.ImageLink {{ Tim = \"{Tim}\", URL = \"{URL}\", UploadedFilename = \"{UploadedFilename}\" }}";
         }
     }
 }

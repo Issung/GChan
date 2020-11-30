@@ -53,6 +53,10 @@ namespace GChan
         {
             arguments = args;
 
+#if DEBUG
+            Directory.CreateDirectory(Path.Combine(Application.CommonAppDataPath, "DEBUG"));
+#endif
+
             if (Properties.Settings.Default.UpdateSettings)
             {
                 Properties.Settings.Default.Upgrade();
@@ -159,10 +163,15 @@ namespace GChan
                     InitialiseStreamWriter();
 
                 if (timestampFirstLine && lines.Length > 0)
-                    lines[0] = $"[{DateTime.Now.ToString()}] - " + lines[0];
+                    lines[0] = $"[{DateTime.Now}] - " + lines[0];
 
                 for (int i = 0; i < lines.Length; i++)
+                { 
                     streamWriter.WriteLine(lines[i]);
+#if DEBUG
+                    Console.WriteLine((i > 0 ? "\t" : "") + lines[i]);
+#endif
+                }
 
                 streamWriter.Flush();
             }

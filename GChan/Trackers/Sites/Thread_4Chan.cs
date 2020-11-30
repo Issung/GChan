@@ -42,17 +42,39 @@ namespace GChan.Trackers
                 if (!Directory.Exists(SaveTo))
                     Directory.CreateDirectory(SaveTo);
 
-                ImageLink[] images = GetImageLinks();
+                ImageLink[] imageLinks = GetImageLinks();
 
-                Parallel.ForEach(images, (link) =>
+                Parallel.ForEach(imageLinks, (link) =>
                 {
-                    Utils.DownloadToDir(link, SaveTo);
+                    if (link.Tim > GreatestSavedFileTim)
+                    {
+#if DEBUG
+                        Program.Log(true, $"Downloading file {link} because it's Tim was greater than {GreatestSavedFileTim}");
+#endif
+                        Utils.DownloadToDir(link, SaveTo);
+                    }
+                    else
+                    {
+#if DEBUG
+                        Program.Log(true, $"Skipping downloading file {link} because it's Tim was less than than {GreatestSavedFileTim}");
+#endif
+                    }
                 });
+
+#if DEBUG
+                long max = imageLinks.Max(t => t.Tim);
+                Program.Log(true, $"Setting thread {this} {nameof(GreatestSavedFileTim)} to {max}.");
+                GreatestSavedFileTim = max;
+#else
+                GreatestSavedFileTim = imageLinks.Max(t => t.Tim);
+#endif
             }
             catch (WebException webEx)
             {
                 Program.Log(webEx);
+
                 var httpWebResponse = (webEx.Response as HttpWebResponse);
+
                 if (webEx.Status == WebExceptionStatus.ProtocolError || (httpWebResponse != null && httpWebResponse.StatusCode == HttpStatusCode.NotFound))
                 {
                     Program.Log(true, $"WebException encountered in FourChan.download(). Gone marked as true. {URL}");
@@ -61,7 +83,7 @@ namespace GChan.Trackers
             }
             catch (UnauthorizedAccessException uaex)
             {
-                MessageBox.Show(uaex.Message, "No Permission to access folder");
+                MessageBox.Show(uaex.Message, $"No Permission to access folder {SaveTo}.");
                 Program.Log(uaex);
             }
             catch (Exception ex)
@@ -76,9 +98,9 @@ namespace GChan.Trackers
             string JSONUrl = "http://a.4cdn.org/" + URL.Split('/')[3] + "/thread/" + URL.Split('/')[5] + ".json";
             string baseURL = "http://i.4cdn.org/" + URL.Split('/')[3] + "/";
             string str = "";
-            XmlNodeList xmlTim;
+            XmlNodeList xmlTims;
             XmlNodeList xmlFilenames;
-            XmlNodeList xmlExt;
+            XmlNodeList xmlExts;
 
             try
             {
@@ -101,21 +123,21 @@ namespace GChan.Trackers
 
                 // The /f/ board (flash) saves the files with their uploaded name.
                 if (URL.Split('/')[3] == "f")
-                    xmlTim = doc.DocumentElement.SelectNodes("/root/posts/item/filename");
+                    xmlTims = doc.DocumentElement.SelectNodes("/root/posts/item/filename");
                 else
-                    xmlTim = doc.DocumentElement.SelectNodes("/root/posts/item/tim");
+                    xmlTims = doc.DocumentElement.SelectNodes("/root/posts/item/tim");
 
                 xmlFilenames = doc.DocumentElement.SelectNodes("/root/posts/item/filename");
-                xmlExt = doc.DocumentElement.SelectNodes("/root/posts/item/ext");
+                xmlExts = doc.DocumentElement.SelectNodes("/root/posts/item/ext");
 
-                for (int i = 0; i < xmlExt.Count; i++)
+                for (int i = 0; i < xmlExts.Count; i++)
                 {
-                    links.Add(new ImageLink(baseURL + xmlTim[i].InnerText + xmlExt[i].InnerText, xmlFilenames[i].InnerText));
+                    links.Add(new ImageLink(long.Parse(xmlTims[i].InnerText), baseURL + xmlTims[i].InnerText + xmlExts[i].InnerText, xmlFilenames[i].InnerText));
                 }
             }
             catch (Exception)
             {
-                Program.Log(true, $"Encountered an exception in FourChan.getLinks(). Thread Board/ID/Subject: {BoardCode}{ID}/{Subject}");
+                Program.Log(true, $"Encountered an exception in Thread_4Chan.GetImageLinks(). Thread Board/ID/Subject: {BoardCode}{ID}/{Subject}");
                 throw;
             }
 
