@@ -18,20 +18,16 @@
 using System;
 using System.IO;
 using System.Linq;
-using System.Drawing;
 using System.Diagnostics;
 using System.Windows.Forms;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using GChan.Controls;
 using System.Threading;
 using SysThread = System.Threading.Thread;
 using GChan.Trackers;
 using Thread = GChan.Trackers.Thread;
 using Type = GChan.Trackers.Type;
 using GChan.Models;
-using System.ComponentModel;
-using System.Reflection;
 
 namespace GChan
 {
@@ -326,16 +322,16 @@ namespace GChan
         {
             lock (threadLock)
             {
-                string currentSubject = (Model.Threads[threadBindingSourceIndex] as Thread).Subject;
+                string currentSubject = Model.Threads[threadBindingSourceIndex].Subject;
                 string entry = Utils.MessageBoxGetString(currentSubject, Left + 50, Top + 50);
 
                 if (string.IsNullOrWhiteSpace(entry))
                 {
-                    (Model.Threads[threadBindingSourceIndex] as Thread).SetSubject(Thread.NO_SUBJECT);
+                    Model.Threads[threadBindingSourceIndex].SetSubject(Thread.NO_SUBJECT);
                 }
                 else
                 {
-                    (Model.Threads[threadBindingSourceIndex] as Thread).SetSubject(entry);
+                    Model.Threads[threadBindingSourceIndex].SetSubject(entry);
                 }
             }
         }
@@ -480,7 +476,7 @@ namespace GChan
                 {
                     try
                     {
-                        RemoveThread(Model.Threads[ThreadGridViewSelectedRowIndex] as Thread);
+                        RemoveThread(Model.Threads[ThreadGridViewSelectedRowIndex]);
                     }
                     catch
                     {
@@ -494,7 +490,7 @@ namespace GChan
         {
             if (ThreadGridViewSelectedRowIndex != -1)
             {
-                string spath = (Model.Threads[ThreadGridViewSelectedRowIndex] as Thread).SaveTo;
+                string spath = Model.Threads[ThreadGridViewSelectedRowIndex].SaveTo;
                 if (!Directory.Exists(spath))
                     Directory.CreateDirectory(spath);
                 Process.Start(spath);
@@ -505,7 +501,7 @@ namespace GChan
         {
             if (ThreadGridViewSelectedRowIndex != -1)
             {
-                string spath = (Model.Threads[ThreadGridViewSelectedRowIndex] as Thread).URL;
+                string spath = Model.Threads[ThreadGridViewSelectedRowIndex].URL;
                 Process.Start(spath);
             }
         }
@@ -612,11 +608,21 @@ namespace GChan
             {
                 if (thread)
                 {
-                    Model.Threads.Clear();
+                    lock (threadLock)
+                    {
+                        while (Model.Threads.Count > 0)
+                        {
+                            RemoveThread(Model.Threads[0]);
+                        }
+                    
+                    }
                 }
                 else
                 {
-                    Model.Boards.Clear();
+                    lock (boardLock)
+                    { 
+                        Model.Boards.Clear();
+                    }
                 }
 
                 if (Properties.Settings.Default.SaveListsOnClose)

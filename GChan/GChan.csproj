@@ -193,12 +193,10 @@
     <Content Include="4chanIcon.ico" />
     <None Include="icons\alert.png" />
     <None Include="icons\question.png" />
-    <None Include="icons\folder-small.png" />
     <Content Include="icons\Rename.png" />
     <Content Include="icons\close.png" />
     <Content Include="icons\folder.png" />
     <None Include="icons\settings-wrench.png" />
-    <None Include="icons\settings-box.png" />
     <Content Include="icons\world.png" />
     <Content Include="icons\clipboard.png" />
     <Content Include="TodoList.txt" />
