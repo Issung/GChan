@@ -118,7 +118,12 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="rtbChange.Text" xml:space="preserve">
-    <value>&gt; GChan 3.3.2 
+    <value>&gt; GChan 4.0.0
+- Large optimisations to the routine thread scanning. The latest file saved is now kept track of and previous files are no longer re-downloaded, so if you delete files from a thread's folder while that thread is still being scraped, those files will no longer download.
+- Large code refactoring.
+- Many bugfixes.
+
+&gt; GChan 3.3.2 
 - Made a small fix to stop a null error when scraping a board. Thanks for the issue report Dante-7!
 
 &gt; GChan 3.3
