@@ -11,6 +11,20 @@ namespace GChan.Trackers
 
         protected string subject = null;
 
+        protected long greatestSavedFileTim = 0;
+
+        public long GreatestSavedFileTim {
+            get {
+                return greatestSavedFileTim;
+            }
+
+            set {
+                if (value > greatestSavedFileTim) {
+                    greatestSavedFileTim = value;
+                }
+            }
+        }
+
         public string Subject { 
             get {
                 if (subject == null)

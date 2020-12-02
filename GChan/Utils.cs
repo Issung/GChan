@@ -50,8 +50,9 @@ namespace GChan
 
                 sb.Clear();
 
+                //TODO: Use better method to save GreatestSavedFileTim rather than just a space delimited text file.
                 for (int i = 0; i < Threads.Count; i++)
-                    sb.AppendLine(Threads[i].GetURLWithSubject());
+                    sb.AppendLine(Threads[i].GetURLWithSubject() + " " + Threads[i].GreatestSavedFileTim);
 
                 File.WriteAllText(Program.THREADS_PATH, sb.ToString());
             }
@@ -142,14 +143,34 @@ namespace GChan
         }
 
         /// <summary>
-        /// Create a new Imageboard
+        /// Create a new Tracker (Thread or Board).
         /// </summary>
-        public static Tracker CreateNewTracker(string url)
+        public static Tracker CreateNewTracker(string info)
         {
+            var parts = info.Split(' ');
+            string url = parts[0];
+            long greatestTim = 0;
+
+            if (parts.Length > 1)
+            {
+                greatestTim = long.Parse(parts[1]);
+#if DEBUG
+                Program.Log(true, $"2nd info part found for thread {url}, greatest tim loaded: {greatestTim}");
+#endif
+            }
+
             if (Thread_4Chan.UrlIsThread(url))
-                return new Thread_4Chan(url);
+            {
+                var thread = new Thread_4Chan(url);
+                thread.GreatestSavedFileTim = greatestTim;
+                return thread;
+            }
             else if (Thread_8Kun.UrlIsThread(url))
-                return new Thread_8Kun(url);
+            { 
+                var thread = new Thread_8Kun(url);
+                thread.GreatestSavedFileTim = greatestTim;
+                return thread;
+            }
 
             if (Board_4Chan.UrlIsBoard(url))
                 return new Board_4Chan(url);
@@ -217,59 +238,30 @@ namespace GChan
         /// </summary>
         public static bool DownloadToDir(ImageLink link, string dir)
         {
-            //Program.Log(true, $"DownloadToDir called for link {link.URL} downloading to {dir}");
-
             if (!Directory.Exists(dir))
                 Directory.CreateDirectory(dir);
 
             string destFilepath = CombinePathAndFilename(dir, link.GenerateNewFilename((ImageFileNameFormat)Properties.Settings.Default.imageFilenameFormat));
 
-            int formatCount = Enum.GetValues(typeof(ImageFileNameFormat)).Length;
-            List<ImageFileNameFormat> formatsNotInUse = new List<ImageFileNameFormat>();
-
-            for (int i = 0; i < formatCount; i++)
-            {
-                if (i != Properties.Settings.Default.imageFilenameFormat)
-                    formatsNotInUse.Add((ImageFileNameFormat)i);
-            }
-
             try
             {
-                // Incase imageFileNameFormat has changed and the file is already saved, instead of downloading another copy with a
-                // new name, check if it already exists and if it does then rename it to the new imageFileNameFormat.
-                for (int i = 0; i < formatsNotInUse.Count; i++)
-                {
-                    string potentialFilepath = CombinePathAndFilename(dir, link.GenerateNewFilename(formatsNotInUse[i]));
-                    if (File.Exists(potentialFilepath))
-                    {
-                        File.Move(potentialFilepath, destFilepath);
-                        return true;
+                WebClient webClient = new WebClient();
+                webClient.DownloadFile(link.URL, destFilepath);
+
+                // TODO: Figure out how to make the async downloading work properly.
+                // This line is currently not working and downloads 0 byte files 100% of the time.
+                //webClient.DownloadFileAsync(new Uri(link.URL), destFilepath);
+                /*Task.Run(() => { 
+                    webClient.DownloadFileAsync(new Uri(link.URL), destFilepath);
+                    while (webClient.IsBusy)
+                    { 
+                        //Do nothing?
                     }
-                }
+                });*/
 
-                //if (!File.Exists(destFilepath) || new System.IO.FileInfo(destFilepath).Length < 1)
-                if( (File.Exists(destFilepath) && new System.IO.FileInfo(destFilepath).Length < 1) || !File.Exists(destFilepath))
-                {
-                    WebClient webClient = new WebClient();
-                    webClient.DownloadFile(link.URL, destFilepath);
+                //new Thread(() => { webClient.DownloadFile(link.URL, destFilepath); }).Start();
 
-                    //TODO: Figure out how to make the async downloading work properly.
-                    // This line is currently not working and downloads 0 byte files 100% of the time.
-                    //webClient.DownloadFileAsync(new Uri(link.URL), destFilepath);
-                    /*Task.Run(() => { 
-                        webClient.DownloadFileAsync(new Uri(link.URL), destFilepath);
-                        while (webClient.IsBusy)
-                        { 
-                            //Do nothing?
-                        }
-                    });*/
-
-                    //new Thread(() => { webClient.DownloadFile(link.URL, destFilepath); }).Start();
-
-                    return true;
-                }
-
-                return false;
+                return true;
             }
             catch (WebException WebE)
             {
@@ -287,12 +279,10 @@ namespace GChan
             /// This could be off by a few 1s. Information that floats around is conflicted, can't be bothered to research more.
             const int FILEPATH_MAX_LENGTH = 255;
 
-            string fullpath = directory + "\\" + filename;
-            //Program.Log($"destFilepath Generated: {destFilepath}. Length: {destFilepath.Length}");
+            string fullpath = Path.Combine(directory, filename);
 
             if (fullpath.Length >= FILEPATH_MAX_LENGTH)
             {
-                //int oldLength = fullpath.Length;
                 fullpath = fullpath.Substring(0, FILEPATH_MAX_LENGTH - Path.GetExtension(fullpath).Length) + Path.GetExtension(fullpath);
                 //Program.Log(true, $"destFilepath max length exceeded new destfilepath: {fullpath}. Old Length: {oldLength}. New Length: {fullpath.Length}");
             }
@@ -331,10 +321,13 @@ namespace GChan
             return ret;
         }
 
-        readonly static char[] subjectIllegalCharacters = { '"', '<', '>', '|', '\0', ':', '*', '?', '/', '\\',
-            '\u0001', '\u0002', '\u0003', '\u0004', '\u0005', '\u0006', '\a', '\b', '\t', '\n', '\v', '\f', 
-            '\r', '\u000e', '\u000f', '\u0010', '\u0011', '\u0012', '\u0013', '\u0014', '\u0015', '\u0016', 
-            '\u0017', '\u0018', '\u0019', '\u001a', '\u001b', '\u001c', '\u001d', '\u001e', '\u001f' };
+        readonly static char[] SubjectIllegalCharacters = { 
+            '"', '<', '>', '|', '\0', ':', '*', '?', '/', '\\',
+            '\a', '\b', '\t', '\n', '\v', '\f', '\r', 
+            '\u0001', '\u0002', '\u0003', '\u0004', '\u0005', '\u0006', '\u000e', '\u000f',
+            '\u0010', '\u0011', '\u0012', '\u0013', '\u0014', '\u0015', '\u0016', '\u0017',
+            '\u0018', '\u0019', '\u001a', '\u001b', '\u001c', '\u001d', '\u001e', '\u001f' 
+        };
 
         /// <summary>
         /// Remove a string of characters illegal for a folder name. Used for thread subjects if 
@@ -346,7 +339,7 @@ namespace GChan
 
             for (int i = 0; i < subject.Length; i++)
             {
-                if (!subjectIllegalCharacters.Contains(subject[i]))
+                if (!SubjectIllegalCharacters.Contains(subject[i]))
                 {
                     sb.Append(subject[i]);
                 }

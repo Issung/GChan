@@ -64,7 +64,7 @@ namespace GChan.Trackers
             List<ImageLink> links = new List<ImageLink>();
             string JSONUrl = ("http://8kun.top/" + URL.Split('/')[3] + "/res/" + URL.Split('/')[5] + ".json").Replace(".html", ""); // thread JSON url
             string str = "";
-            XmlNodeList xmlTim, xmlFilenames, xmlExt;
+            XmlNodeList xmlTims, xmlFilenames, xmlExts;
 
             try
             {
@@ -82,25 +82,25 @@ namespace GChan.Trackers
                 // get single images
                 XmlDocument doc = new XmlDocument();
                 doc.LoadXml(str);
-                xmlTim = doc.DocumentElement.SelectNodes("/root/posts/item/tim");
+                xmlTims = doc.DocumentElement.SelectNodes("/root/posts/item/tim");
                 xmlFilenames = doc.DocumentElement.SelectNodes("/root/posts/item/filename");
-                xmlExt = doc.DocumentElement.SelectNodes("/root/posts/item/ext");
+                xmlExts = doc.DocumentElement.SelectNodes("/root/posts/item/ext");
 
-                for (int i = 0; i < xmlExt.Count; i++)
+                for (int i = 0; i < xmlExts.Count; i++)
                 {
                     //exed = exed + "https://8kun.top/" + getURL().Split('/')[3] + "/src/" + xmlTim[i].InnerText + xmlExt[i].InnerText + "\n";
-                    links.Add(new ImageLink("https://8kun.top/" + "/file_store/" + xmlTim[i].InnerText + xmlExt[i].InnerText, xmlFilenames[i].InnerText));
+                    links.Add(new ImageLink(long.Parse(xmlTims[i].InnerText), "https://8kun.top/" + "/file_store/" + xmlTims[i].InnerText + xmlExts[i].InnerText, xmlFilenames[i].InnerText));
                 }
 
                 // get images of posts with multiple images
-                xmlTim = doc.DocumentElement.SelectNodes("/root/posts/item/extra_files/item/tim");
+                xmlTims = doc.DocumentElement.SelectNodes("/root/posts/item/extra_files/item/tim");
                 xmlFilenames = doc.DocumentElement.SelectNodes("/root/posts/item/extra_files/item/filename");
-                xmlExt = doc.DocumentElement.SelectNodes("/root/posts/item/extra_files/item/ext");
+                xmlExts = doc.DocumentElement.SelectNodes("/root/posts/item/extra_files/item/ext");
 
-                for (int i = 0; i < xmlExt.Count; i++)
+                for (int i = 0; i < xmlExts.Count; i++)
                 {
                     //exed = exed + "https://8kun.top/" + getURL().Split('/')[3] + "/src/" + xmlTim[i].InnerText + xmlExt[i].InnerText + "\n";
-                    links.Add(new ImageLink("https://8kun.top/" + "/file_store/" + xmlTim[i].InnerText + xmlExt[i].InnerText, xmlFilenames[i].InnerText));
+                    links.Add(new ImageLink(long.Parse(xmlTims[i].InnerText), "https://8kun.top/" + "/file_store/" + xmlTims[i].InnerText + xmlExts[i].InnerText, xmlFilenames[i].InnerText));
                 }
             }
             catch (WebException webEx)

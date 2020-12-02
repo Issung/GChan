@@ -39,7 +39,7 @@ namespace GChan
         public List<Board> BoardList = new List<Board>();
         public BindingSource BoardListBindingSource;
 
-        private System.Threading.Thread Scanner = null;                                                      // thread that adds stuff
+        private SysThread Scanner = null;                                                      // thread that adds stuff
 
         //private int threadIndex = -1;     // Item position in threadGridView
 
@@ -118,16 +118,15 @@ namespace GChan
                             // Without setting ScrollBars to None and then setting to Vertical the program will crash.
                             // It doesnt like items being added in parallel in this method...
                             // User cannot also resize columns while adding, or else program crashes.
+                            // TODO: Just move these to outside of the thread call?
 
                             CheckForIllegalCrossThreadCalls = false;
                             Invoke((MethodInvoker)delegate { threadGridView.ScrollBars = ScrollBars.None; });
                             threadGridView.AllowUserToResizeColumns = false;
 
-                            ParallelOptions options = new ParallelOptions { 
-                                MaxDegreeOfParallelism = Environment.ProcessorCount 
-                            };
+                            // END TODO
 
-                            Parallel.ForEach(URLs, options, (url) =>
+                            Parallel.ForEach(URLs, (url) =>
                             {
                                 if (!string.IsNullOrWhiteSpace(url))
                                 {
