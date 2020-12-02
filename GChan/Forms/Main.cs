@@ -29,26 +29,25 @@ using SysThread = System.Threading.Thread;
 using GChan.Trackers;
 using Thread = GChan.Trackers.Thread;
 using Type = GChan.Trackers.Type;
+using GChan.Models;
+using System.ComponentModel;
+using System.Reflection;
 
 namespace GChan
 {
     public partial class MainForm : Form
     {
-        public SortableBindingList<Thread> ThreadListBindingSource;
-
-        public List<Board> BoardList = new List<Board>();
-        public BindingSource BoardListBindingSource;
+        internal MainFormModel Model;
 
         private SysThread Scanner = null;                                                      // thread that adds stuff
-
-        //private int threadIndex = -1;     // Item position in threadGridView
 
         /// <summary>
         /// Get the index of the selected row in the thread grid view.
         /// </summary>
-        private int ThreadGridViewSelectedRowIndex { get { return threadGridView.CurrentCell.RowIndex; } }
+        private int ThreadGridViewSelectedRowIndex => threadGridView.CurrentCell.RowIndex;
 
-        private int bPos = -1;                                                               // Item position in lbBoards
+        private int BoardsListBoxSelectedRowIndex { get { return boardsListBox.SelectedIndex; } set {boardsListBox.SelectedIndex = value;} }
+
         private System.Windows.Forms.Timer scanTimer = new System.Windows.Forms.Timer();     // Timer for scanning
 
         private object threadLock = new object();
@@ -60,25 +59,17 @@ namespace GChan
         {
             InitializeComponent();
 
-            threadGridView.AutoGenerateColumns = false;
-
-            ThreadListBindingSource = new SortableBindingList<Thread>();
-            ThreadListBindingSource.ListChanged += ThreadListBindingSource_ListChanged;
-            threadGridView.DataSource = ThreadListBindingSource;
-
-            BoardListBindingSource = new BindingSource();
-            BoardListBindingSource.DataSource = BoardList;
-            BoardListBindingSource.ListChanged += BoardListBindingSource_ListChanged;
-            boardsListBox.DataSource = BoardListBindingSource;
+            Model = new MainFormModel(this);
+            mainFormModelBindingSource.DataSource = Model;
         }
 
         private void MainForm_Load(object sender, EventArgs e)
         {
-            if (!Properties.Settings.Default.minimizeToTray)                            // If trayicon deactivated
-                nfTray.Visible = false;                                                 // Hide it
+            if (!Properties.Settings.Default.MinimizeToTray)                            // If trayicon deactivated
+                systemTrayNotifyIcon.Visible = false;                                                 // Hide it
 
             scanTimer.Enabled = false;                                                   // Disable timer
-            scanTimer.Interval = Properties.Settings.Default.timer;                      // Set interval
+            scanTimer.Interval = Properties.Settings.Default.ScanTimer;                      // Set interval
             scanTimer.Tick += new EventHandler(Scan);                               // When Timer ticks call scan()
 
             ThreadPool.SetMaxThreads(Environment.ProcessorCount, Environment.ProcessorCount);
@@ -86,7 +77,7 @@ namespace GChan
             ///Require the save on close setting to be true to load threads on application open.
             const bool requireSaveOnCloseToBeTrueToLoadThreadsAndBoards = true;
 
-            if (!requireSaveOnCloseToBeTrueToLoadThreadsAndBoards || Properties.Settings.Default.saveOnClose)                                // If enabled load URLs from file
+            if (!requireSaveOnCloseToBeTrueToLoadThreadsAndBoards || Properties.Settings.Default.SaveListsOnClose)                                // If enabled load URLs from file
             {
                 string boards = Utils.LoadURLs(true);
                 string threads = Utils.LoadURLs(false);
@@ -152,6 +143,7 @@ namespace GChan
             {
                 threadGridView.ScrollBars = ScrollBars.Vertical;
                 threadGridView.AllowUserToResizeColumns = true;
+                //boardsTabPage.Text = Model.BoardsTabText;
 
                 scanTimer.Enabled = true;
                 Scan(this, new EventArgs());
@@ -176,15 +168,15 @@ namespace GChan
 
             if (newTracker != null)
             {
-                List<Tracker> trackerList = ((newTracker.Type == Type.Board) ? BoardList.Cast<Tracker>() : ThreadListBindingSource.Cast<Tracker>()).ToList();
+                List<Tracker> trackerList = ((newTracker.Type == Type.Board) ? Model.Boards.Cast<Tracker>() : Model.Threads.Cast<Tracker>()).ToList();
                 if (IsUnique(newTracker.URL, trackerList))
                 {
                     AddURLToList(newTracker);
 
                     if (!scanTimer.Enabled)
                         scanTimer.Enabled = true;
-                    if (Properties.Settings.Default.saveOnClose)
-                        Utils.SaveURLs(BoardList, ThreadListBindingSource.ToList());
+                    if (Properties.Settings.Default.SaveListsOnClose)
+                        Utils.SaveURLs(Model.Boards, Model.Threads);
 
                     Scan(this, new EventArgs());
                 }
@@ -206,7 +198,7 @@ namespace GChan
             else
             {
                 MessageBox.Show("Corrupt URL, unsupported website or not a board/thread!");
-                URLTextBox.Text = "";
+                urlTextBox.Text = "";
             }
         }
 
@@ -215,12 +207,12 @@ namespace GChan
             if (tracker == null) 
                 return false;
 
-            if (tracker.GetType().BaseType == typeof(Board))
+            if (tracker.Type == Type.Board)
             {
                 lock (boardLock)
                 {
                     Invoke((MethodInvoker)delegate () {
-                        BoardListBindingSource.Add(tracker);
+                        Model.Boards.Add((Board)tracker);
                     });
                 }
             }
@@ -229,7 +221,7 @@ namespace GChan
                 //lock (threadLock)
                 //{
                 Invoke((MethodInvoker)delegate () {
-                    ThreadListBindingSource.Add((Thread)tracker);
+                    Model.Threads.Add((Thread)tracker);
                 });
                 //}
             }
@@ -258,7 +250,7 @@ namespace GChan
             lock (threadLock)
             {
                 // Removes 404'd threads
-                Thread[] array = ThreadListBindingSource.ToArray();
+                Thread[] array = Model.Threads.ToArray();
                 for (int i = 0; i < array.Length; i++)
                 {
                     Thread thread = array[i];
@@ -269,20 +261,20 @@ namespace GChan
                     }
                 }
 
-                if (Properties.Settings.Default.saveOnClose)
-                    Utils.SaveURLs(BoardList, ThreadListBindingSource.ToList());
+                if (Properties.Settings.Default.SaveListsOnClose)
+                    Utils.SaveURLs(Model.Boards, Model.Threads.ToList());
             }
 
             lock (boardLock)
             {
                 // Searches for new threads on the watched boards
-                for (int i = 0; i < BoardList.Count; i++)
+                for (int i = 0; i < Model.Boards.Count; i++)
                 {
                     string[] threads = { };
 
                     try
                     {
-                        threads = BoardList[i].GetThreadLinks();
+                        threads = Model.Boards[i].GetThreadLinks();
                     }
                     catch
                     {
@@ -292,7 +284,7 @@ namespace GChan
                         for (int i1 = 0; i1 < threads.Length; i1++)
                         {
                             Thread newThread = (Thread)Utils.CreateNewTracker(threads[i1]);
-                            if (newThread != null && IsUnique(newThread.URL, ThreadListBindingSource))
+                            if (newThread != null && IsUnique(newThread.URL, Model.Threads))
                             {
                                 AddURLToList(newThread);
                             }
@@ -304,9 +296,9 @@ namespace GChan
             lock (threadLock)
             {
                 // Download threads
-                for (int i = 0; i < ThreadListBindingSource.Count; i++)
+                for (int i = 0; i < Model.Threads.Count; i++)
                 {
-                    ThreadPool.QueueUserWorkItem(new WaitCallback(ThreadListBindingSource[i].Download));
+                    ThreadPool.QueueUserWorkItem(new WaitCallback(Model.Threads[i].Download));
                 }
             }
         }
@@ -322,9 +314,9 @@ namespace GChan
         private int getPlace(string url)
         {
             int plc = -1;
-            for (int i = 0; i < ThreadListBindingSource.Count; i++)
+            for (int i = 0; i < Model.Threads.Count; i++)
             {
-                if (ThreadListBindingSource[i].URL == url)
+                if (Model.Threads[i].URL == url)
                     plc = i;
             }
             return plc;
@@ -334,16 +326,16 @@ namespace GChan
         {
             lock (threadLock)
             {
-                string currentSubject = (ThreadListBindingSource[threadBindingSourceIndex] as Thread).Subject;
+                string currentSubject = (Model.Threads[threadBindingSourceIndex] as Thread).Subject;
                 string entry = Utils.MessageBoxGetString(currentSubject, Left + 50, Top + 50);
 
-                if (entry.Length < 1)
+                if (string.IsNullOrWhiteSpace(entry))
                 {
-                    (ThreadListBindingSource[threadBindingSourceIndex] as Thread).SetSubject(Thread.NO_SUBJECT);
+                    (Model.Threads[threadBindingSourceIndex] as Thread).SetSubject(Thread.NO_SUBJECT);
                 }
                 else
                 {
-                    (ThreadListBindingSource[threadBindingSourceIndex] as Thread).SetSubject(entry);
+                    (Model.Threads[threadBindingSourceIndex] as Thread).SetSubject(entry);
                 }
             }
         }
@@ -352,7 +344,7 @@ namespace GChan
         {
             Program.Log(true, $"Removing thread {thread.URL}! thread.isGone: {thread.Gone}");
 
-            if (Properties.Settings.Default.addThreadSubjectToFolder)
+            if (Properties.Settings.Default.AddThreadSubjectToFolder)
             {
                 string currentPath = thread.SaveTo.Replace("\r", "");
 
@@ -361,7 +353,7 @@ namespace GChan
                 // There are \r characters appearing from the custom subjects, TODO: need to get to the bottom of the cause of this.
                 string destinationPath;
 
-                if ((ThreadFolderNameFormat)Properties.Settings.Default.threadFolderNameFormat == ThreadFolderNameFormat.IdName)
+                if ((ThreadFolderNameFormat)Properties.Settings.Default.ThreadFolderNameFormat == ThreadFolderNameFormat.IdName)
                 {
                     destinationPath = (thread.SaveTo + " - " + cleanSubject);
                 }
@@ -396,355 +388,13 @@ namespace GChan
             }
 
             Invoke((MethodInvoker)delegate () {
-                ThreadListBindingSource.Remove(thread);
+                Model.Threads.Remove(thread);
             });
         }
 
         #endregion
 
         #region Events
-
-        private void ThreadListBindingSource_ListChanged(object sender, System.ComponentModel.ListChangedEventArgs e)
-        {
-            tpThreads.Text = $"Threads ({ThreadListBindingSource.Count})";
-        }
-
-        private void BoardListBindingSource_ListChanged(object sender, System.ComponentModel.ListChangedEventArgs e)
-        {
-            tpBoard.Text = $"Boards ({BoardList.Count})";
-        }
-
-        private void AddButton_Click(object sender, EventArgs e)
-        {
-            // This way, it doesn't flash text during lazy entry
-            string textBox = URLTextBox.Text; 
-
-            // Clear TextBox faster
-            URLTextBox.Text = "";
-
-            if (string.IsNullOrWhiteSpace(textBox) && Clipboard.ContainsText() && Properties.Settings.Default.addUrlFromClipboardWhenTextboxEmpty == true)
-                textBox = Clipboard.GetText();
-
-            // Get url from TextBox
-            var urls = textBox.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-
-            for (int i = 0; i < urls.Length; i++)
-            {
-                urls[i] = Utils.PrepareURL(urls[i]);
-                AddUrl(urls[i]);
-            }
-        }
-
-        private void edtURL_DragDrop(object sender, DragEventArgs e)
-        {
-            string entry = (string)e.Data.GetData(DataFormats.Text);               // Get url from drag and drop
-
-            // Get url from TextBox
-            var urls = entry.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-
-            for (int i = 0; i < urls.Length; i++)
-            {
-                urls[i] = Utils.PrepareURL(urls[i]);
-                AddUrl(urls[i]);
-            }
-        }
-
-        private void edtURL_DragEnter(object sender, DragEventArgs e)
-        {
-            // See if this is a copy and the data includes text.
-            if (e.Data.GetDataPresent(DataFormats.Text) && (e.AllowedEffect & DragDropEffects.Copy) != 0)
-            {
-                // Allow this.
-                e.Effect = DragDropEffects.Copy;
-            }
-            else
-            {
-                // Don't allow any other drop.
-                e.Effect = DragDropEffects.None;
-            }
-        }
-
-        private void lbBoards_MouseDown(object sender, MouseEventArgs e)
-        {
-            if (e.Button == MouseButtons.Right)
-            {
-                bPos = -1;
-                if (boardsListBox.IndexFromPoint(e.Location) != -1)
-                {
-                    bPos = boardsListBox.IndexFromPoint(e.Location);
-                    cmBoards.Show(boardsListBox, new Point(e.X, e.Y));
-                }
-            }
-        }
-
-        private void deleteToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (ThreadGridViewSelectedRowIndex != -1)
-            {
-                lock (threadLock)
-                {
-                    try
-                    {
-                        RemoveThread(ThreadListBindingSource[ThreadGridViewSelectedRowIndex] as Thread);
-                    }
-                    catch
-                    {
-
-                    }
-                }
-            }
-        }
-
-        private void openFolderToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (ThreadGridViewSelectedRowIndex != -1)
-            {
-                string spath = (ThreadListBindingSource[ThreadGridViewSelectedRowIndex] as Thread).SaveTo;
-                if (!Directory.Exists(spath))
-                    Directory.CreateDirectory(spath);
-                Process.Start(spath);
-            }
-        }
-
-        private void openInBrowserToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (ThreadGridViewSelectedRowIndex != -1)
-            {
-                string spath = (ThreadListBindingSource[ThreadGridViewSelectedRowIndex] as Thread).URL;
-                Process.Start(spath);
-            }
-        }
-
-        private void copyURLToClipboardToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (ThreadGridViewSelectedRowIndex != -1)
-            {
-                string spath = ThreadListBindingSource[ThreadGridViewSelectedRowIndex].URL;
-                Clipboard.SetText(spath);
-            }
-        }
-
-        private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            AboutBox tAbout = new AboutBox();
-            tAbout.ShowDialog();
-            tAbout.Dispose();
-        }
-
-        private void changelogToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            Changelog tvInf = new Changelog();
-            tvInf.ShowDialog();
-            tvInf.Dispose();
-        }
-
-        private void settingsToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            Settings tSettings = new Settings();
-            tSettings.ShowDialog();
-            tSettings.Dispose();
-            if (Properties.Settings.Default.minimizeToTray)
-                nfTray.Visible = true;
-            else
-                nfTray.Visible = false;
-
-            scanTimer.Interval = Properties.Settings.Default.timer;
-        }
-
-        private void openBoardFolderToolTip_Click(object sender, EventArgs e)
-        {
-            if (bPos != -1)
-            {
-                string spath = (BoardListBindingSource[bPos] as Board).SaveTo;
-                if (!Directory.Exists(spath))
-                    Directory.CreateDirectory(spath);
-                Process.Start(spath);
-            }
-        }
-
-        private void openBoardURLToolTip_Click(object sender, EventArgs e)
-        {
-            if (bPos != -1)
-            {
-                string spath = boardsListBox.Items[bPos].ToString();
-                Process.Start(spath);
-            }
-        }
-
-        private void deleteBoardToolTip_Click(object sender, EventArgs e)
-        {
-            if (bPos != -1)
-            {
-                lock (boardLock)
-                {
-                    BoardListBindingSource.RemoveAt(bPos);
-                }
-            }
-        }
-
-        private void nfTray_MouseDown(object sender, MouseEventArgs e)
-        {
-            if (e.Button == MouseButtons.Left)
-            {
-                if (Visible)
-                    Hide();
-                else
-                {
-                    Show();
-                    WindowState = FormWindowState.Normal;
-                    Activate();
-                }
-            }
-        }
-
-        private void cmTrayExit_Click(object sender, EventArgs e)
-        {
-            Close();
-        }
-
-        private void cmTrayOpen_Click(object sender, EventArgs e)
-        {
-            string spath = Properties.Settings.Default.path;
-            if (!Directory.Exists(spath))
-                Directory.CreateDirectory(spath);
-            Process.Start(spath);
-        }
-
-        private void MainForm_SizeChanged(object sender, EventArgs e)
-        {
-            if (Properties.Settings.Default.minimizeToTray && WindowState == FormWindowState.Minimized)
-            {
-                // When minimized hide from taskbar if trayicon enabled
-                Hide();
-            }
-        }
-
-        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            Close();
-        }
-
-        private void openFolderToolStripMenuItem1_Click(object sender, EventArgs e)
-        {
-            Process.Start(Properties.Settings.Default.path);
-        }
-
-        private void btnClearAll_Click(object sender, EventArgs e)
-        {
-            if (tcApp.SelectedIndex > 1) return;
-            bool board = (tcApp.SelectedIndex == 1);                             // Board Tab is open -> board=true; Thread tab -> board=false
-
-            string type = "threads";
-            if (board) type = "boards";
-
-            DialogResult dialogResult = MessageBox.Show(
-                "Are you sure you want to clear all " + type + "?",
-                "Clear all " + type,
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Warning,
-                MessageBoxDefaultButton.Button2);    // Confirmation prompt
-
-            if (dialogResult == DialogResult.Yes)
-            {
-                if (board)
-                {
-                    BoardListBindingSource.Clear();
-                }
-                else
-                {
-                    ThreadListBindingSource.Clear();
-                }
-
-                if (Properties.Settings.Default.saveOnClose)
-                    Utils.SaveURLs(BoardList, ThreadListBindingSource.ToList());
-            }
-        }
-
-        private void lbBoards_MouseDoubleClick(object sender, MouseEventArgs e)
-        {
-            int pos;
-            if (e.Button == MouseButtons.Left)
-            {
-                if ((pos = boardsListBox.IndexFromPoint(e.Location)) != -1)
-                {
-                    string spath = (BoardListBindingSource[pos] as Board).SaveTo;
-                    if (!Directory.Exists(spath))
-                        Directory.CreateDirectory(spath);
-                    Process.Start(spath);
-                }
-            }
-        }
-
-        private void lbBoards_KeyUp(object sender, KeyEventArgs e)
-        {
-            if (e.KeyCode == Keys.Delete)
-            {
-                int pos = boardsListBox.SelectedIndex;
-
-                if (pos > -1)
-                {
-                    lock (boardLock)
-                    {
-                        BoardListBindingSource.RemoveAt(pos);
-                    }
-                }
-            }
-        }
-
-        private void threadGridView_MouseDown(object sender, MouseEventArgs e)
-        {
-            if (e.Button == System.Windows.Forms.MouseButtons.Left)
-            {
-                DataGridView.HitTestInfo hit = threadGridView.HitTest(e.X, e.Y);
-
-                if (hit.Type == DataGridViewHitTestType.None)
-                {
-                    threadGridView.ClearSelection();
-                    threadGridView.CurrentCell = null;
-                }
-            }
-        }
-
-        private void threadGridView_CellMouseUp(object sender, DataGridViewCellMouseEventArgs e)
-        {
-            if (e.Button == MouseButtons.Right)
-            {
-                if (e.RowIndex != -1)
-                {
-                    threadGridView.ClearSelection();
-                    threadGridView.Rows[e.RowIndex].Selected = true;
-                    threadGridView.CurrentCell = threadGridView.Rows[e.RowIndex].Cells[0];
-                    cmThreads.Show(Cursor.Position);
-                }
-            }
-        }
-
-        private void clipboardButton_Click(object sender, EventArgs e)
-        {
-            string text = String.Join(",", ThreadListBindingSource.Select(thread => thread.URL)).Replace("\n", "").Replace("\r", "");
-            Clipboard.SetText(text);
-        }
-
-        private void renameToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (ThreadGridViewSelectedRowIndex != -1)
-            {
-                RenameThreadSubjectPrompt(ThreadGridViewSelectedRowIndex);
-            }
-        }
-
-        private void threadGridView_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.KeyCode == Keys.F2)
-            {
-                RenameThreadSubjectPrompt(threadGridView.CurrentCell.RowIndex);
-            }
-        }
-
-        private void openProgramDataFolderToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            Process.Start(Application.CommonAppDataPath);
-        }
 
         protected override void WndProc(ref Message m)
         {
@@ -772,11 +422,340 @@ namespace GChan
             }
         }
 
+        private void addButton_Click(object sender, EventArgs e)
+        {
+            // This way, it doesn't flash text during lazy entry
+            string textBox = urlTextBox.Text; 
+
+            // Clear TextBox faster
+            urlTextBox.Text = "";
+
+            if (string.IsNullOrWhiteSpace(textBox) && Clipboard.ContainsText() && Properties.Settings.Default.AddUrlFromClipboardWhenTextboxEmpty)
+                textBox = Clipboard.GetText();
+
+            // Get url from TextBox
+            var urls = textBox.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+
+            for (int i = 0; i < urls.Length; i++)
+            {
+                urls[i] = Utils.PrepareURL(urls[i]);
+                AddUrl(urls[i]);
+            }
+        }
+
+        private void urlTextBox_DragDrop(object sender, DragEventArgs e)
+        {
+            string entry = (string)e.Data.GetData(DataFormats.Text);               // Get url from drag and drop
+
+            // Get url from TextBox
+            var urls = entry.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+
+            for (int i = 0; i < urls.Length; i++)
+            {
+                urls[i] = Utils.PrepareURL(urls[i]);
+                AddUrl(urls[i]);
+            }
+        }
+
+        private void urlTextBox_DragEnter(object sender, DragEventArgs e)
+        {
+            // See if this is a copy and the data includes text.
+            if (e.Data.GetDataPresent(DataFormats.Text) && (e.AllowedEffect & DragDropEffects.Copy) != 0)
+            {
+                // Allow this.
+                e.Effect = DragDropEffects.Copy;
+            }
+            else
+            {
+                // Don't allow any other drop.
+                e.Effect = DragDropEffects.None;
+            }
+        }
+
+        private void deleteToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (ThreadGridViewSelectedRowIndex != -1)
+            {
+                lock (threadLock)
+                {
+                    try
+                    {
+                        RemoveThread(Model.Threads[ThreadGridViewSelectedRowIndex] as Thread);
+                    }
+                    catch
+                    {
+
+                    }
+                }
+            }
+        }
+
+        private void openFolderToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (ThreadGridViewSelectedRowIndex != -1)
+            {
+                string spath = (Model.Threads[ThreadGridViewSelectedRowIndex] as Thread).SaveTo;
+                if (!Directory.Exists(spath))
+                    Directory.CreateDirectory(spath);
+                Process.Start(spath);
+            }
+        }
+
+        private void openInBrowserToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (ThreadGridViewSelectedRowIndex != -1)
+            {
+                string spath = (Model.Threads[ThreadGridViewSelectedRowIndex] as Thread).URL;
+                Process.Start(spath);
+            }
+        }
+
+        private void copyURLToClipboardToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (ThreadGridViewSelectedRowIndex != -1)
+            {
+                string spath = Model.Threads[ThreadGridViewSelectedRowIndex].URL;
+                Clipboard.SetText(spath);
+            }
+        }
+
+        private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            AboutBox tAbout = new AboutBox();
+            tAbout.ShowDialog();
+            tAbout.Dispose();
+        }
+
+        private void changelogToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Changelog tvInf = new Changelog();
+            tvInf.ShowDialog();
+            tvInf.Dispose();
+        }
+
+        private void settingsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Settings tSettings = new Settings();
+            tSettings.ShowDialog();
+            tSettings.Dispose();
+            if (Properties.Settings.Default.MinimizeToTray)
+                systemTrayNotifyIcon.Visible = true;
+            else
+                systemTrayNotifyIcon.Visible = false;
+
+            scanTimer.Interval = Properties.Settings.Default.ScanTimer;
+        }
+
+        private void openBoardFolderToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (BoardsListBoxSelectedRowIndex != -1)
+            {
+                string spath = (Model.Boards[BoardsListBoxSelectedRowIndex]).SaveTo;
+                if (!Directory.Exists(spath))
+                    Directory.CreateDirectory(spath);
+                Process.Start(spath);
+            }
+        }
+
+        private void openBoardURLToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (BoardsListBoxSelectedRowIndex != -1)
+            {
+                string spath = boardsListBox.Items[BoardsListBoxSelectedRowIndex].ToString();
+                Process.Start(spath);
+            }
+        }
+
+        private void deleteBoardToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (BoardsListBoxSelectedRowIndex != -1)
+            {
+                lock (boardLock)
+                {
+                    Model.Boards.RemoveAt(BoardsListBoxSelectedRowIndex);
+                }
+            }
+        }
+
+        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Close();
+        }
+
+        private void openFolderToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            Process.Start(Properties.Settings.Default.SavePath);
+        }
+
+        private void clearAllButton_Click(object sender, EventArgs e)
+        {
+            if (listsTabControl.SelectedIndex > 1) 
+                return;
+            
+            bool thread = (listsTabControl.SelectedIndex == 0);                             // Board Tab is open -> board=true; Thread tab -> board=false
+
+            string type;
+
+            if (thread)
+                type = "threads";
+            else
+                type = "boards";
+
+            DialogResult dialogResult = MessageBox.Show(
+                "Are you sure you want to clear all " + type + "?",
+                "Clear all " + type,
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Warning,
+                MessageBoxDefaultButton.Button2);    // Confirmation prompt
+
+            if (dialogResult == DialogResult.Yes)
+            {
+                if (thread)
+                {
+                    Model.Threads.Clear();
+                }
+                else
+                {
+                    Model.Boards.Clear();
+                }
+
+                if (Properties.Settings.Default.SaveListsOnClose)
+                    Utils.SaveURLs(Model.Boards, Model.Threads.ToList());
+            }
+        }
+
+        private void boardsListBox_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            int pos;
+
+            if (e.Button == MouseButtons.Left)
+            {
+                if ((pos = boardsListBox.IndexFromPoint(e.Location)) != -1)
+                {
+                    string spath = Model.Boards[pos].SaveTo;
+                    if (!Directory.Exists(spath))
+                        Directory.CreateDirectory(spath);
+                    Process.Start(spath);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Quality of life features.
+        ///     Left click allows user to deselect all rows by clicking white space. 
+        ///     Right click highlights the clicked row (otherwise it would not be done, just looks nicer with the context menu).
+        ///         But this is also 100% necessary because for the context menu click events we must know which row is selected.
+        /// </summary>
+        private void threadGridView_MouseDown(object sender, MouseEventArgs e)
+        {
+            DataGridView.HitTestInfo hitInfo = threadGridView.HitTest(e.X, e.Y);
+
+            if (e.Button == MouseButtons.Left)
+            {
+                if (hitInfo.Type == DataGridViewHitTestType.None)
+                {
+                    threadGridView.ClearSelection();
+                    threadGridView.CurrentCell = null;
+                }
+            }
+            else if (e.Button == MouseButtons.Right)
+            {
+                if (e.Button == MouseButtons.Right)
+                {
+                    if (hitInfo.RowIndex != -1)
+                    {
+                        threadGridView.ClearSelection();
+                        threadGridView.Rows[hitInfo.RowIndex].Selected = true;
+                        threadGridView.CurrentCell = threadGridView.Rows[hitInfo.RowIndex].Cells[0];
+                        threadsContextMenu.Show(Cursor.Position);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Copies threads/boards to clipboard depending on currently selected tab.
+        /// </summary>
+        private void clipboardButton_Click(object sender, EventArgs e)
+        {
+            string text;
+
+            if (listsTabControl.SelectedIndex == 0)
+            {
+                text = String.Join(",", Model.Threads.Select(thread => thread.URL)).Replace("\n", "").Replace("\r", "");
+            }
+            else
+            {
+                text = String.Join(",", Model.Boards.Select(board => board.URL)).Replace("\n", "").Replace("\r", "");
+            }
+
+            Clipboard.SetText(text);
+        }
+
+        private void renameToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (ThreadGridViewSelectedRowIndex != -1)
+            {
+                RenameThreadSubjectPrompt(ThreadGridViewSelectedRowIndex);
+            }
+        }
+
+        private void openProgramDataFolderToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Process.Start(Application.CommonAppDataPath);
+        }
+
+        /// <summary>
+        /// Have to use this event because BalloonTipShown event doesn't fire for some reason.
+        /// </summary>
+        private void systemTrayNotifyIcon_MouseMove(object sender, MouseEventArgs e)
+        {
+            //systemTrayNotifyIcon.Text = Model.NotificationTrayTooltip;
+            Utils.SetNotifyIconText(systemTrayNotifyIcon, Model.NotificationTrayTooltip);
+        }
+
+        private void systemTrayNotifyIcon_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                if (Visible)
+                    Hide();
+                else
+                {
+                    Show();
+                    WindowState = FormWindowState.Normal;
+                    Activate();
+                }
+            }
+        }
+
+        private void systemTrayOpenFolderToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            string spath = Properties.Settings.Default.SavePath;
+            if (!Directory.Exists(spath))
+                Directory.CreateDirectory(spath);
+            Process.Start(spath);
+        }
+
+        private void systemTrayExitToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Close();
+        }
+
+        private void MainForm_SizeChanged(object sender, EventArgs e)
+        {
+            if (Properties.Settings.Default.MinimizeToTray && WindowState == FormWindowState.Minimized)
+            {
+                // When minimized hide from taskbar if trayicon enabled
+                Hide();
+            }
+        }
+
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             DialogResult result = DialogResult.OK;
 
-            if (Properties.Settings.Default.warnOnClose && ThreadListBindingSource.Count > 0)
+            if (Properties.Settings.Default.WarnOnClose && Model.Threads.Count > 0)
             {
                 CloseWarn clw = new CloseWarn();
                 result = clw.ShowDialog();
@@ -786,12 +765,12 @@ namespace GChan
 
             if (result == DialogResult.OK)
             {
-                nfTray.Visible = false;
-                nfTray.Dispose();
+                systemTrayNotifyIcon.Visible = false;
+                systemTrayNotifyIcon.Dispose();
                 scanTimer.Enabled = false;
 
-                if (Properties.Settings.Default.saveOnClose)
-                    Utils.SaveURLs(BoardList, ThreadListBindingSource.ToList());
+                if (Properties.Settings.Default.SaveListsOnClose)
+                    Utils.SaveURLs(Model.Boards, Model.Threads.ToList());
             }
         }
 

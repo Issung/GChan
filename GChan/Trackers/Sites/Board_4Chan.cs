@@ -27,7 +27,8 @@ namespace GChan.Trackers
 
         override public string[] GetThreadLinks()
         {
-            string URL = "http://a.4cdn.org/" + base.URL.Split('/')[3] + "/catalog.json"; //example: http://a.4cdn.org/b/catalog.json
+            //string URL = "http://a.4cdn.org/" + base.URL.Split('/')[3] + "/catalog.json"; //example: http://a.4cdn.org/b/catalog.json
+            string URL = "http://a.4cdn.org/" + BoardCode + "/catalog.json";
             List<string> threadLinks = new List<string>();
             string str = "";
             XmlNodeList threadIDs;
@@ -61,6 +62,7 @@ namespace GChan.Trackers
                 MessageBox.Show("Connection Error: " + webEx.Message);
 #endif
             }
+
             return threadLinks.ToArray();
         }
 

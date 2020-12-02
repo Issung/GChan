@@ -24,6 +24,7 @@ using System.Text;
 using System.Windows.Forms;
 using Microsoft.Win32;
 using GChan.Trackers;
+using System.Reflection;
 
 namespace GChan
 {
@@ -35,24 +36,24 @@ namespace GChan
         public const string PROGRAM_NAME = "GChan";
 
         /// <summary>
-        /// Saves the thread and board list to disk
+        /// Saves the thread and board lists to disk.
         /// </summary>
-        public static void SaveURLs(List<Board> Boards, List<Thread> Threads)
+        public static void SaveURLs(IList<Board> boards, IList<Thread> threads)
         {
             try
             {
                 StringBuilder sb = new StringBuilder();
 
-                for (int i = 0; i < Boards.Count; i++)
-                    sb.AppendLine(Boards[i].URL.Replace("\r", ""));
+                for (int i = 0; i < boards.Count(); i++)
+                    sb.AppendLine(boards[i].URL.Replace("\r", ""));
 
                 File.WriteAllText(Program.BOARDS_PATH, sb.ToString());
 
                 sb.Clear();
 
                 //TODO: Use better method to save GreatestSavedFileTim rather than just a space delimited text file.
-                for (int i = 0; i < Threads.Count; i++)
-                    sb.AppendLine(Threads[i].GetURLWithSubject() + " " + Threads[i].GreatestSavedFileTim);
+                for (int i = 0; i < threads.Count; i++)
+                    sb.AppendLine(threads[i].GetURLWithSubject() + " " + threads[i].GreatestSavedFileTim);
 
                 File.WriteAllText(Program.THREADS_PATH, sb.ToString());
             }
@@ -63,9 +64,9 @@ namespace GChan
         }
 
         /// <summary>
-        /// Returns all saved threads or boards
+        /// Returns all saved threads or boards.
         /// </summary>
-        /// <param name="board">Set true to load boards, false to load threads</param>
+        /// <param name="board">Set true to load boards, false to load threads.</param>
         public static string LoadURLs(bool board)
         {
             if (board && File.Exists(Program.BOARDS_PATH))
@@ -105,17 +106,17 @@ namespace GChan
             bool addThreadSubjectToFolder,
             bool addUrlFromClipboardWhenTextboxEmpty)
         {
-            Properties.Settings.Default.path = path;
-            Properties.Settings.Default.timer = time;
-            Properties.Settings.Default.imageFilenameFormat = (byte)imageFileNameFormat;
-            Properties.Settings.Default.threadFolderNameFormat = (byte)threadFolderNameFormat;
-            Properties.Settings.Default.loadHTML = loadHTML;
-            Properties.Settings.Default.saveOnClose = saveOnclose;
-            Properties.Settings.Default.minimizeToTray = minimizeToTray;
-            Properties.Settings.Default.warnOnClose = closeWarn;
-            Properties.Settings.Default.startWithWindowsMinimized = startWithWindowsMinimized;
-            Properties.Settings.Default.addThreadSubjectToFolder = addThreadSubjectToFolder;
-            Properties.Settings.Default.addUrlFromClipboardWhenTextboxEmpty = addUrlFromClipboardWhenTextboxEmpty;
+            Properties.Settings.Default.SavePath = path;
+            Properties.Settings.Default.ScanTimer = time;
+            Properties.Settings.Default.ImageFilenameFormat = (byte)imageFileNameFormat;
+            Properties.Settings.Default.ThreadFolderNameFormat = (byte)threadFolderNameFormat;
+            Properties.Settings.Default.SaveHTML = loadHTML;
+            Properties.Settings.Default.SaveListsOnClose = saveOnclose;
+            Properties.Settings.Default.MinimizeToTray = minimizeToTray;
+            Properties.Settings.Default.WarnOnClose = closeWarn;
+            Properties.Settings.Default.StartWithWindowsMinimized = startWithWindowsMinimized;
+            Properties.Settings.Default.AddThreadSubjectToFolder = addThreadSubjectToFolder;
+            Properties.Settings.Default.AddUrlFromClipboardWhenTextboxEmpty = addUrlFromClipboardWhenTextboxEmpty;
 
             Properties.Settings.Default.Save();
 
@@ -241,7 +242,7 @@ namespace GChan
             if (!Directory.Exists(dir))
                 Directory.CreateDirectory(dir);
 
-            string destFilepath = CombinePathAndFilename(dir, link.GenerateNewFilename((ImageFileNameFormat)Properties.Settings.Default.imageFilenameFormat));
+            string destFilepath = CombinePathAndFilename(dir, link.GenerateNewFilename((ImageFileNameFormat)Properties.Settings.Default.ImageFilenameFormat));
 
             try
             {
@@ -346,6 +347,21 @@ namespace GChan
             }
 
             return sb.ToString();
+        }
+
+        /// <summary>
+        /// Method to bypass 63 character limit of NotifyIcon.Text
+        /// Credit: https://stackoverflow.com/a/580264/8306962
+        /// </summary>
+        public static void SetNotifyIconText(NotifyIcon ni, string text)
+        {
+            if (text.Length >= 128)
+                throw new ArgumentOutOfRangeException("Text limited to 127 characters");
+            System.Type t = typeof(NotifyIcon);
+            BindingFlags hidden = BindingFlags.NonPublic | BindingFlags.Instance;
+            t.GetField("text", hidden).SetValue(ni, text);
+            if ((bool)t.GetField("added", hidden).GetValue(ni))
+                t.GetMethod("UpdateIcon", hidden).Invoke(ni, new object[] { true });
         }
     }
 }

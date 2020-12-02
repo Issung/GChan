@@ -2,43 +2,43 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="GChan.Properties" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
-    <Setting Name="path" Type="System.String" Scope="User">
-      <Value Profile="(Default)">C:\</Value>
+    <Setting Name="SavePath" Type="System.String" Scope="User">
+      <Value Profile="(Default)">C:\GChan</Value>
     </Setting>
-    <Setting Name="timer" Type="System.Int32" Scope="User">
+    <Setting Name="ScanTimer" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">60000</Value>
     </Setting>
-    <Setting Name="loadHTML" Type="System.Boolean" Scope="User">
+    <Setting Name="SaveHTML" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
-    <Setting Name="firstStart" Type="System.Boolean" Scope="User">
+    <Setting Name="IsFirstStart" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
-    <Setting Name="saveOnClose" Type="System.Boolean" Scope="User">
+    <Setting Name="SaveListsOnClose" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
-    <Setting Name="minimizeToTray" Type="System.Boolean" Scope="User">
+    <Setting Name="MinimizeToTray" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
-    <Setting Name="warnOnClose" Type="System.Boolean" Scope="User">
+    <Setting Name="WarnOnClose" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
     <Setting Name="UpdateSettings" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
-    <Setting Name="addThreadSubjectToFolder" Type="System.Boolean" Scope="User">
+    <Setting Name="AddThreadSubjectToFolder" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
-    <Setting Name="imageFilenameFormat" Type="System.Byte" Scope="User">
+    <Setting Name="ImageFilenameFormat" Type="System.Byte" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
-    <Setting Name="threadFolderNameFormat" Type="System.Byte" Scope="User">
+    <Setting Name="ThreadFolderNameFormat" Type="System.Byte" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
-    <Setting Name="addUrlFromClipboardWhenTextboxEmpty" Type="System.Boolean" Scope="User">
+    <Setting Name="AddUrlFromClipboardWhenTextboxEmpty" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
-    <Setting Name="startWithWindowsMinimized" Type="System.Boolean" Scope="User">
+    <Setting Name="StartWithWindowsMinimized" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
   </Settings>

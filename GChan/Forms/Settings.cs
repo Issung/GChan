@@ -50,32 +50,49 @@ namespace GChan
         public Settings()
         {
             InitializeComponent();
-            imageFilenameFormatComboBox.DataSource = EnumHelper.GetEnumDescriptions(typeof(ImageFileNameFormat));
-            threadFolderNameFormatComboBox.DataSource = EnumHelper.GetEnumDescriptions(typeof(ThreadFolderNameFormat));
+            //imageFilenameFormatComboBox.DataSource = EnumHelper.GetEnumDescriptions(typeof(ImageFileNameFormat));
+            imageFilenameFormatComboBox.DataSource = Enum.GetValues(typeof(ImageFileNameFormat))
+                .Cast<ImageFileNameFormat>()
+                .Select(value => new
+                {
+                    EnumDescription = EnumHelper.GetEnumDescription(value),
+                    EnumValue = value
+                })
+                .ToList();
+
+            //threadFolderNameFormatComboBox.DataSource = EnumHelper.GetEnumDescriptions(typeof(ThreadFolderNameFormat));
+            threadFolderNameFormatComboBox.DataSource = Enum.GetValues(typeof(ThreadFolderNameFormat))
+                .Cast<ThreadFolderNameFormat>()
+                .Select(value => new
+                {
+                    EnumDescription = EnumHelper.GetEnumDescription(value),
+                    EnumValue = value
+                })
+                .ToList();
         }
 
         private void Settings_Shown(object sender, EventArgs e)
         {
             // Load settings into controls
-            directory = Properties.Settings.Default.path;
+            directory = Properties.Settings.Default.SavePath;
             directoryTextBox.Text = directory;
 
-            timerNumeric.Value = (Properties.Settings.Default.timer / 1000);
+            timerNumeric.Value = (Properties.Settings.Default.ScanTimer / 1000);
 
-            imageFilenameFormatComboBox.SelectedIndex = Properties.Settings.Default.imageFilenameFormat;
-            threadFolderNameFormatComboBox.SelectedIndex = Properties.Settings.Default.threadFolderNameFormat;
+            imageFilenameFormatComboBox.SelectedIndex = Properties.Settings.Default.ImageFilenameFormat;
+            threadFolderNameFormatComboBox.SelectedIndex = Properties.Settings.Default.ThreadFolderNameFormat;
 
-            chkHTML.Checked = Properties.Settings.Default.loadHTML;
-            chkSave.Checked = Properties.Settings.Default.saveOnClose;
-            chkTray.Checked = Properties.Settings.Default.minimizeToTray;
-            chkWarn.Checked = Properties.Settings.Default.warnOnClose;
+            chkHTML.Checked = Properties.Settings.Default.SaveHTML;
+            chkSave.Checked = Properties.Settings.Default.SaveListsOnClose;
+            chkTray.Checked = Properties.Settings.Default.MinimizeToTray;
+            chkWarn.Checked = Properties.Settings.Default.WarnOnClose;
 
             chkStartWithWindows.Checked = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true).GetValueNames().Contains(Utils.PROGRAM_NAME);
-            chkStartWithWindowsMinimized.Checked = Properties.Settings.Default.startWithWindowsMinimized;
+            chkStartWithWindowsMinimized.Checked = Properties.Settings.Default.StartWithWindowsMinimized;
 
-            renameThreadFolderCheckBox.Checked = Properties.Settings.Default.addThreadSubjectToFolder;
+            renameThreadFolderCheckBox.Checked = Properties.Settings.Default.AddThreadSubjectToFolder;
 
-            addUrlFromClipboardWhenTextboxEmpty.Checked = Properties.Settings.Default.addUrlFromClipboardWhenTextboxEmpty;
+            addUrlFromClipboardWhenTextboxEmpty.Checked = Properties.Settings.Default.AddUrlFromClipboardWhenTextboxEmpty;
         }
 
         private void btnSSave_Click(object sender, EventArgs e)
@@ -166,7 +183,7 @@ namespace GChan
         /// </summary>
         private void imageFilenameFormatComboBox_DropDown(object sender, EventArgs e)
         {
-            Graphics g = imageFilenameFormatComboBox.CreateGraphics();
+            /*Graphics g = imageFilenameFormatComboBox.CreateGraphics();
             float largestSize = 0;
 
             for (int i = 0; i < imageFilenameFormatComboBox.Items.Count; i++)
@@ -177,7 +194,7 @@ namespace GChan
             }
 
             if (largestSize > 0)
-                imageFilenameFormatComboBox.DropDownWidth = (int)largestSize;
+                imageFilenameFormatComboBox.DropDownWidth = (int)largestSize;*/
         }
 
         private void chkStartWithWindows_CheckedChanged(object sender, EventArgs e)

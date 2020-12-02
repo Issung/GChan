@@ -23,7 +23,7 @@ namespace GChan.Trackers
 
             Match match = Regex.Match(url, threadRegex);
             URL = "https://" + match.Groups[0].Value;      // simplify thread url
-            SaveTo = (Properties.Settings.Default.path + "\\" + SiteName + "\\" + url.Split('/')[3] + "\\" + url.Split('/')[5]).Replace(".html", ""); // set saveto path
+            SaveTo = (Properties.Settings.Default.SavePath + "\\" + SiteName + "\\" + url.Split('/')[3] + "\\" + url.Split('/')[5]).Replace(".html", ""); // set saveto path
         }
 
         public static bool UrlIsThread(string url)
@@ -39,7 +39,7 @@ namespace GChan.Trackers
                 if (!Directory.Exists(SaveTo))
                     Directory.CreateDirectory(SaveTo);
 
-                if (Properties.Settings.Default.loadHTML)
+                if (Properties.Settings.Default.SaveHTML)
                     DownloadHTMLPage();
 
                 ImageLink[] URLs = GetImageLinks();

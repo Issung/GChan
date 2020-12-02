@@ -12,7 +12,7 @@ namespace GChan.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "16.6.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "16.8.1.0")]
     internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
         
         private static Settings defaultInstance = ((Settings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Settings())));
@@ -25,85 +25,85 @@ namespace GChan.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("C:\\")]
-        public string path {
+        [global::System.Configuration.DefaultSettingValueAttribute("C:\\GChan")]
+        public string SavePath {
             get {
-                return ((string)(this["path"]));
+                return ((string)(this["SavePath"]));
             }
             set {
-                this["path"] = value;
+                this["SavePath"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("60000")]
-        public int timer {
+        public int ScanTimer {
             get {
-                return ((int)(this["timer"]));
+                return ((int)(this["ScanTimer"]));
             }
             set {
-                this["timer"] = value;
+                this["ScanTimer"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool loadHTML {
+        public bool SaveHTML {
             get {
-                return ((bool)(this["loadHTML"]));
+                return ((bool)(this["SaveHTML"]));
             }
             set {
-                this["loadHTML"] = value;
+                this["SaveHTML"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool firstStart {
+        public bool IsFirstStart {
             get {
-                return ((bool)(this["firstStart"]));
+                return ((bool)(this["IsFirstStart"]));
             }
             set {
-                this["firstStart"] = value;
+                this["IsFirstStart"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool saveOnClose {
+        public bool SaveListsOnClose {
             get {
-                return ((bool)(this["saveOnClose"]));
+                return ((bool)(this["SaveListsOnClose"]));
             }
             set {
-                this["saveOnClose"] = value;
+                this["SaveListsOnClose"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool minimizeToTray {
+        public bool MinimizeToTray {
             get {
-                return ((bool)(this["minimizeToTray"]));
+                return ((bool)(this["MinimizeToTray"]));
             }
             set {
-                this["minimizeToTray"] = value;
+                this["MinimizeToTray"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool warnOnClose {
+        public bool WarnOnClose {
             get {
-                return ((bool)(this["warnOnClose"]));
+                return ((bool)(this["WarnOnClose"]));
             }
             set {
-                this["warnOnClose"] = value;
+                this["WarnOnClose"] = value;
             }
         }
         
@@ -122,60 +122,60 @@ namespace GChan.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool addThreadSubjectToFolder {
+        public bool AddThreadSubjectToFolder {
             get {
-                return ((bool)(this["addThreadSubjectToFolder"]));
+                return ((bool)(this["AddThreadSubjectToFolder"]));
             }
             set {
-                this["addThreadSubjectToFolder"] = value;
+                this["AddThreadSubjectToFolder"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public byte imageFilenameFormat {
+        public byte ImageFilenameFormat {
             get {
-                return ((byte)(this["imageFilenameFormat"]));
+                return ((byte)(this["ImageFilenameFormat"]));
             }
             set {
-                this["imageFilenameFormat"] = value;
+                this["ImageFilenameFormat"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public byte threadFolderNameFormat {
+        public byte ThreadFolderNameFormat {
             get {
-                return ((byte)(this["threadFolderNameFormat"]));
+                return ((byte)(this["ThreadFolderNameFormat"]));
             }
             set {
-                this["threadFolderNameFormat"] = value;
+                this["ThreadFolderNameFormat"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool addUrlFromClipboardWhenTextboxEmpty {
+        public bool AddUrlFromClipboardWhenTextboxEmpty {
             get {
-                return ((bool)(this["addUrlFromClipboardWhenTextboxEmpty"]));
+                return ((bool)(this["AddUrlFromClipboardWhenTextboxEmpty"]));
             }
             set {
-                this["addUrlFromClipboardWhenTextboxEmpty"] = value;
+                this["AddUrlFromClipboardWhenTextboxEmpty"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool startWithWindowsMinimized {
+        public bool StartWithWindowsMinimized {
             get {
-                return ((bool)(this["startWithWindowsMinimized"]));
+                return ((bool)(this["StartWithWindowsMinimized"]));
             }
             set {
-                this["startWithWindowsMinimized"] = value;
+                this["StartWithWindowsMinimized"] = value;
             }
         }
     }

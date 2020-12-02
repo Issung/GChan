@@ -51,7 +51,7 @@
             // btnSSave
             // 
             this.btnSSave.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
-            this.btnSSave.Location = new System.Drawing.Point(69, 303);
+            this.btnSSave.Location = new System.Drawing.Point(76, 302);
             this.btnSSave.Name = "btnSSave";
             this.btnSSave.Size = new System.Drawing.Size(92, 23);
             this.btnSSave.TabIndex = 0;
@@ -62,7 +62,7 @@
             // btnSCan
             // 
             this.btnSCan.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
-            this.btnSCan.Location = new System.Drawing.Point(167, 303);
+            this.btnSCan.Location = new System.Drawing.Point(174, 302);
             this.btnSCan.Name = "btnSCan";
             this.btnSCan.Size = new System.Drawing.Size(94, 23);
             this.btnSCan.TabIndex = 1;
@@ -210,12 +210,14 @@
             // 
             // imageFilenameFormatComboBox
             // 
+            this.imageFilenameFormatComboBox.DisplayMember = "EnumDescription";
             this.imageFilenameFormatComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.imageFilenameFormatComboBox.FormattingEnabled = true;
+            this.imageFilenameFormatComboBox.DropDownWidth = 300;
             this.imageFilenameFormatComboBox.Location = new System.Drawing.Point(134, 62);
             this.imageFilenameFormatComboBox.Name = "imageFilenameFormatComboBox";
             this.imageFilenameFormatComboBox.Size = new System.Drawing.Size(185, 21);
             this.imageFilenameFormatComboBox.TabIndex = 16;
+            this.imageFilenameFormatComboBox.ValueMember = "EnumValue";
             this.imageFilenameFormatComboBox.DropDown += new System.EventHandler(this.imageFilenameFormatComboBox_DropDown);
             // 
             // addUrlFromClipboardWhenTextboxEmpty
@@ -239,12 +241,14 @@
             // 
             // threadFolderNameFormatComboBox
             // 
+            this.threadFolderNameFormatComboBox.DisplayMember = "EnumDescription";
             this.threadFolderNameFormatComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.threadFolderNameFormatComboBox.FormattingEnabled = true;
             this.threadFolderNameFormatComboBox.Location = new System.Drawing.Point(167, 112);
             this.threadFolderNameFormatComboBox.Name = "threadFolderNameFormatComboBox";
             this.threadFolderNameFormatComboBox.Size = new System.Drawing.Size(152, 21);
             this.threadFolderNameFormatComboBox.TabIndex = 19;
+            this.threadFolderNameFormatComboBox.ValueMember = "EnumValue";
             // 
             // Settings
             // 
@@ -252,7 +256,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.ClientSize = new System.Drawing.Size(327, 338);
+            this.ClientSize = new System.Drawing.Size(329, 331);
             this.ControlBox = false;
             this.Controls.Add(this.chkStartWithWindowsMinimized);
             this.Controls.Add(this.threadFolderNameFormatComboBox);

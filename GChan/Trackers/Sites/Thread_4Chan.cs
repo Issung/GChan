@@ -24,7 +24,7 @@ namespace GChan.Trackers
 
             Match match = Regex.Match(url, @"boards.(4chan|4channel).org/[a-zA-Z0-9]*?/thread/\d*");
             URL = "http://" + match.Groups[0].Value;
-            SaveTo = Properties.Settings.Default.path + "\\" + SiteName + "\\" + url.Split('/')[3] + "\\" + url.Split('/')[5];
+            SaveTo = Properties.Settings.Default.SavePath + "\\" + SiteName + "\\" + url.Split('/')[3] + "\\" + url.Split('/')[5];
             if (subject == null)
                 subject = GetThreadSubject();
         }
@@ -189,10 +189,10 @@ namespace GChan.Trackers
                     htmlPage = htmlPage.Replace(old, rep);
 
                     //get the actual filename saved
-                    string filename = Path.GetFileNameWithoutExtension(new ImageLink(baseURL + xmlTim[i].InnerText + xmlExt[i].InnerText, xmlFilenames[i].InnerText).GenerateNewFilename((ImageFileNameFormat)Properties.Settings.Default.imageFilenameFormat));
+                    string filename = Path.GetFileNameWithoutExtension(new ImageLink(baseURL + xmlTim[i].InnerText + xmlExt[i].InnerText, xmlFilenames[i].InnerText).GenerateNewFilename((ImageFileNameFormat)Properties.Settings.Default.ImageFilenameFormat));
 
                     //Save thumbs for files that need it
-                    if (rep.Split('.')[1] == "webm" /*|| rep.Split('.')[1] == ""*/)
+                    if (rep.Split('.')[1] == "webm")
                     {
                         old = "//t.4cdn.org/" + URL.Split('/')[3] + "/" + xmlTim[i].InnerText + "s.jpg";
                         thumbs.Add("http:" + old);
@@ -231,15 +231,34 @@ namespace GChan.Trackers
 
         protected override string GetThreadSubject()
         {
-            string subject;
+            string subject = NO_SUBJECT;
 
             try
             {
                 string JSONUrl = "http://a.4cdn.org/" + URL.Split('/')[3] + "/thread/" + URL.Split('/')[5] + ".json";
+
+                const string SUB_HEADER = "\"sub\":\"";
+                const string SUB_ENDER = "\",";
+
                 using (var web = new WebClient())
                 {
-                    dynamic data = JObject.Parse(web.DownloadString(JSONUrl));
-                    subject = data.posts[0].sub.ToString();
+                    string rawjson = web.DownloadString(JSONUrl);
+                    int subStartIndex = rawjson.IndexOf(SUB_HEADER);
+
+                    // If "Sub":" was found in json then there is a subject.
+                    if (subStartIndex >= 0)
+                    {
+                        //Increment along the rawjson until the ending ", sequence is found, then substring it to extract the subject.
+                        for (int i = subStartIndex; i < rawjson.Length; i++)
+                        {
+                            if (rawjson.Substring(i, SUB_ENDER.Length) == SUB_ENDER)
+                            {
+                                subject = rawjson.Substring(subStartIndex + SUB_HEADER.Length, i - (subStartIndex + SUB_HEADER.Length));
+                                subject = Utils.CleanSubjectString(WebUtility.HtmlDecode(subject));
+                                break;
+                            }
+                        }
+                    }
                 }
             }
             catch
@@ -247,7 +266,7 @@ namespace GChan.Trackers
                 subject = NO_SUBJECT;
             }
 
-            return Utils.CleanSubjectString(subject);
+            return subject;
         }
     }
 }

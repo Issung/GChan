@@ -100,6 +100,12 @@
     <Compile Include="Forms\GetStringMessageBox.Designer.cs">
       <DependentUpon>GetStringMessageBox.cs</DependentUpon>
     </Compile>
+    <Compile Include="Models\MainFormModel.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="Trackers\Board.cs" />
     <Compile Include="Trackers\Sites\Board_8Kun.cs" />
     <Compile Include="Trackers\Sites\Board_4Chan.cs" />
@@ -121,11 +127,6 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
     <Compile Include="Controls\SortableBindingList\PropertyComparer.cs" />
     <Compile Include="Forms\Settings.cs">
       <SubType>Form</SubType>
@@ -174,6 +175,7 @@
     </EmbeddedResource>
     <None Include="GChan_TemporaryKey.pfx" />
     <None Include="packages.config" />
+    <None Include="Properties\DataSources\GChan.Models.MainFormModel.datasource" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -191,9 +193,12 @@
     <Content Include="4chanIcon.ico" />
     <None Include="icons\alert.png" />
     <None Include="icons\question.png" />
+    <None Include="icons\folder-small.png" />
     <Content Include="icons\Rename.png" />
     <Content Include="icons\close.png" />
     <Content Include="icons\folder.png" />
+    <None Include="icons\settings-wrench.png" />
+    <None Include="icons\settings-box.png" />
     <Content Include="icons\world.png" />
     <Content Include="icons\clipboard.png" />
     <Content Include="TodoList.txt" />

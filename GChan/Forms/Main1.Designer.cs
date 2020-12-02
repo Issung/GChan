@@ -61,41 +61,31 @@ namespace GChan.Forms {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        ///   Looks up a localized resource of type System.Drawing.Point similar to {X=763,Y=47}.
         /// </summary>
-        public static System.Drawing.Bitmap changelogToolStripMenuItem1_Image {
+        public static System.Drawing.Point boardsBindingSource_TrayLocation {
             get {
-                object obj = ResourceManager.GetObject("changelogToolStripMenuItem1.Image", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Point similar to {X=224,Y=17}.
-        /// </summary>
-        public static System.Drawing.Point cmBoards_TrayLocation {
-            get {
-                object obj = ResourceManager.GetObject("cmBoards.TrayLocation", resourceCulture);
+                object obj = ResourceManager.GetObject("boardsBindingSource.TrayLocation", resourceCulture);
                 return ((System.Drawing.Point)(obj));
             }
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Point similar to {X=113,Y=17}.
+        ///   Looks up a localized resource of type System.Drawing.Point similar to {X=276,Y=17}.
         /// </summary>
-        public static System.Drawing.Point cmThreads_TrayLocation {
+        public static System.Drawing.Point boardsContextMenu_TrayLocation {
             get {
-                object obj = ResourceManager.GetObject("cmThreads.TrayLocation", resourceCulture);
+                object obj = ResourceManager.GetObject("boardsContextMenu.TrayLocation", resourceCulture);
                 return ((System.Drawing.Point)(obj));
             }
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Point similar to {X=414,Y=17}.
+        ///   Looks up a localized resource of type System.Drawing.Point similar to {X=371,Y=47}.
         /// </summary>
-        public static System.Drawing.Point cmTray_TrayLocation {
+        public static System.Drawing.Point mainFormModelBindingSource_TrayLocation {
             get {
-                object obj = ResourceManager.GetObject("cmTray.TrayLocation", resourceCulture);
+                object obj = ResourceManager.GetObject("mainFormModelBindingSource.TrayLocation", resourceCulture);
                 return ((System.Drawing.Point)(obj));
             }
         }
@@ -103,9 +93,19 @@ namespace GChan.Forms {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Point similar to {X=17,Y=17}.
         /// </summary>
-        public static System.Drawing.Point msHead_TrayLocation {
+        public static System.Drawing.Point menuStrip_TrayLocation {
             get {
-                object obj = ResourceManager.GetObject("msHead.TrayLocation", resourceCulture);
+                object obj = ResourceManager.GetObject("menuStrip.TrayLocation", resourceCulture);
+                return ((System.Drawing.Point)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Point similar to {X=185,Y=47}.
+        /// </summary>
+        public static System.Drawing.Point systemTrayContextMenu_TrayLocation {
+            get {
+                object obj = ResourceManager.GetObject("systemTrayContextMenu.TrayLocation", resourceCulture);
                 return ((System.Drawing.Point)(obj));
             }
         }
@@ -113,25 +113,45 @@ namespace GChan.Forms {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
         /// </summary>
-        public static System.Drawing.Icon nfTray_Icon {
+        public static System.Drawing.Icon systemTrayNotifyIcon_Icon {
             get {
-                object obj = ResourceManager.GetObject("nfTray.Icon", resourceCulture);
+                object obj = ResourceManager.GetObject("systemTrayNotifyIcon.Icon", resourceCulture);
                 return ((System.Drawing.Icon)(obj));
             }
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Point similar to {X=329,Y=17}.
+        ///   Looks up a localized resource of type System.Drawing.Point similar to {X=15,Y=47}.
         /// </summary>
-        public static System.Drawing.Point nfTray_TrayLocation {
+        public static System.Drawing.Point systemTrayNotifyIcon_TrayLocation {
             get {
-                object obj = ResourceManager.GetObject("nfTray.TrayLocation", resourceCulture);
+                object obj = ResourceManager.GetObject("systemTrayNotifyIcon.TrayLocation", resourceCulture);
                 return ((System.Drawing.Point)(obj));
             }
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Point similar to {X=505,Y=17}.
+        ///   Looks up a localized resource of type System.Drawing.Point similar to {X=592,Y=47}.
+        /// </summary>
+        public static System.Drawing.Point threadsBindingSource_TrayLocation {
+            get {
+                object obj = ResourceManager.GetObject("threadsBindingSource.TrayLocation", resourceCulture);
+                return ((System.Drawing.Point)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Point similar to {X=113,Y=17}.
+        /// </summary>
+        public static System.Drawing.Point threadsContextMenu_TrayLocation {
+            get {
+                object obj = ResourceManager.GetObject("threadsContextMenu.TrayLocation", resourceCulture);
+                return ((System.Drawing.Point)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Point similar to {X=441,Y=15}.
         /// </summary>
         public static System.Drawing.Point toolTip_TrayLocation {
             get {

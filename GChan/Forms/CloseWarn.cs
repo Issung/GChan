@@ -28,20 +28,20 @@ namespace GChan
 
         private void chkWarning_CheckedChanged(object sender, EventArgs e)
         {
-            Properties.Settings.Default.warnOnClose = !chkWarning.Checked;
+            Properties.Settings.Default.WarnOnClose = !chkWarning.Checked;
             Properties.Settings.Default.Save();
         }
 
         private void chkSave_CheckedChanged(object sender, EventArgs e)
         {
-            Properties.Settings.Default.saveOnClose = chkSave.Checked;
+            Properties.Settings.Default.SaveListsOnClose = chkSave.Checked;
             Properties.Settings.Default.Save();
         }
 
         private void CloseWarn_Load(object sender, EventArgs e)
         {
-            chkSave.Checked = Properties.Settings.Default.saveOnClose;
-            chkWarning.Checked = !Properties.Settings.Default.warnOnClose;
+            chkSave.Checked = Properties.Settings.Default.SaveListsOnClose;
+            chkWarning.Checked = !Properties.Settings.Default.WarnOnClose;
         }
     }
 }

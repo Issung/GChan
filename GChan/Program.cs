@@ -26,7 +26,7 @@ namespace GChan
 {
     internal static class Program
     {
-        public static MainForm MainFrame;
+        public static MainForm mainForm;
         public static string APPLICATION_INSTALL_DIRECTORY { get; } = AppDomain.CurrentDomain.BaseDirectory;
 
 #if DEBUG
@@ -80,8 +80,8 @@ namespace GChan
 
                 try
                 {
-                    MainFrame = new MainForm();
-                    Application.Run(MainFrame);
+                    mainForm = new MainForm();
+                    Application.Run(mainForm);
                 }
                 catch
                 {
@@ -94,12 +94,13 @@ namespace GChan
             }
             else
             {
-                // Yes...Bring existing instance to top and activate it.
+                // Bring already open instance to top and activate it.
                 NativeMethods.PostMessage(
                     (IntPtr)HWND_BROADCAST,
                     WM_MY_MSG,
                     new IntPtr(0xCDCD),
-                    new IntPtr(0xEFEF));
+                    new IntPtr(0xEFEF)
+                );
             }
         }
 
@@ -108,12 +109,12 @@ namespace GChan
         /// </summary>
         public static void Application_ThreadException(object sender, System.Threading.ThreadExceptionEventArgs e)
         {
-            Properties.Settings.Default.saveOnClose = true;
+            Properties.Settings.Default.SaveListsOnClose = true;
             Properties.Settings.Default.Save();
 
             try
             {
-                Utils.SaveURLs(MainFrame.BoardList, MainFrame.ThreadListBindingSource.ToList());
+                Utils.SaveURLs(mainForm.Model.Boards, mainForm.Model.Threads);
 
                 Log(true, $"Application_ThreadException - {e.Exception.Message}", e.Exception.StackTrace);
             }
@@ -128,12 +129,12 @@ namespace GChan
         /// </summary>
         public static void AppDomain_UnhandledException(object sender, System.UnhandledExceptionEventArgs e)
         {
-            Properties.Settings.Default.saveOnClose = true;
+            Properties.Settings.Default.SaveListsOnClose = true;
             Properties.Settings.Default.Save();
 
             try
             {
-                Utils.SaveURLs(MainFrame.BoardList, MainFrame.ThreadListBindingSource.ToList());
+                Utils.SaveURLs(mainForm.Model.Boards, mainForm.Model.Threads);
 
                 Exception ex = (Exception)e.ExceptionObject;
                 Log(true, $"AppDomain_UnhandledException - {ex.GetType().Name} - {ex.Message}", ex.StackTrace);

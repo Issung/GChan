@@ -20,7 +20,7 @@ namespace GChan.Trackers
             SiteName = "8kun";
 
             URL = url;
-            SaveTo = Properties.Settings.Default.path + "\\" + SiteName + "\\" + URL.Split('/')[3]; // Set SaveTo path
+            SaveTo = Properties.Settings.Default.SavePath + "\\" + SiteName + "\\" + URL.Split('/')[3]; // Set SaveTo path
         }
 
         public static bool UrlIsBoard(string url)

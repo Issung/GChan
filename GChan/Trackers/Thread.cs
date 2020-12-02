@@ -61,7 +61,7 @@ namespace GChan.Trackers
             {
                 Download();
 
-                if (!Gone && Properties.Settings.Default.loadHTML)
+                if (!Gone && Properties.Settings.Default.SaveHTML)
                     DownloadHTMLPage();
             }
         }
