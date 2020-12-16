@@ -30,8 +30,7 @@ namespace GChan.Trackers
 
         public static bool UrlIsThread(string url)
         {
-            Regex urlMatcher = new Regex(threadRegex);
-            return (urlMatcher.IsMatch(url));
+            return Regex.IsMatch(url, threadRegex);
         }
 
         protected override void Download()
@@ -67,6 +66,8 @@ namespace GChan.Trackers
 #else
                 GreatestSavedFileTim = imageLinks.Max(t => t.Tim);
 #endif
+
+                fileCount = imageLinks.Length;
             }
             catch (WebException webEx)
             {
@@ -140,7 +141,6 @@ namespace GChan.Trackers
                 throw;
             }
 
-            fileCount = links.Count;
             return links.ToArray();
         }
 

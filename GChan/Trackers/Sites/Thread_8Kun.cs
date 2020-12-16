@@ -16,20 +16,31 @@ namespace GChan.Trackers
     public class Thread_8Kun : Thread
     {
         public const string threadRegex = @"8kun.top/[a-zA-Z0-9]*?/res/[0-9]*.[^0-9]*";
+        public const string boardCodeRegex = @"(?<=(8kun.top/)).*(?=(/res/))";
+        public const string idCodeRegex = @"(?<=(res/)).*(?=(.html))";
 
         public Thread_8Kun(string url) : base(url)
         {
             SiteName = "8kun";
 
-            Match match = Regex.Match(url, threadRegex);
-            URL = "https://" + match.Groups[0].Value;      // simplify thread url
-            SaveTo = (Properties.Settings.Default.SavePath + "\\" + SiteName + "\\" + url.Split('/')[3] + "\\" + url.Split('/')[5]).Replace(".html", ""); // set saveto path
+            //Match simplifiedThreadUrlMatch = Regex.Match(url, threadRegex);
+            //URL = "https://" + simplifiedThreadUrlMatch.Groups[0].Value;      // simplify thread url
+
+            Match boardCodeMatch = Regex.Match(url, boardCodeRegex);
+            BoardCode = boardCodeMatch.Groups[0].Value;
+
+            Match idCodeMatch = Regex.Match(url, idCodeRegex);
+            ID = idCodeMatch.Groups[0].Value;
+
+            SaveTo = Path.Combine(Properties.Settings.Default.SavePath, SiteName, BoardCode, ID);
+
+            if (subject == null)
+                subject = GetThreadSubject();
         }
 
         public static bool UrlIsThread(string url)
         {
-            Regex urlMatcher = new Regex(threadRegex);
-            return urlMatcher.IsMatch(url);
+            return Regex.IsMatch(url, threadRegex);
         }
 
         protected override void Download()
@@ -39,13 +50,42 @@ namespace GChan.Trackers
                 if (!Directory.Exists(SaveTo))
                     Directory.CreateDirectory(SaveTo);
 
-                if (Properties.Settings.Default.SaveHTML)
-                    DownloadHTMLPage();
+                ImageLink[] imageLinks = GetImageLinks();
 
-                ImageLink[] URLs = GetImageLinks();
+                Parallel.ForEach(imageLinks, (link) =>
+                {
+                    if (link.Tim > GreatestSavedFileTim)
+                    {
+#if DEBUG
+                        Program.Log(true, $"Downloading file {link} because it's Tim was greater than {GreatestSavedFileTim}");
+#endif
+                        bool downloadSuccessful = Utils.DownloadToDir(link, SaveTo);
 
-                for (int y = 0; y < URLs.Length; y++)
-                    Utils.DownloadToDir(URLs[y], SaveTo);
+                        if (!downloadSuccessful)
+                        {
+                            // Change url from https://8kun.top/file_store/1457787757481-4.gif
+                            // to              https://media.8kun.top/board/src/1457787757481-4.gif
+                            link.URL = "https://media.8kun.top/" + BoardCode + "/src/" + link.URL.Split('/').Last();
+                            Utils.DownloadToDir(link, SaveTo);
+                        }
+                    }
+                    else
+                    {
+#if DEBUG
+                        Program.Log(true, $"Skipping downloading file {link} because it's Tim was less than than {GreatestSavedFileTim}");
+#endif
+                    }
+                });
+
+#if DEBUG
+                long max = imageLinks.Max(t => t.Tim);
+                Program.Log(true, $"Setting thread {this} {nameof(GreatestSavedFileTim)} to {max}.");
+                GreatestSavedFileTim = max;
+#else
+                GreatestSavedFileTim = imageLinks.Max(t => t.Tim);
+#endif
+
+                fileCount = imageLinks.Length;
             }
             catch (WebException webEx)
             {
@@ -62,9 +102,9 @@ namespace GChan.Trackers
         protected override ImageLink[] GetImageLinks()
         {
             List<ImageLink> links = new List<ImageLink>();
-            string JSONUrl = ("http://8kun.top/" + URL.Split('/')[3] + "/res/" + URL.Split('/')[5] + ".json").Replace(".html", ""); // thread JSON url
+            string JSONUrl = ("http://8kun.top/" + BoardCode + "/res/" + ID + ".json"); // Thread JSON url
             string str = "";
-            XmlNodeList xmlTims, xmlFilenames, xmlExts;
+            XmlNodeList xmlNos, xmlTims, xmlFilenames, xmlExts;
 
             try
             {
@@ -79,33 +119,30 @@ namespace GChan.Trackers
                     str = xml.ToString();                                                               // convert JSON to XML (funny, I know)
                 }
 
-                // get single images
                 XmlDocument doc = new XmlDocument();
                 doc.LoadXml(str);
-                xmlTims = doc.DocumentElement.SelectNodes("/root/posts/item/tim");
-                xmlFilenames = doc.DocumentElement.SelectNodes("/root/posts/item/filename");
-                xmlExts = doc.DocumentElement.SelectNodes("/root/posts/item/ext");
 
-                for (int i = 0; i < xmlExts.Count; i++)
+                // Get the numbers of replies that have 1 or more images.
+                xmlNos = doc.DocumentElement.SelectNodes("/root/posts/item[tim]/no");
+
+                // Loop through each reply.
+                for (int i = 0; i < xmlNos.Count; i++)
                 {
-                    //exed = exed + "https://8kun.top/" + getURL().Split('/')[3] + "/src/" + xmlTim[i].InnerText + xmlExt[i].InnerText + "\n";
-                    links.Add(new ImageLink(long.Parse(xmlTims[i].InnerText), "https://8kun.top/" + "/file_store/" + xmlTims[i].InnerText + xmlExts[i].InnerText, xmlFilenames[i].InnerText));
-                }
+                    // Get the tims, filenames and extensions of each image in this reply.
+                    xmlTims = doc.DocumentElement.SelectNodes($"/root/posts/item[no={xmlNos[i].InnerText}]//tim");
+                    xmlFilenames = doc.DocumentElement.SelectNodes($"/root/posts/item[no={xmlNos[i].InnerText}]//filename");
+                    xmlExts = doc.DocumentElement.SelectNodes($"/root/posts/item[no={xmlNos[i].InnerText}]//ext");
 
-                // get images of posts with multiple images
-                xmlTims = doc.DocumentElement.SelectNodes("/root/posts/item/extra_files/item/tim");
-                xmlFilenames = doc.DocumentElement.SelectNodes("/root/posts/item/extra_files/item/filename");
-                xmlExts = doc.DocumentElement.SelectNodes("/root/posts/item/extra_files/item/ext");
-
-                for (int i = 0; i < xmlExts.Count; i++)
-                {
-                    //exed = exed + "https://8kun.top/" + getURL().Split('/')[3] + "/src/" + xmlTim[i].InnerText + xmlExt[i].InnerText + "\n";
-                    links.Add(new ImageLink(long.Parse(xmlTims[i].InnerText), "https://8kun.top/" + "/file_store/" + xmlTims[i].InnerText + xmlExts[i].InnerText, xmlFilenames[i].InnerText));
+                    for (int j = 0; j < xmlTims.Count; j++)
+                    { 
+                        // Save image link using reply no (number) as tim because 8kun tims have letters and numbers in them. The reply number will work just fine.
+                        links.Add(new ImageLink(long.Parse(xmlNos[i].InnerText), "https://8kun.top/" + "/file_store/" + xmlTims[j].InnerText + xmlExts[j].InnerText, xmlFilenames[j].InnerText));
+                    }
                 }
             }
             catch (WebException webEx)
             {
-                if (((int)webEx.Status) == 7)   // 404
+                if (webEx.Status == WebExceptionStatus.ProtocolError)   // 404
                     Gone = true;
                 throw;
             }
@@ -192,7 +229,44 @@ namespace GChan.Trackers
 
         protected override string GetThreadSubject()
         {
-            throw new NotImplementedException();
+            string subject = NO_SUBJECT;
+
+            try
+            {
+                string JSONUrl = "http://8kun.top/" + BoardCode + "/res/" + ID + ".json";
+
+                const string SUB_HEADER = "\"sub\":\"";
+                const string SUB_ENDER = "\",";
+                const string ITEM_ENDER = "},";
+
+                using (var web = new WebClient())
+                {
+                    string rawjson = web.DownloadString(JSONUrl);
+                    int subStartIndex = rawjson.IndexOf(SUB_HEADER);
+                    int firstItemEnderIndex = rawjson.IndexOf(ITEM_ENDER);
+
+                    // If "sub":" was found in json then there is a subject.
+                    if (subStartIndex >= 0 && subStartIndex < firstItemEnderIndex)
+                    {
+                        //Increment along the rawjson until the ending ", sequence is found, then substring it to extract the subject.
+                        for (int i = subStartIndex; i < rawjson.Length; i++)
+                        {
+                            if (rawjson.Substring(i, SUB_ENDER.Length) == SUB_ENDER)
+                            {
+                                subject = rawjson.Substring(subStartIndex + SUB_HEADER.Length, i - (subStartIndex + SUB_HEADER.Length));
+                                subject = Utils.CleanSubjectString(WebUtility.HtmlDecode(subject));
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                subject = NO_SUBJECT;
+            }
+
+            return subject;
         }
     }
 }
