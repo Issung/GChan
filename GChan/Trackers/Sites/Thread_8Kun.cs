@@ -59,15 +59,7 @@ namespace GChan.Trackers
 #if DEBUG
                         Program.Log(true, $"Downloading file {link} because it's Tim was greater than {GreatestSavedFileTim}");
 #endif
-                        bool downloadSuccessful = Utils.DownloadToDir(link, SaveTo);
-
-                        if (!downloadSuccessful)
-                        {
-                            // Change url from https://8kun.top/file_store/1457787757481-4.gif
-                            // to              https://media.8kun.top/board/src/1457787757481-4.gif
-                            link.URL = "https://media.8kun.top/" + BoardCode + "/src/" + link.URL.Split('/').Last();
-                            Utils.DownloadToDir(link, SaveTo);
-                        }
+                        Utils.DownloadToDir(link, SaveTo);
                     }
                     else
                     {
@@ -104,7 +96,10 @@ namespace GChan.Trackers
             List<ImageLink> links = new List<ImageLink>();
             string JSONUrl = ("http://8kun.top/" + BoardCode + "/res/" + ID + ".json"); // Thread JSON url
             string str = "";
-            XmlNodeList xmlNos, xmlTims, xmlFilenames, xmlExts;
+            XmlNodeList xmlNos, xmlTims, xmlFilenames, xmlExts, xmlFpaths;
+
+            string Fpath0Url(string boardcode, string tim, string ext) => $"https://8kun.top/{boardcode}/src/{tim}{ext}";
+            string Fpath1Url(string tim, string ext) => $"https://8kun.top/file_store/{tim}{ext}";
 
             try
             {
@@ -132,11 +127,22 @@ namespace GChan.Trackers
                     xmlTims = doc.DocumentElement.SelectNodes($"/root/posts/item[no={xmlNos[i].InnerText}]//tim");
                     xmlFilenames = doc.DocumentElement.SelectNodes($"/root/posts/item[no={xmlNos[i].InnerText}]//filename");
                     xmlExts = doc.DocumentElement.SelectNodes($"/root/posts/item[no={xmlNos[i].InnerText}]//ext");
+                    xmlFpaths = doc.DocumentElement.SelectNodes($"/root/posts/item[no={xmlNos[i].InnerText}]//fpath");
 
                     for (int j = 0; j < xmlTims.Count; j++)
-                    { 
-                        // Save image link using reply no (number) as tim because 8kun tims have letters and numbers in them. The reply number will work just fine.
-                        links.Add(new ImageLink(long.Parse(xmlNos[i].InnerText), "https://8kun.top/" + "/file_store/" + xmlTims[j].InnerText + xmlExts[j].InnerText, xmlFilenames[j].InnerText));
+                    {
+                        string url;
+
+                        if (xmlExts[j].InnerText != "deleted")
+                        {
+                            if (xmlFpaths[j].InnerText == "0")
+                                url = Fpath0Url(BoardCode, xmlTims[j].InnerText, xmlExts[j].InnerText);
+                            else // "1"
+                                url = Fpath1Url(xmlTims[j].InnerText, xmlExts[j].InnerText);
+
+                            // Save image link using reply no (number) as tim because 8kun tims have letters and numbers in them. The reply number will work just fine.
+                            links.Add(new ImageLink(long.Parse(xmlNos[i].InnerText), url, xmlFilenames[j].InnerText));
+                        }
                     }
                 }
             }
