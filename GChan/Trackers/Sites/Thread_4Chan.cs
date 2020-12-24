@@ -30,8 +30,7 @@ namespace GChan.Trackers
 
         public static bool UrlIsThread(string url)
         {
-            Regex urlMatcher = new Regex(threadRegex);
-            return (urlMatcher.IsMatch(url));
+            return Regex.IsMatch(url, threadRegex);
         }
 
         protected override void Download()

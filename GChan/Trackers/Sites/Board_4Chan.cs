@@ -21,8 +21,7 @@ namespace GChan.Trackers
 
         public static bool UrlIsBoard(string url)
         {
-            Regex urlMatcher = new Regex(boardRegex);
-            return (urlMatcher.IsMatch(url));
+            return Regex.IsMatch(url, boardRegex);
         }
 
         override public string[] GetThreadLinks()
@@ -63,12 +62,8 @@ namespace GChan.Trackers
 #endif
             }
 
+            threadCount = threadLinks.Count;
             return threadLinks.ToArray();
-        }
-
-        public override string ToString()
-        {
-            return URL;
         }
     }
 }
