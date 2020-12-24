@@ -40,7 +40,7 @@ namespace GChan
         /// <summary>
         /// Get the index of the selected row in the thread grid view.
         /// </summary>
-        private int ThreadGridViewSelectedRowIndex => threadGridView.CurrentCell.RowIndex;
+        private int ThreadGridViewSelectedRowIndex => threadGridView?.CurrentCell?.RowIndex ?? -1;
 
         private int BoardsListBoxSelectedRowIndex { get { return boardsListBox.SelectedIndex; } set {boardsListBox.SelectedIndex = value;} }
 
