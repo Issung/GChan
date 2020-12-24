@@ -291,29 +291,6 @@ namespace GChan
             return fullpath;
         }
 
-        public static string MessageBoxGetString(string currentSubject, int x = 0, int y = 0)
-        {
-            GetStringMessageBox dialog = new GetStringMessageBox(currentSubject);
-            dialog.TopMost = true;
-
-            if (x != 0 && y != 0)
-            {
-                dialog.Left = x;
-                dialog.Top = y;
-            }
-
-            // Show testDialog as a modal dialog and determine if DialogResult = OK.
-            if (dialog.ShowDialog() == DialogResult.OK)
-            {
-                // Read the contents of testDialog's TextBox.
-                return dialog.UserEntry.Replace("\n", "").Replace("\r", "");
-            }
-            else
-            {
-                return null;
-            }
-        }
-
         public static string RemoveCharactersFromString(string haystack, params char[] removeThese)
         {
             string ret = haystack;

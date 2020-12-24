@@ -309,19 +309,17 @@ namespace GChan
 
         private void RenameThreadSubjectPrompt(int threadBindingSourceIndex)
         {
-            lock (threadLock)
-            {
-                string currentSubject = Model.Threads[threadBindingSourceIndex].Subject;
-                string entry = Utils.MessageBoxGetString(currentSubject, Left + 50, Top + 50);
+            Thread thread = Model.Threads[threadBindingSourceIndex];
+            GetStringMessageBox dialog = new GetStringMessageBox(thread.Subject);
+            dialog.StartPosition = FormStartPosition.CenterParent;
 
-                if (string.IsNullOrWhiteSpace(entry))
-                {
-                    Model.Threads[threadBindingSourceIndex].SetSubject(Thread.NO_SUBJECT);
-                }
-                else
-                {
-                    Model.Threads[threadBindingSourceIndex].SetSubject(entry);
-                }
+            DialogResult result = dialog.ShowDialog();
+
+            if (result == DialogResult.OK)
+            {
+                string newSubject = string.IsNullOrWhiteSpace(dialog.UserEntry) ? Thread.NO_SUBJECT : dialog.UserEntry;
+
+                thread.SetSubject(newSubject);
             }
         }
 
