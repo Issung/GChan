@@ -54,7 +54,7 @@ namespace GChan.Models
                 form.threadGridView.FirstDisplayedScrollingRowIndex = Math.Max(0, topRowIndex);    //Reset it to saved index after list updated. Credit: https://stackoverflow.com/a/5159926/8306962
 
             form.threadsTabPage.Text = ThreadsTabText;
-            //NotifyPropertyChanged(nameof(ThreadsTabText)); 
+            //NotifyPropertyChanged(nameof(ThreadsTabText));
         }
 
         private void Boards_ListChanged(object sender, ListChangedEventArgs e)

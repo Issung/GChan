@@ -66,8 +66,6 @@ namespace GChan.Trackers
 #else
                 GreatestSavedFileTim = imageLinks.Max(t => t.Tim);
 #endif
-
-                fileCount = imageLinks.Length;
             }
             catch (WebException webEx)
             {
@@ -141,6 +139,7 @@ namespace GChan.Trackers
                 throw;
             }
 
+            fileCount = links.Count;
             return links.ToArray();
         }
 

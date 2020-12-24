@@ -62,12 +62,8 @@ namespace GChan.Trackers
 #endif
             }
 
+            threadCount = threadLinks.Count;
             return threadLinks.ToArray();
-        }
-
-        public override string ToString()
-        {
-            return URL;
         }
     }
 }

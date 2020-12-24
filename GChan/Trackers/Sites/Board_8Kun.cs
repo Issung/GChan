@@ -13,14 +13,17 @@ namespace GChan.Trackers
 {
     public class Board_8Kun : Board
     {
-        public const string boardRegex = "8kun.top/[a-zA-Z0-9]*?/";
+        public const string boardRegex = @"8kun.top/[a-zA-Z0-9]*?/";
+        public const string boardCodeRegex = @"(?<=(8kun.top/))[a-zA-Z0-9]*(?=(/index.html))";
 
         public Board_8Kun(string url) : base(url)
         {
             SiteName = "8kun";
 
-            URL = url;
-            SaveTo = Properties.Settings.Default.SavePath + "\\" + SiteName + "\\" + URL.Split('/')[3]; // Set SaveTo path
+            Match boardCodeMatch = Regex.Match(url, boardCodeRegex);
+            BoardCode = boardCodeMatch.Groups[0].Value;
+
+            SaveTo = Path.Combine(Properties.Settings.Default.SavePath, SiteName, BoardCode);
         }
 
         public static bool UrlIsBoard(string url)
@@ -30,10 +33,11 @@ namespace GChan.Trackers
 
         override public string[] GetThreadLinks()
         {
-            string url = "http://8kun.top/" + URL.Split('/')[3] + "/catalog.json";
-            List<string> Res = new List<string>();
+            string url = "http://8kun.top/" + BoardCode + "/catalog.json";
+            List<string> threadUrls = new List<string>();
             string str = "";
-            XmlNodeList tNo;
+            XmlNodeList threadNos;
+
             try
             {
                 string json = new WebClient().DownloadString(url);
@@ -43,26 +47,25 @@ namespace GChan.Trackers
                     var quotas = new XmlDictionaryReaderQuotas();
                     var jsonReader = JsonReaderWriterFactory.CreateJsonReader(stream, quotas);
                     var xml = XDocument.Load(jsonReader);
-                    str = xml.ToString();                                                 // JSON to XML again
+                    str = xml.ToString();
                 }
 
                 XmlDocument doc = new XmlDocument();
                 doc.LoadXml(str);
-                tNo = doc.DocumentElement.SelectNodes("/root/item/threads/item/no");
-                for (int i = 0; i < tNo.Count; i++)
+                threadNos = doc.DocumentElement.SelectNodes("//no");
+                for (int i = 0; i < threadNos.Count; i++)
                 {
-                    Res.Add("http://8kun.top/" + url.Split('/')[3] + "/res/" + tNo[i].InnerText + ".html");
+                    threadUrls.Add("http://8kun.top/" + BoardCode + "/res/" + threadNos[i].InnerText + ".html");
                 }
             }
             catch (WebException webEx)
             {
                 Program.Log(webEx);
-#if DEBUG
-                MessageBox.Show("Connection Error: " + webEx.Message);
-#endif
+                Program.Log(true, $"Connection error trying to find threads in a board. Exception: {webEx.Message}");
             }
 
-            return Res.ToArray();
+            threadCount = threadUrls.Count;
+            return threadUrls.ToArray();
         }
     }
 }

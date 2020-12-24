@@ -277,9 +277,9 @@ namespace GChan
                     }
                     finally
                     {
-                        for (int i1 = 0; i1 < threads.Length; i1++)
+                        for (int j = 0; j < threads.Length; j++)
                         {
-                            Thread newThread = (Thread)Utils.CreateNewTracker(threads[i1]);
+                            Thread newThread = (Thread)Utils.CreateNewTracker(threads[j]);
                             if (newThread != null && IsUnique(newThread.URL, Model.Threads))
                             {
                                 AddURLToList(newThread);
@@ -305,17 +305,6 @@ namespace GChan
         private bool IsUnique(string url, IEnumerable<Tracker> list)
         {
             return !list.Any(t => t.URL == url);
-        }
-
-        private int getPlace(string url)
-        {
-            int plc = -1;
-            for (int i = 0; i < Model.Threads.Count; i++)
-            {
-                if (Model.Threads[i].URL == url)
-                    plc = i;
-            }
-            return plc;
         }
 
         private void RenameThreadSubjectPrompt(int threadBindingSourceIndex)
