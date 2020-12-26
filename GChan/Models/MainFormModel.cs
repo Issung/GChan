@@ -1,9 +1,10 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Windows.Forms;
 using GChan.Controls;
 using GChan.Trackers;
+using GChan.Forms;
+using System.Windows.Forms;
 
 namespace GChan.Models
 {
@@ -18,6 +19,7 @@ namespace GChan.Models
 #if DEBUG
             Console.WriteLine($"NotifyPropertyChanged! propertyName: {propertyName}");
 #endif
+
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
@@ -54,14 +56,12 @@ namespace GChan.Models
                 form.threadGridView.FirstDisplayedScrollingRowIndex = Math.Max(0, topRowIndex);    //Reset it to saved index after list updated. Credit: https://stackoverflow.com/a/5159926/8306962
 
             form.threadsTabPage.Text = ThreadsTabText;
-            //NotifyPropertyChanged(nameof(ThreadsTabText));
         }
 
         private void Boards_ListChanged(object sender, ListChangedEventArgs e)
         {
             NotifyPropertyChanged(nameof(Boards));
             form.boardsTabPage.Text = BoardsTabText;
-            //NotifyPropertyChanged(nameof(BoardsTabText)); 
         }
     }
 }
