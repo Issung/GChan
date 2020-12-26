@@ -136,7 +136,6 @@
       <DependentUpon>GetStringMessageBox.cs</DependentUpon>
     </Compile>
     <Compile Include="Models\MainFormModel.cs" />
-    <Compile Include="Models\WindowWrapper.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -232,7 +231,7 @@
     <Content Include="4chanIcon.ico" />
     <None Include="icons\alert.png" />
     <None Include="icons\question.png" />
-    <None Include="icons\download..png" />
+    <Content Include="icons\download.png" />
     <Content Include="icons\Rename.png" />
     <Content Include="icons\close.png" />
     <Content Include="icons\folder.png" />

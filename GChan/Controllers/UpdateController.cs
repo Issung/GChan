@@ -26,7 +26,7 @@ namespace GChan.Controllers
         }
 
         IUpdateManager updateManager = new UpdateManager(
-                new GithubPackageResolver(Program.GITHUB_REPOSITORY_OWNER, Program.NAME, $"{Program.NAME}-*.zip"),
+                new GithubPackageResolver(Program.GITHUB_REPOSITORY_OWNER, Program.GITHUB_REPOSITORY_NAME, $"{Program.NAME}-*.zip"),
                 new ZipPackageExtractor()
             );
 
@@ -53,11 +53,6 @@ namespace GChan.Controllers
 
         private UpdateController()
         {
-            updateManager = new UpdateManager(
-                new GithubPackageResolver(Program.GITHUB_REPOSITORY_OWNER, Program.NAME, "SorterExpress-*.zip"),
-                new ZipPackageExtractor()
-            );
-
             CurrentVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString().Trim();
 
             // Save current version and cut off trailing ".0"'s.
@@ -103,6 +98,9 @@ namespace GChan.Controllers
 
                 // Prepare the latest update
                 await updateManager.PrepareUpdateAsync(CheckForUpdatesResult.LastVersion, Progress);
+
+                Properties.Settings.Default.UpdateSettings = true;
+                Properties.Settings.Default.Save();
 
                 // Launch updater and exit
                 updateManager.LaunchUpdater(CheckForUpdatesResult.LastVersion);

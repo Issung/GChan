@@ -805,7 +805,7 @@ namespace GChan
 
         private void updateAvailableToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            // Open UpdateInfoForm as Dialog.
+            UpdateController.Instance.PresentInformation();
         }
 
         #endregion

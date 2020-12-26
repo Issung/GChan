@@ -14,8 +14,8 @@ namespace GChan.Forms
             UpdateController.Instance.Progress.ProgressChanged += Progress_ProgressChanged;
 
             infoLabel.Text = $"An update is available for GChan.\r\n";
-            infoLabel.Text += $"Current version: {UpdateController.Instance.CurrentVersion}.\r\n";
-            infoLabel.Text += $"Latest version: {UpdateController.Instance.CheckForUpdatesResult.LastVersion}.";
+            infoLabel.Text += $"Current version: v{UpdateController.Instance.CurrentVersion}.\r\n";
+            infoLabel.Text += $"Latest version: v{UpdateController.Instance.CheckForUpdatesResult.LastVersion}.";
         }
 
         private void Progress_ProgressChanged(object sender, double e)
@@ -40,7 +40,7 @@ namespace GChan.Forms
         {
             buttonsPanel.Hide();
             downloadingPanel.Show();
-            await UpdateController.Instance.PerformUpdate();
+            UpdateController.Instance.PerformUpdate();
         }
     }
 }
