@@ -32,12 +32,16 @@ namespace GChan
 #if DEBUG
         public static string BOARDS_PATH => Path.Combine(Application.CommonAppDataPath, "DEBUG", "boards.dat");
         public static string THREADS_PATH => Path.Combine(Application.CommonAppDataPath, "DEBUG", "threads.dat");
-        public static string LOGS_PATH { get; } = Path.Combine(Application.CommonAppDataPath, "DEBUG", "crash.logs");
+        public static string LOGS_PATH => Path.Combine(Application.CommonAppDataPath, "DEBUG", "crash.logs");
 #else
         public static string BOARDS_PATH => Path.Combine(Application.CommonAppDataPath, "boards.dat");
         public static string THREADS_PATH => Path.Combine(Application.CommonAppDataPath, "threads.dat");
         public static string LOGS_PATH { get; } = Path.Combine(Application.CommonAppDataPath, "crash.logs");
 #endif
+
+        public static readonly string NAME = "GChan";
+
+        public static readonly string GITHUB_REPOSITORY_OWNER = "Issung";
 
         public static StreamWriter streamWriter;
 

@@ -45,13 +45,14 @@
             this.addUrlFromClipboardWhenTextboxEmpty = new System.Windows.Forms.CheckBox();
             this.threadFolderNameFormatLabel = new System.Windows.Forms.Label();
             this.threadFolderNameFormatComboBox = new System.Windows.Forms.ComboBox();
+            this.checkForUpdatesOnStartCheckBox = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.timerNumeric)).BeginInit();
             this.SuspendLayout();
             // 
             // btnSSave
             // 
             this.btnSSave.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
-            this.btnSSave.Location = new System.Drawing.Point(76, 302);
+            this.btnSSave.Location = new System.Drawing.Point(76, 338);
             this.btnSSave.Name = "btnSSave";
             this.btnSSave.Size = new System.Drawing.Size(92, 23);
             this.btnSSave.TabIndex = 0;
@@ -62,7 +63,7 @@
             // btnSCan
             // 
             this.btnSCan.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
-            this.btnSCan.Location = new System.Drawing.Point(174, 302);
+            this.btnSCan.Location = new System.Drawing.Point(174, 338);
             this.btnSCan.Name = "btnSCan";
             this.btnSCan.Size = new System.Drawing.Size(94, 23);
             this.btnSCan.TabIndex = 1;
@@ -250,14 +251,25 @@
             this.threadFolderNameFormatComboBox.TabIndex = 19;
             this.threadFolderNameFormatComboBox.ValueMember = "EnumValue";
             // 
+            // checkForUpdatesOnStartCheckBox
+            // 
+            this.checkForUpdatesOnStartCheckBox.AutoSize = true;
+            this.checkForUpdatesOnStartCheckBox.Location = new System.Drawing.Point(15, 302);
+            this.checkForUpdatesOnStartCheckBox.Name = "checkForUpdatesOnStartCheckBox";
+            this.checkForUpdatesOnStartCheckBox.Size = new System.Drawing.Size(206, 17);
+            this.checkForUpdatesOnStartCheckBox.TabIndex = 21;
+            this.checkForUpdatesOnStartCheckBox.Text = "Check for updates when GChan starts";
+            this.checkForUpdatesOnStartCheckBox.UseVisualStyleBackColor = true;
+            // 
             // Settings
             // 
             this.AcceptButton = this.btnSSave;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.ClientSize = new System.Drawing.Size(329, 331);
+            this.ClientSize = new System.Drawing.Size(325, 363);
             this.ControlBox = false;
+            this.Controls.Add(this.checkForUpdatesOnStartCheckBox);
             this.Controls.Add(this.chkStartWithWindowsMinimized);
             this.Controls.Add(this.threadFolderNameFormatComboBox);
             this.Controls.Add(this.threadFolderNameFormatLabel);
@@ -314,5 +326,6 @@
         private System.Windows.Forms.Label threadFolderNameFormatLabel;
         private System.Windows.Forms.ComboBox threadFolderNameFormatComboBox;
         private System.Windows.Forms.CheckBox chkStartWithWindowsMinimized;
+        private System.Windows.Forms.CheckBox checkForUpdatesOnStartCheckBox;
     }
 }

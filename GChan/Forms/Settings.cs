@@ -93,6 +93,8 @@ namespace GChan
             renameThreadFolderCheckBox.Checked = Properties.Settings.Default.AddThreadSubjectToFolder;
 
             addUrlFromClipboardWhenTextboxEmpty.Checked = Properties.Settings.Default.AddUrlFromClipboardWhenTextboxEmpty;
+
+            checkForUpdatesOnStartCheckBox.Checked = Properties.Settings.Default.CheckForUpdatesOnStart;
         }
 
         private void btnSSave_Click(object sender, EventArgs e)
@@ -123,7 +125,8 @@ namespace GChan
                     chkStartWithWindows.Checked,
                     chkStartWithWindowsMinimized.Checked,
                     renameThreadFolderCheckBox.Checked,
-                    addUrlFromClipboardWhenTextboxEmpty.Checked
+                    addUrlFromClipboardWhenTextboxEmpty.Checked,
+                    checkForUpdatesOnStartCheckBox.Checked
                 );
 
                 Close();

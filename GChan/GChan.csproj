@@ -111,6 +111,7 @@
     <Reference Include="System.Xml.Serialization" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controllers\UpdateController.cs" />
     <Compile Include="Forms\AboutBox.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -118,6 +119,12 @@
       <DependentUpon>AboutBox.cs</DependentUpon>
     </Compile>
     <Compile Include="EnumHelper.cs" />
+    <Compile Include="Forms\UpdateInfoForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\UpdateInfoForm.Designer.cs">
+      <DependentUpon>UpdateInfoForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="ImageLink.cs" />
     <Compile Include="Controls\CustomDataGridView.cs">
       <SubType>Component</SubType>
@@ -129,6 +136,7 @@
       <DependentUpon>GetStringMessageBox.cs</DependentUpon>
     </Compile>
     <Compile Include="Models\MainFormModel.cs" />
+    <Compile Include="Models\WindowWrapper.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -186,6 +194,9 @@
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Main1.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <EmbeddedResource Include="Forms\UpdateInfoForm.resx">
+      <DependentUpon>UpdateInfoForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <SubType>Designer</SubType>
@@ -221,6 +232,7 @@
     <Content Include="4chanIcon.ico" />
     <None Include="icons\alert.png" />
     <None Include="icons\question.png" />
+    <None Include="icons\download..png" />
     <Content Include="icons\Rename.png" />
     <Content Include="icons\close.png" />
     <Content Include="icons\folder.png" />

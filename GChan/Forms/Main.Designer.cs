@@ -35,6 +35,8 @@
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.changelogToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.checkForUpdatesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.updateAvailableToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.listsTabControl = new System.Windows.Forms.TabControl();
             this.threadsTabPage = new System.Windows.Forms.TabPage();
             this.threadGridView = new GChan.Controls.CustomDataGridView();
@@ -83,7 +85,8 @@
             // 
             this.menuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.fileToolStripMenuItem,
-            this.helpToolStripMenuItem});
+            this.helpToolStripMenuItem,
+            this.updateAvailableToolStripMenuItem});
             this.menuStrip.Location = new System.Drawing.Point(0, 0);
             this.menuStrip.Name = "menuStrip";
             this.menuStrip.Size = new System.Drawing.Size(582, 24);
@@ -145,10 +148,11 @@
             // 
             this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.changelogToolStripMenuItem1,
-            this.aboutToolStripMenuItem1});
+            this.aboutToolStripMenuItem1,
+            this.checkForUpdatesToolStripMenuItem});
             this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
             this.helpToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
-            this.helpToolStripMenuItem.Text = "&Help";
+            this.helpToolStripMenuItem.Text = "Help";
             // 
             // changelogToolStripMenuItem1
             // 
@@ -156,7 +160,7 @@
             this.changelogToolStripMenuItem1.Image = global::GChan.Properties.Resources.alert;
             this.changelogToolStripMenuItem1.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.changelogToolStripMenuItem1.Name = "changelogToolStripMenuItem1";
-            this.changelogToolStripMenuItem1.Size = new System.Drawing.Size(132, 22);
+            this.changelogToolStripMenuItem1.Size = new System.Drawing.Size(171, 22);
             this.changelogToolStripMenuItem1.Text = "&Changelog";
             this.changelogToolStripMenuItem1.Click += new System.EventHandler(this.changelogToolStripMenuItem_Click);
             // 
@@ -165,9 +169,29 @@
             this.aboutToolStripMenuItem1.Image = global::GChan.Properties.Resources.question;
             this.aboutToolStripMenuItem1.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.aboutToolStripMenuItem1.Name = "aboutToolStripMenuItem1";
-            this.aboutToolStripMenuItem1.Size = new System.Drawing.Size(132, 22);
+            this.aboutToolStripMenuItem1.Size = new System.Drawing.Size(171, 22);
             this.aboutToolStripMenuItem1.Text = "&About";
             this.aboutToolStripMenuItem1.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
+            // 
+            // checkForUpdatesToolStripMenuItem
+            // 
+            this.checkForUpdatesToolStripMenuItem.Image = global::GChan.Properties.Resources.download;
+            this.checkForUpdatesToolStripMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
+            this.checkForUpdatesToolStripMenuItem.Name = "checkForUpdatesToolStripMenuItem";
+            this.checkForUpdatesToolStripMenuItem.Size = new System.Drawing.Size(171, 22);
+            this.checkForUpdatesToolStripMenuItem.Text = "Check for Updates";
+            this.checkForUpdatesToolStripMenuItem.Click += new System.EventHandler(this.checkForUpdatesToolStripMenuItem_Click);
+            // 
+            // updateAvailableToolStripMenuItem
+            // 
+            this.updateAvailableToolStripMenuItem.Image = global::GChan.Properties.Resources.alert;
+            this.updateAvailableToolStripMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
+            this.updateAvailableToolStripMenuItem.Name = "updateAvailableToolStripMenuItem";
+            this.updateAvailableToolStripMenuItem.Size = new System.Drawing.Size(126, 20);
+            this.updateAvailableToolStripMenuItem.Text = "Update Available!";
+            this.updateAvailableToolStripMenuItem.ToolTipText = "An update is available for GChan! Click here for more info.";
+            this.updateAvailableToolStripMenuItem.Visible = false;
+            this.updateAvailableToolStripMenuItem.Click += new System.EventHandler(this.updateAvailableToolStripMenuItem_Click);
             // 
             // listsTabControl
             // 
@@ -256,7 +280,7 @@
             // 
             this.fileCountDataGridViewTextBoxColumn.DataPropertyName = "FileCount";
             this.fileCountDataGridViewTextBoxColumn.FillWeight = 8.387236F;
-            this.fileCountDataGridViewTextBoxColumn.HeaderText = "FileCount";
+            this.fileCountDataGridViewTextBoxColumn.HeaderText = "File Count";
             this.fileCountDataGridViewTextBoxColumn.Name = "fileCountDataGridViewTextBoxColumn";
             this.fileCountDataGridViewTextBoxColumn.ReadOnly = true;
             // 
@@ -401,6 +425,7 @@
             this.addButton.Size = new System.Drawing.Size(74, 23);
             this.addButton.TabIndex = 2;
             this.addButton.Text = "Add";
+            this.toolTip.SetToolTip(this.addButton, "Add the entered thread/board to tracking.");
             this.addButton.UseVisualStyleBackColor = true;
             this.addButton.Click += new System.EventHandler(this.addButton_Click);
             // 
@@ -548,14 +573,16 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn notificationTrayTooltipDataGridViewTextBoxColumn;
         private System.Windows.Forms.BindingSource mainFormModelBindingSource;
         private System.Windows.Forms.BindingSource threadsBindingSource;
-        private System.Windows.Forms.DataGridViewTextBoxColumn subjectDataGridViewTextBoxColumn;
-        private System.Windows.Forms.DataGridViewTextBoxColumn boardCodeDataGridViewTextBoxColumn;
-        private System.Windows.Forms.DataGridViewTextBoxColumn iDDataGridViewTextBoxColumn;
-        private System.Windows.Forms.DataGridViewTextBoxColumn fileCountDataGridViewTextBoxColumn;
         private System.Windows.Forms.BindingSource boardsBindingSource;
         internal System.Windows.Forms.TabPage threadsTabPage;
         internal System.Windows.Forms.TabPage boardsTabPage;
         internal Controls.CustomDataGridView threadGridView;
+        private System.Windows.Forms.ToolStripMenuItem updateAvailableToolStripMenuItem;
+        private System.Windows.Forms.DataGridViewTextBoxColumn subjectDataGridViewTextBoxColumn;
+        private System.Windows.Forms.DataGridViewTextBoxColumn boardCodeDataGridViewTextBoxColumn;
+        private System.Windows.Forms.DataGridViewTextBoxColumn iDDataGridViewTextBoxColumn;
+        private System.Windows.Forms.DataGridViewTextBoxColumn fileCountDataGridViewTextBoxColumn;
+        private System.Windows.Forms.ToolStripMenuItem checkForUpdatesToolStripMenuItem;
     }
 }
 

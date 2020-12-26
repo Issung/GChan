@@ -28,6 +28,7 @@ using GChan.Trackers;
 using Thread = GChan.Trackers.Thread;
 using Type = GChan.Trackers.Type;
 using GChan.Models;
+using GChan.Controllers;
 
 namespace GChan
 {
@@ -51,12 +52,20 @@ namespace GChan
 
         private enum URLType { Thread, Board };
 
+        /// <summary>
+        /// Flag for whether or not the last update check was initiated by the user.
+        /// False for automatic program start-up update check.
+        /// </summary>
+        private bool updateCheckWasManual = false;
+
         public MainForm()
         {
             InitializeComponent();
 
             Model = new MainFormModel(this);
             mainFormModelBindingSource.DataSource = Model;
+
+            UpdateController.Instance.UpdateCheckFinished += Instance_UpdateCheckFinished;
         }
 
         private void MainForm_Load(object sender, EventArgs e)
@@ -105,7 +114,7 @@ namespace GChan
                             // Without setting ScrollBars to None and then setting to Vertical the program will crash.
                             // It doesnt like items being added in parallel in this method...
                             // User cannot also resize columns while adding, or else program crashes.
-                            // TODO: Just move these to outside of the thread call?
+                            // TODO: Just move these to outside of the thread call so they don't require an Invoke?
 
                             CheckForIllegalCrossThreadCalls = false;
                             Invoke((MethodInvoker)delegate { threadGridView.ScrollBars = ScrollBars.None; });
@@ -134,15 +143,20 @@ namespace GChan
                 }
             }
 
-            ///Executed once everything has finished being loaded.
+            /// Executed once everything has finished being loaded.
             void Done()
             {
                 threadGridView.ScrollBars = ScrollBars.Vertical;
                 threadGridView.AllowUserToResizeColumns = true;
-                //boardsTabPage.Text = Model.BoardsTabText;
 
                 scanTimer.Enabled = true;
                 Scan(this, new EventArgs());
+
+                // Check for updates.
+                if (Properties.Settings.Default.CheckForUpdatesOnStart)
+                { 
+                    UpdateController.Instance.CheckForUpdates();
+                }
             }
         }
 
@@ -765,6 +779,33 @@ namespace GChan
                 if (Properties.Settings.Default.SaveListsOnClose)
                     Utils.SaveURLs(Model.Boards, Model.Threads.ToList());
             }
+        }
+
+        private void checkForUpdatesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            updateCheckWasManual = true;
+            UpdateController.Instance.CheckForUpdates();
+        }
+
+        private void Instance_UpdateCheckFinished(object sender, Onova.Models.CheckForUpdatesResult result)
+        {
+            if (result.CanUpdate)
+            {
+                updateAvailableToolStripMenuItem.Visible = true;
+            }
+            else
+            {
+                // Only show notification if the update check was initiated by the user.
+                if (updateCheckWasManual)
+                    toolTip.Show("No Updates Available.", menuStrip, 70, 20, 1750);
+
+                updateCheckWasManual = false;
+            }
+        }
+
+        private void updateAvailableToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // Open UpdateInfoForm as Dialog.
         }
 
         #endregion
