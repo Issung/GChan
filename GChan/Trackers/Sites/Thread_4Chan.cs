@@ -53,6 +53,7 @@ namespace GChan.Trackers
                             Program.Log(true, $"Downloading file {link} because it's Tim was greater than {GreatestSavedFileTim}");
 #endif
                             Utils.DownloadToDir(link, SaveTo);
+                            GreatestSavedFileTim = link.Tim;
                         }
                         else
                         {
@@ -62,15 +63,6 @@ namespace GChan.Trackers
                         }
                     }
                 });
-
-                //TODO: Add check here for image links count 0, if imageLinks.Count == 0 do nothing.
-#if DEBUG
-                long max = imageLinks.Max(t => t.Tim);
-                Program.Log(true, $"Setting thread {this} {nameof(GreatestSavedFileTim)} from {GreatestSavedFileTim} to {max}.");
-                GreatestSavedFileTim = max;
-#else
-                GreatestSavedFileTim = imageLinks.Max(t => t.Tim);
-#endif
             }
             catch (WebException webEx)
             {

@@ -40,6 +40,10 @@ namespace GChan
         /// </summary>
         public static void SaveURLs(IList<Board> boards, IList<Thread> threads)
         {
+            // Make copies and save those.
+            boards = boards.ToList();
+            threads = threads.ToList();
+
             try
             {
                 StringBuilder sb = new StringBuilder();

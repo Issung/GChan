@@ -51,6 +51,8 @@ namespace GChan.Controllers
 
         public string CurrentVersion { get; private set; }
 
+        UpdateInfoForm infoForm;
+
         private UpdateController()
         {
             CurrentVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString().Trim();
@@ -73,21 +75,9 @@ namespace GChan.Controllers
 
         public async void PresentInformation()
         {
-            // Show a dialog box with info and links to GitHub, etc.
-
-            /*DialogResult result = MessageBox.Show(
-                    $"There is an update available. Your current version is {CurrentVersion}, the latest version is {CheckForUpdatesResult.LastVersion}. Would you like to update to the latest version?",
-                    "Update Available",
-                    MessageBoxButtons.YesNo
-                );
-
-            if (result == DialogResult.Yes)
-            {
-                 await PerformUpdate();
-            }*/
-
-            UpdateInfoForm infoForm = new UpdateInfoForm();
-            infoForm.ShowDialog();
+            infoForm = new UpdateInfoForm();
+            infoForm.TopMost = true;
+            infoForm.Show();
         }
 
         public async Task PerformUpdate()
@@ -99,11 +89,12 @@ namespace GChan.Controllers
                 // Prepare the latest update
                 await updateManager.PrepareUpdateAsync(CheckForUpdatesResult.LastVersion, Progress);
 
-                Properties.Settings.Default.UpdateSettings = true;
-                Properties.Settings.Default.Save();
-
                 // Launch updater and exit
                 updateManager.LaunchUpdater(CheckForUpdatesResult.LastVersion);
+
+                infoForm?.Close();
+
+                Program.mainForm.FormClosing -= Program.mainForm.MainForm_FormClosing;
 
                 Application.Exit();
             }

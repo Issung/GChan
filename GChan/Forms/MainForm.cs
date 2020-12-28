@@ -378,7 +378,7 @@ namespace GChan
             }
         }
 
-        private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
+        internal void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             e.Cancel = Controller.Closing();
         }

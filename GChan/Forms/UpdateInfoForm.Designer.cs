@@ -48,12 +48,14 @@ namespace GChan.Forms
             // 
             // flowLayoutPanel
             // 
+            this.flowLayoutPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.flowLayoutPanel.Controls.Add(this.infoLabel);
             this.flowLayoutPanel.Controls.Add(this.buttonsPanel);
-            this.flowLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.flowLayoutPanel.Location = new System.Drawing.Point(7, 7);
             this.flowLayoutPanel.Name = "flowLayoutPanel";
-            this.flowLayoutPanel.Size = new System.Drawing.Size(330, 247);
+            this.flowLayoutPanel.Size = new System.Drawing.Size(330, 209);
             this.flowLayoutPanel.TabIndex = 0;
             // 
             // infoLabel
@@ -63,7 +65,7 @@ namespace GChan.Forms
             this.infoLabel.Location = new System.Drawing.Point(25, 25);
             this.infoLabel.Margin = new System.Windows.Forms.Padding(25);
             this.infoLabel.Name = "infoLabel";
-            this.infoLabel.Size = new System.Drawing.Size(283, 99);
+            this.infoLabel.Size = new System.Drawing.Size(283, 66);
             this.infoLabel.TabIndex = 0;
             this.infoLabel.Text = "Info";
             this.infoLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -73,7 +75,7 @@ namespace GChan.Forms
             this.buttonsPanel.Controls.Add(this.viewReleasesButton);
             this.buttonsPanel.Controls.Add(this.doNotUpdateButton);
             this.buttonsPanel.Controls.Add(this.updateButton);
-            this.buttonsPanel.Location = new System.Drawing.Point(3, 152);
+            this.buttonsPanel.Location = new System.Drawing.Point(3, 119);
             this.buttonsPanel.Name = "buttonsPanel";
             this.buttonsPanel.Size = new System.Drawing.Size(326, 88);
             this.buttonsPanel.TabIndex = 1;
@@ -112,11 +114,16 @@ namespace GChan.Forms
             // 
             // downloadingPanel
             // 
+            this.downloadingPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.downloadingPanel.Controls.Add(this.downloadingUpdateLabel);
             this.downloadingPanel.Controls.Add(this.progressBar);
-            this.downloadingPanel.Location = new System.Drawing.Point(10, 157);
+            this.downloadingPanel.Location = new System.Drawing.Point(9, 124);
+            this.downloadingPanel.MaximumSize = new System.Drawing.Size(327, 89);
+            this.downloadingPanel.MinimumSize = new System.Drawing.Size(327, 89);
             this.downloadingPanel.Name = "downloadingPanel";
-            this.downloadingPanel.Size = new System.Drawing.Size(327, 90);
+            this.downloadingPanel.Size = new System.Drawing.Size(327, 89);
             this.downloadingPanel.TabIndex = 1;
             this.downloadingPanel.Visible = false;
             // 
@@ -140,14 +147,13 @@ namespace GChan.Forms
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(344, 261);
+            this.ClientSize = new System.Drawing.Size(344, 223);
             this.ControlBox = false;
             this.Controls.Add(this.downloadingPanel);
             this.Controls.Add(this.flowLayoutPanel);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximumSize = new System.Drawing.Size(360, 300);
-            this.MinimumSize = new System.Drawing.Size(360, 300);
             this.Name = "UpdateInfoForm";
             this.Padding = new System.Windows.Forms.Padding(7);
             this.ShowInTaskbar = false;
