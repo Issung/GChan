@@ -34,7 +34,7 @@ namespace GChan.Trackers
 
             SaveTo = Path.Combine(Properties.Settings.Default.SavePath, SiteName, BoardCode, ID);
 
-            if (Subject == null)
+            if (subject == null)
                 Subject = GetThreadSubject();
         }
 

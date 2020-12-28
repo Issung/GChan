@@ -28,7 +28,7 @@ namespace GChan.Forms
 
         private void viewReleasesButton_Click(object sender, EventArgs e)
         {
-            Process.Start("https://github.com/Issung/GChan/releases");
+            Process.Start("https://github.com/" + Program.GITHUB_REPOSITORY_OWNER + "/" + Program.GITHUB_REPOSITORY_NAME + "/releases");
         }
 
         private void doNotUpdateButton_Click(object sender, EventArgs e)

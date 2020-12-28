@@ -24,7 +24,7 @@ namespace GChan.Trackers
             Match match = Regex.Match(url, @"boards.(4chan|4channel).org/[a-zA-Z0-9]*?/thread/\d*");
             URL = "http://" + match.Groups[0].Value;
             SaveTo = Properties.Settings.Default.SavePath + "\\" + SiteName + "\\" + BoardCode + "\\" + ID;
-            if (Subject == null)
+            if (subject == null)
                 Subject = GetThreadSubject();
         }
 

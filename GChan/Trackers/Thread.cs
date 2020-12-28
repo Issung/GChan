@@ -22,7 +22,7 @@ namespace GChan.Trackers
 
         private int fileCount = FILE_COUNT_NOT_CHECKED_YET;
 
-        private string subject = null;
+        protected string subject { get; private set; } = null;
 
         protected long greatestSavedFileTim = 0;
 

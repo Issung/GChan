@@ -48,11 +48,11 @@ namespace GChan
         /// </summary>
         public static string LOGS_PATH => Path.Combine(Application.CommonAppDataPath, "crash.logs");
 
-        public static readonly string NAME = "GChan";
+        public const string NAME = "GChan";
 
-        public static readonly string GITHUB_REPOSITORY_OWNER = "Issung";
+        public const string GITHUB_REPOSITORY_OWNER = "Issung";
 
-        public static readonly string GITHUB_REPOSITORY_NAME = "GChanUpdateTesting";
+        public const string GITHUB_REPOSITORY_NAME = "GChanUpdateTesting";
 
         public static StreamWriter streamWriter;
 
