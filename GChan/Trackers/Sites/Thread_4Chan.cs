@@ -23,7 +23,7 @@ namespace GChan.Trackers
 
             Match match = Regex.Match(url, @"boards.(4chan|4channel).org/[a-zA-Z0-9]*?/thread/\d*");
             URL = "http://" + match.Groups[0].Value;
-            SaveTo = Properties.Settings.Default.SavePath + "\\" + SiteName + "\\" + url.Split('/')[3] + "\\" + url.Split('/')[5];
+            SaveTo = Properties.Settings.Default.SavePath + "\\" + SiteName + "\\" + BoardCode + "\\" + ID;
             if (subject == null)
                 subject = GetThreadSubject();
         }
@@ -33,6 +33,7 @@ namespace GChan.Trackers
             return Regex.IsMatch(url, threadRegex);
         }
 
+        // TODO: Move this behaviour to be abstract in Thread.cs and keep GetImageLink, etc specific.
         protected override void Download()
         {
             try
@@ -44,24 +45,28 @@ namespace GChan.Trackers
 
                 Parallel.ForEach(imageLinks, (link) =>
                 {
-                    if (link.Tim > GreatestSavedFileTim)
-                    {
+                    if (Scraping)
+                    { 
+                        if (link.Tim > GreatestSavedFileTim)
+                        {
 #if DEBUG
-                        Program.Log(true, $"Downloading file {link} because it's Tim was greater than {GreatestSavedFileTim}");
+                            Program.Log(true, $"Downloading file {link} because it's Tim was greater than {GreatestSavedFileTim}");
 #endif
-                        Utils.DownloadToDir(link, SaveTo);
-                    }
-                    else
-                    {
+                            Utils.DownloadToDir(link, SaveTo);
+                        }
+                        else
+                        {
 #if DEBUG
-                        Program.Log(true, $"Skipping downloading file {link} because it's Tim was less than than {GreatestSavedFileTim}");
+                            Program.Log(true, $"Skipping downloading file {link} because it's Tim was less than than {GreatestSavedFileTim}");
 #endif
+                        }
                     }
                 });
 
+                //TODO: Add check here for image links count 0, if imageLinks.Count == 0 do nothing.
 #if DEBUG
                 long max = imageLinks.Max(t => t.Tim);
-                Program.Log(true, $"Setting thread {this} {nameof(GreatestSavedFileTim)} to {max}.");
+                Program.Log(true, $"Setting thread {this} {nameof(GreatestSavedFileTim)} from {GreatestSavedFileTim} to {max}.");
                 GreatestSavedFileTim = max;
 #else
                 GreatestSavedFileTim = imageLinks.Max(t => t.Tim);
@@ -93,8 +98,8 @@ namespace GChan.Trackers
         protected override ImageLink[] GetImageLinks()
         {
             List<ImageLink> links = new List<ImageLink>();
-            string JSONUrl = "http://a.4cdn.org/" + URL.Split('/')[3] + "/thread/" + URL.Split('/')[5] + ".json";
-            string baseURL = "http://i.4cdn.org/" + URL.Split('/')[3] + "/";
+            string JSONUrl = "http://a.4cdn.org/" + BoardCode + "/thread/" + ID + ".json";
+            string baseURL = "http://i.4cdn.org/" + BoardCode + "/";
             string str = "";
             XmlNodeList xmlTims;
             XmlNodeList xmlFilenames;
@@ -233,7 +238,7 @@ namespace GChan.Trackers
 
             try
             {
-                string JSONUrl = "http://a.4cdn.org/" + URL.Split('/')[3] + "/thread/" + URL.Split('/')[5] + ".json";
+                string JSONUrl = "http://a.4cdn.org/" + BoardCode + "/thread/" + ID + ".json";
 
                 const string SUB_HEADER = "\"sub\":\"";
                 const string SUB_ENDER = "\",";

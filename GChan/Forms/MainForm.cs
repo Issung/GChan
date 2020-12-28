@@ -139,7 +139,7 @@ namespace GChan
             {
                 try
                 {
-                    Controller.RemoveThread(Model.Threads[ThreadGridViewSelectedRowIndex]);
+                    Controller.RemoveThread(Model.Threads[ThreadGridViewSelectedRowIndex], true);
                 }
                 catch
                 {
@@ -228,7 +228,7 @@ namespace GChan
         {
             if (BoardsListBoxSelectedRowIndex != -1)
             {
-                Controller.RemoveBoard(BoardsListBoxSelectedRowIndex);
+                Controller.RemoveBoard((Board)boardsListBox.SelectedItem);
             }
         }
 
@@ -246,43 +246,8 @@ namespace GChan
         {
             if (listsTabControl.SelectedIndex > 1) 
                 return;
-            
-            bool thread = (listsTabControl.SelectedIndex == 0);                             // Board Tab is open -> board=true; Thread tab -> board=false
 
-            string type;
-
-            if (thread)
-                type = "threads";
-            else
-                type = "boards";
-
-            DialogResult dialogResult = MessageBox.Show(
-                "Are you sure you want to clear all " + type + "?",
-                "Clear all " + type,
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Warning,
-                MessageBoxDefaultButton.Button2);    // Confirmation prompt
-
-            if (dialogResult == DialogResult.Yes)
-            {
-                if (thread)
-                {
-                    while (Model.Threads.Count > 0)
-                    {
-                        Controller.RemoveThread(Model.Threads[0]);
-                    }
-                }
-                else
-                {
-                    while (Model.Boards.Count > 0)
-                    {
-                        Controller.RemoveBoard(0);
-                    }
-                }
-
-                if (Properties.Settings.Default.SaveListsOnClose)
-                    Utils.SaveURLs(Model.Boards, Model.Threads.ToList());
-            }
+            Controller.ClearTrackers(listsTabControl.SelectedIndex == 0 ? Type.Thread : Type.Board);
         }
 
         private void boardsListBox_MouseDoubleClick(object sender, MouseEventArgs e)

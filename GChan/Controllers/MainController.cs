@@ -14,6 +14,7 @@ using GChan.Models;
 using GChan.Controllers;
 using URLType = GChan.Trackers.Type;
 using GChan.Forms;
+using Onova.Models;
 
 namespace GChan.Controllers
 {
@@ -23,29 +24,41 @@ namespace GChan.Controllers
 
         internal MainFormModel Model;
 
-        private SysThread Scanner = null;   // TODO: Rename to lowercase "scanner".
+        private SysThread scanThread = null;
 
-        private System.Windows.Forms.Timer scanTimer = new System.Windows.Forms.Timer();     // Timer for scanning
+        private System.Windows.Forms.Timer scanTimer = new System.Windows.Forms.Timer();
 
         public int ScanTimerInterval { get { return scanTimer.Interval; } set { scanTimer.Interval = value; } }
 
 #if DEBUG
+        /// Define special lock objects when in DEBUG mode that print out when/where they are acquired.
+        /// Credit: https://stackoverflow.com/a/36487032/8306962
+
         private object _threadLock = new object();
 
-        /// <summary>
-        /// Credit: https://stackoverflow.com/a/36487032/8306962
-        /// </summary>
         object threadLock { get {
-                StackFrame frame = new StackFrame(1);
-                Trace.WriteLine(String.Format("Lock acquired by: {0} on thread {1}", frame.GetMethod().Name, SysThread.CurrentThread.ManagedThreadId));
+                StackFrame frame = new StackFrame(1, true);
+                Trace.WriteLine($"threadLock acquired by: {frame.GetMethod().Name} at line {frame.GetFileLineNumber()} on thread {SysThread.CurrentThread.ManagedThreadId}.");
                 return _threadLock;
             } 
         }
+
+        object _boardLock = new object();
+
+        object boardLock
+        {
+            get
+            {
+                StackFrame frame = new StackFrame(1, true);
+                Trace.WriteLine($"boardLock acquired by: {frame.GetMethod().Name} at line {frame.GetFileLineNumber()} on thread {SysThread.CurrentThread.ManagedThreadId}.");
+                return _boardLock;
+            }
+        }
 #else
         object threadLock = new object();
-#endif
 
-        private object boardLock = new object();
+        object boardLock = new object();
+#endif
 
         /// <summary>
         /// Flag for whether or not the last update check was initiated by the user.
@@ -112,17 +125,14 @@ namespace GChan.Controllers
                         Form.threadGridView.AllowUserToResizeColumns = false;
 
                         // END TODO
-                        lock (threadLock)
-                        { 
-                            Parallel.ForEach(URLs, (url) =>
+                        Parallel.ForEach(URLs, (url) =>
+                        {
+                            if (!string.IsNullOrWhiteSpace(url))
                             {
-                                if (!string.IsNullOrWhiteSpace(url))
-                                {
-                                    Thread newThread = (Thread)Utils.CreateNewTracker(url.Trim());
-                                    AddURLToList(newThread);
-                                }
-                            });
-                        }
+                                Thread newThread = (Thread)Utils.CreateNewTracker(url.Trim());
+                                AddURLToList(newThread);
+                            }
+                        });
 
                         Form.Invoke((MethodInvoker)delegate {
                             Done();
@@ -220,51 +230,64 @@ namespace GChan.Controllers
             return true;
         }
 
-        internal void RemoveBoard(int index)
+        internal void ClearTrackers(Type type)
         {
-            lock (boardLock)
+            string typeName = type.ToString().ToLower() + "s";
+
+            DialogResult dialogResult = MessageBox.Show(
+                $"Are you sure you want to clear all {typeName}?",
+                $"Clear all {typeName}?",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Warning,
+                MessageBoxDefaultButton.Button2);    // Confirmation prompt
+
+            if (dialogResult == DialogResult.Yes)
             {
-                Form.Invoke((MethodInvoker)delegate { 
-                    Model.Boards.RemoveAt(index);
-                });
+                if (type == Type.Thread)
+                {
+                    lock (threadLock)
+                    {
+                        for (int i = Model.Threads.Count - 1; i >= 0; i--)
+                        {
+                            RemoveThread(Model.Threads[i], true);
+                        }
+                    }
+                }
+                else // Boards
+                {
+                    lock (boardLock)
+                    {
+                        for (int i = Model.Boards.Count - 1; i >= 0; i--)
+                        {
+                            RemoveBoard(Model.Boards[i]);
+                        }
+                    }
+                }
+
+                if (Properties.Settings.Default.SaveListsOnClose)
+                    Utils.SaveURLs(Model.Boards, Model.Threads.ToList());
             }
         }
 
         private void Scan(object sender, EventArgs e)
         {
-            if (Scanner == null || !Scanner.IsAlive)
+            if (scanThread == null || !scanThread.IsAlive)
             {
-                Scanner = new SysThread(new ThreadStart(ScanThread))
+                scanThread = new SysThread(new ThreadStart(ScanRoutine))
                 {
                     Name = "Scan Thread",
                     IsBackground = true
                 };
 
-                Scanner.Start();
+                scanThread.Start();
             }
         }
 
-        private void ScanThread()
+        private void ScanRoutine()
         {
-            //List<Imageboard> goneThreads = new List<Imageboard>();
-
             lock (threadLock)
             {
-                // Removes 404'd threads
-                /*Thread[] array = Model.Threads.ToArray();   //TODO: Is this necessary?
-                for (int i = 0; i < array.Length; i++)
-                {
-                    Thread thread = array[i];
-
-                    if (thread.Gone)
-                    {
-                        RemoveThread(thread);
-                    }
-                }
-
-                if (Properties.Settings.Default.SaveListsOnClose)
-                    Utils.SaveURLs(Model.Boards, Model.Threads.ToList());*/
-
+                // Remove 404'd threads
                 for (int i = 0; i < Model.Threads.Count; i++)
                 {
                     if (Model.Threads[i].Gone)
@@ -278,26 +301,20 @@ namespace GChan.Controllers
                     Utils.SaveURLs(Model.Boards, Model.Threads.ToList());
             }
 
-            lock (boardLock)
+            // Make a copy of the current boards and scrape them for new threads.
+            var boards = Model.Boards.ToList();
+
+            for (int i = 0; i < boards.Count; i++)
             {
-                // Searches for new threads on the watched boards
-                for (int i = 0; i < Model.Boards.Count; i++)
+                if (boards[i].Scraping)
                 {
-                    string[] threads = { };
+                    string[] boardThreads = boards[i].GetThreadLinks();
 
-                    try
+                    for (int j = 0; j < boardThreads.Length; j++)
                     {
-                        threads = Model.Boards[i].GetThreadLinks();
-                    }
-                    catch
-                    {
-
-                    }
-                    finally
-                    {
-                        for (int j = 0; j < threads.Length; j++)
+                        if (boards[i].Scraping)
                         {
-                            Thread newThread = (Thread)Utils.CreateNewTracker(threads[j]);
+                            Thread newThread = (Thread)Utils.CreateNewTracker(boardThreads[j]);
 
                             if (newThread != null && IsUnique(newThread, Model.Threads))
                             {
@@ -308,13 +325,13 @@ namespace GChan.Controllers
                 }
             }
 
-            lock (threadLock)
+            // Make a copy of the current threads and download them.
+            var threads = Model.Threads.ToList();
+
+            for (int i = 0; i < Model.Threads.Count; i++)
             {
-                // Download threads
-                for (int i = 0; i < Model.Threads.Count; i++)
-                {
+                if (Model.Threads[i].Scraping)
                     ThreadPool.QueueUserWorkItem(new WaitCallback(Model.Threads[i].Download));
-                }
             }
         }
 
@@ -352,62 +369,92 @@ namespace GChan.Controllers
             }
         }
 
-        public void RemoveThread(Thread thread)
+        public void RemoveBoard(Board board)
         {
-            Program.Log(true, $"Removing thread {thread.URL}! thread.isGone: {thread.Gone}");
+            board.Scraping = false;
 
-            if (Properties.Settings.Default.AddThreadSubjectToFolder)
+            lock (boardLock)
             {
-                string currentPath = thread.SaveTo.Replace("\r", "");
-
-                string cleanSubject = Utils.CleanSubjectString(thread.Subject);
-
-                // There are \r characters appearing from the custom subjects, TODO: need to get to the bottom of the cause of this.
-                string destinationPath;
-
-                if ((ThreadFolderNameFormat)Properties.Settings.Default.ThreadFolderNameFormat == ThreadFolderNameFormat.IdName)
-                {
-                    destinationPath = (thread.SaveTo + " - " + cleanSubject);
-                }
-                else //NameId
-                {
-                    destinationPath = Path.Combine(Path.GetDirectoryName(thread.SaveTo), $"{thread.Subject} - {thread.ID}");
-                }
-
-                destinationPath = destinationPath.Replace("\r", "").Trim('\\', '/');
-
-                if (Directory.Exists(currentPath))
-                {
-                    int number = 0;
-                    string numberText() => (number == 0) ? "" : $" ({number})";
-
-                    string calculatedDestination() => destinationPath + numberText();
-
-                    while (Directory.Exists(calculatedDestination()))
-                    {
-                        number++;
-                    }
-
-                    Program.Log(true, $"Directory.Moving {currentPath} to {destinationPath}");
-
-                    Directory.Move(currentPath, calculatedDestination());
-                }
-                else
-                {
-                    Program.Log(true, $"While attempting to rename thread {thread.URL} the current folder could not be found, renaming abandoned.");
-                }
-            }
-
-            lock (threadLock)
-            { 
-                // Remove on UI thread because this method can be called from non-ui thread.
-                Form.Invoke((MethodInvoker)delegate () {
-                    Model.Threads.Remove(thread);
+                Form.Invoke((MethodInvoker)delegate {
+                    Model.Boards.Remove(board);
                 });
             }
         }
 
-        private void Instance_UpdateCheckFinished(object sender, Onova.Models.CheckForUpdatesResult result)
+        public void RemoveThread(Thread thread, bool manualRemove = false)
+        {
+            Program.Log(true, $"Removing thread {thread.URL}! thread.isGone: {thread.Gone}");
+
+            thread.Scraping = false;
+
+            try
+            {
+                if (Properties.Settings.Default.AddThreadSubjectToFolder)
+                {
+                    string currentPath = thread.SaveTo.Replace("\r", "");
+
+                    string cleanSubject = Utils.CleanSubjectString(thread.Subject);
+
+                    // There are \r characters appearing from the custom subjects, TODO: need to get to the bottom of the cause of this.
+                    string destinationPath;
+
+                    if ((ThreadFolderNameFormat)Properties.Settings.Default.ThreadFolderNameFormat == ThreadFolderNameFormat.IdName)
+                    {
+                        destinationPath = (thread.SaveTo + " - " + cleanSubject);
+                    }
+                    else //NameId
+                    {
+                        destinationPath = Path.Combine(Path.GetDirectoryName(thread.SaveTo), $"{thread.Subject} - {thread.ID}");
+                    }
+
+                    destinationPath = destinationPath.Replace("\r", "").Trim('\\', '/');
+
+                    if (Directory.Exists(currentPath))
+                    {
+                        int number = 0;
+                        string numberText() => (number == 0) ? "" : $" ({number})";
+
+                        string calculatedDestination() => destinationPath + numberText();
+
+                        while (Directory.Exists(calculatedDestination()))
+                        {
+                            number++;
+                        }
+
+                        Program.Log(true, $"Directory.Moving {currentPath} to {destinationPath}");
+
+                        Directory.Move(currentPath, calculatedDestination());
+                    }
+                    else
+                    {
+                        Program.Log(true, $"While attempting to rename thread \"{thread.Subject}\" the current folder could not be found, renaming abandoned.");
+                    }
+                }
+
+                lock (threadLock)
+                {
+                    // Remove on UI thread because this method can be called from non-ui thread.
+                    Form.Invoke((MethodInvoker)delegate () {
+                        Model.Threads.Remove(thread);
+                    });
+                }
+            }
+            catch (Exception e)
+            {
+                Program.Log(true, $"Exception occured attempting to remove thread \"{thread.Subject}\" (URL: {thread.URL}).");
+                Program.Log(e);
+
+                if (manualRemove)
+                {
+                    MessageBox.Show(
+                        $"An error occured when trying to remove the thread \"{thread.Subject}\". Please check the logs file in the ProgramData folder for more information.", 
+                        "Remove Thread Error", 
+                        MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
+                }
+            }
+        }
+
+        private void Instance_UpdateCheckFinished(object sender, CheckForUpdatesResult result)
         {
             if (result.CanUpdate)
             {
