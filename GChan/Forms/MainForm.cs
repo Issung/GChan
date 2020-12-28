@@ -3,16 +3,10 @@ using System.IO;
 using System.Linq;
 using System.Diagnostics;
 using System.Windows.Forms;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using System.Threading;
-using SysThread = System.Threading.Thread;
 using GChan.Trackers;
-using Thread = GChan.Trackers.Thread;
 using Type = GChan.Trackers.Type;
 using GChan.Models;
 using GChan.Controllers;
-using URLType = GChan.Trackers.Type;
 
 namespace GChan
 {

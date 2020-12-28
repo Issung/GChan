@@ -93,7 +93,7 @@ namespace GChan.Controllers
                 string boards = Utils.LoadURLs(true);
                 string threads = Utils.LoadURLs(false);
 
-                if (!String.IsNullOrWhiteSpace(boards))
+                if (!string.IsNullOrWhiteSpace(boards))
                 {
                     lock (boardLock)
                     {
@@ -109,28 +109,19 @@ namespace GChan.Controllers
                     }
                 }
 
-                if (!String.IsNullOrWhiteSpace(threads))
+                if (!string.IsNullOrWhiteSpace(threads))
                 {
                     string[] URLs = threads.Split('\n');
 
                     new SysThread(() =>
                     {
-                        // Without setting ScrollBars to None and then setting to Vertical the program will crash.
-                        // It doesnt like items being added in parallel in this method...
-                        // User cannot also resize columns while adding, or else program crashes.
-                        // TODO: Just move these to outside of the thread call so they don't require an Invoke?
-
-                        MainForm.CheckForIllegalCrossThreadCalls = false;
-                        Form.Invoke((MethodInvoker)delegate { Form.threadGridView.ScrollBars = ScrollBars.None; });
-                        Form.threadGridView.AllowUserToResizeColumns = false;
-
                         // END TODO
                         Parallel.ForEach(URLs, (url) =>
                         {
                             if (!string.IsNullOrWhiteSpace(url))
                             {
                                 Thread newThread = (Thread)Utils.CreateNewTracker(url.Trim());
-                                AddURLToList(newThread);
+                                Form.BeginInvoke(new Action(() => { AddURLToList(newThread); }));
                             }
                         });
 
@@ -148,9 +139,6 @@ namespace GChan.Controllers
             /// Executed once everything has finished being loaded.
             void Done()
             {
-                Form.threadGridView.ScrollBars = ScrollBars.Vertical;
-                Form.threadGridView.AllowUserToResizeColumns = true;
-
                 scanTimer.Enabled = true;
                 Scan(this, new EventArgs());
 
@@ -365,7 +353,7 @@ namespace GChan.Controllers
             {
                 string newSubject = string.IsNullOrWhiteSpace(dialog.UserEntry) ? Thread.NO_SUBJECT : dialog.UserEntry;
 
-                thread.SetSubject(newSubject);
+                thread.Subject = newSubject;
             }
         }
 

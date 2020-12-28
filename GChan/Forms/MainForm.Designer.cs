@@ -246,7 +246,7 @@
             this.threadGridView.Name = "threadGridView";
             this.threadGridView.ReadOnly = true;
             this.threadGridView.RowHeadersVisible = false;
-            this.threadGridView.ScrollBars = System.Windows.Forms.ScrollBars.None;
+            this.threadGridView.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.threadGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.threadGridView.Size = new System.Drawing.Size(552, 198);
             this.threadGridView.TabIndex = 1;
@@ -278,7 +278,7 @@
             // 
             // fileCountDataGridViewTextBoxColumn
             // 
-            this.fileCountDataGridViewTextBoxColumn.DataPropertyName = "FileCount";
+            this.fileCountDataGridViewTextBoxColumn.DataPropertyName = "FileCountDisplay";
             this.fileCountDataGridViewTextBoxColumn.FillWeight = 8.387236F;
             this.fileCountDataGridViewTextBoxColumn.HeaderText = "File Count";
             this.fileCountDataGridViewTextBoxColumn.Name = "fileCountDataGridViewTextBoxColumn";
@@ -571,10 +571,6 @@
         internal System.Windows.Forms.TabPage threadsTabPage;
         internal System.Windows.Forms.TabPage boardsTabPage;
         internal Controls.CustomDataGridView threadGridView;
-        private System.Windows.Forms.DataGridViewTextBoxColumn subjectDataGridViewTextBoxColumn;
-        private System.Windows.Forms.DataGridViewTextBoxColumn boardCodeDataGridViewTextBoxColumn;
-        private System.Windows.Forms.DataGridViewTextBoxColumn iDDataGridViewTextBoxColumn;
-        private System.Windows.Forms.DataGridViewTextBoxColumn fileCountDataGridViewTextBoxColumn;
         private System.Windows.Forms.ToolStripMenuItem checkForUpdatesToolStripMenuItem;
         internal System.Windows.Forms.MenuStrip menuStrip;
         internal System.Windows.Forms.ToolTip toolTip;
@@ -582,6 +578,10 @@
         internal System.Windows.Forms.NotifyIcon systemTrayNotifyIcon;
         internal System.Windows.Forms.TextBox urlTextBox;
         internal System.Windows.Forms.ToolStripMenuItem updateAvailableToolStripMenuItem;
+        private System.Windows.Forms.DataGridViewTextBoxColumn subjectDataGridViewTextBoxColumn;
+        private System.Windows.Forms.DataGridViewTextBoxColumn boardCodeDataGridViewTextBoxColumn;
+        private System.Windows.Forms.DataGridViewTextBoxColumn iDDataGridViewTextBoxColumn;
+        private System.Windows.Forms.DataGridViewTextBoxColumn fileCountDataGridViewTextBoxColumn;
     }
 }
 

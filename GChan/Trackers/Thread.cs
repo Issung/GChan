@@ -1,23 +1,32 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace GChan.Trackers
 {
-    public abstract class Thread : Tracker
+    public abstract class Thread : Tracker, INotifyPropertyChanged
     {
+        /// <summary>
+        /// Value indicating that file count has not yet been retrieved.
+        /// </summary>
+        public const int FILE_COUNT_NOT_CHECKED_YET = -1;
+
         public const string NO_SUBJECT = "No Subject";
 
-        protected int fileCount;
+        private int fileCount = FILE_COUNT_NOT_CHECKED_YET;
 
-        protected string subject = null;
+        private string subject = null;
 
         protected long greatestSavedFileTim = 0;
+
+        public event PropertyChangedEventHandler PropertyChanged;
 
         public long GreatestSavedFileTim {
             get {
@@ -38,13 +47,28 @@ namespace GChan.Trackers
                 else
                     return subject;
             }
+
+            set {
+                subject = value;
+                NotifyPropertyChanged();
+            }
         }
 
         /// <summary>
         /// The ID of the thread (AKA No. (number))
         /// </summary>
         public string ID { get; protected set; }
-        public int FileCount { get { return fileCount; } }
+
+        public int FileCount { 
+            get { return fileCount; }
+            set { 
+                fileCount = value; 
+                Program.mainForm.Invoke(new Action(() => { NotifyPropertyChanged(nameof(FileCountDisplay)); })); 
+            }
+        }
+
+        public string FileCountDisplay => FileCount == FILE_COUNT_NOT_CHECKED_YET ? "-" : FileCount.ToString();
+
         public bool Gone { get; protected set; } = false;
 
         protected Thread(string url) : base(url)
@@ -58,6 +82,15 @@ namespace GChan.Trackers
                 subject = url.Substring(url.LastIndexOf('=') + 1).Replace('_', ' ');
                 URL = url.Substring(0, url.LastIndexOf('/'));
             }
+        }
+
+        public void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
+        {
+#if DEBUG
+            Console.WriteLine($"NotifyPropertyChanged! propertyName: {propertyName}");
+#endif
+
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
         public void Download(object callback)
@@ -142,11 +175,6 @@ namespace GChan.Trackers
         }
 
         protected abstract string GetThreadSubject();
-
-        public void SetSubject(string newSubject)
-        {
-            subject = newSubject;
-        }
 
         public string GetURLWithSubject()
         {

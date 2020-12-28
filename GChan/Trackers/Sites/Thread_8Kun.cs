@@ -34,8 +34,8 @@ namespace GChan.Trackers
 
             SaveTo = Path.Combine(Properties.Settings.Default.SavePath, SiteName, BoardCode, ID);
 
-            if (subject == null)
-                subject = GetThreadSubject();
+            if (Subject == null)
+                Subject = GetThreadSubject();
         }
 
         public static bool UrlIsThread(string url)
@@ -105,7 +105,7 @@ namespace GChan.Trackers
                 throw;
             }
 
-            fileCount = links.Count;
+            FileCount = links.Count;
             return links.ToArray();
         }
 
