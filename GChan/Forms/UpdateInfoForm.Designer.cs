@@ -96,7 +96,7 @@ namespace GChan.Forms
             this.doNotUpdateButton.Name = "doNotUpdateButton";
             this.doNotUpdateButton.Size = new System.Drawing.Size(320, 23);
             this.doNotUpdateButton.TabIndex = 1;
-            this.doNotUpdateButton.Text = "Do not Update";
+            this.doNotUpdateButton.Text = "Later";
             this.doNotUpdateButton.UseVisualStyleBackColor = true;
             this.doNotUpdateButton.Click += new System.EventHandler(this.doNotUpdateButton_Click);
             // 

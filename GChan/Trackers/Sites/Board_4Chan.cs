@@ -16,7 +16,7 @@ namespace GChan.Trackers
 
         public Board_4Chan(string URL) : base(URL)
         {
-
+            SiteName = "4chan";
         }
 
         public static bool UrlIsBoard(string url)

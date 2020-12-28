@@ -34,6 +34,9 @@ namespace GChan.Trackers
             }
         }
 
+        /// <summary>
+        /// The ID of the thread (AKA No. (number))
+        /// </summary>
         public string ID { get; protected set; }
         public int FileCount { get { return fileCount; } }
         public bool Gone { get; protected set; } = false;
@@ -72,11 +75,11 @@ namespace GChan.Trackers
 
         protected abstract void DownloadHTMLPage();
 
+        //TODO: This probably needs to be overriden in specific website's Thread extensions, with Regex.
         public string GetID()
         {
             //Split up the url by slashes and return the only string that is an integer.
-            return URL.Split('\\', '/').Where(t => int.TryParse(t, out int whocares)).FirstOrDefault();
-            //return URL.Substring(URL.LastIndexOf('/') + 1);
+            return URL.Split('\\', '/').Where(t => int.TryParse(t, out int _)).FirstOrDefault();
         }
 
         protected abstract string GetThreadSubject();

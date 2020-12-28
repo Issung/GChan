@@ -21,6 +21,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Forms;
 using System.Linq;
+using System.Diagnostics;
 
 namespace GChan
 {
@@ -167,7 +168,8 @@ namespace GChan
 
         public static void Log(Exception ex)
         {
-            Log(true, $"Logged Exception - {ex.GetType().Name} - {ex.Message}", ex.StackTrace);
+            StackFrame frame = new StackFrame(1, true);
+            Log(true, $"Logged Exception - {ex.GetType().Name} - {ex.Message} in method {frame.GetMethod().Name} at line {frame.GetFileLineNumber()}:{frame.GetFileColumnNumber()}", ex.StackTrace);
         }
 
         public static void Log(bool timestampFirstLine, params string[] lines)
@@ -190,9 +192,11 @@ namespace GChan
 
                 streamWriter.Flush();
             }
-            catch (Exception)
-            { 
-                
+            catch (Exception e)
+            {
+#if DEBUG
+                Console.WriteLine(e.ToString());
+#endif
             }
         }
 

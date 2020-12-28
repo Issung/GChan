@@ -16,6 +16,11 @@ namespace GChan.Trackers
 
         public string BoardCode { get; protected set; }
 
+        /// <summary>
+        /// Whether or not to keep scraping this tracker.
+        /// </summary>
+        public bool Scraping { get; set; } = true;
+
         protected Tracker(string url)
         {
             URL = url;
