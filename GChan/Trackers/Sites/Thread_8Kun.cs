@@ -35,58 +35,12 @@ namespace GChan.Trackers
             SaveTo = Path.Combine(Properties.Settings.Default.SavePath, SiteName, BoardCode, ID);
 
             if (subject == null)
-                subject = GetThreadSubject();
+                Subject = GetThreadSubject();
         }
 
         public static bool UrlIsThread(string url)
         {
             return Regex.IsMatch(url, threadRegex);
-        }
-
-        protected override void Download()
-        {
-            try
-            {
-                if (!Directory.Exists(SaveTo))
-                    Directory.CreateDirectory(SaveTo);
-
-                ImageLink[] imageLinks = GetImageLinks();
-
-                Parallel.ForEach(imageLinks, (link) =>
-                {
-                    if (link.Tim > GreatestSavedFileTim)
-                    {
-#if DEBUG
-                        Program.Log(true, $"Downloading file {link} because it's Tim was greater than {GreatestSavedFileTim}");
-#endif
-                        Utils.DownloadToDir(link, SaveTo);
-                    }
-                    else
-                    {
-#if DEBUG
-                        Program.Log(true, $"Skipping downloading file {link} because it's Tim was less than than {GreatestSavedFileTim}");
-#endif
-                    }
-                });
-
-#if DEBUG
-                long max = imageLinks.Max(t => t.Tim);
-                Program.Log(true, $"Setting thread {this} {nameof(GreatestSavedFileTim)} to {max}.");
-                GreatestSavedFileTim = max;
-#else
-                GreatestSavedFileTim = imageLinks.Max(t => t.Tim);
-#endif
-            }
-            catch (WebException webEx)
-            {
-                if (((int)webEx.Status) == 7)
-                    Gone = true;
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                MessageBox.Show(ex.Message, "No Permission to access folder");
-                throw;
-            }
         }
 
         protected override ImageLink[] GetImageLinks()
@@ -151,7 +105,7 @@ namespace GChan.Trackers
                 throw;
             }
 
-            fileCount = links.Count;
+            FileCount = links.Count;
             return links.ToArray();
         }
 

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Windows.Forms;
 using GChan.Controls;
 using GChan.Trackers;
 
@@ -18,6 +17,7 @@ namespace GChan.Models
 #if DEBUG
             Console.WriteLine($"NotifyPropertyChanged! propertyName: {propertyName}");
 #endif
+
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
@@ -46,22 +46,13 @@ namespace GChan.Models
 
         private void Threads_ListChanged(object sender, ListChangedEventArgs e)
         {
-            int topRowIndex = form.threadGridView.FirstDisplayedScrollingRowIndex; //Save top row index to use after updating grid view to keep scroll position.
-
-            NotifyPropertyChanged(nameof(Threads));
-
-            if (form.threadGridView.Rows.Count > 0) //If there are no rows let the grid view handle itself.
-                form.threadGridView.FirstDisplayedScrollingRowIndex = Math.Max(0, topRowIndex);    //Reset it to saved index after list updated. Credit: https://stackoverflow.com/a/5159926/8306962
-
             form.threadsTabPage.Text = ThreadsTabText;
-            //NotifyPropertyChanged(nameof(ThreadsTabText));
         }
 
         private void Boards_ListChanged(object sender, ListChangedEventArgs e)
         {
             NotifyPropertyChanged(nameof(Boards));
             form.boardsTabPage.Text = BoardsTabText;
-            //NotifyPropertyChanged(nameof(BoardsTabText)); 
         }
     }
 }

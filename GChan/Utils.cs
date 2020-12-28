@@ -40,6 +40,10 @@ namespace GChan
         /// </summary>
         public static void SaveURLs(IList<Board> boards, IList<Thread> threads)
         {
+            // Make copies and save those.
+            boards = boards.ToList();
+            threads = threads.ToList();
+
             try
             {
                 StringBuilder sb = new StringBuilder();
@@ -104,7 +108,8 @@ namespace GChan
             bool startWithWindows,
             bool startWithWindowsMinimized,
             bool addThreadSubjectToFolder,
-            bool addUrlFromClipboardWhenTextboxEmpty)
+            bool addUrlFromClipboardWhenTextboxEmpty,
+            bool checkForUpdatesOnStart)
         {
             Properties.Settings.Default.SavePath = path;
             Properties.Settings.Default.ScanTimer = time;
@@ -117,6 +122,7 @@ namespace GChan
             Properties.Settings.Default.StartWithWindowsMinimized = startWithWindowsMinimized;
             Properties.Settings.Default.AddThreadSubjectToFolder = addThreadSubjectToFolder;
             Properties.Settings.Default.AddUrlFromClipboardWhenTextboxEmpty = addUrlFromClipboardWhenTextboxEmpty;
+            Properties.Settings.Default.CheckForUpdatesOnStart = checkForUpdatesOnStart;
 
             Properties.Settings.Default.Save();
 

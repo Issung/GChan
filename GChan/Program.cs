@@ -21,6 +21,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Forms;
 using System.Linq;
+using System.Diagnostics;
 
 namespace GChan
 {
@@ -30,14 +31,28 @@ namespace GChan
         public static string APPLICATION_INSTALL_DIRECTORY { get; } = AppDomain.CurrentDomain.BaseDirectory;
 
 #if DEBUG
-        public static string BOARDS_PATH => Path.Combine(Application.CommonAppDataPath, "DEBUG", "boards.dat");
-        public static string THREADS_PATH => Path.Combine(Application.CommonAppDataPath, "DEBUG", "threads.dat");
-        public static string LOGS_PATH { get; } = Path.Combine(Application.CommonAppDataPath, "DEBUG", "crash.logs");
+        public static string PROGRAM_DATA_PATH => Path.Combine(Path.GetDirectoryName(Application.CommonAppDataPath), "DEBUG");
 #else
-        public static string BOARDS_PATH => Path.Combine(Application.CommonAppDataPath, "boards.dat");
-        public static string THREADS_PATH => Path.Combine(Application.CommonAppDataPath, "threads.dat");
-        public static string LOGS_PATH { get; } = Path.Combine(Application.CommonAppDataPath, "crash.logs");
+        public static string PROGRAM_DATA_PATH => Path.GetDirectoryName(Application.CommonAppDataPath);
 #endif
+        /// <summary>
+        /// Store boards in root ProgramData folder, not in version folder, so it can be accessed across upgrades.
+        /// </summary>
+        public static string BOARDS_PATH => Path.Combine(PROGRAM_DATA_PATH, "boards.dat");
+        /// <summary>
+        /// Store threads in root ProgramData folder, not in version folder, so it can be accessed across upgrades.
+        /// </summary>
+        public static string THREADS_PATH => Path.Combine(PROGRAM_DATA_PATH, "threads.dat");
+        /// <summary>
+        /// Store crash logs in version folder to help with finding the correct file with less useless info in it.
+        /// </summary>
+        public static string LOGS_PATH => Path.Combine(Application.CommonAppDataPath, "crash.logs");
+
+        public const string NAME = "GChan";
+
+        public const string GITHUB_REPOSITORY_OWNER = "Issung";
+
+        public const string GITHUB_REPOSITORY_NAME = "GChanUpdateTesting";
 
         public static StreamWriter streamWriter;
 
@@ -54,7 +69,7 @@ namespace GChan
             arguments = args;
 
 #if DEBUG
-            Directory.CreateDirectory(Path.Combine(Application.CommonAppDataPath, "DEBUG"));
+            Directory.CreateDirectory(PROGRAM_DATA_PATH);
 #endif
 
             if (Properties.Settings.Default.UpdateSettings)
@@ -153,7 +168,8 @@ namespace GChan
 
         public static void Log(Exception ex)
         {
-            Log(true, $"Logged Exception - {ex.GetType().Name} - {ex.Message}", ex.StackTrace);
+            StackFrame frame = new StackFrame(1, true);
+            Log(true, $"Logged Exception - {ex.GetType().Name} - {ex.Message} in method {frame.GetMethod().Name} at line {frame.GetFileLineNumber()}:{frame.GetFileColumnNumber()}", ex.StackTrace);
         }
 
         public static void Log(bool timestampFirstLine, params string[] lines)
@@ -176,9 +192,11 @@ namespace GChan
 
                 streamWriter.Flush();
             }
-            catch (Exception)
-            { 
-                
+            catch (Exception e)
+            {
+#if DEBUG
+                Console.WriteLine(e.ToString());
+#endif
             }
         }
 

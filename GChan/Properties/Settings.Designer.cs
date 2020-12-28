@@ -178,5 +178,17 @@ namespace GChan.Properties {
                 this["StartWithWindowsMinimized"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool CheckForUpdatesOnStart {
+            get {
+                return ((bool)(this["CheckForUpdatesOnStart"]));
+            }
+            set {
+                this["CheckForUpdatesOnStart"] = value;
+            }
+        }
     }
 }
