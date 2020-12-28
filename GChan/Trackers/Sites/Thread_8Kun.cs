@@ -43,45 +43,6 @@ namespace GChan.Trackers
             return Regex.IsMatch(url, threadRegex);
         }
 
-        protected override void Download()
-        {
-            try
-            {
-                if (!Directory.Exists(SaveTo))
-                    Directory.CreateDirectory(SaveTo);
-
-                ImageLink[] imageLinks = GetImageLinks();
-
-                Parallel.ForEach(imageLinks, (link) =>
-                {
-                    if (link.Tim > GreatestSavedFileTim)
-                    {
-#if DEBUG
-                        Program.Log(true, $"Downloading file {link} because it's Tim was greater than {GreatestSavedFileTim}");
-#endif
-                        Utils.DownloadToDir(link, SaveTo);
-                        GreatestSavedFileTim = link.Tim;
-                    }
-                    else
-                    {
-#if DEBUG
-                        Program.Log(true, $"Skipping downloading file {link} because it's Tim was less than than {GreatestSavedFileTim}");
-#endif
-                    }
-                });
-            }
-            catch (WebException webEx)
-            {
-                if (((int)webEx.Status) == 7)
-                    Gone = true;
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                MessageBox.Show(ex.Message, "No Permission to access folder");
-                throw;
-            }
-        }
-
         protected override ImageLink[] GetImageLinks()
         {
             List<ImageLink> links = new List<ImageLink>();
