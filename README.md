@@ -1,4 +1,4 @@
-# GChan      <img align="right" width="90" height="90" src="http://puu.sh/Grv6g.jpg">
+# GChan      <img align="right" width="90" height="90" src="https://i.imgur.com/orC8f3w.png">
 [![Release](https://img.shields.io/github/v/release/issung/GChan?style=for-the-badge)](https://github.com/Issung/GChan/releases)
 [![Downloads](https://img.shields.io/github/downloads/issung/GCHan/total?style=for-the-badge)](https://github.com/Issung/GChan/releases)
 
@@ -6,11 +6,13 @@ GChan is an automatic imageboard scraper, it supports multithreading and auto-re
 
 GChan is a fork of YChan which aims to improve stability and add extra features which some may find useful.
 
+#### Project Status: Active Development + Bug Maintenance.
+
 ### Supported Websites: 
 * [4chan.org](http://4chan.org/)
-* 8Chan (now [8kun.top](https://8kun.top/index.html)) WIP
+* [8kun.top](https://8kun.top/index.html) [Complete. Pending Release]
 
-Requires .NET Framework 4.8 or higher, GUI is made with Winforms.
+Requires .NET Framework 4.8 or higher, made with Windows Forms.
 
 ![GChan Window](http://puu.sh/ERKQ8.png)
 
