@@ -20,8 +20,8 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Forms;
-using System.Linq;
 using System.Diagnostics;
+using GChan.Forms;
 
 namespace GChan
 {
@@ -170,6 +170,12 @@ namespace GChan
         {
             StackFrame frame = new StackFrame(1, true);
             Log(true, $"Logged Exception - {ex.GetType().Name} - {ex.Message} in method {frame.GetMethod().Name} at line {frame.GetFileLineNumber()}:{frame.GetFileColumnNumber()}", ex.StackTrace);
+        }
+
+        public static void Log(string message, Exception ex)
+        {
+            StackFrame frame = new StackFrame(1, true);
+            Log(true, message, $"Logged Exception - {ex.GetType().Name} - {ex.Message} in method {frame.GetMethod().Name} at line {frame.GetFileLineNumber()}:{frame.GetFileColumnNumber()}", ex.StackTrace);
         }
 
         public static void Log(bool timestampFirstLine, params string[] lines)

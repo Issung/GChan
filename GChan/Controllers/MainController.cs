@@ -146,7 +146,7 @@ namespace GChan.Controllers
                 // Check for updates.
                 if (Properties.Settings.Default.CheckForUpdatesOnStart)
                 {
-                    UpdateController.Instance.CheckForUpdates();
+                    UpdateController.Instance.CheckForUpdates(false);
                 }
             }
         }
@@ -488,7 +488,7 @@ namespace GChan.Controllers
             }
         }
 
-        private void Instance_UpdateCheckFinished(object sender, CheckForUpdatesResult result)
+        private void Instance_UpdateCheckFinished(object sender, CheckForUpdatesResult result, bool initiatedByUser)
         {
             if (result.CanUpdate)
             {
@@ -497,10 +497,8 @@ namespace GChan.Controllers
             else
             {
                 // Only show notification if the update check was initiated by the user.
-                if (updateCheckWasManual)
+                if (initiatedByUser)
                     Form.toolTip.Show("No Updates Available.", Form.menuStrip, 70, 20, 1750);
-
-                updateCheckWasManual = false;
             }
         }
 

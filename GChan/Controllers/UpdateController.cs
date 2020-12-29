@@ -38,15 +38,15 @@ namespace GChan.Controllers
         public CheckForUpdatesResult CheckForUpdatesResult { get; private set; }
 
         // Update Check Started
-        public delegate void UpdateCheckStartedEvent(object sender, EventArgs args);
+        public delegate void UpdateCheckStartedEvent(object sender, bool initiatedByUser);
         public event UpdateCheckStartedEvent UpdateCheckStarted;
         
         // Update Check Finished
-        public delegate void UpdateCheckFinishedEvent(object sender, CheckForUpdatesResult result);
+        public delegate void UpdateCheckFinishedEvent(object sender, CheckForUpdatesResult result, bool initiatedByUser);
         public event UpdateCheckFinishedEvent UpdateCheckFinished;
 
         // Update Started
-        public delegate void UpdateStartedEvent(object sender, EventArgs args);
+        public delegate void UpdateStartedEvent(object sender);
         public event UpdateStartedEvent UpdateStarted;
 
         public string CurrentVersion { get; private set; }
@@ -64,13 +64,13 @@ namespace GChan.Controllers
             }
         }
 
-        public async void CheckForUpdates()
+        public async void CheckForUpdates(bool initiatedByUser)
         {
-            UpdateCheckStarted?.Invoke(this, EventArgs.Empty);
+            UpdateCheckStarted?.Invoke(this, initiatedByUser);
 
             CheckForUpdatesResult = await updateManager.CheckForUpdatesAsync();
 
-            UpdateCheckFinished?.Invoke(this, CheckForUpdatesResult);
+            UpdateCheckFinished?.Invoke(this, CheckForUpdatesResult, initiatedByUser);
         }
 
         public async void PresentInformation()
@@ -84,7 +84,7 @@ namespace GChan.Controllers
         {
             if (CheckForUpdatesResult.CanUpdate)
             {
-                UpdateStarted?.Invoke(this, EventArgs.Empty);
+                UpdateStarted?.Invoke(this);
 
                 // Prepare the latest update
                 await updateManager.PrepareUpdateAsync(CheckForUpdatesResult.LastVersion, Progress);
