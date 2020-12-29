@@ -16,12 +16,12 @@ namespace GChan.Trackers
     public class Thread_8Kun : Thread
     {
         public const string threadRegex = @"8kun.top/[a-zA-Z0-9]*?/res/[0-9]*.[^0-9]*";
-        public const string boardCodeRegex = @"(?<=(8kun.top/)).*(?=(/res/))";
-        public const string idCodeRegex = @"(?<=(res/)).*(?=(.html))";
+        public const string boardCodeRegex = @"(?<=(8kun.top/))[a-zA-Z0-9]+(?=(/res/))";
+        public const string idCodeRegex = @"(?<=(res/))[0-9]+(?=(.html))";
 
         public Thread_8Kun(string url) : base(url)
         {
-            SiteName = "8kun";
+            SiteName = Board_8Kun.SITE_NAME_8KUN;
 
             //Match simplifiedThreadUrlMatch = Regex.Match(url, threadRegex);
             //URL = "https://" + simplifiedThreadUrlMatch.Groups[0].Value;      // simplify thread url

@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using GChan.Controls;
 using GChan.Trackers;
+using GChan.Forms;
 
 namespace GChan.Models
 {

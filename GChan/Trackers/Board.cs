@@ -6,6 +6,8 @@
 
         public int ThreadCount { get { return threadCount; } }
 
+        public int LargestAddedThreadNo { get; set; }
+
         protected Board(string url) : base(url)
         {
             Type = Type.Board;

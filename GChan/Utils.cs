@@ -49,7 +49,7 @@ namespace GChan
                 StringBuilder sb = new StringBuilder();
 
                 for (int i = 0; i < boards.Count(); i++)
-                    sb.AppendLine(boards[i].URL.Replace("\r", ""));
+                    sb.AppendLine(boards[i].URL.Replace("\r", "") + " " + boards[i].LargestAddedThreadNo);
 
                 File.WriteAllText(Program.BOARDS_PATH, sb.ToString());
 
@@ -168,21 +168,21 @@ namespace GChan
 
             if (Thread_4Chan.UrlIsThread(url))
             {
-                var thread = new Thread_4Chan(url);
-                thread.GreatestSavedFileTim = greatestTim;
-                return thread;
+                return new Thread_4Chan(url) { GreatestSavedFileTim = greatestTim };
             }
             else if (Thread_8Kun.UrlIsThread(url))
             { 
-                var thread = new Thread_8Kun(url);
-                thread.GreatestSavedFileTim = greatestTim;
-                return thread;
+                return new Thread_8Kun(url) { GreatestSavedFileTim = greatestTim };
             }
 
             if (Board_4Chan.UrlIsBoard(url))
-                return new Board_4Chan(url);
+            {
+                return new Board_4Chan(url) { LargestAddedThreadNo = (int)greatestTim };
+            }
             else if (Board_8Kun.UrlIsBoard(url))
-                return new Board_8Kun(url);
+            { 
+                return new Board_8Kun(url) { LargestAddedThreadNo = (int)greatestTim };
+            }
 
             return null;
         }

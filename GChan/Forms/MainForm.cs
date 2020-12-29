@@ -7,8 +7,10 @@ using GChan.Trackers;
 using Type = GChan.Trackers.Type;
 using GChan.Models;
 using GChan.Controllers;
+using GChan.Controls;
+using System.Collections.Generic;
 
-namespace GChan
+namespace GChan.Forms
 {
     public partial class MainForm : Form
     {
@@ -22,12 +24,6 @@ namespace GChan
         private int ThreadGridViewSelectedRowIndex => threadGridView?.CurrentCell?.RowIndex ?? -1;
 
         private int BoardsListBoxSelectedRowIndex { get { return boardsListBox.SelectedIndex; } set {boardsListBox.SelectedIndex = value;} }
-
-        /// <summary>
-        /// Flag for whether or not the last update check was initiated by the user.
-        /// False for automatic program start-up update check.
-        /// </summary>
-        private bool updateCheckWasManual = false;
 
         public MainForm()
         {
@@ -372,20 +368,19 @@ namespace GChan
             }
         }
 
-        internal void MainForm_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            e.Cancel = Controller.Closing();
-        }
-
         private void checkForUpdatesToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            updateCheckWasManual = true;
-            UpdateController.Instance.CheckForUpdates();
+            UpdateController.Instance.CheckForUpdates(true);
         }
 
         private void updateAvailableToolStripMenuItem_Click(object sender, EventArgs e)
         {
             UpdateController.Instance.PresentInformation();
+        }
+
+        internal void MainForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            e.Cancel = Controller.Closing();
         }
     }
 }

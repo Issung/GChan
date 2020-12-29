@@ -113,6 +113,7 @@
   <ItemGroup>
     <Compile Include="Controllers\MainController.cs" />
     <Compile Include="Controllers\UpdateController.cs" />
+    <Compile Include="Controls\DataGridViewPreferencesSetting.cs" />
     <Compile Include="Forms\AboutBox.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -133,7 +134,7 @@
       <DependentUpon>UpdateInfoForm.cs</DependentUpon>
     </Compile>
     <Compile Include="ImageLink.cs" />
-    <Compile Include="Controls\CustomDataGridView.cs">
+    <Compile Include="Controls\PreferencesDataGridView.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Forms\GetStringMessageBox.cs">

@@ -15,6 +15,7 @@ using GChan.Controllers;
 using URLType = GChan.Trackers.Type;
 using GChan.Forms;
 using Onova.Models;
+using System.Text.RegularExpressions;
 
 namespace GChan.Controllers
 {
@@ -145,7 +146,7 @@ namespace GChan.Controllers
                 // Check for updates.
                 if (Properties.Settings.Default.CheckForUpdatesOnStart)
                 {
-                    UpdateController.Instance.CheckForUpdates();
+                    UpdateController.Instance.CheckForUpdates(false);
                 }
             }
         }
@@ -296,20 +297,38 @@ namespace GChan.Controllers
             {
                 if (boards[i].Scraping)
                 {
-                    string[] boardThreads = boards[i].GetThreadLinks();
+                    // OrderBy because we need the threads to be in ascending order by ID for LargestAddedThreadNo to be useful.
+                    string[] boardThreadUrls = boards[i].GetThreadLinks().OrderBy(t => t).ToArray();
+                    int largestNo = 0;
 
-                    for (int j = 0; j < boardThreads.Length; j++)
+                    Parallel.ForEach(boardThreadUrls, (url) =>
                     {
                         if (boards[i].Scraping)
                         {
-                            Thread newThread = (Thread)Utils.CreateNewTracker(boardThreads[j]);
+                            int? id = GetThreadID(boards[i], url);
 
-                            if (newThread != null && IsUnique(newThread, Model.Threads))
+                            if (id.HasValue)
                             {
-                                AddURLToList(newThread);
+                                if (id.Value > boards[i].LargestAddedThreadNo)
+                                {
+                                    Thread newThread = (Thread)Utils.CreateNewTracker(url);
+
+                                    if (newThread != null && IsUnique(newThread, Model.Threads))
+                                    {
+                                        bool urlWasAdded = AddURLToList(newThread);
+
+                                        if (urlWasAdded)
+                                        {
+                                            if (id.Value > largestNo)   //Not exactly safe in multithreaded but should work fine.
+                                                largestNo = id.Value;
+                                        }
+                                    }
+                                }
                             }
                         }
-                    }
+                    });
+
+                    boards[i].LargestAddedThreadNo = largestNo;
                 }
             }
 
@@ -321,6 +340,33 @@ namespace GChan.Controllers
                 if (Model.Threads[i].Scraping)
                     ThreadPool.QueueUserWorkItem(new WaitCallback(Model.Threads[i].Download));
             }
+        }
+
+        public int? GetThreadID(Board board, string url)
+        {
+            try
+            {
+                Match idCodeMatch = null;
+
+                if (board.SiteName == Board_4Chan.SITE_NAME_4CHAN)
+                {
+                    idCodeMatch = Regex.Match(url, Thread_4Chan.ID_CODE_REGEX);
+                }
+                else if (board.SiteName == Board_8Kun.SITE_NAME_8KUN)
+                {
+                    idCodeMatch = Regex.Match(url, Thread_8Kun.idCodeRegex);
+                }
+
+                if (idCodeMatch != null)
+                    if (idCodeMatch.Groups.Count > 0)
+                        return int.Parse(idCodeMatch.Groups[0].Value);
+            }
+            catch
+            {
+
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -442,7 +488,7 @@ namespace GChan.Controllers
             }
         }
 
-        private void Instance_UpdateCheckFinished(object sender, CheckForUpdatesResult result)
+        private void Instance_UpdateCheckFinished(object sender, CheckForUpdatesResult result, bool initiatedByUser)
         {
             if (result.CanUpdate)
             {
@@ -451,10 +497,8 @@ namespace GChan.Controllers
             else
             {
                 // Only show notification if the update check was initiated by the user.
-                if (updateCheckWasManual)
+                if (initiatedByUser)
                     Form.toolTip.Show("No Updates Available.", Form.menuStrip, 70, 20, 1750);
-
-                updateCheckWasManual = false;
             }
         }
 

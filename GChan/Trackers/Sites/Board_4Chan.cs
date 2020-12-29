@@ -12,16 +12,21 @@ namespace GChan.Trackers
 {
     public class Board_4Chan : Board
     {
-        public const string boardRegex = "boards.(4chan|4channel).org/[a-zA-Z0-9]*?/*$";
+        public const string SITE_NAME_4CHAN = "4chan";
+        public const string IS_BOARD_REGEX = "boards.(4chan|4channel).org/[a-zA-Z0-9]*?/*$";
+        public const string BOARD_CODE_REGEX = "(?<=((chan|channel).org/))[a-zA-Z0-9]+(?=(/))?";
 
         public Board_4Chan(string URL) : base(URL)
         {
-            SiteName = "4chan";
+            SiteName = SITE_NAME_4CHAN;
+
+            Match boardCodeMatch = Regex.Match(URL, BOARD_CODE_REGEX);
+            BoardCode = boardCodeMatch.Groups[0].Value;
         }
 
         public static bool UrlIsBoard(string url)
         {
-            return Regex.IsMatch(url, boardRegex);
+            return Regex.IsMatch(url, IS_BOARD_REGEX);
         }
 
         override public string[] GetThreadLinks()
