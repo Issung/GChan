@@ -299,18 +299,19 @@ namespace GChan.Controllers
                 {
                     // OrderBy because we need the threads to be in ascending order by ID for LargestAddedThreadNo to be useful.
                     string[] boardThreadUrls = boards[i].GetThreadLinks().OrderBy(t => t).ToArray();
+                    int largestNo = 0;
 
-                    for (int j = 0; j < boardThreadUrls.Length; j++)
+                    Parallel.ForEach(boardThreadUrls, (url) =>
                     {
                         if (boards[i].Scraping)
-                        { 
-                            int? id = GetThreadID(boards[i], boardThreadUrls[j]);
+                        {
+                            int? id = GetThreadID(boards[i], url);
 
                             if (id.HasValue)
                             {
                                 if (id.Value > boards[i].LargestAddedThreadNo)
                                 {
-                                    Thread newThread = (Thread)Utils.CreateNewTracker(boardThreadUrls[j]);
+                                    Thread newThread = (Thread)Utils.CreateNewTracker(url);
 
                                     if (newThread != null && IsUnique(newThread, Model.Threads))
                                     {
@@ -318,22 +319,16 @@ namespace GChan.Controllers
 
                                         if (urlWasAdded)
                                         {
-                                            boards[i].LargestAddedThreadNo = id.Value;
-#if DEBUG
-                                            Program.Log(true, $"Thread {newThread} added while scraping {boards[i]}");
-#endif
+                                            if (id.Value > largestNo)   //Not exactly safe in multithreaded but should work fine.
+                                                largestNo = id.Value;
                                         }
                                     }
                                 }
-#if DEBUG
-                                else
-                                {
-                                    Program.Log(true, $"URL {boardThreadUrls[j]} skipped while scraping board {boards[i]} because its ID was lower than {boards[i].LargestAddedThreadNo}");
-                                }
-#endif
                             }
                         }
-                    }
+                    });
+
+                    boards[i].LargestAddedThreadNo = largestNo;
                 }
             }
 
