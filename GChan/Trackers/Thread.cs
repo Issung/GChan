@@ -74,7 +74,6 @@ namespace GChan.Trackers
         protected Thread(string url) : base(url)
         {
             Type = Type.Thread;
-            ID = GetID();
 
             if (url.Contains("?"))
             {
@@ -166,13 +165,6 @@ namespace GChan.Trackers
         protected abstract ImageLink[] GetImageLinks();
 
         protected abstract void DownloadHTMLPage();
-
-        //TODO: This probably needs to be overriden in specific website's Thread extensions, with Regex.
-        public string GetID()
-        {
-            //Split up the url by slashes and return the only string that is an integer.
-            return URL.Split('\\', '/').Where(t => int.TryParse(t, out int _)).FirstOrDefault();
-        }
 
         protected abstract string GetThreadSubject();
 

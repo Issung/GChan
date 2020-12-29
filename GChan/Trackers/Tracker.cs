@@ -24,24 +24,6 @@ namespace GChan.Trackers
         protected Tracker(string url)
         {
             URL = url;
-            BoardCode = FindBoardCode();
-        }
-
-        protected string FindBoardCode()
-        {
-            Regex regex = new Regex(@"(\/(\w|\d)+\/)");
-
-            // Temporarily add a / incase url doesnt end with one.
-            var matches = regex.Matches(URL + "/");
-
-            if (matches.Count > 0)
-            {
-                return matches[0].Value;
-            }
-            else
-            {
-                return null;
-            }
         }
     }
 }

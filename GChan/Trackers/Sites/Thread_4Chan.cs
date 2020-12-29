@@ -15,22 +15,32 @@ namespace GChan.Trackers
 {
     public class Thread_4Chan : Thread
     {
-        public const string threadRegex = "boards.(4chan|4channel).org/[a-zA-Z0-9]*?/thread/[0-9]*";
+        public const string THREAD_REGEX = "boards.(4chan|4channel).org/[a-zA-Z0-9]*?/thread/[0-9]*";
+        public const string BOARD_CODE_REGEX = "(?<=((chan|channel).org/))[a-zA-Z0-9]+(?=(/))?";
+        public const string ID_CODE_REGEX = "(?<=(thread/))[0-9]*(?=(.*))";
 
         public Thread_4Chan(string url) : base(url)
         {
-            SiteName = "4chan";
+            SiteName = Board_4Chan.SITE_NAME_4CHAN;
 
             Match match = Regex.Match(url, @"boards.(4chan|4channel).org/[a-zA-Z0-9]*?/thread/\d*");
             URL = "http://" + match.Groups[0].Value;
+
+            Match boardCodeMatch = Regex.Match(url, BOARD_CODE_REGEX);
+            BoardCode = boardCodeMatch.Groups[0].Value;
+
+            Match idCodeMatch = Regex.Match(url, ID_CODE_REGEX);
+            ID = idCodeMatch.Groups[0].Value;
+
             SaveTo = Properties.Settings.Default.SavePath + "\\" + SiteName + "\\" + BoardCode + "\\" + ID;
+
             if (subject == null)
                 Subject = GetThreadSubject();
         }
 
         public static bool UrlIsThread(string url)
         {
-            return Regex.IsMatch(url, threadRegex);
+            return Regex.IsMatch(url, THREAD_REGEX);
         }
 
         protected override ImageLink[] GetImageLinks()

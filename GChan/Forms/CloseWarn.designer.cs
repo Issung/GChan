@@ -122,12 +122,15 @@ namespace GChan
             this.Controls.Add(this.chkSave);
             this.Controls.Add(this.chkWarning);
             this.Controls.Add(this.lblText);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximumSize = new System.Drawing.Size(451, 170);
             this.MinimumSize = new System.Drawing.Size(451, 170);
             this.Name = "CloseWarn";
+            this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Closing GChan";
+            this.TopMost = true;
             this.Load += new System.EventHandler(this.CloseWarn_Load);
             this.buttonTableLayoutPanel.ResumeLayout(false);
             this.ResumeLayout(false);

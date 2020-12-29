@@ -77,7 +77,7 @@ namespace GChan.Controllers
         {
             infoForm = new UpdateInfoForm();
             infoForm.TopMost = true;
-            infoForm.Show();
+            infoForm.ShowDialog();
         }
 
         public async Task PerformUpdate()
@@ -95,6 +95,8 @@ namespace GChan.Controllers
                 infoForm?.Close();
 
                 Program.mainForm.FormClosing -= Program.mainForm.MainForm_FormClosing;
+
+                Utils.SaveURLs(Program.mainForm.Model.Boards, Program.mainForm.Model.Threads);
 
                 Application.Exit();
             }

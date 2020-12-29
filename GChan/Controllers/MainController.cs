@@ -15,6 +15,7 @@ using GChan.Controllers;
 using URLType = GChan.Trackers.Type;
 using GChan.Forms;
 using Onova.Models;
+using System.Text.RegularExpressions;
 
 namespace GChan.Controllers
 {
@@ -296,17 +297,40 @@ namespace GChan.Controllers
             {
                 if (boards[i].Scraping)
                 {
-                    string[] boardThreads = boards[i].GetThreadLinks();
+                    // OrderBy because we need the threads to be in ascending order by ID for LargestAddedThreadNo to be useful.
+                    string[] boardThreadUrls = boards[i].GetThreadLinks().OrderBy(t => t).ToArray();
 
-                    for (int j = 0; j < boardThreads.Length; j++)
+                    for (int j = 0; j < boardThreadUrls.Length; j++)
                     {
                         if (boards[i].Scraping)
-                        {
-                            Thread newThread = (Thread)Utils.CreateNewTracker(boardThreads[j]);
+                        { 
+                            int? id = GetThreadID(boards[i], boardThreadUrls[j]);
 
-                            if (newThread != null && IsUnique(newThread, Model.Threads))
+                            if (id.HasValue)
                             {
-                                AddURLToList(newThread);
+                                if (id.Value > boards[i].LargestAddedThreadNo)
+                                {
+                                    Thread newThread = (Thread)Utils.CreateNewTracker(boardThreadUrls[j]);
+
+                                    if (newThread != null && IsUnique(newThread, Model.Threads))
+                                    {
+                                        bool urlWasAdded = AddURLToList(newThread);
+
+                                        if (urlWasAdded)
+                                        {
+                                            boards[i].LargestAddedThreadNo = id.Value;
+#if DEBUG
+                                            Program.Log(true, $"Thread {newThread} added while scraping {boards[i]}");
+#endif
+                                        }
+                                    }
+                                }
+#if DEBUG
+                                else
+                                {
+                                    Program.Log(true, $"URL {boardThreadUrls[j]} skipped while scraping board {boards[i]} because its ID was lower than {boards[i].LargestAddedThreadNo}");
+                                }
+#endif
                             }
                         }
                     }
@@ -321,6 +345,33 @@ namespace GChan.Controllers
                 if (Model.Threads[i].Scraping)
                     ThreadPool.QueueUserWorkItem(new WaitCallback(Model.Threads[i].Download));
             }
+        }
+
+        public int? GetThreadID(Board board, string url)
+        {
+            try
+            {
+                Match idCodeMatch = null;
+
+                if (board.SiteName == Board_4Chan.SITE_NAME_4CHAN)
+                {
+                    idCodeMatch = Regex.Match(url, Thread_4Chan.ID_CODE_REGEX);
+                }
+                else if (board.SiteName == Board_8Kun.SITE_NAME_8KUN)
+                {
+                    idCodeMatch = Regex.Match(url, Thread_8Kun.idCodeRegex);
+                }
+
+                if (idCodeMatch != null)
+                    if (idCodeMatch.Groups.Count > 0)
+                        return int.Parse(idCodeMatch.Groups[0].Value);
+            }
+            catch
+            {
+
+            }
+
+            return null;
         }
 
         /// <summary>
