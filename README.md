@@ -1,6 +1,7 @@
 # GChan      <img align="right" width="90" height="90" src="https://i.imgur.com/orC8f3w.png">
 [![Release](https://img.shields.io/github/v/release/issung/GChan?style=for-the-badge)](https://github.com/Issung/GChan/releases)
 [![Downloads](https://img.shields.io/github/downloads/issung/GCHan/total?style=for-the-badge)](https://github.com/Issung/GChan/releases)
+[![Discord](https://img.shields.io/discord/806067523853746196?color=%23738BD8&label=discord&style=for-the-badge)](https://discord.gg/Ayh6UasAVn)
 
 GChan is an automatic imageboard scraper, it supports multithreading and auto-rechecking of threads with a custom set timer.
 
