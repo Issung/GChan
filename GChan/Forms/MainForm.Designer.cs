@@ -239,6 +239,7 @@
             this.boardCodeDataGridViewTextBoxColumn,
             this.iDDataGridViewTextBoxColumn,
             this.fileCountDataGridViewTextBoxColumn});
+            this.threadGridView.ContextMenuStrip = this.threadsContextMenu;
             this.threadGridView.DataSource = this.threadsBindingSource;
             this.threadGridView.GridColor = System.Drawing.SystemColors.Window;
             this.threadGridView.Location = new System.Drawing.Point(-1, -1);

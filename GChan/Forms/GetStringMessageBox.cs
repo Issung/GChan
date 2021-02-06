@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace GChan
@@ -9,6 +11,11 @@ namespace GChan
         /// Get the user's entry into the textbox.
         /// </summary>
         public string UserEntry => entryTextBox.Text;
+
+        /// <summary>
+        /// Characters not allowed in paths or filenames, for when renaming the thread folder to the subject.
+        /// </summary>
+        char[] disallowedCharacters = Path.GetInvalidFileNameChars();
 
         public GetStringMessageBox(string defaultText = "")
         {
@@ -41,15 +48,19 @@ namespace GChan
 
         private void entryTextBox_TextChanged(object sender, EventArgs e)
         {
-            char[] disallowedCharacters = "_/\\!@#$%^&*()[]{};':\"?\r".ToCharArray();
-
             int prevSelectionStart = entryTextBox.SelectionStart;
             int prevSelectionLength = entryTextBox.SelectionLength;
 
-            entryTextBox.Text = Utils.RemoveCharactersFromString(entryTextBox.Text, disallowedCharacters);
+            string originalText = entryTextBox.Text;
+            string cleanedText = Utils.RemoveCharactersFromString(entryTextBox.Text, disallowedCharacters);
 
-            entryTextBox.SelectionStart = prevSelectionStart;
-            entryTextBox.SelectionLength = prevSelectionLength;
+            entryTextBox.Text = cleanedText;
+
+            if (cleanedText != originalText)
+            { 
+                entryTextBox.SelectionStart = Math.Max(prevSelectionStart - 1, 0);
+                entryTextBox.SelectionLength = Math.Max(prevSelectionLength - 1, 0);
+            }
         }
     }
 }

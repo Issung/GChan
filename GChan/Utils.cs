@@ -297,21 +297,19 @@ namespace GChan
             return fullpath;
         }
 
-        public static string RemoveCharactersFromString(string haystack, params char[] removeThese)
+        public static string RemoveCharactersFromString(string haystack, params char[] charactersToRemove)
         {
             string ret = haystack;
-            for (int i = 0; i < removeThese.Length; i++)
-                ret = ret.Replace(removeThese[i].ToString(), "");
+
+            for (int i = 0; i < charactersToRemove.Length; i++)
+            { 
+                ret = ret.Replace(charactersToRemove[i].ToString(), "");
+            }
+
             return ret;
         }
 
-        readonly static char[] SubjectIllegalCharacters = { 
-            '"', '<', '>', '|', '\0', ':', '*', '?', '/', '\\',
-            '\a', '\b', '\t', '\n', '\v', '\f', '\r', 
-            '\u0001', '\u0002', '\u0003', '\u0004', '\u0005', '\u0006', '\u000e', '\u000f',
-            '\u0010', '\u0011', '\u0012', '\u0013', '\u0014', '\u0015', '\u0016', '\u0017',
-            '\u0018', '\u0019', '\u001a', '\u001b', '\u001c', '\u001d', '\u001e', '\u001f' 
-        };
+        readonly static char[] SubjectIllegalCharacters = Path.GetInvalidFileNameChars();
 
         /// <summary>
         /// Remove a string of characters illegal for a folder name. Used for thread subjects if 
