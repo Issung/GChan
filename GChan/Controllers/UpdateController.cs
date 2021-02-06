@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using GChan.Models;
 using System.Windows.Forms;
 using GChan.Forms;
+using GChan.Data;
 
 namespace GChan.Controllers
 {
@@ -96,7 +97,7 @@ namespace GChan.Controllers
 
                 Program.mainForm.FormClosing -= Program.mainForm.MainForm_FormClosing;
 
-                Utils.SaveURLs(Program.mainForm.Model.Boards, Program.mainForm.Model.Threads);
+                DataController.SaveAll(Program.mainForm.Model.Threads, Program.mainForm.Model.Boards);
 
                 Application.Exit();
             }

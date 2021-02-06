@@ -16,6 +16,7 @@ using URLType = GChan.Trackers.Type;
 using GChan.Forms;
 using Onova.Models;
 using System.Text.RegularExpressions;
+using GChan.Data;
 
 namespace GChan.Controllers
 {
@@ -91,50 +92,31 @@ namespace GChan.Controllers
 
             if (!requireSaveOnCloseToBeTrueToLoadThreadsAndBoards || Properties.Settings.Default.SaveListsOnClose)                                // If enabled load URLs from file
             {
-                string boards = Utils.LoadURLs(true);
-                string threads = Utils.LoadURLs(false);
+                var boards = DataController.LoadBoards();
+                var threads = DataController.LoadThreads();
 
-                if (!string.IsNullOrWhiteSpace(boards))
+                lock (boardLock)
                 {
-                    lock (boardLock)
+                    for (int i = 0; i < boards.Count; i++)
                     {
-                        string[] URLs = boards.Split('\n');
-                        for (int i = 0; i < URLs.Length; i++)
-                        {
-                            if (!string.IsNullOrWhiteSpace(URLs[i]))
-                            {
-                                Board newBoard = (Board)Utils.CreateNewTracker(URLs[i].Trim());
-                                AddURLToList(newBoard);
-                            }
-                        }
+                        Board newBoard = (Board)Utils.CreateNewTracker(boards[i]);
+                        AddURLToList(newBoard);
                     }
                 }
 
-                if (!string.IsNullOrWhiteSpace(threads))
+                new SysThread(() =>
                 {
-                    string[] URLs = threads.Split('\n');
-
-                    new SysThread(() =>
+                    // END TODO
+                    Parallel.ForEach(threads, (thread) =>
                     {
-                        // END TODO
-                        Parallel.ForEach(URLs, (url) =>
-                        {
-                            if (!string.IsNullOrWhiteSpace(url))
-                            {
-                                Thread newThread = (Thread)Utils.CreateNewTracker(url.Trim());
-                                Form.BeginInvoke(new Action(() => { AddURLToList(newThread); }));
-                            }
-                        });
+                        Thread newThread = (Thread)Utils.CreateNewTracker(thread);
+                        Form.BeginInvoke(new Action(() => { AddURLToList(newThread); }));
+                    });
 
-                        Form.Invoke((MethodInvoker)delegate {
-                            Done();
-                        });
-                    }).Start();
-                }
-                else
-                {
-                    Done();
-                }
+                    Form.Invoke((MethodInvoker)delegate {
+                        Done();
+                    });
+                }).Start();
             }
 
             /// Executed once everything has finished being loaded.
@@ -166,7 +148,7 @@ namespace GChan.Controllers
                     if (!scanTimer.Enabled)
                         scanTimer.Enabled = true;
                     if (Properties.Settings.Default.SaveListsOnClose)
-                        Utils.SaveURLs(Model.Boards, Model.Threads);
+                        DataController.SaveAll(Model.Threads, Model.Boards);
 
                     Scan(this, new EventArgs());
                 }
@@ -254,7 +236,7 @@ namespace GChan.Controllers
                 }
 
                 if (Properties.Settings.Default.SaveListsOnClose)
-                    Utils.SaveURLs(Model.Boards, Model.Threads.ToList());
+                    DataController.SaveAll(Model.Threads.ToList(), Model.Boards);
             }
         }
 
@@ -287,7 +269,7 @@ namespace GChan.Controllers
                 }
 
                 if (Properties.Settings.Default.SaveListsOnClose)
-                    Utils.SaveURLs(Model.Boards, Model.Threads.ToList());
+                    DataController.SaveAll(Model.Threads.ToList(), Model.Boards);
             }
 
             // Make a copy of the current boards and scrape them for new threads.
@@ -529,7 +511,7 @@ namespace GChan.Controllers
                 scanTimer.Enabled = false;
 
                 if (Properties.Settings.Default.SaveListsOnClose)
-                    Utils.SaveURLs(Model.Boards, Model.Threads.ToList());
+                    DataController.SaveAll(Model.Threads.ToList(), Model.Boards);
             }
 
             return cancel;

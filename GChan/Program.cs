@@ -22,6 +22,7 @@ using System.Threading;
 using System.Windows.Forms;
 using System.Diagnostics;
 using GChan.Forms;
+using GChan.Data;
 
 namespace GChan
 {
@@ -129,7 +130,7 @@ namespace GChan
 
             try
             {
-                Utils.SaveURLs(mainForm.Model.Boards, mainForm.Model.Threads);
+                DataController.SaveAll(mainForm.Model.Threads, mainForm.Model.Boards);
 
                 Log(true, $"Application_ThreadException - {e.Exception.Message}", e.Exception.StackTrace);
             }
@@ -149,7 +150,7 @@ namespace GChan
 
             try
             {
-                Utils.SaveURLs(mainForm.Model.Boards, mainForm.Model.Threads);
+                DataController.SaveAll(mainForm.Model.Threads, mainForm.Model.Boards);
 
                 Exception ex = (Exception)e.ExceptionObject;
                 Log(true, $"AppDomain_UnhandledException - {ex.GetType().Name} - {ex.Message}", ex.StackTrace);

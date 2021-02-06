@@ -25,6 +25,7 @@ using System.Windows.Forms;
 using Microsoft.Win32;
 using GChan.Trackers;
 using System.Reflection;
+using GChan.Data;
 
 namespace GChan
 {
@@ -34,58 +35,6 @@ namespace GChan
     internal class Utils
     {
         public const string PROGRAM_NAME = "GChan";
-
-        /// <summary>
-        /// Saves the thread and board lists to disk.
-        /// </summary>
-        public static void SaveURLs(IList<Board> boards, IList<Thread> threads)
-        {
-            // Make copies and save those.
-            boards = boards.ToList();
-            threads = threads.ToList();
-
-            try
-            {
-                StringBuilder sb = new StringBuilder();
-
-                for (int i = 0; i < boards.Count(); i++)
-                    sb.AppendLine(boards[i].URL.Replace("\r", "") + " " + boards[i].LargestAddedThreadNo);
-
-                File.WriteAllText(Program.BOARDS_PATH, sb.ToString());
-
-                sb.Clear();
-
-                //TODO: Use better method to save GreatestSavedFileTim rather than just a space delimited text file.
-                for (int i = 0; i < threads.Count; i++)
-                    sb.AppendLine(threads[i].GetURLWithSubject() + " " + threads[i].GreatestSavedFileTim);
-
-                File.WriteAllText(Program.THREADS_PATH, sb.ToString());
-            }
-            catch (Exception ex)
-            {
-                Program.Log(ex);
-            }
-        }
-
-        /// <summary>
-        /// Returns all saved threads or boards.
-        /// </summary>
-        /// <param name="board">Set true to load boards, false to load threads.</param>
-        public static string LoadURLs(bool board)
-        {
-            if (board && File.Exists(Program.BOARDS_PATH))
-            {
-                return File.ReadAllText(Program.BOARDS_PATH);
-            }
-            else if (!board && File.Exists(Program.THREADS_PATH))
-            {
-                return File.ReadAllText(Program.THREADS_PATH);
-            }
-            else
-            { 
-                return "";
-            }
-        }
 
         /// <summary>
         /// Save settings to disk.
@@ -152,36 +101,47 @@ namespace GChan
         /// <summary>
         /// Create a new Tracker (Thread or Board).
         /// </summary>
-        public static Tracker CreateNewTracker(string info)
+        public static Tracker CreateNewTracker(LoadedInfo info)
         {
-            var parts = info.Split(' ');
-            string url = parts[0];
-            long greatestTim = 0;
+            int greatestSaved = int.Parse(info.GreatestSaved);
 
-            if (parts.Length > 1)
+            Tracker tracker = CreateNewTracker(info.URL);
+
+            var trackerType = tracker.GetType();
+
+            if (trackerType == typeof(Thread))
             {
-                greatestTim = long.Parse(parts[1]);
-#if DEBUG
-                Program.Log(true, $"2nd info part found for thread {url}, greatest tim loaded: {greatestTim}");
-#endif
+                ((Thread)tracker).GreatestSavedFileTim = greatestSaved;
+            }
+            else if (trackerType == typeof(Board))
+            {
+                ((Board)tracker).LargestAddedThreadNo = greatestSaved;
             }
 
+            return tracker;
+        }
+
+        /// <summary>
+        /// Create a new Tracker (Thread or Board).
+        /// </summary>
+        public static Tracker CreateNewTracker(string url)
+        {
             if (Thread_4Chan.UrlIsThread(url))
             {
-                return new Thread_4Chan(url) { GreatestSavedFileTim = greatestTim };
+                return new Thread_4Chan(url);
             }
             else if (Thread_8Kun.UrlIsThread(url))
-            { 
-                return new Thread_8Kun(url) { GreatestSavedFileTim = greatestTim };
+            {
+                return new Thread_8Kun(url);
             }
 
             if (Board_4Chan.UrlIsBoard(url))
             {
-                return new Board_4Chan(url) { LargestAddedThreadNo = (int)greatestTim };
+                return new Board_4Chan(url);
             }
             else if (Board_8Kun.UrlIsBoard(url))
-            { 
-                return new Board_8Kun(url) { LargestAddedThreadNo = (int)greatestTim };
+            {
+                return new Board_8Kun(url);
             }
 
             return null;
