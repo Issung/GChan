@@ -12,7 +12,7 @@ namespace GChan.Data
         /// </summary>
         public const int DATABASE_VERSION = 1;
 
-        private const string DATABASE_FILENAME = "data.db";
+        private const string DATABASE_FILENAME = "trackers.db";
         private static readonly string DATABASE_PATH = Path.Combine(Program.PROGRAM_DATA_PATH, DATABASE_FILENAME);
         private static readonly string DATABASE_CONNECTION_STRING = "DataSource=" + DATABASE_PATH;
 
@@ -21,7 +21,7 @@ namespace GChan.Data
         /// </summary>
         private const string TB_VERSION = "version";
         private const string TB_THREAD = "thread";
-        private const string TB_Board = "board";
+        private const string TB_BOARD = "board";
 
         /// <summary>
         /// Columns
@@ -52,16 +52,16 @@ namespace GChan.Data
                     {
                         _connection = new SQLiteConnection(DATABASE_CONNECTION_STRING);
                         _connection.Open();
-                    }
 
-                    if (!dbExisted)
-                    {
-                        CreateDB();
+                        if (!dbExisted)
+                        {
+                            CreateDB();
+                        }
+                        else
+                        {
+                            UpgradeDB();
+                        }
                     }
-                    /*else
-                    {
-                        UpgradeDB();
-                    }*/
 
                     return _connection;
                 }
@@ -91,15 +91,18 @@ namespace GChan.Data
                 cmd.ExecuteNonQuery();
 
                 // Board Table
-                cmd.CommandText = $"DROP TABLE IF EXISTS {TB_Board}";
+                cmd.CommandText = $"DROP TABLE IF EXISTS {TB_BOARD}";
                 cmd.ExecuteNonQuery();
 
-                cmd.CommandText = $"CREATE TABLE {TB_Board} ({COL_URL} TEXT PRIMARY KEY NOT NULL, {COL_GREATEST_SAVED} TEXT)";
+                cmd.CommandText = $"CREATE TABLE {TB_BOARD} ({COL_URL} TEXT PRIMARY KEY NOT NULL, {COL_GREATEST_SAVED} TEXT)";
                 cmd.ExecuteNonQuery();
             }
         }
 
-        /*private static void UpgradeDB()
+        /// <summary>
+        /// Drop the current database and build a new one.
+        /// </summary>
+        private static void UpgradeDB()
         {
             using (var cmd = new SQLiteCommand(Connection))
             {
@@ -111,14 +114,15 @@ namespace GChan.Data
                     {
                         if (reader.GetInt32(0) != DATABASE_VERSION)
                         {
-                            var tet = (LoadThreads(), LoadBoards());
+                            /*var tet = (LoadThreads(), LoadBoards());
                             CreateDB();
-                            SaveAll(tet.Item1, tet.Item2);
+                            SaveAll(tet.Item1, tet.Item2);*/
+                            CreateDB();
                         }
                     }
                 }
             }
-        }*/
+        }
 
         /// <summary>
         /// Saves the thread and board lists to disk.
@@ -134,12 +138,30 @@ namespace GChan.Data
             using (var cmd = new SQLiteCommand(Connection))
             {
                 for (int i = 0; i < threads.Count; i++)
-                { 
-                    cmd.CommandText = $"REPLACE INTO {TB_THREAD}({COL_URL}, {COL_GREATEST_SAVED}, {COL_SUBJECT}) VALUES (@{COL_URL}, @{COL_GREATEST_SAVED}, @{COL_SUBJECT})";
+                {
+                    cmd.CommandText = $@"UPDATE 
+                                            {TB_THREAD} 
+                                        SET 
+                                            {COL_GREATEST_SAVED} = @{COL_GREATEST_SAVED}, 
+                                            {COL_SUBJECT} = @{COL_SUBJECT}
+                                        WHERE
+                                            {COL_URL} = @{COL_URL}";
+
                     cmd.Parameters.AddWithValue(COL_URL, threads[i].URL);
                     cmd.Parameters.AddWithValue(COL_GREATEST_SAVED, threads[i].GreatestSavedFileTim);
                     cmd.Parameters.AddWithValue(COL_SUBJECT, threads[i].Subject);
-                    cmd.ExecuteNonQuery();
+
+                    int affectedRows = cmd.ExecuteNonQuery();
+
+                    if (affectedRows == 0)
+                    {
+                        cmd.CommandText = $@"INSERT INTO
+                                                {TB_THREAD} ({COL_URL}, {COL_GREATEST_SAVED}, {COL_SUBJECT}) 
+                                            VALUES 
+                                                (@{COL_URL}, @{COL_GREATEST_SAVED}, @{COL_SUBJECT})";
+
+                        cmd.ExecuteNonQuery();
+                    }
                 }
             }
         }
@@ -170,10 +192,24 @@ namespace GChan.Data
             {
                 for (int i = 0; i < boards.Count; i++)
                 {
-                    cmd.CommandText = $"REPLACE INTO {TB_Board}({COL_URL}, {COL_GREATEST_SAVED}) VALUES (@{COL_URL}, @{COL_GREATEST_SAVED})";
+                    cmd.CommandText = $@"UPDATE 
+                                            {TB_BOARD} 
+                                        SET 
+                                            {COL_GREATEST_SAVED} = @{COL_GREATEST_SAVED}
+                                        WHERE
+                                            {COL_URL} = @{COL_URL}";
+
                     cmd.Parameters.AddWithValue(COL_URL, boards[i].URL);
                     cmd.Parameters.AddWithValue(COL_GREATEST_SAVED, boards[i].LargestAddedThreadNo);
-                    cmd.ExecuteNonQuery();
+
+                    int affectedRows = cmd.ExecuteNonQuery();
+
+                    if (affectedRows == 0)
+                    {
+                        cmd.CommandText = $@"INSERT INTO {TB_BOARD}({COL_URL}, {COL_GREATEST_SAVED}) VALUES (@{COL_URL}, @{COL_GREATEST_SAVED})";
+
+                        cmd.ExecuteNonQuery();
+                    }
                 }
             }
         }
@@ -184,7 +220,7 @@ namespace GChan.Data
 
             using (var cmd = new SQLiteCommand(Connection))
             {
-                cmd.CommandText = $"SELECT * FROM {TB_Board}";
+                cmd.CommandText = $"SELECT * FROM {TB_BOARD}";
 
                 using (SQLiteDataReader reader = cmd.ExecuteReader())
                 {

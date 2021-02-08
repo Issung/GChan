@@ -103,17 +103,18 @@ namespace GChan
         /// </summary>
         public static Tracker CreateNewTracker(LoadedInfo info)
         {
-            int greatestSaved = int.Parse(info.GreatestSaved);
+            long greatestSaved = long.Parse(info.GreatestSaved);
 
             Tracker tracker = CreateNewTracker(info.URL);
 
             var trackerType = tracker.GetType();
-
-            if (trackerType == typeof(Thread))
+            
+            if (tracker.Type == Trackers.Type.Thread)
             {
                 ((Thread)tracker).GreatestSavedFileTim = greatestSaved;
+                ((Thread)tracker).Subject = ((LoadedThreadInfo)info).Subject;
             }
-            else if (trackerType == typeof(Board))
+            else if (tracker.Type == Trackers.Type.Board)
             {
                 ((Board)tracker).LargestAddedThreadNo = greatestSaved;
             }
