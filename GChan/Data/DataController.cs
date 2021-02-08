@@ -137,31 +137,22 @@ namespace GChan.Data
         {
             using (var cmd = new SQLiteCommand(Connection))
             {
+                cmd.CommandText = $"DELETE FROM {TB_THREAD}";
+
+                cmd.ExecuteNonQuery();
+
                 for (int i = 0; i < threads.Count; i++)
                 {
-                    cmd.CommandText = $@"UPDATE 
-                                            {TB_THREAD} 
-                                        SET 
-                                            {COL_GREATEST_SAVED} = @{COL_GREATEST_SAVED}, 
-                                            {COL_SUBJECT} = @{COL_SUBJECT}
-                                        WHERE
-                                            {COL_URL} = @{COL_URL}";
+                    cmd.CommandText = $@"INSERT INTO
+                                            {TB_THREAD} ({COL_URL}, {COL_GREATEST_SAVED}, {COL_SUBJECT}) 
+                                        VALUES 
+                                            (@{COL_URL}, @{COL_GREATEST_SAVED}, @{COL_SUBJECT})";
 
                     cmd.Parameters.AddWithValue(COL_URL, threads[i].URL);
                     cmd.Parameters.AddWithValue(COL_GREATEST_SAVED, threads[i].GreatestSavedFileTim);
                     cmd.Parameters.AddWithValue(COL_SUBJECT, threads[i].Subject);
 
-                    int affectedRows = cmd.ExecuteNonQuery();
-
-                    if (affectedRows == 0)
-                    {
-                        cmd.CommandText = $@"INSERT INTO
-                                                {TB_THREAD} ({COL_URL}, {COL_GREATEST_SAVED}, {COL_SUBJECT}) 
-                                            VALUES 
-                                                (@{COL_URL}, @{COL_GREATEST_SAVED}, @{COL_SUBJECT})";
-
-                        cmd.ExecuteNonQuery();
-                    }
+                    cmd.ExecuteNonQuery();
                 }
             }
         }
@@ -190,26 +181,18 @@ namespace GChan.Data
         {
             using (var cmd = new SQLiteCommand(Connection))
             {
+                cmd.CommandText = $"DELETE FROM {TB_BOARD}";
+
+                cmd.ExecuteNonQuery();
+
                 for (int i = 0; i < boards.Count; i++)
                 {
-                    cmd.CommandText = $@"UPDATE 
-                                            {TB_BOARD} 
-                                        SET 
-                                            {COL_GREATEST_SAVED} = @{COL_GREATEST_SAVED}
-                                        WHERE
-                                            {COL_URL} = @{COL_URL}";
 
+                    cmd.CommandText = $@"INSERT INTO {TB_BOARD} ({COL_URL}, {COL_GREATEST_SAVED}) VALUES (@{COL_URL}, @{COL_GREATEST_SAVED})";
                     cmd.Parameters.AddWithValue(COL_URL, boards[i].URL);
                     cmd.Parameters.AddWithValue(COL_GREATEST_SAVED, boards[i].LargestAddedThreadNo);
 
-                    int affectedRows = cmd.ExecuteNonQuery();
-
-                    if (affectedRows == 0)
-                    {
-                        cmd.CommandText = $@"INSERT INTO {TB_BOARD}({COL_URL}, {COL_GREATEST_SAVED}) VALUES (@{COL_URL}, @{COL_GREATEST_SAVED})";
-
-                        cmd.ExecuteNonQuery();
-                    }
+                    cmd.ExecuteNonQuery();
                 }
             }
         }

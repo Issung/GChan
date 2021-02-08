@@ -147,8 +147,6 @@ namespace GChan.Controllers
 
                     if (!scanTimer.Enabled)
                         scanTimer.Enabled = true;
-                    if (Properties.Settings.Default.SaveListsOnClose)
-                        DataController.SaveAll(Model.Threads, Model.Boards);
 
                     Scan(this, new EventArgs());
                 }
@@ -234,9 +232,6 @@ namespace GChan.Controllers
                         }
                     }
                 }
-
-                if (Properties.Settings.Default.SaveListsOnClose)
-                    DataController.SaveAll(Model.Threads.ToList(), Model.Boards);
             }
         }
 
@@ -267,9 +262,6 @@ namespace GChan.Controllers
                         i--;
                     }
                 }
-
-                if (Properties.Settings.Default.SaveListsOnClose)
-                    DataController.SaveAll(Model.Threads.ToList(), Model.Boards);
             }
 
             // Make a copy of the current boards and scrape them for new threads.
