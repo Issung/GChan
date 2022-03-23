@@ -309,10 +309,10 @@ namespace GChan.Controllers
             // Make a copy of the current threads and download them.
             var threads = Model.Threads.ToList();
 
-            for (int i = 0; i < Model.Threads.Count; i++)
+            for (int i = 0; i < threads.Count; i++)
             {
-                if (Model.Threads[i].Scraping)
-                    ThreadPool.QueueUserWorkItem(new WaitCallback(Model.Threads[i].Download));
+                if (threads[i].Scraping)
+                    ThreadPool.QueueUserWorkItem(new WaitCallback(threads[i].Download));
             }
         }
 
