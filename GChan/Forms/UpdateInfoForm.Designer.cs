@@ -60,14 +60,12 @@ namespace GChan.Forms
             // 
             // infoLabel
             // 
-            this.infoLabel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.infoLabel.Location = new System.Drawing.Point(25, 25);
-            this.infoLabel.Margin = new System.Windows.Forms.Padding(25);
+            this.infoLabel.Location = new System.Drawing.Point(15, 15);
+            this.infoLabel.Margin = new System.Windows.Forms.Padding(15);
             this.infoLabel.Name = "infoLabel";
-            this.infoLabel.Size = new System.Drawing.Size(283, 66);
+            this.infoLabel.Size = new System.Drawing.Size(300, 84);
             this.infoLabel.TabIndex = 0;
-            this.infoLabel.Text = "Info";
+            this.infoLabel.Text = resources.GetString("infoLabel.Text");
             this.infoLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // buttonsPanel
@@ -75,7 +73,7 @@ namespace GChan.Forms
             this.buttonsPanel.Controls.Add(this.viewReleasesButton);
             this.buttonsPanel.Controls.Add(this.doNotUpdateButton);
             this.buttonsPanel.Controls.Add(this.updateButton);
-            this.buttonsPanel.Location = new System.Drawing.Point(3, 119);
+            this.buttonsPanel.Location = new System.Drawing.Point(3, 117);
             this.buttonsPanel.Name = "buttonsPanel";
             this.buttonsPanel.Size = new System.Drawing.Size(326, 88);
             this.buttonsPanel.TabIndex = 1;

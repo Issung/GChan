@@ -13,14 +13,9 @@ namespace GChan.Trackers
 {
     public abstract class Thread : Tracker, INotifyPropertyChanged
     {
-        /// <summary>
-        /// Value indicating that file count has not yet been retrieved.
-        /// </summary>
-        public const int FILE_COUNT_NOT_CHECKED_YET = -1;
-
         public const string NO_SUBJECT = "No Subject";
 
-        private int fileCount = FILE_COUNT_NOT_CHECKED_YET;
+        private int? fileCount = null;
 
         protected string subject { get; private set; } = null;
 
@@ -59,15 +54,13 @@ namespace GChan.Trackers
         /// </summary>
         public string ID { get; protected set; }
 
-        public int FileCount { 
+        public int? FileCount { 
             get { return fileCount; }
             set { 
                 fileCount = value; 
-                Program.mainForm.Invoke(new Action(() => { NotifyPropertyChanged(nameof(FileCountDisplay)); })); 
+                Program.mainForm.Invoke(new Action(() => { NotifyPropertyChanged(nameof(FileCount)); })); 
             }
         }
-
-        public string FileCountDisplay => FileCount == FILE_COUNT_NOT_CHECKED_YET ? "-" : FileCount.ToString();
 
         public bool Gone { get; protected set; } = false;
 

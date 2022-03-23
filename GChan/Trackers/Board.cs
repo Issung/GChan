@@ -4,9 +4,15 @@
     {
         protected int threadCount;
 
-        public int ThreadCount { get { return threadCount; } }
+        public int ThreadCount 
+        { 
+            get 
+            { 
+                return threadCount; 
+            } 
+        }
 
-        public int LargestAddedThreadNo { get; set; }
+        public long LargestAddedThreadNo { get; set; }
 
         protected Board(string url) : base(url)
         {

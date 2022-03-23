@@ -13,9 +13,8 @@ namespace GChan.Forms
 
             UpdateController.Instance.Progress.ProgressChanged += Progress_ProgressChanged;
 
-            infoLabel.Text = $"An update is available for GChan.\r\n";
-            infoLabel.Text += $"Current version: v{UpdateController.Instance.CurrentVersion}.\r\n";
-            infoLabel.Text += $"Latest version: v{UpdateController.Instance.CheckForUpdatesResult.LastVersion}.";
+            infoLabel.Text = infoLabel.Text.Replace("%currentversion%", $"v{UpdateController.Instance.CurrentVersion}");
+            infoLabel.Text = infoLabel.Text.Replace("%latestversion%", $"v{UpdateController.Instance.CheckForUpdatesResult.LastVersion}");
         }
 
         private void Progress_ProgressChanged(object sender, double e)
