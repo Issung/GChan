@@ -1,16 +1,13 @@
-﻿using Onova;
+﻿using GChan.Data;
+using GChan.Forms;
+using Onova;
 using Onova.Models;
 using Onova.Services;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
-using GChan.Models;
 using System.Windows.Forms;
-using GChan.Forms;
-using GChan.Data;
 
 namespace GChan.Controllers
 {
@@ -26,10 +23,10 @@ namespace GChan.Controllers
             } 
         }
 
-        IUpdateManager updateManager = new UpdateManager(
-                new GithubPackageResolver(Program.GITHUB_REPOSITORY_OWNER, Program.GITHUB_REPOSITORY_NAME, $"{Program.NAME}-*.zip"),
-                new ZipPackageExtractor()
-            );
+        readonly IUpdateManager updateManager = new UpdateManager(
+            new GithubPackageResolver(Program.GITHUB_REPOSITORY_OWNER, Program.GITHUB_REPOSITORY_NAME, $"{Program.NAME}-*.zip"),
+            new ZipPackageExtractor()
+        );
 
         /// <summary>
         /// Progress reporter for update downloading process.
@@ -74,10 +71,12 @@ namespace GChan.Controllers
             UpdateCheckFinished?.Invoke(this, CheckForUpdatesResult, initiatedByUser);
         }
 
-        public async void PresentInformation()
+        public void ShowUpdateDialog()
         {
-            infoForm = new UpdateInfoForm();
-            infoForm.TopMost = true;
+            infoForm = new UpdateInfoForm
+            {
+                TopMost = true
+            };
             infoForm.ShowDialog();
         }
 

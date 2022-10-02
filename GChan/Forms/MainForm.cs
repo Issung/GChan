@@ -1,14 +1,12 @@
-﻿using System;
+﻿using GChan.Controllers;
+using GChan.Models;
+using GChan.Trackers;
+using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Diagnostics;
 using System.Windows.Forms;
-using GChan.Trackers;
 using Type = GChan.Trackers.Type;
-using GChan.Models;
-using GChan.Controllers;
-using GChan.Controls;
-using System.Collections.Generic;
 
 namespace GChan.Forms
 {
@@ -16,7 +14,7 @@ namespace GChan.Forms
     {
         internal MainFormModel Model => Controller.Model;
 
-        private MainController Controller;
+        private readonly MainController Controller;
 
         /// <summary>
         /// Get the index of the selected row in the thread grid view.
@@ -375,7 +373,7 @@ namespace GChan.Forms
 
         private void updateAvailableToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            UpdateController.Instance.PresentInformation();
+            UpdateController.Instance.ShowUpdateDialog();
         }
 
         internal void MainForm_FormClosing(object sender, FormClosingEventArgs e)

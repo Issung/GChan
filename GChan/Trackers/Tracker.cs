@@ -1,6 +1,4 @@
-﻿using System.Text.RegularExpressions;
-
-namespace GChan.Trackers
+﻿namespace GChan.Trackers
 {
     public enum Type { Board, Thread };
 

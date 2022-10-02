@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 using System.Xml;
 using System.Xml.Linq;
 
@@ -112,12 +109,11 @@ namespace GChan.Trackers
         protected override void DownloadHTMLPage()
         {
             List<string> thumbs = new List<string>();
-            string htmlPage = "";
             string str;
 
             try
             {
-                htmlPage = new WebClient().DownloadString(URL);
+                string htmlPage = new WebClient().DownloadString(URL);
 
                 string JURL = URL.Replace(".html", ".json");
 
