@@ -1,28 +1,11 @@
-﻿/************************************************************************
- * Copyright (C) 2015 by themirage <mirage@secure-mail.biz>             *
- *                                                                      *
- * This program is free software: you can redistribute it and/or modify *
- * it under the terms of the GNU General Public License as published by *
- * the Free Software Foundation, either version 3 of the License, or    *
- * (at your option) any later version.                                  *
- *                                                                      *
- * This program is distributed in the hope that it will be useful,      *
- * but WITHOUT ANY WARRANTY; without even the implied warranty of       *
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
- * GNU General Public License for more details.                         *
- *                                                                      *
- * You should have received a copy of the GNU General Public License    *
- * along with this program.  If not, see <http://www.gnu.org/licenses/> *
- ************************************************************************/
-
+﻿using GChan.Data;
+using GChan.Forms;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Forms;
-using System.Diagnostics;
-using GChan.Forms;
-using GChan.Data;
 
 namespace GChan
 {
@@ -53,7 +36,11 @@ namespace GChan
 
         public const string GITHUB_REPOSITORY_OWNER = "Issung";
 
+#if DEBUG
         public const string GITHUB_REPOSITORY_NAME = "GChanUpdateTesting";
+#else
+        public const string GITHUB_REPOSITORY_NAME = "GChan";
+#endif
 
         public static StreamWriter streamWriter;
 
@@ -163,8 +150,10 @@ namespace GChan
 
         private static void InitialiseStreamWriter()
         {
-            streamWriter = new StreamWriter(LOGS_PATH, true);
-            streamWriter.AutoFlush = false;
+            streamWriter = new StreamWriter(LOGS_PATH, true)
+            {
+                AutoFlush = false
+            };
         }
 
         public static void Log(Exception ex)
@@ -207,11 +196,11 @@ namespace GChan
             }
         }
 
-        #region Dll Imports
+#region Dll Imports
 
         private const int HWND_BROADCAST = 0xFFFF;
         public static readonly int WM_MY_MSG = NativeMethods.RegisterWindowMessage("WM_MY_MSG");
-        private static Mutex _single = new Mutex(true, "GChanRunning");
+        private static readonly Mutex _single = new Mutex(true, "GChanRunning");
 
         private class NativeMethods
         {
@@ -222,6 +211,6 @@ namespace GChan
             public static extern int RegisterWindowMessage(string message);
         }
 
-        #endregion Dll Imports
+#endregion Dll Imports
     }
 }

@@ -39,7 +39,7 @@ namespace GChan.Forms
         {
             buttonsPanel.Hide();
             downloadingPanel.Show();
-            UpdateController.Instance.PerformUpdate();
+            await UpdateController.Instance.PerformUpdate();
         }
     }
 }

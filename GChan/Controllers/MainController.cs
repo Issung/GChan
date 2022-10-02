@@ -1,22 +1,20 @@
-﻿using System;
+﻿using GChan.Data;
+using GChan.Forms;
+using GChan.Models;
+using GChan.Trackers;
+using Onova.Models;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Diagnostics;
-using System.Windows.Forms;
-using System.Threading.Tasks;
-using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
+using System.Windows.Forms;
 using SysThread = System.Threading.Thread;
-using GChan.Trackers;
 using Thread = GChan.Trackers.Thread;
 using Type = GChan.Trackers.Type;
-using GChan.Models;
-using GChan.Controllers;
-using URLType = GChan.Trackers.Type;
-using GChan.Forms;
-using Onova.Models;
-using System.Text.RegularExpressions;
-using GChan.Data;
 
 namespace GChan.Controllers
 {
@@ -28,7 +26,7 @@ namespace GChan.Controllers
 
         private SysThread scanThread = null;
 
-        private System.Windows.Forms.Timer scanTimer = new System.Windows.Forms.Timer();
+        private readonly System.Windows.Forms.Timer scanTimer = new System.Windows.Forms.Timer();
 
         public int ScanTimerInterval { get { return scanTimer.Interval; } set { scanTimer.Interval = value; } }
 
@@ -57,16 +55,9 @@ namespace GChan.Controllers
             }
         }
 #else
-        object threadLock = new object();
-
-        object boardLock = new object();
+        readonly object threadLock = new object();
+        readonly object boardLock = new object();
 #endif
-
-        /// <summary>
-        /// Flag for whether or not the last update check was initiated by the user.
-        /// False for automatic program start-up update check.
-        /// </summary>
-        private bool updateCheckWasManual = false;
 
         public MainController(MainForm mainForm)
         {
@@ -364,8 +355,10 @@ namespace GChan.Controllers
         public void RenameThreadSubjectPrompt(int threadBindingSourceIndex)
         {
             Thread thread = Model.Threads[threadBindingSourceIndex];
-            GetStringMessageBox dialog = new GetStringMessageBox(thread.Subject);
-            dialog.StartPosition = FormStartPosition.CenterParent;
+            GetStringMessageBox dialog = new GetStringMessageBox(thread.Subject)
+            {
+                StartPosition = FormStartPosition.CenterParent
+            };
 
             DialogResult result = dialog.ShowDialog();
 
