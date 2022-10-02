@@ -84,7 +84,7 @@ namespace GChan
 
         public override string ToString()
         {
-            return $"GChan.ImageLink {{ Tim = \"{Tim}\", URL = \"{URL}\", UploadedFilename = \"{UploadedFilename}\" }}";
+            return $"ImageLink {{ Tim: '{Tim}', URL: '{URL}', UploadedFilename: '{UploadedFilename}' }}";
         }
     }
 }

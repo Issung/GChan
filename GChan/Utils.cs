@@ -1,6 +1,7 @@
 ﻿using GChan.Data;
 using GChan.Trackers;
 using Microsoft.Win32;
+using NLog;
 using System;
 using System.IO;
 using System.Linq;
@@ -17,6 +18,8 @@ namespace GChan
     internal class Utils
     {
         public const string PROGRAM_NAME = "GChan";
+
+        private static readonly ILogger logger = LogManager.GetCurrentClassLogger();
 
         /// <summary>
         /// Save settings to disk.
@@ -213,10 +216,10 @@ namespace GChan
 
                 return true;
             }
-            catch (WebException WebE)
+            catch (WebException ex)
             {
+                logger.Error(ex, $"Error occured while downloading link {link.URL}.");
                 return false;
-                throw WebE;
             }
         }
 

@@ -1,7 +1,7 @@
 ﻿using GChan.Controls;
 using GChan.Forms;
 using GChan.Trackers;
-using System;
+using NLog;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
@@ -16,7 +16,7 @@ namespace GChan.Models
         public void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
         {
 #if DEBUG
-            Console.WriteLine($"NotifyPropertyChanged! propertyName: {propertyName}");
+            logger.Trace($"NotifyPropertyChanged! propertyName: {propertyName}.");
 #endif
 
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
@@ -36,6 +36,8 @@ namespace GChan.Models
                     "\nClick to show/hide.";
             }
         }
+
+        private readonly ILogger logger = LogManager.GetCurrentClassLogger();
 
         public MainFormModel(MainForm form)
         {

@@ -77,7 +77,7 @@ namespace GChan.Trackers
         public void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
         {
 #if DEBUG
-            Console.WriteLine($"NotifyPropertyChanged! propertyName: {propertyName}");
+            logger.Trace($"NotifyPropertyChanged! propertyName: {propertyName}.");
 #endif
 
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
@@ -87,14 +87,16 @@ namespace GChan.Trackers
         {
             if (Gone)
             {
-                Program.Log(true, $"Download(object callback) called on thread {BoardCode}{ID}, but will not download because isGone is true");
+                logger.Info($"Download(object callback) called on {this}, but will not download because {nameof(Gone)} is true.");
             }
             else
             {
                 DownloadImages();
 
                 if (!Gone && Properties.Settings.Default.SaveHTML)
+                { 
                     DownloadHTMLPage();
+                }
             }
         }
 
@@ -114,14 +116,14 @@ namespace GChan.Trackers
                         if (link.Tim > GreatestSavedFileTim)
                         {
 #if DEBUG
-                            Program.Log(true, $"Downloading file {link} because it's Tim was greater than {GreatestSavedFileTim}");
+                            logger.Debug($"Downloading file {link} because it's Tim was greater than {GreatestSavedFileTim}.");
 #endif
                             Utils.DownloadToDir(link, SaveTo);
                         }
                         else
                         {
 #if DEBUG
-                            Program.Log(true, $"Skipping downloading file {link} because it's Tim was less than than {GreatestSavedFileTim}");
+                            logger.Debug($"Skipping downloading file {link} because it's Tim was less than than {GreatestSavedFileTim}.");
 #endif
                         }
                     }
@@ -132,24 +134,26 @@ namespace GChan.Trackers
             }
             catch (WebException webEx)
             {
-                Program.Log(webEx);
+                var httpWebResponse = webEx.Response as HttpWebResponse;
 
-                var httpWebResponse = (webEx.Response as HttpWebResponse);
-
-                if (webEx.Status == WebExceptionStatus.ProtocolError || (httpWebResponse != null && httpWebResponse.StatusCode == HttpStatusCode.NotFound))
+                if (webEx.Status == WebExceptionStatus.ProtocolError || (httpWebResponse?.StatusCode == HttpStatusCode.NotFound))
                 {
-                    Program.Log(true, $"WebException encountered in FourChan.download(). Gone marked as true. {URL}");
+                    logger.Info(webEx, $"404 occured in {this} {nameof(DownloadImages)}. 'Gone' set to true.");
                     Gone = true;
+                }
+                else 
+                { 
+                    logger.Error(webEx);
                 }
             }
             catch (UnauthorizedAccessException uaex)
             {
                 MessageBox.Show(uaex.Message, $"No Permission to access folder {SaveTo}.");
-                Program.Log(uaex);
+                logger.Error(uaex);
             }
             catch (Exception ex)
             {
-                Program.Log(ex);
+                logger.Error(ex);
             }
         }
 

@@ -2,6 +2,7 @@
 using GChan.Forms;
 using GChan.Models;
 using GChan.Trackers;
+using NLog;
 using Onova.Models;
 using System;
 using System.Collections.Generic;
@@ -28,6 +29,8 @@ namespace GChan.Controllers
 
         private readonly System.Windows.Forms.Timer scanTimer = new System.Windows.Forms.Timer();
 
+        private readonly ILogger logger = LogManager.GetCurrentClassLogger();
+
         public int ScanTimerInterval { get { return scanTimer.Interval; } set { scanTimer.Interval = value; } }
 
 #if DEBUG
@@ -38,7 +41,7 @@ namespace GChan.Controllers
 
         object threadLock { get {
                 StackFrame frame = new StackFrame(1, true);
-                Trace.WriteLine($"threadLock acquired by: {frame.GetMethod().Name} at line {frame.GetFileLineNumber()} on thread {SysThread.CurrentThread.ManagedThreadId}.");
+                logger.Trace($"threadLock acquired by: {frame.GetMethod().Name} at line {frame.GetFileLineNumber()} on thread {SysThread.CurrentThread.ManagedThreadId}.");
                 return _threadLock;
             } 
         }
@@ -50,7 +53,7 @@ namespace GChan.Controllers
             get
             {
                 StackFrame frame = new StackFrame(1, true);
-                Trace.WriteLine($"boardLock acquired by: {frame.GetMethod().Name} at line {frame.GetFileLineNumber()} on thread {SysThread.CurrentThread.ManagedThreadId}.");
+                logger.Trace($"boardLock acquired by: {frame.GetMethod().Name} at line {frame.GetFileLineNumber()} on thread {SysThread.CurrentThread.ManagedThreadId}.");
                 return _boardLock;
             }
         }
@@ -384,7 +387,7 @@ namespace GChan.Controllers
 
         public void RemoveThread(Thread thread, bool manualRemove = false)
         {
-            Program.Log(true, $"Removing thread {thread.URL}! thread.isGone: {thread.Gone}");
+            logger.Info($"Removing thread {thread}.");
 
             thread.Scraping = false;
 
@@ -422,13 +425,13 @@ namespace GChan.Controllers
                             number++;
                         }
 
-                        Program.Log(true, $"Directory.Moving {currentPath} to {destinationPath}");
+                        logger.Info($"Directory.Moving '{currentPath}' to '{destinationPath}'.");
 
                         Directory.Move(currentPath, calculatedDestination());
                     }
                     else
                     {
-                        Program.Log(true, $"While attempting to rename thread \"{thread.Subject}\" the current folder could not be found, renaming abandoned.");
+                        logger.Warn($"While attempting to rename thread {thread} the current folder could not be found, renaming abandoned.");
                     }
                 }
 
@@ -440,15 +443,14 @@ namespace GChan.Controllers
                     });
                 }
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                Program.Log(true, $"Exception occured attempting to remove thread \"{thread.Subject}\" (URL: {thread.URL}).");
-                Program.Log(e);
+                logger.Error(ex, $"Exception occured attempting to remove thread {thread}.");
 
                 if (manualRemove)
                 {
                     MessageBox.Show(
-                        $"An error occured when trying to remove the thread \"{thread.Subject}\". Please check the logs file in the ProgramData folder for more information.", 
+                        $"An error occured when trying to remove the thread {thread.Subject} ({thread.ID}). Please check the logs file in the ProgramData folder for more information.", 
                         "Remove Thread Error", 
                         MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
                 }
