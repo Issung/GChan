@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using NLog;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Runtime.Serialization.Json;
@@ -61,7 +62,8 @@ namespace GChan.Trackers
             }
             catch (WebException webEx)
             {
-                Program.Log(webEx);
+                logger.Error(webEx, "Error occured attempting to get thread links.");
+                
 #if DEBUG
                 MessageBox.Show("Connection Error: " + webEx.Message);
 #endif

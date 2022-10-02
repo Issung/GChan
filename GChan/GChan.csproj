@@ -65,6 +65,9 @@
     <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=6.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Bcl.AsyncInterfaces.6.0.0\lib\net461\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
     </Reference>
+    <Reference Include="NLog, Version=5.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
+      <HintPath>..\packages\NLog.5.0.4\lib\net46\NLog.dll</HintPath>
+    </Reference>
     <Reference Include="Onova, Version=2.6.2.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Onova.2.6.2\lib\net461\Onova.dll</HintPath>
     </Reference>
@@ -75,10 +78,12 @@
     <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Buffers.4.5.1\lib\net461\System.Buffers.dll</HintPath>
     </Reference>
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data.SQLite, Version=1.0.116.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=MSIL">
       <HintPath>..\packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.116.0\lib\net46\System.Data.SQLite.dll</HintPath>
     </Reference>
+    <Reference Include="System.IO.Compression" />
     <Reference Include="System.Memory, Version=4.0.1.2, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Memory.4.5.5\lib\net461\System.Memory.dll</HintPath>
     </Reference>
@@ -213,6 +218,9 @@
       <DependentUpon>Changelog.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="GChan_TemporaryKey.pfx" />
+    <None Include="nlog.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="packages.config" />
     <None Include="Properties\DataSources\GChan.Models.MainFormModel.datasource" />
     <None Include="Properties\Settings.settings">
@@ -230,15 +238,18 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="4chanIcon.ico" />
-    <None Include="icons\alert.png" />
-    <None Include="icons\question.png" />
-    <Content Include="icons\download.png" />
-    <Content Include="icons\Rename.png" />
-    <Content Include="icons\close.png" />
-    <Content Include="icons\folder.png" />
-    <None Include="icons\settings-wrench.png" />
-    <Content Include="icons\world.png" />
-    <Content Include="icons\clipboard.png" />
+    <None Include="Icons\alert.png" />
+    <None Include="Icons\question.png" />
+    <None Include="Icons\clipboard1.png" />
+    <Content Include="Icons\download.png" />
+    <None Include="Icons\file.png" />
+    <Content Include="Icons\Rename.png" />
+    <Content Include="Icons\close.png" />
+    <Content Include="Icons\folder.png" />
+    <None Include="Icons\settings-wrench.png" />
+    <Content Include="Icons\world.png" />
+    <Content Include="Icons\clipboard.png" />
+    <None Include="Resources\file.bmp" />
     <Content Include="TodoList.txt" />
   </ItemGroup>
   <ItemGroup>
@@ -258,9 +269,7 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Resources\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.116.0\build\net46\Stub.System.Data.SQLite.Core.NetFramework.targets" Condition="Exists('..\packages\Stub.System.Data.SQLite.Core.NetFramework.1.0.116.0\build\net46\Stub.System.Data.SQLite.Core.NetFramework.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

@@ -1,4 +1,6 @@
-﻿namespace GChan.Trackers
+﻿using NLog;
+
+namespace GChan.Trackers
 {
     public enum Type { Board, Thread };
 
@@ -12,6 +14,10 @@
 
         public string SiteName { get; protected set; }
 
+        /// <summary>
+        /// Code for the board this is tracking, excluding slashes.
+        /// e.g. gif, r9k, b
+        /// </summary>
         public string BoardCode { get; protected set; }
 
         /// <summary>
@@ -19,9 +25,27 @@
         /// </summary>
         public bool Scraping { get; set; } = true;
 
+        protected readonly ILogger logger = LogManager.GetCurrentClassLogger();
+
         protected Tracker(string url)
         {
             URL = url;
+        }
+
+        public override string ToString()
+        {
+            if (this is Thread thread)
+            {
+                return $"Thread {{ {SiteName}, /{BoardCode}/, {thread.ID}, Gone: {thread.Gone} }}";
+            }
+            else if (this is Board)
+            {
+                return $"Board {{ {SiteName}, /{BoardCode}/ }}";
+            }
+            else
+            {
+                return $"{this.GetType().Name} {{ {SiteName}, /{BoardCode}/ }}";
+            }
         }
     }
 }

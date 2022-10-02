@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using NLog;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Runtime.Serialization.Json;
@@ -59,8 +60,7 @@ namespace GChan.Trackers
             }
             catch (WebException webEx)
             {
-                Program.Log(webEx);
-                Program.Log(true, $"Connection error trying to find threads in a board. Exception: {webEx.Message}");
+                logger.Error(webEx, $"Connection error trying to find threads in a board {this}.");
             }
 
             threadCount = threadUrls.Count;

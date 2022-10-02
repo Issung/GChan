@@ -83,9 +83,9 @@ namespace GChan.Trackers
                     links.Add(new ImageLink(long.Parse(xmlTims[i].InnerText), baseURL + xmlTims[i].InnerText + xmlExts[i].InnerText, xmlFilenames[i].InnerText));
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                Program.Log(true, $"Encountered an exception in Thread_4Chan.GetImageLinks(). Thread Board/ID/Subject: {BoardCode}{ID}/{Subject}");
+                logger.Error(ex, $"Encountered an exception in GetImageLinks() {this}.");
                 throw;
             }
 
@@ -173,7 +173,7 @@ namespace GChan.Trackers
             }
             catch (Exception ex)
             {
-                Program.Log(ex);
+                logger.Error(ex);
             }
         }
 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NLog;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
@@ -11,11 +12,12 @@ using System.Windows.Forms;
 /// </summary>
 namespace GChan.Controls
 {
-    [Description("DataGridView but with inbuilt column hide/show context menu and saving/loading preferences of column's visibility, width & ordering.")]
+    [Description("Enhanced DataGridView with inbuilt column hide/show context menu and saving/loading preferences of column's visibility, width & ordering.")]
     [ToolboxBitmap(typeof(DataGridView))]
     class PreferencesDataGridView : DataGridView
     {
-        ContextMenuStrip contextMenu = new ContextMenuStrip();
+        private readonly ContextMenuStrip contextMenu = new ContextMenuStrip();
+        private readonly ILogger logger = LogManager.GetCurrentClassLogger();
 
         protected override bool ShowFocusCues => false;
 
@@ -29,9 +31,9 @@ namespace GChan.Controls
                 {
                     LoadPreferences();
                 }
-                catch (Exception e)
+                catch (Exception ex)
                 {
-                    Program.Log("Failed to load datagridview preferences.", e);
+                    logger.Error(ex, "Failed to load datagridview preferences.");
                 }
 
                 foreach (DataGridViewColumn column in Columns)
@@ -50,13 +52,13 @@ namespace GChan.Controls
 
         private void ToolStripItem_CheckStateChanged(object sender, EventArgs e)
         {
-            ToolStripMenuItem item = (ToolStripMenuItem)sender;
+            var item = (ToolStripMenuItem)sender;
             Columns[contextMenu.Items.IndexOf(item)].Visible = item.Checked;
         }
 
         private void LoadPreferences()
         {
-            //Load settings from last version if this is first run.
+            // Load settings from last version if this is first run.
             if (DataGridViewPreferencesSetting.Default.FirstStart)
             {
                 DataGridViewPreferencesSetting.Default.Upgrade();
@@ -66,9 +68,11 @@ namespace GChan.Controls
             }
 
             if (!DataGridViewPreferencesSetting.Default.ColumnOrder.ContainsKey(this.Name))
+            { 
                 return;
+            }
 
-            List<ColumnOrderItem> columnOrder = DataGridViewPreferencesSetting.Default.ColumnOrder[this.Name];
+            var columnOrder = DataGridViewPreferencesSetting.Default.ColumnOrder[this.Name];
 
             if (columnOrder != null)
             {

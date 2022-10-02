@@ -1,10 +1,13 @@
 ﻿using GChan.Controllers;
 using GChan.Models;
 using GChan.Trackers;
+using NLog;
+using NLog.Targets;
 using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Windows.Forms;
 using Type = GChan.Trackers.Type;
 
@@ -314,9 +317,11 @@ namespace GChan.Forms
             }
         }
 
-        private void openProgramDataFolderToolStripMenuItem_Click(object sender, EventArgs e)
+        private void openLogsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Process.Start(Application.CommonAppDataPath);
+            var assemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            var fullPath = Path.Combine(assemblyPath, "logs");
+            Process.Start(fullPath);
         }
 
         /// <summary>
