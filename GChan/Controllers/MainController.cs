@@ -161,8 +161,7 @@ namespace GChan.Controllers
             }
             else
             {
-                MessageBox.Show("Corrupt URL, unsupported website or not a board/thread!");
-                Form.urlTextBox.Text = "";
+                MessageBox.Show($"Entered text '{url}' is not a supported site or board/thread!");
             }
         }
 

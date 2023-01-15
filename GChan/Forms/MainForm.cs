@@ -95,12 +95,12 @@ namespace GChan.Forms
             }
         }
 
-        private void urlTextBox_DragDrop(object sender, DragEventArgs e)
+        private void DragDropHandler(object sender, DragEventArgs e)
         {
-            string entry = (string)e.Data.GetData(DataFormats.Text);               // Get url from drag and drop
+            var textData = (string)e.Data.GetData(DataFormats.Text);
 
             // Get url from TextBox
-            var urls = entry.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            var urls = textData.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
             for (int i = 0; i < urls.Length; i++)
             {
@@ -109,10 +109,10 @@ namespace GChan.Forms
             }
         }
 
-        private void urlTextBox_DragEnter(object sender, DragEventArgs e)
+        private void DragEnterHandler(object sender, DragEventArgs e)
         {
             // See if this is a copy and the data includes text.
-            if (e.Data.GetDataPresent(DataFormats.Text) && (e.AllowedEffect & DragDropEffects.Copy) != 0)
+            if (e.Data.GetDataPresent(DataFormats.Text) && e.AllowedEffect.HasFlag(DragDropEffects.Copy))
             {
                 // Allow this.
                 e.Effect = DragDropEffects.Copy;

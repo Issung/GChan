@@ -111,7 +111,7 @@
             this.settingsToolStripMenuItem1.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.settingsToolStripMenuItem1.Name = "settingsToolStripMenuItem1";
             this.settingsToolStripMenuItem1.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-            this.settingsToolStripMenuItem1.Size = new System.Drawing.Size(180, 22);
+            this.settingsToolStripMenuItem1.Size = new System.Drawing.Size(179, 22);
             this.settingsToolStripMenuItem1.Text = "&Settings";
             this.settingsToolStripMenuItem1.Click += new System.EventHandler(this.settingsToolStripMenuItem_Click);
             // 
@@ -120,7 +120,7 @@
             this.openFolderToolStripMenuItem1.Image = global::GChan.Properties.Resources.folder;
             this.openFolderToolStripMenuItem1.Name = "openFolderToolStripMenuItem1";
             this.openFolderToolStripMenuItem1.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.F)));
-            this.openFolderToolStripMenuItem1.Size = new System.Drawing.Size(180, 22);
+            this.openFolderToolStripMenuItem1.Size = new System.Drawing.Size(179, 22);
             this.openFolderToolStripMenuItem1.Text = "Open &Folder";
             this.openFolderToolStripMenuItem1.Click += new System.EventHandler(this.openFolderToolStripMenuItem1_Click);
             // 
@@ -129,7 +129,7 @@
             this.openLogsToolStripMenuItem.Image = global::GChan.Properties.Resources.file;
             this.openLogsToolStripMenuItem.Name = "openLogsToolStripMenuItem";
             this.openLogsToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.P)));
-            this.openLogsToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.openLogsToolStripMenuItem.Size = new System.Drawing.Size(179, 22);
             this.openLogsToolStripMenuItem.Text = "Open Logs";
             this.openLogsToolStripMenuItem.ToolTipText = "The ProgramData folder contains the files used to store saved threads & boards, a" +
     "nd also crash logs to help with debugging.";
@@ -141,7 +141,7 @@
             this.exitToolStripMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
             this.exitToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Q)));
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(179, 22);
             this.exitToolStripMenuItem.Text = "&Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
@@ -452,8 +452,6 @@
             this.urlTextBox.Name = "urlTextBox";
             this.urlTextBox.Size = new System.Drawing.Size(366, 20);
             this.urlTextBox.TabIndex = 3;
-            this.urlTextBox.DragDrop += new System.Windows.Forms.DragEventHandler(this.urlTextBox_DragDrop);
-            this.urlTextBox.DragEnter += new System.Windows.Forms.DragEventHandler(this.urlTextBox_DragEnter);
             // 
             // systemTrayNotifyIcon
             // 
@@ -516,6 +514,7 @@
             // MainForm
             // 
             this.AcceptButton = this.addButton;
+            this.AllowDrop = true;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(582, 294);
@@ -533,6 +532,8 @@
             this.Load += new System.EventHandler(this.MainForm_Load);
             this.Shown += new System.EventHandler(this.MainForm_Shown);
             this.SizeChanged += new System.EventHandler(this.MainForm_SizeChanged);
+            this.DragDrop += new System.Windows.Forms.DragEventHandler(this.DragDropHandler);
+            this.DragEnter += new System.Windows.Forms.DragEventHandler(this.DragEnterHandler);
             this.menuStrip.ResumeLayout(false);
             this.menuStrip.PerformLayout();
             this.listsTabControl.ResumeLayout(false);
