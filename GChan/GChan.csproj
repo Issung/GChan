@@ -10,6 +10,7 @@
     <RootNamespace>GChan</RootNamespace>
     <AssemblyName>GChan</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+	<LangVersion>11</LangVersion>
     <FileAlignment>512</FileAlignment>
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <TargetFrameworkProfile />

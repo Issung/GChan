@@ -130,13 +130,17 @@ namespace GChan.Trackers
                 });
 
                 if (imageLinks.Length > 0)
+                { 
                     GreatestSavedFileTim = imageLinks.Max(t => t.Tim);
+                }
             }
             catch (WebException webEx)
             {
-                var httpWebResponse = webEx.Response as HttpWebResponse;
+                var httpWebResponse = (HttpWebResponse)webEx.Response;
+                var statusCode = httpWebResponse.StatusCode;
+                var goneStatusCodes = new[] { HttpStatusCode.NotFound, HttpStatusCode.Gone };
 
-                if (webEx.Status == WebExceptionStatus.ProtocolError || (httpWebResponse?.StatusCode == HttpStatusCode.NotFound))
+                if (webEx.Status == WebExceptionStatus.ProtocolError && goneStatusCodes.Contains(statusCode))
                 {
                     logger.Info(webEx, $"404 occured in {this} {nameof(DownloadImages)}. 'Gone' set to true.");
                     Gone = true;
