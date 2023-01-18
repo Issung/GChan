@@ -52,6 +52,12 @@ namespace GChan.Trackers
         /// </summary>
         public string ID { get; protected set; }
 
+        private readonly HttpStatusCode[] goneStatusCodes = 
+        {
+            HttpStatusCode.NotFound,
+            HttpStatusCode.Gone,
+        };
+
         public int? FileCount { 
             get { return fileCount; }
             set { 
@@ -138,7 +144,6 @@ namespace GChan.Trackers
             {
                 var httpWebResponse = (HttpWebResponse)webEx.Response;
                 var statusCode = httpWebResponse.StatusCode;
-                var goneStatusCodes = new[] { HttpStatusCode.NotFound, HttpStatusCode.Gone };
 
                 if (webEx.Status == WebExceptionStatus.ProtocolError && goneStatusCodes.Contains(statusCode))
                 {
