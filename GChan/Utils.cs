@@ -192,13 +192,15 @@ namespace GChan
         public static bool DownloadToDir(ImageLink link, string dir)
         {
             if (!Directory.Exists(dir))
+            { 
                 Directory.CreateDirectory(dir);
+            }
 
             string destFilepath = CombinePathAndFilename(dir, link.GenerateNewFilename((ImageFileNameFormat)Properties.Settings.Default.ImageFilenameFormat));
 
             try
             {
-                WebClient webClient = new WebClient();
+                using var webClient = new WebClient();
                 webClient.DownloadFile(link.URL, destFilepath);
 
                 // TODO: Figure out how to make the async downloading work properly.
@@ -211,8 +213,6 @@ namespace GChan
                         //Do nothing?
                     }
                 });*/
-
-                //new Thread(() => { webClient.DownloadFile(link.URL, destFilepath); }).Start();
 
                 return true;
             }

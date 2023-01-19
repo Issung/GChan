@@ -52,6 +52,12 @@ namespace GChan.Trackers
         /// </summary>
         public string ID { get; protected set; }
 
+        private readonly HttpStatusCode[] goneStatusCodes = 
+        {
+            HttpStatusCode.NotFound,
+            HttpStatusCode.Gone,
+        };
+
         public int? FileCount { 
             get { return fileCount; }
             set { 
@@ -130,13 +136,16 @@ namespace GChan.Trackers
                 });
 
                 if (imageLinks.Length > 0)
+                { 
                     GreatestSavedFileTim = imageLinks.Max(t => t.Tim);
+                }
             }
             catch (WebException webEx)
             {
-                var httpWebResponse = webEx.Response as HttpWebResponse;
+                var httpWebResponse = (HttpWebResponse)webEx.Response;
+                var statusCode = httpWebResponse.StatusCode;
 
-                if (webEx.Status == WebExceptionStatus.ProtocolError || (httpWebResponse?.StatusCode == HttpStatusCode.NotFound))
+                if (webEx.Status == WebExceptionStatus.ProtocolError && goneStatusCodes.Contains(statusCode))
                 {
                     logger.Info(webEx, $"404 occured in {this} {nameof(DownloadImages)}. 'Gone' set to true.");
                     Gone = true;
