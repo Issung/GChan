@@ -1,5 +1,6 @@
 ﻿using GChan.Controls;
 using GChan.Forms;
+using GChan.Properties;
 using GChan.Trackers;
 using NLog;
 using System.ComponentModel;
@@ -32,7 +33,7 @@ namespace GChan.Models
 
         public string NotificationTrayTooltip {
             get {
-                return $"Scraping {Threads.Count} thread{(Threads.Count != 1 ? "s" : "")} and {Boards.Count} board{(Boards.Count != 1 ? "s" : "")} every {Properties.Settings.Default.ScanTimer / 60 / 1000} minute{((Properties.Settings.Default.ScanTimer / 60 / 1000) != 1 ? "s" : "")}." +
+                return $"Scraping {Threads.Count} thread{(Threads.Count != 1 ? "s" : "")} and {Boards.Count} board{(Boards.Count != 1 ? "s" : "")} every {Settings.Default.ScanTimer / 60 / 1000} minute{((Settings.Default.ScanTimer / 60 / 1000) != 1 ? "s" : "")}." +
                     "\nClick to show/hide.";
             }
         }

@@ -1,5 +1,6 @@
 ﻿using GChan.Controllers;
 using GChan.Models;
+using GChan.Properties;
 using GChan.Trackers;
 using NLog;
 using NLog.Targets;
@@ -82,7 +83,7 @@ namespace GChan.Forms
             // Clear TextBox faster
             urlTextBox.Text = "";
 
-            if (string.IsNullOrWhiteSpace(textBox) && Clipboard.ContainsText() && Properties.Settings.Default.AddUrlFromClipboardWhenTextboxEmpty)
+            if (string.IsNullOrWhiteSpace(textBox) && Clipboard.ContainsText() && Settings.Default.AddUrlFromClipboardWhenTextboxEmpty)
                 textBox = Clipboard.GetText();
 
             // Get url from TextBox
@@ -184,15 +185,15 @@ namespace GChan.Forms
 
         private void settingsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Settings tSettings = new Settings();
+            SettingsForm tSettings = new SettingsForm();
             tSettings.ShowDialog();
             tSettings.Dispose();
-            if (Properties.Settings.Default.MinimizeToTray)
+            if (Settings.Default.MinimizeToTray)
                 systemTrayNotifyIcon.Visible = true;
             else
                 systemTrayNotifyIcon.Visible = false;
 
-            Controller.ScanTimerInterval = Properties.Settings.Default.ScanTimer;
+            Controller.ScanTimerInterval = Settings.Default.ScanTimer;
         }
 
         private void openBoardFolderToolStripMenuItem_Click(object sender, EventArgs e)
@@ -230,7 +231,7 @@ namespace GChan.Forms
 
         private void openFolderToolStripMenuItem1_Click(object sender, EventArgs e)
         {
-            Process.Start(Properties.Settings.Default.SavePath);
+            Process.Start(Settings.Default.SavePath);
         }
 
         private void clearAllButton_Click(object sender, EventArgs e)
@@ -351,7 +352,7 @@ namespace GChan.Forms
 
         private void systemTrayOpenFolderToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            string spath = Properties.Settings.Default.SavePath;
+            string spath = Settings.Default.SavePath;
 
             if (!Directory.Exists(spath))
                 Directory.CreateDirectory(spath);
@@ -366,7 +367,7 @@ namespace GChan.Forms
 
         private void MainForm_SizeChanged(object sender, EventArgs e)
         {
-            if (Properties.Settings.Default.MinimizeToTray && WindowState == FormWindowState.Minimized)
+            if (Settings.Default.MinimizeToTray && WindowState == FormWindowState.Minimized)
             {
                 // When minimized hide from taskbar if trayicon enabled
                 Hide();

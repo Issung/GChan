@@ -1,5 +1,6 @@
 ﻿using GChan.Data;
 using GChan.Forms;
+using GChan.Properties;
 using NLog;
 using System;
 using System.IO;
@@ -48,12 +49,12 @@ namespace GChan
             Directory.CreateDirectory(PROGRAM_DATA_PATH);
 #endif
 
-            if (Properties.Settings.Default.UpdateSettings)
+            if (Settings.Default.UpdateSettings)
             {
-                Properties.Settings.Default.Upgrade();
-                Properties.Settings.Default.Reload();
-                Properties.Settings.Default.UpdateSettings = false;
-                Properties.Settings.Default.Save();
+                Settings.Default.Upgrade();
+                Settings.Default.Reload();
+                Settings.Default.UpdateSettings = false;
+                Settings.Default.Save();
             }
 
             // See if an instance is already running...
@@ -100,8 +101,8 @@ namespace GChan
         /// </summary>
         public static void Application_ThreadException(object sender, ThreadExceptionEventArgs exceptionArgs)
         {
-            Properties.Settings.Default.SaveListsOnClose = true;
-            Properties.Settings.Default.Save();
+            Settings.Default.SaveListsOnClose = true;
+            Settings.Default.Save();
 
             try
             {
@@ -121,8 +122,8 @@ namespace GChan
         /// </summary>
         public static void AppDomain_UnhandledException(object sender, UnhandledExceptionEventArgs args)
         {
-            Properties.Settings.Default.SaveListsOnClose = true;
-            Properties.Settings.Default.Save();
+            Settings.Default.SaveListsOnClose = true;
+            Settings.Default.Save();
 
             try
             {

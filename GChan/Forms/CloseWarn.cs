@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GChan.Properties;
+using System;
 using System.Windows.Forms;
 
 namespace GChan
@@ -28,20 +29,20 @@ namespace GChan
 
         private void chkWarning_CheckedChanged(object sender, EventArgs e)
         {
-            Properties.Settings.Default.WarnOnClose = !chkWarning.Checked;
-            Properties.Settings.Default.Save();
+            Settings.Default.WarnOnClose = !chkWarning.Checked;
+            Settings.Default.Save();
         }
 
         private void chkSave_CheckedChanged(object sender, EventArgs e)
         {
-            Properties.Settings.Default.SaveListsOnClose = chkSave.Checked;
-            Properties.Settings.Default.Save();
+            Settings.Default.SaveListsOnClose = chkSave.Checked;
+            Settings.Default.Save();
         }
 
         private void CloseWarn_Load(object sender, EventArgs e)
         {
-            chkSave.Checked = Properties.Settings.Default.SaveListsOnClose;
-            chkWarning.Checked = !Properties.Settings.Default.WarnOnClose;
+            chkSave.Checked = Settings.Default.SaveListsOnClose;
+            chkWarning.Checked = !Settings.Default.WarnOnClose;
         }
     }
 }

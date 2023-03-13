@@ -1,4 +1,5 @@
 ﻿using GChan.Data;
+using GChan.Properties;
 using GChan.Trackers;
 using Microsoft.Win32;
 using NLog;
@@ -47,20 +48,20 @@ namespace GChan
             bool addUrlFromClipboardWhenTextboxEmpty,
             bool checkForUpdatesOnStart)
         {
-            Properties.Settings.Default.SavePath = path;
-            Properties.Settings.Default.ScanTimer = time;
-            Properties.Settings.Default.ImageFilenameFormat = (byte)imageFileNameFormat;
-            Properties.Settings.Default.ThreadFolderNameFormat = (byte)threadFolderNameFormat;
-            Properties.Settings.Default.SaveHTML = loadHTML;
-            Properties.Settings.Default.SaveListsOnClose = saveOnclose;
-            Properties.Settings.Default.MinimizeToTray = minimizeToTray;
-            Properties.Settings.Default.WarnOnClose = closeWarn;
-            Properties.Settings.Default.StartWithWindowsMinimized = startWithWindowsMinimized;
-            Properties.Settings.Default.AddThreadSubjectToFolder = addThreadSubjectToFolder;
-            Properties.Settings.Default.AddUrlFromClipboardWhenTextboxEmpty = addUrlFromClipboardWhenTextboxEmpty;
-            Properties.Settings.Default.CheckForUpdatesOnStart = checkForUpdatesOnStart;
+            Settings.Default.SavePath = path;
+            Settings.Default.ScanTimer = time;
+            Settings.Default.ImageFilenameFormat = (byte)imageFileNameFormat;
+            Settings.Default.ThreadFolderNameFormat = (byte)threadFolderNameFormat;
+            Settings.Default.SaveHTML = loadHTML;
+            Settings.Default.SaveListsOnClose = saveOnclose;
+            Settings.Default.MinimizeToTray = minimizeToTray;
+            Settings.Default.WarnOnClose = closeWarn;
+            Settings.Default.StartWithWindowsMinimized = startWithWindowsMinimized;
+            Settings.Default.AddThreadSubjectToFolder = addThreadSubjectToFolder;
+            Settings.Default.AddUrlFromClipboardWhenTextboxEmpty = addUrlFromClipboardWhenTextboxEmpty;
+            Settings.Default.CheckForUpdatesOnStart = checkForUpdatesOnStart;
 
-            Properties.Settings.Default.Save();
+            Settings.Default.Save();
 
             RegistryKey registryKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
 
@@ -196,7 +197,7 @@ namespace GChan
                 Directory.CreateDirectory(dir);
             }
 
-            string destFilepath = CombinePathAndFilename(dir, link.GenerateNewFilename((ImageFileNameFormat)Properties.Settings.Default.ImageFilenameFormat));
+            string destFilepath = CombinePathAndFilename(dir, link.GenerateNewFilename((ImageFileNameFormat)Settings.Default.ImageFilenameFormat));
 
             try
             {
@@ -235,7 +236,7 @@ namespace GChan
             string subject = SanitiseSubjectString(thread.Subject);
 
             // There are \r characters appearing from the custom subjects, TODO: need to get to the bottom of the cause of this.
-            var folderNameFormat = (ThreadFolderNameFormat)Properties.Settings.Default.ThreadFolderNameFormat;
+            var folderNameFormat = (ThreadFolderNameFormat)Settings.Default.ThreadFolderNameFormat;
             var destinationDirectory = folderNameFormat switch
             {
                 ThreadFolderNameFormat.IdSubject => $"{currentDirectory} - {subject}",

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GChan.Properties;
+using System;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
@@ -91,10 +92,7 @@ namespace GChan.Trackers
 
         public void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
         {
-#if DEBUG
-            logger.Trace($"NotifyPropertyChanged! propertyName: {propertyName}.");
-#endif
-
+            logger.Debug($"NotifyPropertyChanged! propertyName: {propertyName}.");
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
@@ -108,7 +106,7 @@ namespace GChan.Trackers
             {
                 DownloadImages();
 
-                if (!Gone && Properties.Settings.Default.SaveHTML)
+                if (!Gone && Settings.Default.SaveHTML)
                 {
                     DownloadHTMLPage();
                 }

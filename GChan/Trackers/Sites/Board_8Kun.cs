@@ -1,4 +1,5 @@
-﻿using NLog;
+﻿using GChan.Properties;
+using NLog;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
@@ -23,7 +24,7 @@ namespace GChan.Trackers
             Match boardCodeMatch = Regex.Match(url, boardCodeRegex);
             BoardCode = boardCodeMatch.Groups[0].Value;
 
-            SaveTo = Path.Combine(Properties.Settings.Default.SavePath, SiteName, BoardCode);
+            SaveTo = Path.Combine(Settings.Default.SavePath, SiteName, BoardCode);
         }
 
         public static bool UrlIsBoard(string url)

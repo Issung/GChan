@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GChan.Properties;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
@@ -29,7 +30,7 @@ namespace GChan.Trackers
             Match idCodeMatch = Regex.Match(url, ID_CODE_REGEX);
             ID = idCodeMatch.Groups[0].Value;
 
-            SaveTo = Path.Combine(Properties.Settings.Default.SavePath, SiteName, BoardCode, ID);
+            SaveTo = Path.Combine(Settings.Default.SavePath, SiteName, BoardCode, ID);
 
             if (subject == null)
                 Subject = GetThreadSubject();

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GChan.Properties;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
@@ -29,7 +30,7 @@ namespace GChan.Trackers
             Match idCodeMatch = Regex.Match(url, ID_CODE_REGEX);
             ID = idCodeMatch.Groups[0].Value;
 
-            SaveTo = Properties.Settings.Default.SavePath + "\\" + SiteName + "\\" + BoardCode + "\\" + ID;
+            SaveTo = Settings.Default.SavePath + "\\" + SiteName + "\\" + BoardCode + "\\" + ID;
 
             if (subject == null)
                 Subject = GetThreadSubject();
@@ -137,7 +138,7 @@ namespace GChan.Trackers
                     htmlPage = htmlPage.Replace(old, rep);
 
                     //get the actual filename saved
-                    string filename = Path.GetFileNameWithoutExtension(new ImageLink(baseURL + xmlTim[i].InnerText + xmlExt[i].InnerText, xmlFilenames[i].InnerText).GenerateNewFilename((ImageFileNameFormat)Properties.Settings.Default.ImageFilenameFormat));
+                    string filename = Path.GetFileNameWithoutExtension(new ImageLink(baseURL + xmlTim[i].InnerText + xmlExt[i].InnerText, xmlFilenames[i].InnerText).GenerateNewFilename((ImageFileNameFormat)Settings.Default.ImageFilenameFormat));
 
                     //Save thumbs for files that need it
                     if (rep.Split('.')[1] == "webm")

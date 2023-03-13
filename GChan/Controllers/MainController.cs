@@ -1,6 +1,7 @@
 ﻿using GChan.Data;
 using GChan.Forms;
 using GChan.Models;
+using GChan.Properties;
 using GChan.Trackers;
 using NLog;
 using Onova.Models;
@@ -74,13 +75,13 @@ namespace GChan.Controllers
 
             UpdateController.Instance.UpdateCheckFinished += Instance_UpdateCheckFinished;
 
-            if (!Properties.Settings.Default.MinimizeToTray)
+            if (!Settings.Default.MinimizeToTray)
             { 
                 Form.systemTrayNotifyIcon.Visible = false;
             }
 
             scanTimer.Enabled = false;
-            scanTimer.Interval = Properties.Settings.Default.ScanTimer;
+            scanTimer.Interval = Settings.Default.ScanTimer;
             scanTimer.Tick += new EventHandler(Scan);
         }
 
@@ -89,7 +90,7 @@ namespace GChan.Controllers
             ///Require the save on close setting to be true to load threads on application open.
             const bool requireSaveOnCloseToBeTrueToLoadThreadsAndBoards = true;
 
-            if (!requireSaveOnCloseToBeTrueToLoadThreadsAndBoards || Properties.Settings.Default.SaveListsOnClose)              // If enabled load URLs from file
+            if (!requireSaveOnCloseToBeTrueToLoadThreadsAndBoards || Settings.Default.SaveListsOnClose)              // If enabled load URLs from file
             {
                 var boards = DataController.LoadBoards();
                 var threads = DataController.LoadThreads();
@@ -125,7 +126,7 @@ namespace GChan.Controllers
                 Scan(this, new EventArgs());
 
                 // Check for updates.
-                if (Properties.Settings.Default.CheckForUpdatesOnStart)
+                if (Settings.Default.CheckForUpdatesOnStart)
                 {
                     UpdateController.Instance.CheckForUpdates(false);
                 }
@@ -404,7 +405,7 @@ namespace GChan.Controllers
 
             try
             {
-                if (Properties.Settings.Default.AddThreadSubjectToFolder)
+                if (Settings.Default.AddThreadSubjectToFolder)
                 {
                     Utils.MoveThread(thread);
                 }
@@ -456,7 +457,7 @@ namespace GChan.Controllers
         // TODO: This method has 2 functions, warning if needed and cleanup, seperate into 2 responsibilities.
         public bool Closing()
         {
-            if (Properties.Settings.Default.WarnOnClose && Model.Threads.Count > 0)
+            if (Settings.Default.WarnOnClose && Model.Threads.Count > 0)
             {
                 using var closeDialog = new CloseWarn();
                 var dialogResult = closeDialog.ShowDialog();
@@ -473,7 +474,7 @@ namespace GChan.Controllers
             scanTimer.Enabled = false;
             scanTimer.Dispose();
 
-            if (Properties.Settings.Default.SaveListsOnClose)
+            if (Settings.Default.SaveListsOnClose)
             { 
                 DataController.SaveAll(Model.Threads.ToList(), Model.Boards);
             }
