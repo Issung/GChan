@@ -21,48 +21,57 @@ namespace GChan.Trackers
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public long GreatestSavedFileTim {
-            get {
+        public long GreatestSavedFileTim
+        {
+            get
+            {
                 return greatestSavedFileTim;
             }
 
-            set {
-                if (value > greatestSavedFileTim) {
+            set
+            {
+                if (value > greatestSavedFileTim)
+                {
                     greatestSavedFileTim = value;
                 }
             }
         }
 
-        public string Subject { 
-            get {
+        public string Subject
+        {
+            get
+            {
                 if (subject == null)
                     return NO_SUBJECT;
                 else
                     return subject;
             }
 
-            set {
+            set
+            {
                 subject = value;
                 NotifyPropertyChanged();
             }
         }
 
         /// <summary>
-        /// The ID of the thread (AKA No. (number))
+        /// The identifier of the thread (AKA No. (number))
         /// </summary>
         public string ID { get; protected set; }
 
-        private readonly HttpStatusCode[] goneStatusCodes = 
+        private readonly HttpStatusCode[] goneStatusCodes =
         {
             HttpStatusCode.NotFound,
             HttpStatusCode.Gone,
         };
 
-        public int? FileCount { 
-            get { return fileCount; }
-            set { 
-                fileCount = value; 
-                Program.mainForm.Invoke(new Action(() => { NotifyPropertyChanged(nameof(FileCount)); })); 
+        public int? FileCount
+        {
+            get => fileCount;
+            set
+            {
+                fileCount = value;
+                Program.mainForm.Invoke(new Action(() => { NotifyPropertyChanged(nameof(FileCount)); }));
             }
         }
 
@@ -76,7 +85,7 @@ namespace GChan.Trackers
             {
                 //TODO: Do this with Regex or Uri and HTTPUtility HttpUtility.ParseQueryString (https://stackoverflow.com/a/659929/8306962)
                 subject = url.Substring(url.LastIndexOf('=') + 1).Replace('_', ' ');
-                URL = url.Substring(0, url.LastIndexOf('/'));
+                Url = url.Substring(0, url.LastIndexOf('/'));
             }
         }
 
@@ -100,7 +109,7 @@ namespace GChan.Trackers
                 DownloadImages();
 
                 if (!Gone && Properties.Settings.Default.SaveHTML)
-                { 
+                {
                     DownloadHTMLPage();
                 }
             }
@@ -121,22 +130,18 @@ namespace GChan.Trackers
                     {
                         if (link.Tim > GreatestSavedFileTim)
                         {
-#if DEBUG
-                            logger.Debug($"Downloading file {link} because it's Tim was greater than {GreatestSavedFileTim}.");
-#endif
+                            logger.Debug($"Downloading file {link} because its Tim was greater than {GreatestSavedFileTim}.");
                             Utils.DownloadToDir(link, SaveTo);
                         }
                         else
                         {
-#if DEBUG
-                            logger.Debug($"Skipping downloading file {link} because it's Tim was less than than {GreatestSavedFileTim}.");
-#endif
+                            logger.Debug($"Skipping downloading file {link} because its Tim was less than than {GreatestSavedFileTim}.");
                         }
                     }
                 });
 
                 if (imageLinks.Length > 0)
-                { 
+                {
                     GreatestSavedFileTim = imageLinks.Max(t => t.Tim);
                 }
             }
@@ -150,8 +155,8 @@ namespace GChan.Trackers
                     logger.Info(webEx, $"404 occured in {this} {nameof(DownloadImages)}. 'Gone' set to true.");
                     Gone = true;
                 }
-                else 
-                { 
+                else
+                {
                     logger.Error(webEx);
                 }
             }
@@ -174,7 +179,7 @@ namespace GChan.Trackers
 
         public string GetURLWithSubject()
         {
-            return (URL + ("/?subject=" + Utils.CleanSubjectString(Subject).Replace(' ', '_'))).Replace("\r", "");
+            return (Url + ("/?subject=" + Utils.SanitiseSubjectString(Subject).Replace(' ', '_'))).Replace("\r", "");
         }
     }
 }

@@ -148,7 +148,7 @@ namespace GChan.Data
                                         VALUES 
                                             (@{COL_URL}, @{COL_GREATEST_SAVED}, @{COL_SUBJECT})";
 
-                    cmd.Parameters.AddWithValue(COL_URL, threads[i].URL);
+                    cmd.Parameters.AddWithValue(COL_URL, threads[i].Url);
                     cmd.Parameters.AddWithValue(COL_GREATEST_SAVED, threads[i].GreatestSavedFileTim);
                     cmd.Parameters.AddWithValue(COL_SUBJECT, threads[i].Subject);
 
@@ -189,7 +189,7 @@ namespace GChan.Data
                 {
 
                     cmd.CommandText = $@"INSERT INTO {TB_BOARD} ({COL_URL}, {COL_GREATEST_SAVED}) VALUES (@{COL_URL}, @{COL_GREATEST_SAVED})";
-                    cmd.Parameters.AddWithValue(COL_URL, boards[i].URL);
+                    cmd.Parameters.AddWithValue(COL_URL, boards[i].Url);
                     cmd.Parameters.AddWithValue(COL_GREATEST_SAVED, boards[i].LargestAddedThreadNo);
 
                     cmd.ExecuteNonQuery();

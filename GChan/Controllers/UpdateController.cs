@@ -11,14 +11,18 @@ using System.Windows.Forms;
 
 namespace GChan.Controllers
 {
+    /// <summary>
+    /// Controller that manages the check for updates/updating version flow.
+    /// </summary>
     class UpdateController
     {
         private static UpdateController instance = null;
 
-        public static UpdateController Instance { get {
-                if (instance == null)
-                    instance = new UpdateController();
-
+        public static UpdateController Instance 
+        { 
+            get 
+            {
+                instance ??= new UpdateController();
                 return instance;
             } 
         }

@@ -8,7 +8,9 @@ using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Windows.Forms;
+using Thread = GChan.Trackers.Thread;
 
 namespace GChan
 {
@@ -92,8 +94,7 @@ namespace GChan
 
             Tracker tracker = CreateNewTracker(info.URL);
 
-            var trackerType = tracker.GetType();
-            
+            // TODO: Use 'is' check on type and cast at same time.
             if (tracker.Type == Trackers.Type.Thread)
             {
                 ((Thread)tracker).GreatestSavedFileTim = greatestSaved;
@@ -149,40 +150,39 @@ namespace GChan
             return url;
         }
 
-        private static string GetFileNameFromURL(string hrefLink)
+        private static string GetFilenameFromUrl(string hrefLink)
         {
-            string[] parts = hrefLink.Split('/');
-            string fileName = "";
-
-            if (parts.Length > 0)
-                fileName = parts.Last();
-            else
-                fileName = hrefLink;
-
+            var parts = hrefLink.Split('/');
+            var fileName = parts.LastOrDefault() ?? hrefLink;
             return fileName;
         }
 
-        public static bool DownloadToDir(string url, string dir)
+        /// <returns>True if file was downloaded or already existed, false for error occured.</returns>
+        public static bool DownloadFile(string url, string directory)
         {
-            if (!Directory.Exists(dir))
-                Directory.CreateDirectory(dir);
+            if (!Directory.Exists(directory))
+            { 
+                Directory.CreateDirectory(directory);
+            }
 
-            string fileName = GetFileNameFromURL(url);
-            dir = dir + "\\" + fileName;
+            var fileName = GetFilenameFromUrl(url);
+            var fullpath = Path.Combine(directory, fileName);
 
             try
             {
-                if (!File.Exists(dir))
+                if (!File.Exists(fullpath))
                 {
-                    WebClient webClient = new WebClient();
-                    webClient.DownloadFile(url, dir);
+                    using var client = new WebClient();
+                    client.DownloadFile(url, fullpath);
                 }
+
                 return true;
             }
-            catch (WebException WebE)
+            catch (Exception e)
             {
+                // Should we throw?
+                logger.Log(LogLevel.Warn, e, "Exception occured downloading file.");
                 return false;
-                throw WebE;
             }
         }
 
@@ -224,6 +224,49 @@ namespace GChan
         }
 
         /// <summary>
+        /// Move thread directory for removal, based on settings.
+        /// </summary>
+        /// <exception cref="IOException"/>
+        /// <exception cref="UnauthorizedAccessException"/>
+        /// <exception cref="PathTooLongException"/>
+        public static void MoveThread(Thread thread)
+        {
+            string currentDirectory = thread.SaveTo.Replace("\r", "");
+            string subject = SanitiseSubjectString(thread.Subject);
+
+            // There are \r characters appearing from the custom subjects, TODO: need to get to the bottom of the cause of this.
+            var folderNameFormat = (ThreadFolderNameFormat)Properties.Settings.Default.ThreadFolderNameFormat;
+            var destinationDirectory = folderNameFormat switch
+            {
+                ThreadFolderNameFormat.IdSubject => $"{currentDirectory} - {subject}",
+                ThreadFolderNameFormat.SubjectId => Path.Combine(Path.GetDirectoryName(currentDirectory), $"{subject} - {thread.ID}"),
+                _ => throw new Exception($"Unknown value {folderNameFormat} for thread folder name format."),
+            };
+
+            destinationDirectory = destinationDirectory.Replace("\r", "").Trim('\\', '/');
+
+            if (!Directory.Exists(currentDirectory))
+            {
+                logger.Info($"While attempting to move thread {thread} the current directory could not be found, abandoning.");
+                return;
+            }
+
+            // Attmept normal directory move, if already exists add a number in bracket starting with 1 going upwards.
+            int number = 0;
+            string indexBracket() => (number == 0) ? "" : $" ({number})";
+            string newDirectory() => destinationDirectory + indexBracket();
+
+            while (Directory.Exists(newDirectory()))
+            {
+                number++;
+            }
+
+            logger.Info($"Moving thread directory '{currentDirectory}' to '{newDirectory()}'.");
+
+            Directory.Move(currentDirectory, newDirectory());
+        }
+
+        /// <summary>
         /// Combine a path and filename with two backslashes \\ and clamp the final return out at a constant 255 length.
         /// </summary>
         public static string CombinePathAndFilename(string directory, string filename)
@@ -261,7 +304,7 @@ namespace GChan
         /// Remove a string of characters illegal for a folder name. Used for thread subjects if 
         /// addThreadSubjectToFolder setting is enabled.
         /// </summary>
-        public static string CleanSubjectString(string subject)
+        public static string SanitiseSubjectString(string subject)
         {
             StringBuilder sb = new StringBuilder();
 

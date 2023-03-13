@@ -154,7 +154,7 @@ namespace GChan.Forms
         {
             if (ThreadGridViewSelectedRowIndex != -1)
             {
-                string spath = Model.Threads[ThreadGridViewSelectedRowIndex].URL;
+                string spath = Model.Threads[ThreadGridViewSelectedRowIndex].Url;
                 Process.Start(spath);
             }
         }
@@ -163,7 +163,7 @@ namespace GChan.Forms
         {
             if (ThreadGridViewSelectedRowIndex != -1)
             {
-                string spath = Model.Threads[ThreadGridViewSelectedRowIndex].URL;
+                string spath = Model.Threads[ThreadGridViewSelectedRowIndex].Url;
                 Clipboard.SetText(spath);
             }
         }
@@ -235,8 +235,10 @@ namespace GChan.Forms
 
         private void clearAllButton_Click(object sender, EventArgs e)
         {
-            if (listsTabControl.SelectedIndex > 1) 
+            if (listsTabControl.SelectedIndex > 1)
+            { 
                 return;
+            }
 
             Controller.ClearTrackers(listsTabControl.SelectedIndex == 0 ? Type.Thread : Type.Board);
         }
@@ -299,11 +301,11 @@ namespace GChan.Forms
 
             if (listsTabControl.SelectedIndex == 0)
             {
-                text = string.Join(",", Model.Threads.Select(thread => thread.URL)).Replace("\n", "").Replace("\r", "");
+                text = string.Join(",", Model.Threads.Select(thread => thread.Url)).Replace("\n", "").Replace("\r", "");
             }
             else
             {
-                text = string.Join(",", Model.Boards.Select(board => board.URL)).Replace("\n", "").Replace("\r", "");
+                text = string.Join(",", Model.Boards.Select(board => board.Url)).Replace("\n", "").Replace("\r", "");
             }
 
             Clipboard.SetText(text);

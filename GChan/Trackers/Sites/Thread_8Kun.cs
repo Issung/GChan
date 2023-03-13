@@ -14,7 +14,7 @@ namespace GChan.Trackers
     {
         public const string threadRegex = @"8kun.top/[a-zA-Z0-9]*?/res/[0-9]*.[^0-9]*";
         public const string boardCodeRegex = @"(?<=(8kun.top/))[a-zA-Z0-9]+(?=(/res/))";
-        public const string idCodeRegex = @"(?<=(res/))[0-9]+(?=(.html))";
+        public const string ID_CODE_REGEX = @"(?<=(res/))[0-9]+(?=(.html))";
 
         public Thread_8Kun(string url) : base(url)
         {
@@ -26,7 +26,7 @@ namespace GChan.Trackers
             Match boardCodeMatch = Regex.Match(url, boardCodeRegex);
             BoardCode = boardCodeMatch.Groups[0].Value;
 
-            Match idCodeMatch = Regex.Match(url, idCodeRegex);
+            Match idCodeMatch = Regex.Match(url, ID_CODE_REGEX);
             ID = idCodeMatch.Groups[0].Value;
 
             SaveTo = Path.Combine(Properties.Settings.Default.SavePath, SiteName, BoardCode, ID);
@@ -113,9 +113,9 @@ namespace GChan.Trackers
 
             try
             {
-                string htmlPage = new WebClient().DownloadString(URL);
+                string htmlPage = new WebClient().DownloadString(Url);
 
-                string JURL = URL.Replace(".html", ".json");
+                string JURL = Url.Replace(".html", ".json");
 
                 string Content = new WebClient().DownloadString(JURL);
 
@@ -170,7 +170,7 @@ namespace GChan.Trackers
 
                 for (int i = 0; i < thumbs.Count; i++)
                 {
-                    Utils.DownloadToDir(thumbs[i], SaveTo + "\\thumb");
+                    Utils.DownloadFile(thumbs[i], SaveTo + "\\thumb");
                 }
 
                 if (!String.IsNullOrWhiteSpace(htmlPage))
@@ -209,7 +209,7 @@ namespace GChan.Trackers
                             if (rawjson.Substring(i, SUB_ENDER.Length) == SUB_ENDER)
                             {
                                 subject = rawjson.Substring(subStartIndex + SUB_HEADER.Length, i - (subStartIndex + SUB_HEADER.Length));
-                                subject = Utils.CleanSubjectString(WebUtility.HtmlDecode(subject));
+                                subject = Utils.SanitiseSubjectString(WebUtility.HtmlDecode(subject));
                                 break;
                             }
                         }

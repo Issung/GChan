@@ -21,7 +21,7 @@ namespace GChan.Trackers
             SiteName = Board_4Chan.SITE_NAME_4CHAN;
 
             Match match = Regex.Match(url, @"boards.(4chan|4channel).org/[a-zA-Z0-9]*?/thread/\d*");
-            URL = "http://" + match.Groups[0].Value;
+            Url = "http://" + match.Groups[0].Value;
 
             Match boardCodeMatch = Regex.Match(url, BOARD_CODE_REGEX);
             BoardCode = boardCodeMatch.Groups[0].Value;
@@ -70,7 +70,7 @@ namespace GChan.Trackers
                 doc.LoadXml(str);
 
                 // The /f/ board (flash) saves the files with their uploaded name.
-                if (URL.Split('/')[3] == "f")
+                if (Url.Split('/')[3] == "f")
                     xmlTims = doc.DocumentElement.SelectNodes("/root/posts/item/filename");
                 else
                     xmlTims = doc.DocumentElement.SelectNodes("/root/posts/item/tim");
@@ -98,8 +98,8 @@ namespace GChan.Trackers
             List<string> thumbs = new List<string>();
             string htmlPage = "";
             string str = "";
-            string baseURL = "//i.4cdn.org/" + URL.Split('/')[3] + "/";
-            string JURL = "http://a.4cdn.org/" + URL.Split('/')[3] + "/thread/" + URL.Split('/')[5] + ".json";
+            string baseURL = "//i.4cdn.org/" + Url.Split('/')[3] + "/";
+            string JURL = "http://a.4cdn.org/" + Url.Split('/')[3] + "/thread/" + Url.Split('/')[5] + ".json";
 
             try
             {
@@ -108,7 +108,7 @@ namespace GChan.Trackers
                 {
                     web.Headers["User-Agent"] = "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0";
 
-                    htmlPage = web.DownloadString(URL);
+                    htmlPage = web.DownloadString(Url);
 
                     //Prevent the html from being destroyed by the anti adblock script
                     htmlPage = htmlPage.Replace("f=\"to\"", "f=\"penis\"");
@@ -142,11 +142,11 @@ namespace GChan.Trackers
                     //Save thumbs for files that need it
                     if (rep.Split('.')[1] == "webm")
                     {
-                        old = "//t.4cdn.org/" + URL.Split('/')[3] + "/" + xmlTim[i].InnerText + "s.jpg";
+                        old = "//t.4cdn.org/" + Url.Split('/')[3] + "/" + xmlTim[i].InnerText + "s.jpg";
                         thumbs.Add("http:" + old);
 
                         htmlPage = htmlPage.Replace(xmlTim[i].InnerText, filename);
-                        htmlPage = htmlPage.Replace("//i.4cdn.org/" + URL.Split('/')[3] + "/" + filename, "thumb/" + xmlTim[i].InnerText);
+                        htmlPage = htmlPage.Replace("//i.4cdn.org/" + Url.Split('/')[3] + "/" + filename, "thumb/" + xmlTim[i].InnerText);
                     }
                     else
                     {
@@ -154,11 +154,11 @@ namespace GChan.Trackers
                         htmlPage = htmlPage.Replace(thumbName + ".jpg", rep.Split('.')[0] + "." + rep.Split('.')[1]);
                         htmlPage = htmlPage.Replace("/" + thumbName, thumbName);
 
-                        htmlPage = htmlPage.Replace("//i.4cdn.org/" + URL.Split('/')[3] + "/" + xmlTim[i].InnerText, xmlTim[i].InnerText);
+                        htmlPage = htmlPage.Replace("//i.4cdn.org/" + Url.Split('/')[3] + "/" + xmlTim[i].InnerText, xmlTim[i].InnerText);
                         htmlPage = htmlPage.Replace(xmlTim[i].InnerText, filename); //easy fix for images
                     }
 
-                    htmlPage = htmlPage.Replace("//is2.4chan.org/" + URL.Split('/')[3] + "/" + xmlTim[i].InnerText, xmlTim[i].InnerText); //bandaid fix for is2 urls
+                    htmlPage = htmlPage.Replace("//is2.4chan.org/" + Url.Split('/')[3] + "/" + xmlTim[i].InnerText, xmlTim[i].InnerText); //bandaid fix for is2 urls
                     htmlPage = htmlPage.Replace("/" + rep, rep);
                 }
 
@@ -166,7 +166,7 @@ namespace GChan.Trackers
 
                 //Save thumbs for files that need it
                 for (int i = 0; i < thumbs.Count; i++)
-                    Utils.DownloadToDir(thumbs[i], SaveTo + "\\thumb");
+                    Utils.DownloadFile(thumbs[i], SaveTo + "\\thumb");
 
                 if (!string.IsNullOrWhiteSpace(htmlPage))
                     File.WriteAllText(SaveTo + "\\Thread.html", htmlPage);
@@ -202,7 +202,7 @@ namespace GChan.Trackers
                             if (rawjson.Substring(i, SUB_ENDER.Length) == SUB_ENDER)
                             {
                                 subject = rawjson.Substring(subStartIndex + SUB_HEADER.Length, i - (subStartIndex + SUB_HEADER.Length));
-                                subject = Utils.CleanSubjectString(WebUtility.HtmlDecode(subject));
+                                subject = Utils.SanitiseSubjectString(WebUtility.HtmlDecode(subject));
                                 break;
                             }
                         }

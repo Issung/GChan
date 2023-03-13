@@ -7,7 +7,8 @@ using System.Windows.Forms;
 
 namespace GChan
 {
-    public enum ImageFileNameFormat {
+    public enum ImageFileNameFormat 
+    {
         [Description("ID (eg. '1570301.jpg')")]
         ID = 0,
         [Description("OriginalFilename (eg. 'LittleSaintJames.jpg')")]
@@ -18,11 +19,12 @@ namespace GChan
         OriginalFilenameAndID = 3
     };
 
-    public enum ThreadFolderNameFormat {
-        [Description("ThreadID - ThreadName")]
-        IdName = 0,
-        [Description("ThreadName - ThreadID")]
-        NameId = 1
+    public enum ThreadFolderNameFormat 
+    {
+        [Description("ID - Subject")]
+        IdSubject = 0,
+        [Description("Subject - ID")]
+        SubjectId = 1
     }
 
     public partial class Settings : Form

@@ -57,7 +57,7 @@ namespace GChan.Trackers
 
                 for (int i = 0; i < threadIDs.Count; i++)
                 {
-                    threadLinks.Add("http://boards.4chan.org/" + base.URL.Split('/')[3] + "/thread/" + threadIDs[i].InnerText);
+                    threadLinks.Add("http://boards.4chan.org/" + base.Url.Split('/')[3] + "/thread/" + threadIDs[i].InnerText);
                 }
             }
             catch (WebException webEx)

@@ -34,32 +34,35 @@ namespace GChan.Controllers
         public int ScanTimerInterval { get { return scanTimer.Interval; } set { scanTimer.Interval = value; } }
 
 #if DEBUG
-        /// Define special lock objects when in DEBUG mode that print out when/where they are acquired.
+        /// Define special lock objects when in DEBUG mode that print when/where they are acquired.
         /// Credit: https://stackoverflow.com/a/36487032/8306962
 
-        private object _threadLock = new object();
+        readonly object threadLock = new();
 
-        object threadLock { get {
+        object ThreadLock 
+        { 
+            get 
+            {
                 StackFrame frame = new StackFrame(1, true);
                 logger.Trace($"threadLock acquired by: {frame.GetMethod().Name} at line {frame.GetFileLineNumber()} on thread {SysThread.CurrentThread.ManagedThreadId}.");
-                return _threadLock;
+                return threadLock;
             } 
         }
 
-        object _boardLock = new object();
+        readonly object boardLock = new();
 
-        object boardLock
+        object BoardLock
         {
             get
             {
                 StackFrame frame = new StackFrame(1, true);
                 logger.Trace($"boardLock acquired by: {frame.GetMethod().Name} at line {frame.GetFileLineNumber()} on thread {SysThread.CurrentThread.ManagedThreadId}.");
-                return _boardLock;
+                return boardLock;
             }
         }
 #else
-        readonly object threadLock = new object();
-        readonly object boardLock = new object();
+        readonly object ThreadLock = new();
+        readonly object BoardLock = new();
 #endif
 
         public MainController(MainForm mainForm)
@@ -72,7 +75,9 @@ namespace GChan.Controllers
             UpdateController.Instance.UpdateCheckFinished += Instance_UpdateCheckFinished;
 
             if (!Properties.Settings.Default.MinimizeToTray)
+            { 
                 Form.systemTrayNotifyIcon.Visible = false;
+            }
 
             scanTimer.Enabled = false;
             scanTimer.Interval = Properties.Settings.Default.ScanTimer;
@@ -84,17 +89,17 @@ namespace GChan.Controllers
             ///Require the save on close setting to be true to load threads on application open.
             const bool requireSaveOnCloseToBeTrueToLoadThreadsAndBoards = true;
 
-            if (!requireSaveOnCloseToBeTrueToLoadThreadsAndBoards || Properties.Settings.Default.SaveListsOnClose)                                // If enabled load URLs from file
+            if (!requireSaveOnCloseToBeTrueToLoadThreadsAndBoards || Properties.Settings.Default.SaveListsOnClose)              // If enabled load URLs from file
             {
                 var boards = DataController.LoadBoards();
                 var threads = DataController.LoadThreads();
 
-                lock (boardLock)
+                lock (BoardLock)
                 {
                     for (int i = 0; i < boards.Count; i++)
                     {
                         Board newBoard = (Board)Utils.CreateNewTracker(boards[i]);
-                        AddURLToList(newBoard);
+                        AddNewTracker(newBoard);
                     }
                 }
 
@@ -104,7 +109,7 @@ namespace GChan.Controllers
                     Parallel.ForEach(threads, (thread) =>
                     {
                         Thread newThread = (Thread)Utils.CreateNewTracker(thread);
-                        Form.BeginInvoke(new Action(() => { AddURLToList(newThread); }));
+                        Form.BeginInvoke(new Action(() => { AddNewTracker(newThread); }));
                     });
 
                     Form.Invoke((MethodInvoker)delegate {
@@ -137,11 +142,8 @@ namespace GChan.Controllers
 
                 if (IsUnique(newTracker, trackerList))
                 {
-                    AddURLToList(newTracker);
-
-                    if (!scanTimer.Enabled)
-                        scanTimer.Enabled = true;
-
+                    AddNewTracker(newTracker);
+                    scanTimer.Enabled = true;
                     Scan(this, new EventArgs());
                 }
                 else
@@ -165,26 +167,30 @@ namespace GChan.Controllers
             }
         }
 
-        private bool AddURLToList(Tracker tracker)
+        private bool AddNewTracker(Tracker tracker)
         {
             if (tracker == null)
+            { 
                 return false;
+            }
 
-            if (tracker.Type == Type.Board)
+            if (tracker is Board board)
             {
-                lock (boardLock)
+                lock (BoardLock)
                 {
-                    Form.Invoke((MethodInvoker)delegate () {
-                        Model.Boards.Add((Board)tracker);
+                    Form.Invoke((MethodInvoker)delegate () 
+                    {
+                        Model.Boards.Add(board);
                     });
                 }
             }
-            else //Thread
+            else if (tracker is Thread thread)
             {
-                lock (threadLock)
+                lock (ThreadLock)
                 {
-                    Form.Invoke((MethodInvoker)delegate () {
-                        Model.Threads.Add((Thread)tracker);
+                    Form.Invoke((MethodInvoker)delegate () 
+                    {
+                        Model.Threads.Add(thread);
                     });
                 }
             }
@@ -207,7 +213,7 @@ namespace GChan.Controllers
             {
                 if (type == Type.Thread)
                 {
-                    lock (threadLock)
+                    lock (ThreadLock)
                     {
                         for (int i = Model.Threads.Count - 1; i >= 0; i--)
                         {
@@ -217,7 +223,7 @@ namespace GChan.Controllers
                 }
                 else // Boards
                 {
-                    lock (boardLock)
+                    lock (BoardLock)
                     {
                         for (int i = Model.Boards.Count - 1; i >= 0; i--)
                         {
@@ -244,7 +250,7 @@ namespace GChan.Controllers
 
         private void ScanRoutine()
         {
-            lock (threadLock)
+            lock (ThreadLock)
             {
                 // Remove 404'd threads
                 for (int i = 0; i < Model.Threads.Count; i++)
@@ -272,23 +278,20 @@ namespace GChan.Controllers
                     {
                         if (boards[i].Scraping)
                         {
-                            int? id = GetThreadID(boards[i], url);
+                            int? id = GetThreadId(boards[i], url);
 
-                            if (id.HasValue)
+                            if (id.HasValue && id.Value > boards[i].LargestAddedThreadNo)
                             {
-                                if (id.Value > boards[i].LargestAddedThreadNo)
+                                Thread newThread = (Thread)Utils.CreateNewTracker(url);
+
+                                if (newThread != null && IsUnique(newThread, Model.Threads))
                                 {
-                                    Thread newThread = (Thread)Utils.CreateNewTracker(url);
+                                    bool urlWasAdded = AddNewTracker(newThread);
 
-                                    if (newThread != null && IsUnique(newThread, Model.Threads))
+                                    if (urlWasAdded)
                                     {
-                                        bool urlWasAdded = AddURLToList(newThread);
-
-                                        if (urlWasAdded)
-                                        {
-                                            if (id.Value > largestNo)   //Not exactly safe in multithreaded but should work fine.
-                                                largestNo = id.Value;
-                                        }
+                                        if (id.Value > largestNo)   //Not exactly safe in multithreaded but should work fine.
+                                            largestNo = id.Value;
                                     }
                                 }
                             }
@@ -309,24 +312,21 @@ namespace GChan.Controllers
             }
         }
 
-        public int? GetThreadID(Board board, string url)
+        public int? GetThreadId(Board board, string url)
         {
             try
             {
-                Match idCodeMatch = null;
-
-                if (board.SiteName == Board_4Chan.SITE_NAME_4CHAN)
+                var idCodeMatch = board.SiteName switch
                 {
-                    idCodeMatch = Regex.Match(url, Thread_4Chan.ID_CODE_REGEX);
-                }
-                else if (board.SiteName == Board_8Kun.SITE_NAME_8KUN)
-                {
-                    idCodeMatch = Regex.Match(url, Thread_8Kun.idCodeRegex);
-                }
+                    Thread_4Chan.ID_CODE_REGEX => Regex.Match(url, Thread_4Chan.ID_CODE_REGEX),
+                    Board_8Kun.SITE_NAME_8KUN => Regex.Match(url, Thread_8Kun.ID_CODE_REGEX),
+                    _ => null,
+                };
 
-                if (idCodeMatch != null)
-                    if (idCodeMatch.Groups.Count > 0)
-                        return int.Parse(idCodeMatch.Groups[0].Value);
+                if (idCodeMatch?.Groups.Count > 0)
+                {
+                    return int.Parse(idCodeMatch.Groups[0].Value);
+                }
             }
             catch
             {
@@ -350,7 +350,7 @@ namespace GChan.Controllers
             }
             else // Board
             {
-                return !list.OfType<Board>().Any(t => t.URL == tracker.URL);
+                return !list.OfType<Board>().Any(t => t.Url == tracker.Url);
             }
         }
 
@@ -376,14 +376,26 @@ namespace GChan.Controllers
         {
             board.Scraping = false;
 
-            lock (boardLock)
+            lock (BoardLock)
             {
-                Form.Invoke((MethodInvoker)delegate {
+                Form.Invoke((MethodInvoker)delegate 
+                {
                     Model.Boards.Remove(board);
                 });
             }
         }
 
+        /// <summary>
+        /// Remove a thread from tracking.
+        /// </summary>
+        /// <param name="thread">Thread to remove.</param>
+        /// <param name="manualRemove">Was this remove initiated by the user or by the scanning routine.</param>
+        /// <remarks>
+        /// TODO: RemoveThread likely to throw. Info below:
+        /// If removing a newly added thread this is likely to fail beacuse files are still being downloaded into the current directory.
+        /// It only fails once because after setting thread.Scraping to no more downloads happen (mostly..).
+        /// We kind of need a download manager so we can wait for all downloads from this thread to finish before moving dir.
+        /// </remarks>
         public void RemoveThread(Thread thread, bool manualRemove = false)
         {
             logger.Info($"Removing thread {thread}.");
@@ -394,50 +406,14 @@ namespace GChan.Controllers
             {
                 if (Properties.Settings.Default.AddThreadSubjectToFolder)
                 {
-                    string currentPath = thread.SaveTo.Replace("\r", "");
-
-                    string cleanSubject = Utils.CleanSubjectString(thread.Subject);
-
-                    // There are \r characters appearing from the custom subjects, TODO: need to get to the bottom of the cause of this.
-                    string destinationPath;
-
-                    if ((ThreadFolderNameFormat)Properties.Settings.Default.ThreadFolderNameFormat == ThreadFolderNameFormat.IdName)
-                    {
-                        destinationPath = (thread.SaveTo + " - " + cleanSubject);
-                    }
-                    else //NameId
-                    {
-                        destinationPath = Path.Combine(Path.GetDirectoryName(thread.SaveTo), $"{thread.Subject} - {thread.ID}");
-                    }
-
-                    destinationPath = destinationPath.Replace("\r", "").Trim('\\', '/');
-
-                    if (Directory.Exists(currentPath))
-                    {
-                        int number = 0;
-                        string numberText() => (number == 0) ? "" : $" ({number})";
-
-                        string calculatedDestination() => destinationPath + numberText();
-
-                        while (Directory.Exists(calculatedDestination()))
-                        {
-                            number++;
-                        }
-
-                        logger.Info($"Directory.Moving '{currentPath}' to '{destinationPath}'.");
-
-                        Directory.Move(currentPath, calculatedDestination());
-                    }
-                    else
-                    {
-                        logger.Warn($"While attempting to rename thread {thread} the current folder could not be found, renaming abandoned.");
-                    }
+                    Utils.MoveThread(thread);
                 }
 
-                lock (threadLock)
+                lock (ThreadLock)
                 {
                     // Remove on UI thread because this method can be called from non-ui thread.
-                    Form.Invoke((MethodInvoker)delegate () {
+                    Form.Invoke(() =>
+                    {
                         Model.Threads.Remove(thread);
                     });
                 }
@@ -450,8 +426,10 @@ namespace GChan.Controllers
                 {
                     MessageBox.Show(
                         $"An error occured when trying to remove the thread {thread.Subject} ({thread.ID}). Please check the logs file in the ProgramData folder for more information.", 
-                        "Remove Thread Error", 
-                        MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
+                        "Thread Removal Error", 
+                        MessageBoxButtons.OK, 
+                        MessageBoxIcon.Error, 
+                        MessageBoxDefaultButton.Button1);
                 }
             }
         }
@@ -466,41 +444,41 @@ namespace GChan.Controllers
             {
                 // Only show notification if the update check was initiated by the user.
                 if (initiatedByUser)
+                { 
                     Form.toolTip.Show("No Updates Available.", Form.menuStrip, 70, 20, 1750);
+                }
             }
         }
 
         /// <summary>
-        /// Returns true to cancel closing.
+        /// Returns true to cancel closing, false to go ahead with closing.
         /// </summary>
+        // TODO: This method has 2 functions, warning if needed and cleanup, seperate into 2 responsibilities.
         public bool Closing()
         {
-            bool cancel = false;
-            DialogResult result = DialogResult.OK;
-
             if (Properties.Settings.Default.WarnOnClose && Model.Threads.Count > 0)
             {
-                CloseWarn clw = new CloseWarn();
-                result = clw.ShowDialog();
-                clw.Dispose();
+                using var closeDialog = new CloseWarn();
+                var dialogResult = closeDialog.ShowDialog();
+
+                if (dialogResult == DialogResult.Cancel)
+                {
+                    return true;
+                }
             }
 
-            if (result == DialogResult.Cancel)
+            // TODO: Call cancel scraping method.
+            Form.systemTrayNotifyIcon.Visible = false;
+            Form.systemTrayNotifyIcon.Dispose();
+            scanTimer.Enabled = false;
+            scanTimer.Dispose();
+
+            if (Properties.Settings.Default.SaveListsOnClose)
             { 
-                cancel = true;
-            }
-            else if (result == DialogResult.OK)
-            {
-                // TODO: Call cancel scraping method.
-                Form.systemTrayNotifyIcon.Visible = false;
-                Form.systemTrayNotifyIcon.Dispose();
-                scanTimer.Enabled = false;
-
-                if (Properties.Settings.Default.SaveListsOnClose)
-                    DataController.SaveAll(Model.Threads.ToList(), Model.Boards);
+                DataController.SaveAll(Model.Threads.ToList(), Model.Boards);
             }
 
-            return cancel;
+            return false;
         }
     }
 }

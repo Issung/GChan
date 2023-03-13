@@ -6,7 +6,7 @@ namespace GChan.Trackers
 
     public abstract class Tracker
     {
-        public string URL { get; protected set; }
+        public string Url { get; protected set; }
 
         public string SaveTo { get; protected set; }
 
@@ -29,7 +29,7 @@ namespace GChan.Trackers
 
         protected Tracker(string url)
         {
-            URL = url;
+            Url = url;
         }
 
         public override string ToString()
