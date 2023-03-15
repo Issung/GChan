@@ -43,8 +43,8 @@ namespace GChan
             {
                 ImageFileNameFormat.ID => lastPart,
                 ImageFileNameFormat.OriginalFilename => UploadedFilename + extension,
-                ImageFileNameFormat.IDAndOriginalFilename => Path.GetFileNameWithoutExtension(URL) + " - " + UploadedFilename + extension,
-                _ => Path.GetFileNameWithoutExtension(URL) + " - " + UploadedFilename + extension,
+                ImageFileNameFormat.IDAndOriginalFilename => $"{Path.GetFileNameWithoutExtension(URL)}-{UploadedFilename}{extension}",
+                _ => $"{UploadedFilename}-{Path.GetFileNameWithoutExtension(URL)}{extension}",
             };
 
             return result;
