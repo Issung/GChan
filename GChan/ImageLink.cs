@@ -39,38 +39,48 @@ namespace GChan
 
             string extension = Path.GetExtension(URL); // Contains period (.).
 
-            string result;
+            string result = format switch
+            {
+                ImageFileNameFormat.ID => lastPart,
+                ImageFileNameFormat.OriginalFilename => UploadedFilename + extension,
+                ImageFileNameFormat.IDAndOriginalFilename => Path.GetFileNameWithoutExtension(URL) + " - " + UploadedFilename + extension,
+                _ => Path.GetFileNameWithoutExtension(URL) + " - " + UploadedFilename + extension,
+            };
 
-            switch (format)
-            {
-                case ImageFileNameFormat.ID:
-                    result = lastPart;
-                    break;
-                case ImageFileNameFormat.OriginalFilename:
-                    result = UploadedFilename + extension;
-                    break;
-                case ImageFileNameFormat.IDAndOriginalFilename:
-                default:
-                    result = Path.GetFileNameWithoutExtension(URL) + " - " + UploadedFilename + extension;
-                    break;
-            }
+            return result;
 
-            if (format == ImageFileNameFormat.ID)
-            {
-                result = lastPart;
-            }
-            else if (format == ImageFileNameFormat.OriginalFilename)
-            {
-                result = UploadedFilename + extension;
-            }
-            else if (format == ImageFileNameFormat.IDAndOriginalFilename)
-            {
-                result = Path.GetFileNameWithoutExtension(URL) + " - " + UploadedFilename + extension;
-            }
-            else //ImageFileFormat == OriginalFilenameAndID
-            {
-                result = UploadedFilename + " - " + Path.GetFileNameWithoutExtension(URL) + extension;
-            }
+            //-------------------------------------------------
+
+            //switch (format)
+            //{
+            //    case ImageFileNameFormat.ID:
+            //        result = lastPart;
+            //        break;
+            //    case ImageFileNameFormat.OriginalFilename:
+            //        result = UploadedFilename + extension;
+            //        break;
+            //    case ImageFileNameFormat.IDAndOriginalFilename:
+            //    default:
+            //        result = Path.GetFileNameWithoutExtension(URL) + " - " + UploadedFilename + extension;
+            //        break;
+            //}
+
+            //if (format == ImageFileNameFormat.ID)
+            //{
+            //    result = lastPart;
+            //}
+            //else if (format == ImageFileNameFormat.OriginalFilename)
+            //{
+            //    result = UploadedFilename + extension;
+            //}
+            //else if (format == ImageFileNameFormat.IDAndOriginalFilename)
+            //{
+            //    result = Path.GetFileNameWithoutExtension(URL) + " - " + UploadedFilename + extension;
+            //}
+            //else //ImageFileFormat == OriginalFilenameAndID
+            //{
+            //    result = UploadedFilename + " - " + Path.GetFileNameWithoutExtension(URL) + extension;
+            //}
 
             //if (result.Length > FILENAME_MAX_LENGTH)
             //{
@@ -78,8 +88,6 @@ namespace GChan
             //}
 
             //Program.Log($"Filename generated: {result}. Length: {result.Length}");
-
-            return result;
         }
 
         public override string ToString()
