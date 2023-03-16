@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using NLog;
+using System;
+using System.IO;
 using System.Linq;
 
 namespace GChan
@@ -17,6 +19,8 @@ namespace GChan
         /// e.g. "LittleSaintJames.jpg", NOT the stored filename e.g. "1265123123.jpg".
         /// </summary>
         public string UploadedFilename;
+
+        private readonly ILogger logger = LogManager.GetCurrentClassLogger();
 
         public ImageLink(string url, string uploadedFilename)
         {
@@ -43,51 +47,14 @@ namespace GChan
             {
                 ImageFileNameFormat.ID => lastPart,
                 ImageFileNameFormat.OriginalFilename => UploadedFilename + extension,
-                ImageFileNameFormat.IDAndOriginalFilename => $"{Path.GetFileNameWithoutExtension(URL)}-{UploadedFilename}{extension}",
-                _ => $"{UploadedFilename}-{Path.GetFileNameWithoutExtension(URL)}{extension}",
+                ImageFileNameFormat.IDAndOriginalFilename => $"{Tim}-{UploadedFilename}{extension}",
+                ImageFileNameFormat.OriginalFilenameAndID => $"{UploadedFilename}-{Tim}{extension}",
+                _ => throw new ArgumentException("Given value for 'format' is unknown.")
             };
 
+            logger.Info($"Filename generated: {result}. Length: {result.Length}");
+
             return result;
-
-            //-------------------------------------------------
-
-            //switch (format)
-            //{
-            //    case ImageFileNameFormat.ID:
-            //        result = lastPart;
-            //        break;
-            //    case ImageFileNameFormat.OriginalFilename:
-            //        result = UploadedFilename + extension;
-            //        break;
-            //    case ImageFileNameFormat.IDAndOriginalFilename:
-            //    default:
-            //        result = Path.GetFileNameWithoutExtension(URL) + " - " + UploadedFilename + extension;
-            //        break;
-            //}
-
-            //if (format == ImageFileNameFormat.ID)
-            //{
-            //    result = lastPart;
-            //}
-            //else if (format == ImageFileNameFormat.OriginalFilename)
-            //{
-            //    result = UploadedFilename + extension;
-            //}
-            //else if (format == ImageFileNameFormat.IDAndOriginalFilename)
-            //{
-            //    result = Path.GetFileNameWithoutExtension(URL) + " - " + UploadedFilename + extension;
-            //}
-            //else //ImageFileFormat == OriginalFilenameAndID
-            //{
-            //    result = UploadedFilename + " - " + Path.GetFileNameWithoutExtension(URL) + extension;
-            //}
-
-            //if (result.Length > FILENAME_MAX_LENGTH)
-            //{
-            //    result = result.Substring(0, FILENAME_MAX_LENGTH - extension.Length) + extension;
-            //}
-
-            //Program.Log($"Filename generated: {result}. Length: {result.Length}");
         }
 
         public override string ToString()
