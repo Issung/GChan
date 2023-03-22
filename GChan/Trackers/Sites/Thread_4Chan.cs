@@ -2,12 +2,12 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
-using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Xml;
-using System.Xml.Linq;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace GChan.Trackers
 {
@@ -46,43 +46,35 @@ namespace GChan.Trackers
             List<ImageLink> links = new List<ImageLink>();
             string JSONUrl = "http://a.4cdn.org/" + BoardCode + "/thread/" + ID + ".json";
             string baseURL = "http://i.4cdn.org/" + BoardCode + "/";
-            string str = "";
-            XmlNodeList xmlTims;
-            XmlNodeList xmlFilenames;
-            XmlNodeList xmlExts;
 
             try
             {
+                JObject jObject;
                 using (var web = new WebClient())
                 {
-                    string Content = web.DownloadString(JSONUrl);
-                    byte[] bytes = Encoding.ASCII.GetBytes(Content);
+                    string json = web.DownloadString(JSONUrl);
+                    byte[] bytes = Encoding.ASCII.GetBytes(json);
 
                     using (var stream = new MemoryStream(bytes))
                     {
-                        var quotas = new XmlDictionaryReaderQuotas();
-                        var jsonReader = JsonReaderWriterFactory.CreateJsonReader(stream, quotas);
-                        var xml = XDocument.Load(jsonReader);
-                        str = xml.ToString();
+                        using (var streamReader = new StreamReader(stream))
+                        {
+                            var jsonReader = new JsonTextReader(streamReader);
+                            jObject = JObject.Load(jsonReader);
+                        }
                     }
                 }
 
-                XmlDocument doc = new XmlDocument();
-                doc.LoadXml(str);
-
                 // The /f/ board (flash) saves the files with their uploaded name.
-                if (Url.Split('/')[3] == "f")
-                    xmlTims = doc.DocumentElement.SelectNodes("/root/posts/item/filename");
-                else
-                    xmlTims = doc.DocumentElement.SelectNodes("/root/posts/item/tim");
-
-                xmlFilenames = doc.DocumentElement.SelectNodes("/root/posts/item/filename");
-                xmlExts = doc.DocumentElement.SelectNodes("/root/posts/item/ext");
-
-                for (int i = 0; i < xmlExts.Count; i++)
-                {
-                    links.Add(new ImageLink(long.Parse(xmlTims[i].InnerText), baseURL + xmlTims[i].InnerText + xmlExts[i].InnerText, xmlFilenames[i].InnerText));
-                }
+                var timPath = Url.Split('/')[3] == "f" ? "filename" : "tim";
+                links = jObject
+                    .SelectTokens("posts[*]")
+                    .Where(x => x["ext"] != null)
+                    .Select(x =>
+                        new ImageLink(long.Parse(x[timPath].ToString()),
+                            baseURL + x[timPath] + x["ext"],
+                            x["filename"].ToString()))
+                    .ToList();
             }
             catch (Exception ex)
             {
@@ -98,12 +90,13 @@ namespace GChan.Trackers
         {
             List<string> thumbs = new List<string>();
             string htmlPage = "";
-            string str = "";
             string baseURL = "//i.4cdn.org/" + Url.Split('/')[3] + "/";
             string JURL = "http://a.4cdn.org/" + Url.Split('/')[3] + "/thread/" + Url.Split('/')[5] + ".json";
 
             try
             {
+                JObject jObject;
+
                 //Add a UserAgent to prevent 403
                 using (var web = new WebClient())
                 {
@@ -118,36 +111,39 @@ namespace GChan.Trackers
                     byte[] bytes = Encoding.ASCII.GetBytes(json);
                     using (var stream = new MemoryStream(bytes))
                     {
-                        var quotas = new XmlDictionaryReaderQuotas();
-                        var jsonReader = JsonReaderWriterFactory.CreateJsonReader(stream, quotas);
-                        var xml = XDocument.Load(jsonReader);
-                        str = xml.ToString();
+                        using (var streamReader = new StreamReader(stream))
+                        {
+                            var jsonReader = new JsonTextReader(streamReader);
+                            jObject = JObject.Load(jsonReader);
+                        }
                     }
                 }
 
-                XmlDocument doc = new XmlDocument();
-                doc.LoadXml(str);
-                XmlNodeList xmlTim = doc.DocumentElement.SelectNodes("/root/posts/item/tim");
-                XmlNodeList xmlExt = doc.DocumentElement.SelectNodes("/root/posts/item/ext");
-                XmlNodeList xmlFilenames = doc.DocumentElement.SelectNodes("/root/posts/item/filename");
-
-                for (int i = 0; i < xmlExt.Count; i++)
+                var posts = jObject
+                    .SelectTokens("posts[*]")
+                    .Where(x => x["ext"] != null)
+                    .ToList();
+                
+                foreach (var post in posts)
                 {
-                    string old = baseURL + xmlTim[i].InnerText + xmlExt[i].InnerText;
-                    string rep = xmlTim[i].InnerText + xmlExt[i].InnerText;
+                    string old = baseURL + post["tim"] + post["ext"];
+                    string rep = post["tim"] + (string) post["ext"];
                     htmlPage = htmlPage.Replace(old, rep);
 
                     //get the actual filename saved
-                    string filename = Path.GetFileNameWithoutExtension(new ImageLink(baseURL + xmlTim[i].InnerText + xmlExt[i].InnerText, xmlFilenames[i].InnerText).GenerateNewFilename((ImageFileNameFormat)Settings.Default.ImageFilenameFormat));
+                    string filename = Path.GetFileNameWithoutExtension(
+                        new ImageLink(baseURL + post["tim"] + post["ext"],
+                            post["filename"].ToString())
+                            .GenerateNewFilename((ImageFileNameFormat)Settings.Default.ImageFilenameFormat));
 
                     //Save thumbs for files that need it
                     if (rep.Split('.')[1] == "webm")
                     {
-                        old = "//t.4cdn.org/" + Url.Split('/')[3] + "/" + xmlTim[i].InnerText + "s.jpg";
+                        old = "//t.4cdn.org/" + Url.Split('/')[3] + "/" + post["tim"] + "s.jpg";
                         thumbs.Add("http:" + old);
 
-                        htmlPage = htmlPage.Replace(xmlTim[i].InnerText, filename);
-                        htmlPage = htmlPage.Replace("//i.4cdn.org/" + Url.Split('/')[3] + "/" + filename, "thumb/" + xmlTim[i].InnerText);
+                        htmlPage = htmlPage.Replace(post["tim"].ToString(), filename);
+                        htmlPage = htmlPage.Replace("//i.4cdn.org/" + Url.Split('/')[3] + "/" + filename, "thumb/" + post["tim"]);
                     }
                     else
                     {
@@ -155,11 +151,11 @@ namespace GChan.Trackers
                         htmlPage = htmlPage.Replace(thumbName + ".jpg", rep.Split('.')[0] + "." + rep.Split('.')[1]);
                         htmlPage = htmlPage.Replace("/" + thumbName, thumbName);
 
-                        htmlPage = htmlPage.Replace("//i.4cdn.org/" + Url.Split('/')[3] + "/" + xmlTim[i].InnerText, xmlTim[i].InnerText);
-                        htmlPage = htmlPage.Replace(xmlTim[i].InnerText, filename); //easy fix for images
+                        htmlPage = htmlPage.Replace("//i.4cdn.org/" + Url.Split('/')[3] + "/" + post["tim"], post["tim"].ToString());
+                        htmlPage = htmlPage.Replace(post["tim"].ToString(), filename); //easy fix for images
                     }
 
-                    htmlPage = htmlPage.Replace("//is2.4chan.org/" + Url.Split('/')[3] + "/" + xmlTim[i].InnerText, xmlTim[i].InnerText); //bandaid fix for is2 urls
+                    htmlPage = htmlPage.Replace("//is2.4chan.org/" + Url.Split('/')[3] + "/" + post["tim"], post["tim"].ToString()); //bandaid fix for is2 urls
                     htmlPage = htmlPage.Replace("/" + rep, rep);
                 }
 

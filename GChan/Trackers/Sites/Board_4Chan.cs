@@ -1,13 +1,12 @@
-﻿using NLog;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
-using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
-using System.Xml;
-using System.Xml.Linq;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace GChan.Trackers
 {
@@ -36,29 +35,29 @@ namespace GChan.Trackers
             string URL = "http://a.4cdn.org/" + BoardCode + "/catalog.json";
             List<string> threadLinks = new List<string>();
             string str = "";
-            XmlNodeList threadIDs;
 
             try
             {
-                string json = new WebClient().DownloadString(URL);
-                byte[] bytes = Encoding.ASCII.GetBytes(json);
-
-                using (var stream = new MemoryStream(bytes))
+                JArray jArray;
+                using (var web = new WebClient())
                 {
-                    var quotas = new XmlDictionaryReaderQuotas();
-                    var jsonReader = JsonReaderWriterFactory.CreateJsonReader(stream, quotas);
-                    var xml = XDocument.Load(jsonReader);
-                    str = xml.ToString();
+                    string json = web.DownloadString(URL);
+                    byte[] bytes = Encoding.ASCII.GetBytes(json);
+
+                    using (var stream = new MemoryStream(bytes))
+                    {
+                        using (var streamReader = new StreamReader(stream))
+                        {
+                            var jsonReader = new JsonTextReader(streamReader);
+                            jArray = JArray.Load(jsonReader);
+                        }
+                    }
                 }
 
-                XmlDocument doc = new XmlDocument();
-                doc.LoadXml(str);
-                threadIDs = doc.DocumentElement.SelectNodes("/root/item/threads/item/no");
-
-                for (int i = 0; i < threadIDs.Count; i++)
-                {
-                    threadLinks.Add("http://boards.4chan.org/" + Url.Split('/')[3] + "/thread/" + threadIDs[i].InnerText);
-                }
+                threadLinks = jArray
+                    .SelectTokens("[*].threads[*]")
+                    .Select(x => "http://boards.4chan.org/" + Url.Split('/')[3] + "/thread/" + x["no"])
+                    .ToList();
             }
             catch (WebException webEx)
             {
