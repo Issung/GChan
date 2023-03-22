@@ -19,7 +19,7 @@ namespace GChan.Trackers
 
         public Thread_8Kun(string url) : base(url)
         {
-            SiteName = Board_8Kun.SITE_NAME_8KUN;
+            SiteName = Board_8Kun.SITE_NAME;
 
             //Match simplifiedThreadUrlMatch = Regex.Match(url, threadRegex);
             //URL = "https://" + simplifiedThreadUrlMatch.Groups[0].Value;      // simplify thread url

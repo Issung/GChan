@@ -19,7 +19,7 @@ namespace GChan.Trackers
 
         public Thread_4Chan(string url) : base(url)
         {
-            SiteName = Board_4Chan.SITE_NAME_4CHAN;
+            SiteName = Board_4Chan.SITE_NAME;
 
             Match match = Regex.Match(url, @"boards.(4chan|4channel).org/[a-zA-Z0-9]*?/thread/\d*");
             Url = "http://" + match.Groups[0].Value;

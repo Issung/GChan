@@ -292,7 +292,13 @@ namespace GChan.Controllers
                                     if (urlWasAdded)
                                     {
                                         if (id.Value > largestNo)   //Not exactly safe in multithreaded but should work fine.
+                                        {
                                             largestNo = id.Value;
+                                        }
+                                        else
+                                        {
+                                            logger.Debug(() => $"Not adding thread {newThread} from board {boards[i].BoardCode} because No was lower than {largestNo}.");
+                                        }
                                     }
                                 }
                             }
@@ -319,8 +325,8 @@ namespace GChan.Controllers
             {
                 var idCodeMatch = board.SiteName switch
                 {
-                    Thread_4Chan.ID_CODE_REGEX => Regex.Match(url, Thread_4Chan.ID_CODE_REGEX),
-                    Board_8Kun.SITE_NAME_8KUN => Regex.Match(url, Thread_8Kun.ID_CODE_REGEX),
+                    Board_4Chan.SITE_NAME => Regex.Match(url, Thread_4Chan.ID_CODE_REGEX),
+                    Board_8Kun.SITE_NAME => Regex.Match(url, Thread_8Kun.ID_CODE_REGEX),
                     _ => null,
                 };
 

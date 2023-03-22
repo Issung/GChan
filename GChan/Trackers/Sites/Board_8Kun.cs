@@ -13,13 +13,13 @@ namespace GChan.Trackers
 {
     public class Board_8Kun : Board
     {
-        public const string SITE_NAME_8KUN = "8kun";
+        public const string SITE_NAME = "8kun";
         public const string boardRegex = @"8kun.top/[a-zA-Z0-9]*?/";
         public const string boardCodeRegex = @"(?<=(8kun.top/))[a-zA-Z0-9]*(?=(/index.html))";
 
         public Board_8Kun(string url) : base(url)
         {
-            SiteName = SITE_NAME_8KUN;
+            SiteName = SITE_NAME;
 
             Match boardCodeMatch = Regex.Match(url, boardCodeRegex);
             BoardCode = boardCodeMatch.Groups[0].Value;
