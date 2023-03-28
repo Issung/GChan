@@ -35,7 +35,6 @@ namespace GChan.Trackers
         {
             string url = "http://8kun.top/" + BoardCode + "/catalog.json";
             List<string> threadUrls = new List<string>();
-            string str = "";
 
             try
             {
@@ -43,16 +42,7 @@ namespace GChan.Trackers
                 using (var web = new WebClient())
                 {
                     string json = web.DownloadString(url);
-                    byte[] bytes = Encoding.ASCII.GetBytes(json);
-
-                    using (var stream = new MemoryStream(bytes))
-                    {
-                        using (var streamReader = new StreamReader(stream))
-                        {
-                            var jsonReader = new JsonTextReader(streamReader);
-                            jArray = JArray.Load(jsonReader);
-                        }
-                    }
+                    jArray = JArray.Parse(json);
                 }
 
                 threadUrls = jArray

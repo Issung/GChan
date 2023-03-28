@@ -45,7 +45,6 @@ namespace GChan.Trackers
         {
             List<ImageLink> links = new List<ImageLink>();
             string JSONUrl = ("http://8kun.top/" + BoardCode + "/res/" + ID + ".json"); // Thread JSON url
-            string str = "";
 
             string Fpath0Url(string boardcode, string tim, string ext) => $"https://8kun.top/{boardcode}/src/{tim}{ext}";
             string Fpath1Url(string tim, string ext) => $"https://8kun.top/file_store/{tim}{ext}";
@@ -56,16 +55,7 @@ namespace GChan.Trackers
                 using (var web = new WebClient())
                 {
                     string json = web.DownloadString(JSONUrl);
-                    byte[] bytes = Encoding.ASCII.GetBytes(json);
-
-                    using (var stream = new MemoryStream(bytes))
-                    {
-                        using (var streamReader = new StreamReader(stream))
-                        {
-                            var jsonReader = new JsonTextReader(streamReader);
-                            jObject = JObject.Load(jsonReader);
-                        }
-                    }
+                    jObject = JObject.Parse(json);
                 }
 
                 // Get the numbers of replies that have 1 or more images.
@@ -109,12 +99,10 @@ namespace GChan.Trackers
         {
             List<string> thumbs = new List<string>();
             string htmlPage = "";
-            string str;
 
             try
             {
                 JObject jObject;
-
                 using (var web = new WebClient())
                 {
                     htmlPage = new WebClient().DownloadString(Url);
@@ -122,15 +110,7 @@ namespace GChan.Trackers
                     string JURL = Url.Replace(".html", ".json");
 
                     string json = web.DownloadString(JURL);
-                    byte[] bytes = Encoding.ASCII.GetBytes(json);
-                    using (var stream = new MemoryStream(bytes))
-                    {
-                        using (var streamReader = new StreamReader(stream))
-                        {
-                            var jsonReader = new JsonTextReader(streamReader);
-                            jObject = JObject.Load(jsonReader);
-                        }
-                    }
+                    jObject = JObject.Parse(json);
                 }
 
                 // get single images

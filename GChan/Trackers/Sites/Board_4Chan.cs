@@ -34,7 +34,6 @@ namespace GChan.Trackers
             //string URL = "http://a.4cdn.org/" + base.URL.Split('/')[3] + "/catalog.json"; //example: http://a.4cdn.org/b/catalog.json
             string URL = "http://a.4cdn.org/" + BoardCode + "/catalog.json";
             List<string> threadLinks = new List<string>();
-            string str = "";
 
             try
             {
@@ -42,21 +41,12 @@ namespace GChan.Trackers
                 using (var web = new WebClient())
                 {
                     string json = web.DownloadString(URL);
-                    byte[] bytes = Encoding.ASCII.GetBytes(json);
-
-                    using (var stream = new MemoryStream(bytes))
-                    {
-                        using (var streamReader = new StreamReader(stream))
-                        {
-                            var jsonReader = new JsonTextReader(streamReader);
-                            jArray = JArray.Load(jsonReader);
-                        }
-                    }
+                    jArray = JArray.Parse(json);
                 }
 
                 threadLinks = jArray
                     .SelectTokens("[*].threads[*]")
-                    .Select(x => "http://boards.4chan.org/" + Url.Split('/')[3] + "/thread/" + x["no"])
+                    .Select(x => "http://boards.4chan.org/" + BoardCode + "/thread/" + x["no"])
                     .ToList();
             }
             catch (WebException webEx)

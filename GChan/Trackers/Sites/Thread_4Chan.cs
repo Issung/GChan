@@ -53,20 +53,11 @@ namespace GChan.Trackers
                 using (var web = new WebClient())
                 {
                     string json = web.DownloadString(JSONUrl);
-                    byte[] bytes = Encoding.ASCII.GetBytes(json);
-
-                    using (var stream = new MemoryStream(bytes))
-                    {
-                        using (var streamReader = new StreamReader(stream))
-                        {
-                            var jsonReader = new JsonTextReader(streamReader);
-                            jObject = JObject.Load(jsonReader);
-                        }
-                    }
+                    jObject = JObject.Parse(json);
                 }
 
                 // The /f/ board (flash) saves the files with their uploaded name.
-                var timPath = Url.Split('/')[3] == "f" ? "filename" : "tim";
+                var timPath = BoardCode == "f" ? "filename" : "tim";
                 links = jObject
                     .SelectTokens("posts[*]")
                     .Where(x => x["ext"] != null)
@@ -90,33 +81,25 @@ namespace GChan.Trackers
         {
             List<string> thumbs = new List<string>();
             string htmlPage = "";
-            string baseURL = "//i.4cdn.org/" + Url.Split('/')[3] + "/";
-            string JURL = "http://a.4cdn.org/" + Url.Split('/')[3] + "/thread/" + Url.Split('/')[5] + ".json";
+            string baseURL = "//i.4cdn.org/" + BoardCode + "/";
+            string JURL = "http://a.4cdn.org/" + BoardCode + "/thread/" + ID + ".json";
 
             try
             {
                 JObject jObject;
 
-                //Add a UserAgent to prevent 403
                 using (var web = new WebClient())
                 {
+                    //Add a UserAgent to prevent 403
                     web.Headers["User-Agent"] = "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0";
 
                     htmlPage = web.DownloadString(Url);
 
                     //Prevent the html from being destroyed by the anti adblock script
                     htmlPage = htmlPage.Replace("f=\"to\"", "f=\"penis\"");
-
+                    
                     string json = web.DownloadString(JURL);
-                    byte[] bytes = Encoding.ASCII.GetBytes(json);
-                    using (var stream = new MemoryStream(bytes))
-                    {
-                        using (var streamReader = new StreamReader(stream))
-                        {
-                            var jsonReader = new JsonTextReader(streamReader);
-                            jObject = JObject.Load(jsonReader);
-                        }
-                    }
+                    jObject = JObject.Parse(json);
                 }
 
                 var posts = jObject
@@ -127,36 +110,36 @@ namespace GChan.Trackers
                 foreach (var post in posts)
                 {
                     string old = baseURL + post["tim"] + post["ext"];
-                    string rep = post["tim"] + (string) post["ext"];
-                    htmlPage = htmlPage.Replace(old, rep);
+                    string replacement = post["tim"] + (string) post["ext"];
+                    htmlPage = htmlPage.Replace(old, replacement);
 
                     //get the actual filename saved
                     string filename = Path.GetFileNameWithoutExtension(
-                        new ImageLink(baseURL + post["tim"] + post["ext"],
+                        new ImageLink(old,
                             post["filename"].ToString())
                             .GenerateNewFilename((ImageFileNameFormat)Settings.Default.ImageFilenameFormat));
 
                     //Save thumbs for files that need it
-                    if (rep.Split('.')[1] == "webm")
+                    if (replacement.Split('.')[1] == "webm")
                     {
-                        old = "//t.4cdn.org/" + Url.Split('/')[3] + "/" + post["tim"] + "s.jpg";
+                        old = "//t.4cdn.org/" + BoardCode + "/" + post["tim"] + "s.jpg";
                         thumbs.Add("http:" + old);
 
                         htmlPage = htmlPage.Replace(post["tim"].ToString(), filename);
-                        htmlPage = htmlPage.Replace("//i.4cdn.org/" + Url.Split('/')[3] + "/" + filename, "thumb/" + post["tim"]);
+                        htmlPage = htmlPage.Replace("//i.4cdn.org/" + BoardCode + "/" + filename, "thumb/" + post["tim"]);
                     }
                     else
                     {
-                        string thumbName = rep.Split('.')[0] + "s";
-                        htmlPage = htmlPage.Replace(thumbName + ".jpg", rep.Split('.')[0] + "." + rep.Split('.')[1]);
+                        string thumbName = replacement.Split('.')[0] + "s";
+                        htmlPage = htmlPage.Replace(thumbName + ".jpg", replacement.Split('.')[0] + "." + replacement.Split('.')[1]);
                         htmlPage = htmlPage.Replace("/" + thumbName, thumbName);
 
-                        htmlPage = htmlPage.Replace("//i.4cdn.org/" + Url.Split('/')[3] + "/" + post["tim"], post["tim"].ToString());
+                        htmlPage = htmlPage.Replace("//i.4cdn.org/" + BoardCode + "/" + post["tim"], post["tim"].ToString());
                         htmlPage = htmlPage.Replace(post["tim"].ToString(), filename); //easy fix for images
                     }
 
-                    htmlPage = htmlPage.Replace("//is2.4chan.org/" + Url.Split('/')[3] + "/" + post["tim"], post["tim"].ToString()); //bandaid fix for is2 urls
-                    htmlPage = htmlPage.Replace("/" + rep, rep);
+                    htmlPage = htmlPage.Replace("//is2.4chan.org/" + BoardCode + "/" + post["tim"], post["tim"].ToString()); //bandaid fix for is2 urls
+                    htmlPage = htmlPage.Replace("/" + replacement, replacement);
                 }
 
                 htmlPage = htmlPage.Replace("=\"//", "=\"http://");
