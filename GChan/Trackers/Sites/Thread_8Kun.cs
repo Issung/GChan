@@ -2,12 +2,12 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
-using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Xml;
-using System.Xml.Linq;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace GChan.Trackers
 {
@@ -45,53 +45,41 @@ namespace GChan.Trackers
         {
             List<ImageLink> links = new List<ImageLink>();
             string JSONUrl = ("http://8kun.top/" + BoardCode + "/res/" + ID + ".json"); // Thread JSON url
-            string str = "";
-            XmlNodeList xmlNos, xmlTims, xmlFilenames, xmlExts, xmlFpaths;
 
             string Fpath0Url(string boardcode, string tim, string ext) => $"https://8kun.top/{boardcode}/src/{tim}{ext}";
             string Fpath1Url(string tim, string ext) => $"https://8kun.top/file_store/{tim}{ext}";
 
             try
             {
-                string Content = new WebClient().DownloadString(JSONUrl);
-
-                byte[] bytes = Encoding.ASCII.GetBytes(Content);
-                using (var stream = new MemoryStream(bytes))
+                JObject jObject;
+                using (var web = new WebClient())
                 {
-                    var quotas = new XmlDictionaryReaderQuotas();
-                    var jsonReader = JsonReaderWriterFactory.CreateJsonReader(stream, quotas);
-                    var xml = XDocument.Load(jsonReader);
-                    str = xml.ToString();                                                               // convert JSON to XML (funny, I know)
+                    string json = web.DownloadString(JSONUrl);
+                    jObject = JObject.Parse(json);
                 }
 
-                XmlDocument doc = new XmlDocument();
-                doc.LoadXml(str);
-
                 // Get the numbers of replies that have 1 or more images.
-                xmlNos = doc.DocumentElement.SelectNodes("/root/posts/item[tim]/no");
+                var nos = jObject.SelectTokens("posts[?(@.tim)].no").Select(x => long.Parse(x.ToString())).ToList();
 
                 // Loop through each reply.
-                for (int i = 0; i < xmlNos.Count; i++)
+                foreach (var no in nos)
                 {
                     // Get the tims, filenames and extensions of each image in this reply.
-                    xmlTims = doc.DocumentElement.SelectNodes($"/root/posts/item[no={xmlNos[i].InnerText}]//tim");
-                    xmlFilenames = doc.DocumentElement.SelectNodes($"/root/posts/item[no={xmlNos[i].InnerText}]//filename");
-                    xmlExts = doc.DocumentElement.SelectNodes($"/root/posts/item[no={xmlNos[i].InnerText}]//ext");
-                    xmlFpaths = doc.DocumentElement.SelectNodes($"/root/posts/item[no={xmlNos[i].InnerText}]//fpath");
+                    var tims = jObject.SelectTokens($"posts[?(@.no == {no})]..tim").Select(x => x.ToString()).ToList();
+                    var filenames = jObject.SelectTokens($"posts[?(@.no == {no})]..filename").Select(x => x.ToString()).ToList();
+                    var exts = jObject.SelectTokens($"posts[?(@.no == {no})]..ext").Select(x => x.ToString()).ToList();
+                    var fpaths = jObject.SelectTokens($"posts[?(@.no == {no})]..fpath").Select(x => x.ToString()).ToList();
 
-                    for (int j = 0; j < xmlTims.Count; j++)
+                    for (int j = 0; j < tims.Count; j++)
                     {
-                        string url;
-
-                        if (xmlExts[j].InnerText != "deleted")
+                        if (exts[j] != "deleted")
                         {
-                            if (xmlFpaths[j].InnerText == "0")
-                                url = Fpath0Url(BoardCode, xmlTims[j].InnerText, xmlExts[j].InnerText);
-                            else // "1"
-                                url = Fpath1Url(xmlTims[j].InnerText, xmlExts[j].InnerText);
+                            var url = fpaths[j] == "0" ? 
+                                Fpath0Url(BoardCode, tims[j], exts[j]) :
+                                Fpath1Url(tims[j], exts[j]); // "1"
 
                             // Save image link using reply no (number) as tim because 8kun tims have letters and numbers in them. The reply number will work just fine.
-                            links.Add(new ImageLink(long.Parse(xmlNos[i].InnerText), url, xmlFilenames[j].InnerText));
+                            links.Add(new ImageLink(no, url, filenames[j]));
                         }
                     }
                 }
@@ -110,61 +98,63 @@ namespace GChan.Trackers
         protected override void DownloadHTMLPage()
         {
             List<string> thumbs = new List<string>();
-            string str;
+            string htmlPage = "";
 
             try
             {
-                string htmlPage = new WebClient().DownloadString(Url);
-
-                string JURL = Url.Replace(".html", ".json");
-
-                string Content = new WebClient().DownloadString(JURL);
-
-                byte[] bytes = Encoding.ASCII.GetBytes(Content);
-                using (var stream = new MemoryStream(bytes))
+                JObject jObject;
+                using (var web = new WebClient())
                 {
-                    var quotas = new XmlDictionaryReaderQuotas();
-                    var jsonReader = JsonReaderWriterFactory.CreateJsonReader(stream, quotas);
-                    var xml = XDocument.Load(jsonReader);
-                    str = xml.ToString();
+                    htmlPage = new WebClient().DownloadString(Url);
+
+                    string JURL = Url.Replace(".html", ".json");
+
+                    string json = web.DownloadString(JURL);
+                    jObject = JObject.Parse(json);
                 }
 
                 // get single images
-                XmlDocument doc = new XmlDocument();
-                doc.LoadXml(str);
-                XmlNodeList xmlTim = doc.DocumentElement.SelectNodes("/root/posts/item/tim");
-                XmlNodeList xmlExt = doc.DocumentElement.SelectNodes("/root/posts/item/ext");
-                for (int i = 0; i < xmlExt.Count; i++)
+                var posts = jObject
+                    .SelectTokens("posts[*]")
+                    .Where(x => x["ext"] != null)
+                    .ToList();
+                
+                foreach (var post in posts)
                 {
-                    string ext = xmlExt[i].InnerText;
+                    var tim = post["tim"].ToString();
+                    var ext = post["ext"].ToString();
                     //                        if(ext == ".webm")
                     //                            ext = ".jpg";
-                    thumbs.Add("https://8kun.top/file_store/thumb/" + xmlTim[i].InnerText + ext);
+                    thumbs.Add("https://8kun.top/file_store/thumb/" + post["tim"] + ext);
 
-                    htmlPage = htmlPage.Replace("https://8kun.top/file_store/thumb/" + xmlTim[i].InnerText + ext, "thumb/" + xmlTim[i].InnerText + ext);
-                    htmlPage = htmlPage.Replace("=\"/file_store/thumb/" + xmlTim[i].InnerText + ext, "=\"thumb/" + xmlTim[i].InnerText + ext);
-                    htmlPage = htmlPage.Replace("=\"/file_store/" + xmlTim[i].InnerText + ext, "=\"" + xmlTim[i].InnerText + ext);
-                    htmlPage = htmlPage.Replace("https://media.8kun.top/file_store/thumb/" + xmlTim[i].InnerText + ext, "thumb/" + xmlTim[i].InnerText + ext);
-                    htmlPage = htmlPage.Replace("https://media.8kun.top/file_store/" + xmlTim[i].InnerText + ext, xmlTim[i].InnerText + ext);
-                    htmlPage = htmlPage.Replace("https://8kun.top/file_store/" + xmlTim[i].InnerText + ext, xmlTim[i].InnerText + ext);
+                    htmlPage = htmlPage.Replace("https://8kun.top/file_store/thumb/" + tim + ext, "thumb/" + tim + ext);
+                    htmlPage = htmlPage.Replace("=\"/file_store/thumb/" + tim + ext, "=\"thumb/" + tim + ext);
+                    htmlPage = htmlPage.Replace("=\"/file_store/" + tim + ext, "=\"" + tim + ext);
+                    htmlPage = htmlPage.Replace("https://media.8kun.top/file_store/thumb/" + tim + ext, "thumb/" + tim + ext);
+                    htmlPage = htmlPage.Replace("https://media.8kun.top/file_store/" + tim + ext, tim + ext);
+                    htmlPage = htmlPage.Replace("https://8kun.top/file_store/" + tim + ext, tim + ext);
                 }
 
                 // get images of posts with multiple images
-                xmlTim = doc.DocumentElement.SelectNodes("/root/posts/item/extra_files/item/tim");
-                xmlExt = doc.DocumentElement.SelectNodes("/root/posts/item/extra_files/item/ext");
-                for (int i = 0; i < xmlExt.Count; i++)
+                var extras = jObject
+                    .SelectTokens("posts.extra_files[*]")
+                    .Where(x => x["ext"] != null)
+                    .ToList();
+                
+                foreach (var extra in extras)
                 {
-                    string ext = xmlExt[i].InnerText;
+                    var tim = extra["tim"].ToString();
+                    var ext = extra["ext"].ToString();
                     //                        if(ext == ".webm")
                     //                            ext = ".jpg";
-                    thumbs.Add("https://8kun.top/file_store/thumb/" + xmlTim[i].InnerText + ext);
+                    thumbs.Add("https://8kun.top/file_store/thumb/" + tim + ext);
 
-                    htmlPage = htmlPage.Replace("https://8kun.top/file_store/thumb/" + xmlTim[i].InnerText + ext, "thumb/" + xmlTim[i].InnerText + ext);
-                    htmlPage = htmlPage.Replace("=\"/file_store/thumb/" + xmlTim[i].InnerText + ext, "=\"thumb/" + xmlTim[i].InnerText + ext);
-                    htmlPage = htmlPage.Replace("=\"/file_store/" + xmlTim[i].InnerText + ext, "=\"" + xmlTim[i].InnerText + ext);
-                    htmlPage = htmlPage.Replace("https://media.8kun.top/file_store/thumb/" + xmlTim[i].InnerText + ext, "thumb/" + xmlTim[i].InnerText + ext);
-                    htmlPage = htmlPage.Replace("https://media.8kun.top/file_store/" + xmlTim[i].InnerText + ext, xmlTim[i].InnerText + ext);
-                    htmlPage = htmlPage.Replace("https://8kun.top/file_store/" + xmlTim[i].InnerText + ext, xmlTim[i].InnerText + ext);
+                    htmlPage = htmlPage.Replace("https://8kun.top/file_store/thumb/" + tim + ext, "thumb/" + tim + ext);
+                    htmlPage = htmlPage.Replace("=\"/file_store/thumb/" + tim + ext, "=\"thumb/" + tim + ext);
+                    htmlPage = htmlPage.Replace("=\"/file_store/" + tim + ext, "=\"" + tim + ext);
+                    htmlPage = htmlPage.Replace("https://media.8kun.top/file_store/thumb/" + tim + ext, "thumb/" + tim + ext);
+                    htmlPage = htmlPage.Replace("https://media.8kun.top/file_store/" + tim + ext, tim + ext);
+                    htmlPage = htmlPage.Replace("https://8kun.top/file_store/" + tim + ext, tim + ext);
                 }
 
                 htmlPage = htmlPage.Replace("=\"/", "=\"https://8kun.top/");
