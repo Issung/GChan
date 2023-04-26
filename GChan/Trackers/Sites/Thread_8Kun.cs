@@ -79,7 +79,7 @@ namespace GChan.Trackers
                                 Fpath1Url(tims[j], exts[j]); // "1"
 
                             // Save image link using reply no (number) as tim because 8kun tims have letters and numbers in them. The reply number will work just fine.
-                            links.Add(new ImageLink(no, url, filenames[j]));
+                            links.Add(new ImageLink(no, url, filenames[j], no));
                         }
                     }
                 }
