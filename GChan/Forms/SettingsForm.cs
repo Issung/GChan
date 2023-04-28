@@ -152,7 +152,7 @@ namespace GChan
             var openFileDialog = new CommonOpenFileDialog();
             openFileDialog.IsFolderPicker = true;
             openFileDialog.Title = "Select Folder";
-            openFileDialog.InitialDirectory = @"C:\";
+            openFileDialog.InitialDirectory = Path.GetPathRoot(Environment.SystemDirectory);
             
             if (openFileDialog.ShowDialog() == CommonFileDialogResult.Ok && !string.IsNullOrWhiteSpace(openFileDialog.FileName))
             {
