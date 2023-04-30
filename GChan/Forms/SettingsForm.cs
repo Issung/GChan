@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
+using Microsoft.WindowsAPICodePack.Dialogs;
 
 namespace GChan
 {
@@ -148,14 +149,14 @@ namespace GChan
 
         private void SetPathButton_Click(object sender, EventArgs e)
         {
-            FolderBrowserDialog FolD = new FolderBrowserDialog();
-            FolD.Description = "Select Folder";
-            FolD.SelectedPath = @"C:\";
-            DialogResult dRes = FolD.ShowDialog(this);
-
-            if (dRes == DialogResult.OK)
+            var openFileDialog = new CommonOpenFileDialog();
+            openFileDialog.IsFolderPicker = true;
+            openFileDialog.Title = "Select Folder";
+            openFileDialog.InitialDirectory = Path.GetPathRoot(Environment.SystemDirectory);
+            
+            if (openFileDialog.ShowDialog() == CommonFileDialogResult.Ok && !string.IsNullOrWhiteSpace(openFileDialog.FileName))
             {
-                directory = FolD.SelectedPath;
+                directory = openFileDialog.FileName;
                 directoryTextBox.Text = directory;
             }
         }
