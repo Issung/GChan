@@ -62,10 +62,10 @@ namespace GChan.Trackers
                     .SelectTokens("posts[*]")
                     .Where(x => x["ext"] != null)
                     .Select(x =>
-                        new ImageLink(long.Parse(x[timPath].ToString()),
+                        new ImageLink(x[timPath].Value<long>(),
                             baseURL + x[timPath] + x["ext"],
                             x["filename"].ToString(),
-                            long.Parse(x["no"].ToString())))
+                            x["no"].Value<long>()))
                     .ToList();
             }
             catch (Exception ex)
@@ -116,10 +116,10 @@ namespace GChan.Trackers
 
                     //get the actual filename saved
                     string filename = Path.GetFileNameWithoutExtension(
-                        new ImageLink(long.Parse(post["tim"].ToString()),
+                        new ImageLink(post["tim"].Value<long>(),
                                 old,
                                 post["filename"].ToString(),
-                                long.Parse(post["no"].ToString()))
+                                post["no"].Value<long>())
                             .GenerateFilename((ImageFileNameFormat)Settings.Default.ImageFilenameFormat));
 
                     //Save thumbs for files that need it

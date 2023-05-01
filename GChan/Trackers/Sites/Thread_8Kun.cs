@@ -59,7 +59,7 @@ namespace GChan.Trackers
                 }
 
                 // Get the numbers of replies that have 1 or more images.
-                var nos = jObject.SelectTokens("posts[?(@.tim)].no").Select(x => long.Parse(x.ToString())).ToList();
+                var nos = jObject.SelectTokens("posts[?(@.tim)].no").Select(x => x.Value<long>()).ToList();
 
                 // Loop through each reply.
                 foreach (var no in nos)
