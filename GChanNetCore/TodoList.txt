@@ -1,0 +1,42 @@
+﻿Todo items:
+	Add (proper scaled) icons to all context menus.
+	Archived thread indicator (with red text/highlight or seperate column (archived yes/no)).
+	Add support for 8kun.top.
+	Asynchronous General.DownloadToDir downloads files as 0bytes empty files, fix this immediately.
+	Make boards view a datagridview and make it use databinding.
+	Add options to task bar right click
+		Toggle Stop & Go (Allow users to pause timer while gaming, etc).
+		Quick set interval with a little popup box.
+		
+Maybes:
+	Right click column headers -> choose visible columns.
+		Add more column choices?
+			Archived...
+
+Done items:
+	Refactor code to seperate "Imageboard" into thread and board.
+
+	Load threads and boards on program load on a seperate thread.
+	Databinding on thread grid view.
+	Ability to sort thread rows by clicking column headers.
+
+	Added dropdown box (ComboBox) to settings to allow choice for saved files filename format.
+
+	Copying all threads to clipboard also includes the custom subject text now.
+	Copying URL to clipboard now includes the custom subject text in the URL as a parameter.
+
+	Added new column displaying thread file count.
+
+	Added option to add subject text to folder name once thread is archived or manually removed.
+	
+	Thread count in tab text.
+	Changed Settings Page:
+		Directory textbox is now readonly, opens directory on double click.
+		Timer field is now a NumericUpDown.
+	Custom subjects are now saved by appending it so saved URL as a GET URL parameter.
+	Added disallowed characters to GetStringMessageBox.
+	Removed annoying FocusCues thing on DataGridView by making custom class CustomDataGridView and overriding the bool.
+
+	Changed icon.
+	Add start with windows checkbox.
+	Resize settings window.
