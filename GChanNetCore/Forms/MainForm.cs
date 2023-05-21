@@ -142,7 +142,7 @@ namespace GChan.Forms
                 string spath = Model.Threads[ThreadGridViewSelectedRowIndex].SaveTo;
                 if (!Directory.Exists(spath))
                     Directory.CreateDirectory(spath);
-                Process.Start(spath);
+                Utils.OpenInExplorer(spath);
             }
         }
 
@@ -151,7 +151,7 @@ namespace GChan.Forms
             if (ThreadGridViewSelectedRowIndex != -1)
             {
                 string spath = Model.Threads[ThreadGridViewSelectedRowIndex].Url;
-                Process.Start(spath);
+                Utils.OpenInBrowser(spath);
             }
         }
 
@@ -198,7 +198,7 @@ namespace GChan.Forms
                 string spath = (Model.Boards[BoardsListBoxSelectedRowIndex]).SaveTo;
                 if (!Directory.Exists(spath))
                     Directory.CreateDirectory(spath);
-                Process.Start(spath);
+                Utils.OpenInExplorer(spath);
             }
         }
 
@@ -207,7 +207,7 @@ namespace GChan.Forms
             if (BoardsListBoxSelectedRowIndex != -1)
             {
                 string spath = boardsListBox.Items[BoardsListBoxSelectedRowIndex].ToString();
-                Process.Start(spath);
+                Utils.OpenInBrowser(spath);
             }
         }
 
@@ -226,7 +226,7 @@ namespace GChan.Forms
 
         private void openFolderToolStripMenuItem1_Click(object sender, EventArgs e)
         {
-            Process.Start(Settings.Default.SavePath);
+            Utils.OpenInExplorer(Settings.Default.SavePath);
         }
 
         private void clearAllButton_Click(object sender, EventArgs e)
@@ -249,8 +249,10 @@ namespace GChan.Forms
                 {
                     string spath = Model.Boards[pos].SaveTo;
                     if (!Directory.Exists(spath))
+                    { 
                         Directory.CreateDirectory(spath);
-                    Process.Start(spath);
+                    }
+                    Utils.OpenInExplorer(spath);
                 }
             }
         }
@@ -319,7 +321,7 @@ namespace GChan.Forms
         {
             var assemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             var fullPath = Path.Combine(assemblyPath, "logs");
-            Process.Start(fullPath);
+            Utils.OpenInExplorer(fullPath);
         }
 
         /// <summary>
@@ -350,9 +352,11 @@ namespace GChan.Forms
             string spath = Settings.Default.SavePath;
 
             if (!Directory.Exists(spath))
+            { 
                 Directory.CreateDirectory(spath);
+            }
 
-            Process.Start(spath);
+            Utils.OpenInExplorer(spath);
         }
 
         private void systemTrayExitToolStripMenuItem_Click(object sender, EventArgs e)

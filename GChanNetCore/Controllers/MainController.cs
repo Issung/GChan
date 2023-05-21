@@ -152,7 +152,7 @@ namespace GChan.Controllers
                         string spath = newTracker.SaveTo;
                         if (!Directory.Exists(spath))
                             Directory.CreateDirectory(spath);
-                        Process.Start(spath);
+                        Utils.OpenInExplorer(spath);
                     }
                 }
             }

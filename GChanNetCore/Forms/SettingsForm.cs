@@ -160,7 +160,7 @@ namespace GChan
 
         private void textBox1_DoubleClick(object sender, EventArgs e)
         {
-            System.Diagnostics.Process.Start("explorer.exe", string.Format(directory));
+            Utils.OpenInExplorer(string.Format(directory));
         }
 
         /// <summary>

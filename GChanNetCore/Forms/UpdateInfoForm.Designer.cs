@@ -29,140 +29,143 @@ namespace GChan.Forms
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
+            components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(UpdateInfoForm));
-            this.flowLayoutPanel = new System.Windows.Forms.FlowLayoutPanel();
-            this.infoLabel = new System.Windows.Forms.Label();
-            this.buttonsPanel = new System.Windows.Forms.FlowLayoutPanel();
-            this.viewReleasesButton = new System.Windows.Forms.Button();
-            this.doNotUpdateButton = new System.Windows.Forms.Button();
-            this.updateButton = new System.Windows.Forms.Button();
-            this.toolTip = new System.Windows.Forms.ToolTip(this.components);
-            this.downloadingPanel = new System.Windows.Forms.Panel();
-            this.downloadingUpdateLabel = new System.Windows.Forms.Label();
-            this.progressBar = new System.Windows.Forms.ProgressBar();
-            this.flowLayoutPanel.SuspendLayout();
-            this.buttonsPanel.SuspendLayout();
-            this.downloadingPanel.SuspendLayout();
-            this.SuspendLayout();
+            flowLayoutPanel = new FlowLayoutPanel();
+            infoLabel = new Label();
+            buttonsPanel = new FlowLayoutPanel();
+            viewReleasesButton = new Button();
+            doNotUpdateButton = new Button();
+            updateButton = new Button();
+            toolTip = new ToolTip(components);
+            downloadingPanel = new Panel();
+            downloadingUpdateLabel = new Label();
+            progressBar = new ProgressBar();
+            flowLayoutPanel.SuspendLayout();
+            buttonsPanel.SuspendLayout();
+            downloadingPanel.SuspendLayout();
+            SuspendLayout();
             // 
             // flowLayoutPanel
             // 
-            this.flowLayoutPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.flowLayoutPanel.Controls.Add(this.infoLabel);
-            this.flowLayoutPanel.Controls.Add(this.buttonsPanel);
-            this.flowLayoutPanel.Location = new System.Drawing.Point(7, 7);
-            this.flowLayoutPanel.Name = "flowLayoutPanel";
-            this.flowLayoutPanel.Size = new System.Drawing.Size(330, 209);
-            this.flowLayoutPanel.TabIndex = 0;
+            flowLayoutPanel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            flowLayoutPanel.Controls.Add(infoLabel);
+            flowLayoutPanel.Controls.Add(buttonsPanel);
+            flowLayoutPanel.Location = new Point(8, 8);
+            flowLayoutPanel.Margin = new Padding(4, 3, 4, 3);
+            flowLayoutPanel.Name = "flowLayoutPanel";
+            flowLayoutPanel.Size = new Size(385, 242);
+            flowLayoutPanel.TabIndex = 0;
             // 
             // infoLabel
             // 
-            this.infoLabel.Location = new System.Drawing.Point(15, 15);
-            this.infoLabel.Margin = new System.Windows.Forms.Padding(15);
-            this.infoLabel.Name = "infoLabel";
-            this.infoLabel.Size = new System.Drawing.Size(300, 84);
-            this.infoLabel.TabIndex = 0;
-            this.infoLabel.Text = resources.GetString("infoLabel.Text");
-            this.infoLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            infoLabel.Location = new Point(18, 17);
+            infoLabel.Margin = new Padding(18, 17, 18, 17);
+            infoLabel.Name = "infoLabel";
+            infoLabel.Size = new Size(350, 97);
+            infoLabel.TabIndex = 0;
+            infoLabel.Text = resources.GetString("infoLabel.Text");
+            infoLabel.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // buttonsPanel
             // 
-            this.buttonsPanel.Controls.Add(this.viewReleasesButton);
-            this.buttonsPanel.Controls.Add(this.doNotUpdateButton);
-            this.buttonsPanel.Controls.Add(this.updateButton);
-            this.buttonsPanel.Location = new System.Drawing.Point(3, 117);
-            this.buttonsPanel.Name = "buttonsPanel";
-            this.buttonsPanel.Size = new System.Drawing.Size(326, 88);
-            this.buttonsPanel.TabIndex = 1;
+            buttonsPanel.Controls.Add(viewReleasesButton);
+            buttonsPanel.Controls.Add(doNotUpdateButton);
+            buttonsPanel.Controls.Add(updateButton);
+            buttonsPanel.Location = new Point(4, 134);
+            buttonsPanel.Margin = new Padding(4, 3, 4, 3);
+            buttonsPanel.Name = "buttonsPanel";
+            buttonsPanel.Size = new Size(380, 102);
+            buttonsPanel.TabIndex = 1;
             // 
             // viewReleasesButton
             // 
-            this.viewReleasesButton.Location = new System.Drawing.Point(3, 3);
-            this.viewReleasesButton.Name = "viewReleasesButton";
-            this.viewReleasesButton.Size = new System.Drawing.Size(320, 23);
-            this.viewReleasesButton.TabIndex = 0;
-            this.viewReleasesButton.Text = "View Releases on GitHub";
-            this.toolTip.SetToolTip(this.viewReleasesButton, "View the releases on GChan\'s official GitHub page at https://github.com/Issung/GC" +
-        "han/releases.");
-            this.viewReleasesButton.UseVisualStyleBackColor = true;
-            this.viewReleasesButton.Click += new System.EventHandler(this.viewReleasesButton_Click);
+            viewReleasesButton.Location = new Point(4, 3);
+            viewReleasesButton.Margin = new Padding(4, 3, 4, 3);
+            viewReleasesButton.Name = "viewReleasesButton";
+            viewReleasesButton.Size = new Size(373, 27);
+            viewReleasesButton.TabIndex = 0;
+            viewReleasesButton.Text = "View Releases on GitHub";
+            toolTip.SetToolTip(viewReleasesButton, "View the releases on GChan's official GitHub page at https://github.com/Issung/GChan/releases.");
+            viewReleasesButton.UseVisualStyleBackColor = true;
+            viewReleasesButton.Click += viewReleasesButton_Click;
             // 
             // doNotUpdateButton
             // 
-            this.doNotUpdateButton.Location = new System.Drawing.Point(3, 32);
-            this.doNotUpdateButton.Name = "doNotUpdateButton";
-            this.doNotUpdateButton.Size = new System.Drawing.Size(320, 23);
-            this.doNotUpdateButton.TabIndex = 1;
-            this.doNotUpdateButton.Text = "Later";
-            this.doNotUpdateButton.UseVisualStyleBackColor = true;
-            this.doNotUpdateButton.Click += new System.EventHandler(this.doNotUpdateButton_Click);
+            doNotUpdateButton.Location = new Point(4, 36);
+            doNotUpdateButton.Margin = new Padding(4, 3, 4, 3);
+            doNotUpdateButton.Name = "doNotUpdateButton";
+            doNotUpdateButton.Size = new Size(373, 27);
+            doNotUpdateButton.TabIndex = 1;
+            doNotUpdateButton.Text = "Later";
+            doNotUpdateButton.UseVisualStyleBackColor = true;
+            doNotUpdateButton.Click += doNotUpdateButton_Click;
             // 
             // updateButton
             // 
-            this.updateButton.Location = new System.Drawing.Point(3, 61);
-            this.updateButton.Name = "updateButton";
-            this.updateButton.Size = new System.Drawing.Size(320, 23);
-            this.updateButton.TabIndex = 2;
-            this.updateButton.Text = "Download and Install Update";
-            this.updateButton.UseVisualStyleBackColor = true;
-            this.updateButton.Click += new System.EventHandler(this.updateButton_Click);
+            updateButton.Location = new Point(4, 69);
+            updateButton.Margin = new Padding(4, 3, 4, 3);
+            updateButton.Name = "updateButton";
+            updateButton.Size = new Size(373, 27);
+            updateButton.TabIndex = 2;
+            updateButton.Text = "Download and Install Update";
+            updateButton.UseVisualStyleBackColor = true;
+            updateButton.Click += updateButton_Click;
             // 
             // downloadingPanel
             // 
-            this.downloadingPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.downloadingPanel.Controls.Add(this.downloadingUpdateLabel);
-            this.downloadingPanel.Controls.Add(this.progressBar);
-            this.downloadingPanel.Location = new System.Drawing.Point(9, 124);
-            this.downloadingPanel.MaximumSize = new System.Drawing.Size(327, 89);
-            this.downloadingPanel.MinimumSize = new System.Drawing.Size(327, 89);
-            this.downloadingPanel.Name = "downloadingPanel";
-            this.downloadingPanel.Size = new System.Drawing.Size(327, 89);
-            this.downloadingPanel.TabIndex = 1;
-            this.downloadingPanel.Visible = false;
+            downloadingPanel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            downloadingPanel.Controls.Add(downloadingUpdateLabel);
+            downloadingPanel.Controls.Add(progressBar);
+            downloadingPanel.Location = new Point(10, 143);
+            downloadingPanel.Margin = new Padding(4, 3, 4, 3);
+            downloadingPanel.MaximumSize = new Size(382, 103);
+            downloadingPanel.MinimumSize = new Size(382, 103);
+            downloadingPanel.Name = "downloadingPanel";
+            downloadingPanel.Size = new Size(382, 103);
+            downloadingPanel.TabIndex = 1;
+            downloadingPanel.Visible = false;
             // 
             // downloadingUpdateLabel
             // 
-            this.downloadingUpdateLabel.Location = new System.Drawing.Point(12, 18);
-            this.downloadingUpdateLabel.Name = "downloadingUpdateLabel";
-            this.downloadingUpdateLabel.Size = new System.Drawing.Size(301, 23);
-            this.downloadingUpdateLabel.TabIndex = 1;
-            this.downloadingUpdateLabel.Text = "Downloading update... Please wait...";
-            this.downloadingUpdateLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            downloadingUpdateLabel.Location = new Point(14, 21);
+            downloadingUpdateLabel.Margin = new Padding(4, 0, 4, 0);
+            downloadingUpdateLabel.Name = "downloadingUpdateLabel";
+            downloadingUpdateLabel.Size = new Size(351, 27);
+            downloadingUpdateLabel.TabIndex = 1;
+            downloadingUpdateLabel.Text = "Downloading update... Please wait...";
+            downloadingUpdateLabel.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // progressBar
             // 
-            this.progressBar.Location = new System.Drawing.Point(12, 52);
-            this.progressBar.Name = "progressBar";
-            this.progressBar.Size = new System.Drawing.Size(301, 23);
-            this.progressBar.TabIndex = 0;
+            progressBar.Location = new Point(14, 60);
+            progressBar.Margin = new Padding(4, 3, 4, 3);
+            progressBar.Name = "progressBar";
+            progressBar.Size = new Size(351, 27);
+            progressBar.TabIndex = 0;
             // 
             // UpdateInfoForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(344, 223);
-            this.ControlBox = false;
-            this.Controls.Add(this.downloadingPanel);
-            this.Controls.Add(this.flowLayoutPanel);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.MaximumSize = new System.Drawing.Size(360, 300);
-            this.Name = "UpdateInfoForm";
-            this.Padding = new System.Windows.Forms.Padding(7);
-            this.ShowInTaskbar = false;
-            this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "Update Information";
-            this.flowLayoutPanel.ResumeLayout(false);
-            this.buttonsPanel.ResumeLayout(false);
-            this.downloadingPanel.ResumeLayout(false);
-            this.ResumeLayout(false);
-
+            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
+            ClientSize = new Size(401, 258);
+            ControlBox = false;
+            Controls.Add(downloadingPanel);
+            Controls.Add(flowLayoutPanel);
+            FormBorderStyle = FormBorderStyle.FixedDialog;
+            Icon = (Icon)resources.GetObject("$this.Icon");
+            Margin = new Padding(4, 3, 4, 3);
+            MaximumSize = new Size(417, 340);
+            Name = "UpdateInfoForm";
+            Padding = new Padding(8);
+            ShowInTaskbar = false;
+            SizeGripStyle = SizeGripStyle.Hide;
+            StartPosition = FormStartPosition.CenterParent;
+            Text = "Update Information";
+            flowLayoutPanel.ResumeLayout(false);
+            buttonsPanel.ResumeLayout(false);
+            downloadingPanel.ResumeLayout(false);
+            ResumeLayout(false);
         }
 
         #endregion

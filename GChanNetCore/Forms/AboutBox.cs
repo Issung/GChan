@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using GChan.Helpers;
+using System.Reflection;
 
 namespace GChan
 {
@@ -107,7 +108,7 @@ namespace GChan
 
         private void richTextBoxDescription_LinkClicked(object sender, LinkClickedEventArgs e)
         {
-            System.Diagnostics.Process.Start(e.LinkText);
+            Utils.OpenInBrowser(e.LinkText);
         }
 
         private void richTextBoxDescription_TextChanged(object sender, EventArgs e)

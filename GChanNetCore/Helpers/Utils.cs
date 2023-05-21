@@ -3,6 +3,7 @@ using GChan.Properties;
 using GChan.Trackers;
 using Microsoft.Win32;
 using NLog;
+using System.Diagnostics;
 using System.Net;
 using System.Reflection;
 using System.Text;
@@ -61,9 +62,23 @@ namespace GChan.Helpers
             RegistryKey registryKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
 
             if (startWithWindows)
+            {
                 registryKey.SetValue(PROGRAM_NAME, '"' + Application.ExecutablePath + '"' + (minimizeToTray && startWithWindowsMinimized ? $" {Program.TRAY_CMDLINE_ARG}" : ""));
+            }
             else if (registryKey.GetValue(PROGRAM_NAME) != null)
+            { 
                 registryKey.DeleteValue(PROGRAM_NAME);
+            }
+        }
+
+        public static void OpenInExplorer(string path)
+        {
+            Process.Start("explorer.exe", path);
+        }
+
+        public static void OpenInBrowser(string url)
+        {
+            Process.Start("explorer", url);
         }
 
         /// <summary>

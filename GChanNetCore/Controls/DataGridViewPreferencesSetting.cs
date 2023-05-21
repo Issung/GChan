@@ -1,4 +1,5 @@
-﻿using System.Configuration;
+﻿using GChan.Helpers;
+using System.Configuration;
 
 /// <summary>
 /// Credit goes to Günther M. FOIDL https://github.com/gfoidl
@@ -6,7 +7,7 @@
 /// </summary>
 namespace GChan.Controls
 {
-    internal sealed class DataGridViewPreferencesSetting : ApplicationSettingsBase
+	internal sealed class DataGridViewPreferencesSetting : ApplicationSettingsBase
 	{
 		private static DataGridViewPreferencesSetting _defaultInstance = (DataGridViewPreferencesSetting)Synchronized(new DataGridViewPreferencesSetting());
 		
@@ -16,12 +17,19 @@ namespace GChan.Controls
 		// a dictionary is used to save the settings for this DGV.
 		// As name of the control is used as the dictionary key.
 		[UserScopedSetting]
-		[SettingsSerializeAs(SettingsSerializeAs.Binary)]
 		[DefaultSettingValue("")]
-		public Dictionary<string, List<ColumnOrderItem>> ColumnOrder
+		[SettingsSerializeAs(SettingsSerializeAs.Xml)]
+		public XmlSerializableDictionary<string, List<ColumnOrderItem>> ColumnOrder
 		{
-			get { return this["ColumnOrder"] as Dictionary<string, List<ColumnOrderItem>>; }
-			set { this["ColumnOrder"] = value; }
+			get
+			{
+				var temp = this["ColumnOrder"];
+				return (temp as XmlSerializableDictionary<string, List<ColumnOrderItem>>) ?? new(); 
+			}
+			set
+			{
+				this["ColumnOrder"] = value; 
+			}
 		}
 
 		
@@ -32,11 +40,12 @@ namespace GChan.Controls
 		{
 			get
 			{
-				return (bool)(this[nameof(FirstStart)]);
+				return (bool)this["FirstStart"];
 			}
 			set
 			{
-				this[nameof(FirstStart)] = value;
+				this["FirstStart"] = value;
+
 			}
 		}
 	}
