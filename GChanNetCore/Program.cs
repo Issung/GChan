@@ -2,11 +2,7 @@
 using GChan.Forms;
 using GChan.Properties;
 using NLog;
-using System;
-using System.IO;
 using System.Runtime.InteropServices;
-using System.Threading;
-using System.Windows.Forms;
 
 namespace GChan
 {

@@ -44,34 +44,34 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <None Update="icons\Alert.png">
+	  <None Update="Icons\Alert.png">
 	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
 	  </None>
-	  <None Update="icons\Clipboard.png">
+	  <None Update="Icons\Clipboard.png">
 	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
 	  </None>
-	  <None Update="icons\Cclose.png">
+	  <None Update="Icons\Cclose.png">
 	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
 	  </None>
-	  <None Update="icons\Download.png">
+	  <None Update="Icons\Download.png">
 	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
 	  </None>
-	  <None Update="icons\File.png">
+	  <None Update="Icons\File.png">
 	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
 	  </None>
-	  <None Update="icons\Folder.png">
+	  <None Update="Icons\Folder.png">
 	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
 	  </None>
-	  <None Update="icons\Question.png">
+	  <None Update="Icons\Question.png">
 	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
 	  </None>
-	  <None Update="icons\Rename.png">
+	  <None Update="Icons\Rename.png">
 	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
 	  </None>
-	  <None Update="icons\SettingsWrench.png">
+	  <None Update="Icons\SettingsWrench.png">
 	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
 	  </None>
-	  <None Update="icons\World.png">
+	  <None Update="Icons\World.png">
 	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
 	  </None>
 	</ItemGroup>

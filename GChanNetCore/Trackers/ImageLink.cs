@@ -1,7 +1,4 @@
-﻿using System.IO;
-using System.Linq;
-
-namespace GChan
+﻿namespace GChan.Trackers
 {
     public class ImageLink
     {
@@ -35,7 +32,7 @@ namespace GChan
         {
             //const int FILENAME_MAX_LENGTH = 254;
             string[] parts = URL.Split('/');
-            string lastPart = (parts.Length > 0) ? parts.Last() : URL;
+            string lastPart = parts.Length > 0 ? parts.Last() : URL;
 
             string extension = Path.GetExtension(URL); // Contains period (.).
 

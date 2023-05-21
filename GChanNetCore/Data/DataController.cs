@@ -1,7 +1,5 @@
 ﻿using GChan.Trackers;
-using System.Collections.Generic;
 using System.Data.SQLite;
-using System.IO;
 
 namespace GChan.Data
 {

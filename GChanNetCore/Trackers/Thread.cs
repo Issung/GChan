@@ -1,12 +1,8 @@
-﻿using GChan.Properties;
-using System;
+﻿using GChan.Helpers;
+using GChan.Properties;
 using System.ComponentModel;
-using System.IO;
-using System.Linq;
 using System.Net;
 using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 
 namespace GChan.Trackers
 {

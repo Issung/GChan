@@ -1,6 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Windows.Forms;
+﻿using GChan.Helpers;
 
 namespace GChan
 {

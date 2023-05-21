@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 
-namespace GChan
+namespace GChan.Helpers
 {
     public static class EnumHelper
     {

@@ -2,14 +2,9 @@
 using GChan.Models;
 using GChan.Properties;
 using GChan.Trackers;
-using NLog;
-using NLog.Targets;
-using System;
+using GChan.Helpers;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Windows.Forms;
 using Type = GChan.Trackers.Type;
 
 namespace GChan.Forms

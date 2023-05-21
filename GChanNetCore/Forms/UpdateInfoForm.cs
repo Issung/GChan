@@ -1,7 +1,5 @@
 ﻿using GChan.Controllers;
-using System;
 using System.Diagnostics;
-using System.Windows.Forms;
 
 namespace GChan.Forms
 {

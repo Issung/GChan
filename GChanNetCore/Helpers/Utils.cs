@@ -3,17 +3,12 @@ using GChan.Properties;
 using GChan.Trackers;
 using Microsoft.Win32;
 using NLog;
-using System;
-using System.IO;
-using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Text;
-using System.Threading;
-using System.Windows.Forms;
 using Thread = GChan.Trackers.Thread;
 
-namespace GChan
+namespace GChan.Helpers
 {
     /// <summary>
     /// Utility methods
@@ -77,7 +72,7 @@ namespace GChan
         /// <param name="str">String to validate</param>
         public static bool IsDigitsOnly(string str)
         {
-            foreach(char c in str)
+            foreach (char c in str)
             {
                 if (c < '0' || c > '9')
                     return false;
@@ -162,7 +157,7 @@ namespace GChan
         public static bool DownloadFile(string url, string directory)
         {
             if (!Directory.Exists(directory))
-            { 
+            {
                 Directory.CreateDirectory(directory);
             }
 
@@ -193,7 +188,7 @@ namespace GChan
         public static bool DownloadToDir(ImageLink link, string dir)
         {
             if (!Directory.Exists(dir))
-            { 
+            {
                 Directory.CreateDirectory(dir);
             }
 
@@ -254,7 +249,7 @@ namespace GChan
 
             // Attmept normal directory move, if already exists add a number in bracket starting with 1 going upwards.
             int number = 0;
-            string indexBracket() => (number == 0) ? "" : $" ({number})";
+            string indexBracket() => number == 0 ? "" : $" ({number})";
             string newDirectory() => destinationDirectory + indexBracket();
 
             while (Directory.Exists(newDirectory()))
@@ -292,7 +287,7 @@ namespace GChan
             string ret = haystack;
 
             for (int i = 0; i < charactersToRemove.Length; i++)
-            { 
+            {
                 ret = ret.Replace(charactersToRemove[i].ToString(), "");
             }
 

@@ -1,11 +1,8 @@
-﻿using GChan.Properties;
+﻿using GChan.Helpers;
+using GChan.Properties;
 using Microsoft.Win32;
-using System;
-using System.ComponentModel;
-using System.IO;
-using System.Linq;
-using System.Windows.Forms;
 using Microsoft.WindowsAPICodePack.Dialogs;
+using System.ComponentModel;
 
 namespace GChan
 {

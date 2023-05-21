@@ -1,6 +1,4 @@
 ﻿using GChan.Properties;
-using System;
-using System.Windows.Forms;
 
 namespace GChan
 {

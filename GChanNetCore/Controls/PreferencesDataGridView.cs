@@ -1,10 +1,5 @@
 ﻿using NLog;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
-using System.Linq;
-using System.Windows.Forms;
 
 /// <summary>
 /// Credit goes to Günther M. FOIDL https://github.com/gfoidl

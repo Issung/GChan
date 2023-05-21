@@ -1,7 +1,4 @@
-﻿using System;
-using System.Windows.Forms;
-
-namespace GChan
+﻿namespace GChan
 {
     public partial class Changelog : Form
     {

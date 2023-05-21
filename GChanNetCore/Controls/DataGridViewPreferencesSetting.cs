@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
+﻿using System.Configuration;
 
 /// <summary>
 /// Credit goes to Günther M. FOIDL https://github.com/gfoidl
@@ -8,7 +6,7 @@ using System.Configuration;
 /// </summary>
 namespace GChan.Controls
 {
-	internal sealed class DataGridViewPreferencesSetting : ApplicationSettingsBase
+    internal sealed class DataGridViewPreferencesSetting : ApplicationSettingsBase
 	{
 		private static DataGridViewPreferencesSetting _defaultInstance = (DataGridViewPreferencesSetting)Synchronized(new DataGridViewPreferencesSetting());
 		
