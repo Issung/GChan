@@ -77,7 +77,9 @@ namespace GChan.Trackers
 
         public void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
         {
+#if DEBUG
             logger.Debug($"NotifyPropertyChanged! propertyName: {propertyName}.");
+#endif
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
