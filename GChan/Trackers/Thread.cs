@@ -1,4 +1,5 @@
-﻿using GChan.Properties;
+﻿using GChan.Models;
+using GChan.Properties;
 using System;
 using System.ComponentModel;
 using System.IO;
@@ -18,25 +19,9 @@ namespace GChan.Trackers
 
         protected string subject { get; private set; } = null;
 
-        protected long greatestSavedFileTim = 0;
-
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public long GreatestSavedFileTim
-        {
-            get
-            {
-                return greatestSavedFileTim;
-            }
-
-            set
-            {
-                if (value > greatestSavedFileTim)
-                {
-                    greatestSavedFileTim = value;
-                }
-            }
-        }
+        public SavedIdsCollection SavedIds { get; set; } = new();
 
         public string Subject
         {
@@ -126,22 +111,18 @@ namespace GChan.Trackers
                 {
                     if (Scraping)
                     {
-                        if (link.Tim > GreatestSavedFileTim)
+                        if (!SavedIds.Contains(link.Tim))
                         {
-                            logger.Debug($"Downloading file {link} because its Tim was greater than {GreatestSavedFileTim}.");
+                            logger.Debug($"Downloading file {link} because its Tim is not in the saved set.");
                             Utils.DownloadToDir(link, SaveTo);
+                            SavedIds.Add(link.Tim);
                         }
                         else
                         {
-                            logger.Debug($"Skipping downloading file {link} because its Tim was less than than {GreatestSavedFileTim}.");
+                            logger.Debug($"Skipping downloading file {link} because its Tim is in the saved set.");
                         }
                     }
                 });
-
-                if (imageLinks.Length > 0)
-                {
-                    GreatestSavedFileTim = imageLinks.Max(t => t.Tim);
-                }
             }
             catch (WebException webEx)
             {

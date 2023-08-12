@@ -14,6 +14,8 @@
 
         public long LargestAddedThreadNo { get; set; }
 
+        public long GreatestThreadId { get; set; }
+
         protected Board(string url) : base(url)
         {
             Type = Type.Board;

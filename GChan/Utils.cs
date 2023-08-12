@@ -89,21 +89,20 @@ namespace GChan
         /// <summary>
         /// Create a new Tracker (Thread or Board).
         /// </summary>
-        public static Tracker CreateNewTracker(LoadedInfo info)
+        public static Tracker CreateNewTracker(LoadedData data)
         {
-            long greatestSaved = long.Parse(info.GreatestSaved);
+            // TODO: Should be making trackers based on the LoadedData (pass loadeddata to constructor).
+            // Rather than making them and then loading them with more data.
+            var tracker = CreateNewTracker(data.URL);
 
-            Tracker tracker = CreateNewTracker(info.URL);
-
-            // TODO: Use 'is' check on type and cast at same time.
-            if (tracker.Type == Trackers.Type.Thread)
+            if (data is LoadedThreadData threadData && tracker is Thread thread)
             {
-                ((Thread)tracker).GreatestSavedFileTim = greatestSaved;
-                ((Thread)tracker).Subject = ((LoadedThreadInfo)info).Subject;
+                thread.Subject = threadData.Subject;
+                thread.SavedIds = threadData.SavedIds;
             }
-            else if (tracker.Type == Trackers.Type.Board)
+            else if (data is LoadedBoardData boardData && tracker is Board board)
             {
-                ((Board)tracker).LargestAddedThreadNo = greatestSaved;
+                board.LargestAddedThreadNo = boardData.GreatestThreadId;
             }
 
             return tracker;
