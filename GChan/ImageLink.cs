@@ -1,9 +1,10 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Linq;
 
 namespace GChan
 {
-    public class ImageLink
+    public class ImageLink : IEquatable<ImageLink>
     {
         public long Tim;
 
@@ -80,6 +81,42 @@ namespace GChan
             //Program.Log($"Filename generated: {result}. Length: {result.Length}");
 
             return result;
+        }
+
+        public bool Download()
+
+        public bool Equals(ImageLink other)
+        {
+            if (other == null)
+            {
+                return false;
+            }
+
+            return Tim == other.Tim &&
+                   URL == other.URL &&
+                   UploadedFilename == other.UploadedFilename;
+        }
+
+        public override bool Equals(object other)
+        {
+            if (other == null || GetType() != other.GetType())
+            {
+                return false;
+            }
+
+            return this.Equals((ImageLink)other);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 17;
+                hash = hash * 23 + Tim.GetHashCode();
+                hash = hash * 23 + (URL?.GetHashCode() ?? 0);
+                hash = hash * 23 + (UploadedFilename?.GetHashCode() ?? 0);
+                return hash;
+            }
         }
 
         public override string ToString()
