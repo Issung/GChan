@@ -1,4 +1,7 @@
-﻿using System.IO;
+﻿using GChan.Helpers;
+using Newtonsoft.Json.Linq;
+using System;
+using System.IO;
 using System.Linq;
 
 namespace GChan
@@ -17,6 +20,8 @@ namespace GChan
         /// e.g. "LittleSaintJames.jpg", NOT the stored filename e.g. "1265123123.jpg".
         /// </summary>
         public string UploadedFilename;
+
+        
 
         public ImageLink(string url, string uploadedFilename)
         {

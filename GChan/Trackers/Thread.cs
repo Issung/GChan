@@ -150,7 +150,7 @@ namespace GChan.Trackers
             }
         }
 
-        protected abstract ImageLink[] GetImageLinks();
+        protected abstract ImageLink[] GetImageLinks(bool includeAlreadySaved = false);
 
         protected abstract void DownloadHTMLPage();
 

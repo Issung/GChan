@@ -99,7 +99,7 @@ namespace GChan.Data
                 cmd.CommandText = $"DROP TABLE IF EXISTS {TB_BOARD}";
                 cmd.ExecuteNonQuery();
 
-                cmd.CommandText = $"CREATE TABLE {TB_BOARD} ({COL_URL} TEXT PRIMARY KEY NOT NULL)";
+                cmd.CommandText = $"CREATE TABLE {TB_BOARD} ({COL_URL} TEXT PRIMARY KEY NOT NULL, {COL_GREATEST_THREAD_ID} INTEGER)";
                 cmd.ExecuteNonQuery();
             }
         }
@@ -198,7 +198,7 @@ namespace GChan.Data
 
                     cmd.CommandText = $@"INSERT INTO {TB_BOARD} ({COL_URL}, {COL_GREATEST_THREAD_ID}) VALUES (@{COL_URL}, @{COL_GREATEST_THREAD_ID})";
                     cmd.Parameters.AddWithValue(COL_URL, boards[i].Url);
-                    cmd.Parameters.AddWithValue(COL_GREATEST_THREAD_ID, boards[i].LargestAddedThreadNo);
+                    cmd.Parameters.AddWithValue(COL_GREATEST_THREAD_ID, boards[i].GreatestThreadId);
 
                     cmd.ExecuteNonQuery();
                 }
