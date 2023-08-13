@@ -2,8 +2,6 @@
 using GChan.Models;
 using GChan.Properties;
 using GChan.Trackers;
-using NLog;
-using NLog.Targets;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -87,13 +85,8 @@ namespace GChan.Forms
                 textBox = Clipboard.GetText();
 
             // Get url from TextBox
-            var urls = textBox.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-
-            for (int i = 0; i < urls.Length; i++)
-            {
-                urls[i] = Utils.PrepareURL(urls[i]);
-                Controller.AddUrl(urls[i]);
-            }
+            var urls = textBox.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(Utils.PrepareURL);
+            Controller.AddUrls(urls);
         }
 
         private void DragDropHandler(object sender, DragEventArgs e)
@@ -101,13 +94,8 @@ namespace GChan.Forms
             var textData = (string)e.Data.GetData(DataFormats.Text);
 
             // Get url from TextBox
-            var urls = textData.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-
-            for (int i = 0; i < urls.Length; i++)
-            {
-                urls[i] = Utils.PrepareURL(urls[i]);
-                Controller.AddUrl(urls[i]);
-            }
+            var urls = textData.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(Utils.PrepareURL);
+            Controller.AddUrls(urls);
         }
 
         private void DragEnterHandler(object sender, DragEventArgs e)
@@ -146,7 +134,9 @@ namespace GChan.Forms
             {
                 string spath = Model.Threads[ThreadGridViewSelectedRowIndex].SaveTo;
                 if (!Directory.Exists(spath))
+                { 
                     Directory.CreateDirectory(spath);
+                }
                 Process.Start(spath);
             }
         }

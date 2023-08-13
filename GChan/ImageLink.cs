@@ -7,48 +7,48 @@ namespace GChan
 {
     public class ImageLink
     {
+        /// <summary>
+        /// For 4chan: Unix timestamp with microseconds at which the image was uploaded.
+        /// For 8kun: The ID of the post this image belongs to (same as No).
+        /// </summary>
         public long Tim;
 
         /// <summary>
         /// URL to the access the image.
         /// </summary>
-        public string URL;
+        public string Url;
 
         /// <summary>
-        /// The filename the image was uploaded with. 
-        /// e.g. "LittleSaintJames.jpg", NOT the stored filename e.g. "1265123123.jpg".
+        /// The filename the image was uploaded as <strong>without an extension</strong>.<br/>
+        /// e.g. "LittleSaintJames", NOT the stored filename e.g. "1265123123.jpg".
         /// </summary>
         public string UploadedFilename;
 
         private readonly ILogger logger = LogManager.GetCurrentClassLogger();
 
-        public ImageLink(string url, string uploadedFilename)
-        {
-            URL = url;
-            UploadedFilename = uploadedFilename;
-        }
+        /// <summary>
+        /// The ID of the post this image belongs to.
+        /// </summary>
+        public long No;
 
-        public ImageLink(long tim, string url, string uploadedFilename)
+        public ImageLink(long tim, string url, string uploadedFilename, long no)
         {
             Tim = tim;
-            URL = url;
+            Url = url;
             UploadedFilename = uploadedFilename;
+            No = no;
         }
 
-        public string GenerateNewFilename(ImageFileNameFormat format)
+        public string GenerateFilename(ImageFileNameFormat format)
         {
-            //const int FILENAME_MAX_LENGTH = 254;
-            string[] parts = URL.Split('/');
-            string lastPart = (parts.Length > 0) ? parts.Last() : URL;
+            var extension = Path.GetExtension(Url); // Contains period (.).
 
-            string extension = Path.GetExtension(URL); // Contains period (.).
-
-            string result = format switch
+            var result = format switch
             {
-                ImageFileNameFormat.ID => lastPart,
-                ImageFileNameFormat.OriginalFilename => UploadedFilename + extension,
-                ImageFileNameFormat.IDAndOriginalFilename => $"{Tim}-{UploadedFilename}{extension}",
-                ImageFileNameFormat.OriginalFilenameAndID => $"{UploadedFilename}-{Tim}{extension}",
+                ImageFileNameFormat.ID => $"{No}{extension}",
+                ImageFileNameFormat.OriginalFilename => $"{UploadedFilename}{extension}",
+                ImageFileNameFormat.IDAndOriginalFilename => $"{No} - {UploadedFilename}{extension}",
+                ImageFileNameFormat.OriginalFilenameAndID => $"{UploadedFilename} - {No}{extension}",
                 _ => throw new ArgumentException("Given value for 'format' is unknown.")
             };
 
@@ -59,7 +59,7 @@ namespace GChan
 
         public override string ToString()
         {
-            return $"ImageLink {{ Tim: '{Tim}', URL: '{URL}', UploadedFilename: '{UploadedFilename}' }}";
+            return $"ImageLink {{ Tim: '{Tim}', Url: '{Url}', UploadedFilename: '{UploadedFilename}', No: '{No}' }}";
         }
     }
 }

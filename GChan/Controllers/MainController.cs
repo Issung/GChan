@@ -1,5 +1,6 @@
 ﻿using GChan.Data;
 using GChan.Forms;
+using GChan.Helpers;
 using GChan.Models;
 using GChan.Properties;
 using GChan.Trackers;
@@ -82,7 +83,7 @@ namespace GChan.Controllers
 
             scanTimer.Enabled = false;
             scanTimer.Interval = Settings.Default.ScanTimer;
-            scanTimer.Tick += new EventHandler(Scan);
+            scanTimer.Tick += new EventHandler(StartScanThread);
         }
 
         public void LoadTrackers()
@@ -106,7 +107,6 @@ namespace GChan.Controllers
 
                 new SysThread(() =>
                 {
-                    // END TODO
                     Parallel.ForEach(threads, (thread) =>
                     {
                         Thread newThread = (Thread)Utils.CreateNewTracker(thread);
@@ -114,16 +114,16 @@ namespace GChan.Controllers
                     });
 
                     Form.Invoke((MethodInvoker)delegate {
-                        Done();
+                        FinishLoadingTrackers();
                     });
                 }).Start();
             }
 
             /// Executed once everything has finished being loaded.
-            void Done()
+            void FinishLoadingTrackers()
             {
                 scanTimer.Enabled = true;
-                Scan(this, new EventArgs());
+                StartScanThread(this, new EventArgs());
 
                 // Check for updates.
                 if (Settings.Default.CheckForUpdatesOnStart)
@@ -133,41 +133,56 @@ namespace GChan.Controllers
             }
         }
 
-        public void AddUrl(string url)
+        public void AddUrls(IEnumerable<string> urls)
         {
-            Tracker newTracker = Utils.CreateNewTracker(url);
+            bool trackerWasAdded = false;
+            foreach (var url in urls)
+            { 
+                var newTracker = Utils.CreateNewTracker(url);
 
-            if (newTracker != null)
-            {
-                List<Tracker> trackerList = ((newTracker.Type == Type.Board) ? Model.Boards.Cast<Tracker>() : Model.Threads.Cast<Tracker>()).ToList();
-
-                if (IsUnique(newTracker, trackerList))
+                if (newTracker != null)
                 {
-                    AddNewTracker(newTracker);
-                    scanTimer.Enabled = true;
-                    Scan(this, new EventArgs());
+                    var trackerList = ((newTracker.Type == Type.Board) ? Model.Boards.Cast<Tracker>() : Model.Threads.Cast<Tracker>()).ToArray();
+
+                    if (IsUnique(newTracker, trackerList))
+                    {
+                        var addSuccess = AddNewTracker(newTracker);
+                        if (addSuccess)
+                        { 
+                            trackerWasAdded = true;
+                        }
+                    }
+                    else
+                    {
+                        var result = MessageBox.Show(
+                            "URL is already being tracked!\nOpen corresponding folder?",
+                            "Error", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1);
+
+                        if (result == DialogResult.Yes)
+                        {
+                            var path = newTracker.SaveTo;
+                            if (!Directory.Exists(path))
+                            { 
+                                Directory.CreateDirectory(path);
+                            }
+                            Process.Start(path);
+                        }
+                    }
                 }
                 else
                 {
-                    DialogResult result = MessageBox.Show(
-                        "URL is already being tracked!\nOpen corresponding folder?",
-                        "Error", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1);
-
-                    if (result == DialogResult.Yes)
-                    {
-                        string spath = newTracker.SaveTo;
-                        if (!Directory.Exists(spath))
-                            Directory.CreateDirectory(spath);
-                        Process.Start(spath);
-                    }
+                    MessageBox.Show($"Entered text '{url}' is not a supported site or board/thread!");
                 }
             }
-            else
+
+            if (trackerWasAdded)
             {
-                MessageBox.Show($"Entered text '{url}' is not a supported site or board/thread!");
+                scanTimer.Enabled = true;
+                StartScanThread(this, new EventArgs());
             }
         }
 
+        /// <returns>Was <paramref name="tracker"/> added to a tracker list.</returns>
         private bool AddNewTracker(Tracker tracker)
         {
             if (tracker == null)
@@ -235,7 +250,10 @@ namespace GChan.Controllers
             }
         }
 
-        private void Scan(object sender, EventArgs e)
+        /// <summary>
+        /// Run the scan thread if it isn't already running.
+        /// </summary>
+        private void StartScanThread(object sender, EventArgs e)
         {
             if (scanThread == null || !scanThread.IsAlive)
             {
@@ -249,67 +267,71 @@ namespace GChan.Controllers
             }
         }
 
+        /// <summary>
+        /// Thread entry-point.
+        /// </summary>
         private void ScanRoutine()
         {
             lock (ThreadLock)
             {
                 // Remove 404'd threads
-                for (int i = 0; i < Model.Threads.Count; i++)
-                {
-                    if (Model.Threads[i].Gone)
-                    {
-                        RemoveThread(Model.Threads[i]);
-                        i--;
-                    }
-                }
+                var removedThreads = Model.Threads.RemoveAll(t => t.Gone);
+                removedThreads.ForEach(t => RemoveThread(t));
             }
 
             // Make a copy of the current boards and scrape them for new threads.
-            var boards = Model.Boards.ToList();
+            var boards = Model.Boards.ToArray();
 
-            for (int i = 0; i < boards.Count; i++)
+            foreach (var board in boards)
             {
-                if (boards[i].Scraping)
+                if (board.Scraping)
                 {
-                    // OrderBy because we need the threads to be in ascending order by ID for LargestAddedThreadNo to be useful.
-                    string[] boardThreadUrls = boards[i].GetThreadLinks().OrderBy(t => t).ToArray();
-                    int largestNo = 0;
+                    var threadUrls = board.GetThreadLinks();
+                    var greatestThreadIdLock = new object();
+                    var greatestThreadId = 0;
 
-                    Parallel.ForEach(boardThreadUrls, (url) =>
+                    Parallel.ForEach(threadUrls, (threadUrl) =>
                     {
-                        if (boards[i].Scraping)
+                        if (board.Scraping)
                         {
-                            int? id = GetThreadId(boards[i], url);
+                            var id = GetThreadId(board, threadUrl);
 
-                            if (id.HasValue && id.Value > boards[i].LargestAddedThreadNo)
+                            if (id != null && id > board.LargestAddedThreadNo)
                             {
-                                Thread newThread = (Thread)Utils.CreateNewTracker(url);
+                                var newThread = (Thread)Utils.CreateNewTracker(threadUrl);
 
                                 if (newThread != null && IsUnique(newThread, Model.Threads))
                                 {
-                                    bool urlWasAdded = AddNewTracker(newThread);
+                                    var urlWasAdded = AddNewTracker(newThread);
 
                                     if (urlWasAdded)
                                     {
-                                        if (id.Value > largestNo)   //Not exactly safe in multithreaded but should work fine.
-                                            largestNo = id.Value;
+                                        lock (greatestThreadIdLock)
+                                        { 
+                                            if (id > greatestThreadId)
+                                            {
+                                                greatestThreadId = id.Value;
+                                            }
+                                        }
                                     }
                                 }
                             }
                         }
                     });
 
-                    boards[i].LargestAddedThreadNo = largestNo;
+                    board.LargestAddedThreadNo = greatestThreadId;
                 }
             }
 
             // Make a copy of the current threads and download them.
-            var threads = Model.Threads.ToList();
+            var threads = Model.Threads.ToArray();
 
-            for (int i = 0; i < threads.Count; i++)
+            for (int i = 0; i < threads.Length; i++)
             {
                 if (threads[i].Scraping)
+                { 
                     ThreadPool.QueueUserWorkItem(new WaitCallback(threads[i].Download));
+                }
             }
         }
 
@@ -319,8 +341,8 @@ namespace GChan.Controllers
             {
                 var idCodeMatch = board.SiteName switch
                 {
-                    Thread_4Chan.ID_CODE_REGEX => Regex.Match(url, Thread_4Chan.ID_CODE_REGEX),
-                    Board_8Kun.SITE_NAME_8KUN => Regex.Match(url, Thread_8Kun.ID_CODE_REGEX),
+                    Board_4Chan.SITE_NAME => Regex.Match(url, Thread_4Chan.ID_CODE_REGEX),
+                    Board_8Kun.SITE_NAME => Regex.Match(url, Thread_8Kun.ID_CODE_REGEX),
                     _ => null,
                 };
 
@@ -342,12 +364,13 @@ namespace GChan.Controllers
         /// </summary>
         private bool IsUnique(Tracker tracker, IEnumerable<Tracker> list)
         {
-            if (tracker.Type == Type.Thread)
+            if (tracker is Thread thread)
             {
-                return !list.OfType<Thread>().Any(
-                    t => t.SiteName == tracker.SiteName &&
-                    t.BoardCode == tracker.BoardCode &&
-                    t.ID == ((Thread)tracker).ID);
+                return !list.OfType<Thread>().Any(t => 
+                    t.SiteName == thread.SiteName &&
+                    t.BoardCode == thread.BoardCode &&
+                    t.ID == thread.ID
+                );
             }
             else // Board
             {
@@ -475,8 +498,8 @@ namespace GChan.Controllers
             scanTimer.Dispose();
 
             if (Settings.Default.SaveListsOnClose)
-            { 
-                DataController.SaveAll(Model.Threads.ToList(), Model.Boards);
+            {
+                DataController.SaveAll(Model.Threads.ToArray(), Model.Boards.ToArray());
             }
 
             return false;

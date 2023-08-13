@@ -23,9 +23,9 @@ namespace GChan.Models
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        public SortableBindingList<Thread> Threads { get; set; } = new SortableBindingList<Thread>();
+        public SortableBindingList<Thread> Threads { get; set; } = new();
 
-        public BindingList<Board> Boards { get; set; } = new BindingList<Board>();
+        public SortableBindingList<Board> Boards { get; set; } = new();
 
         public string ThreadsTabText => $"Threads ({Threads.Count})";
 

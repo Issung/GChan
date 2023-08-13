@@ -1,25 +1,24 @@
 ﻿using GChan.Properties;
-using NLog;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
-using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Xml;
-using System.Xml.Linq;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace GChan.Trackers
 {
     public class Board_8Kun : Board
     {
-        public const string SITE_NAME_8KUN = "8kun";
+        public const string SITE_NAME = "8kun";
         public const string boardRegex = @"8kun.top/[a-zA-Z0-9]*?/";
         public const string boardCodeRegex = @"(?<=(8kun.top/))[a-zA-Z0-9]*(?=(/index.html))";
 
         public Board_8Kun(string url) : base(url)
         {
-            SiteName = SITE_NAME_8KUN;
+            SiteName = SITE_NAME;
 
             Match boardCodeMatch = Regex.Match(url, boardCodeRegex);
             BoardCode = boardCodeMatch.Groups[0].Value;
@@ -36,28 +35,20 @@ namespace GChan.Trackers
         {
             string url = "http://8kun.top/" + BoardCode + "/catalog.json";
             List<string> threadUrls = new List<string>();
-            string str = "";
-            XmlNodeList threadNos;
 
             try
             {
-                string json = new WebClient().DownloadString(url);
-                byte[] bytes = Encoding.ASCII.GetBytes(json);
-                using (var stream = new MemoryStream(bytes))
+                JArray jArray;
+                using (var web = new WebClient())
                 {
-                    var quotas = new XmlDictionaryReaderQuotas();
-                    var jsonReader = JsonReaderWriterFactory.CreateJsonReader(stream, quotas);
-                    var xml = XDocument.Load(jsonReader);
-                    str = xml.ToString();
+                    string json = web.DownloadString(url);
+                    jArray = JArray.Parse(json);
                 }
 
-                XmlDocument doc = new XmlDocument();
-                doc.LoadXml(str);
-                threadNos = doc.DocumentElement.SelectNodes("//no");
-                for (int i = 0; i < threadNos.Count; i++)
-                {
-                    threadUrls.Add("http://8kun.top/" + BoardCode + "/res/" + threadNos[i].InnerText + ".html");
-                }
+                threadUrls = jArray
+                    .SelectTokens("..no")
+                    .Select(x => "http://8kun.top/" + BoardCode + "/res/" + x + ".html")
+                    .ToList();
             }
             catch (WebException webEx)
             {
