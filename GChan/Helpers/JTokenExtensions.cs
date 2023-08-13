@@ -17,6 +17,10 @@ namespace GChan.Helpers
             JTokenType.String,
         };
 
+        /// <summary>
+        /// Get hashcode of a Tim <see cref="JToken"/> restricted to specific token types.
+        /// </summary>
+        /// <exception cref="Exception">Token type is not in <see cref="AcceptedJTokenHashTypes"/>.</exception>
         public static long GetTimHashCode(this JToken token)
         {
             if (AcceptedJTokenHashTypes.Contains(token.Type))

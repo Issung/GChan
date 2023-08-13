@@ -12,7 +12,7 @@ namespace GChan.Data
         public LoadedThreadData(SQLiteDataReader dataReader)
         {
             var index = 0;
-            URL = dataReader.GetString(index++) ?? "";
+            Url = dataReader.GetString(index++) ?? "";
             Subject = dataReader.GetString(index++) ?? "";
             SavedIds = new SavedIdsCollection(dataReader.GetString(index++) ?? "");
         }

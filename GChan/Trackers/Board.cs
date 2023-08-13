@@ -12,6 +12,10 @@
             } 
         }
 
+        /// <summary>
+        /// The greatest Thread ID added to tracking.<br/>
+        /// This is used to ignore old thread ids in <see cref="GetThreadLinks"/>.
+        /// </summary>
         public long GreatestThreadId { get; set; }
 
         protected Board(string url) : base(url)

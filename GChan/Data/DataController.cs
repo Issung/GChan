@@ -125,9 +125,7 @@ namespace GChan.Data
 
             if (version == -1 || version != DATABASE_VERSION)
             {
-                /*var tet = (LoadThreads(), LoadBoards());
-                CreateDB();
-                SaveAll(tet.Item1, tet.Item2);*/
+                // TODO: Figure out migration strategies.
                 CreateDB();
             }
         }
@@ -173,12 +171,10 @@ namespace GChan.Data
             {
                 cmd.CommandText = $"SELECT * FROM {TB_THREAD}";
 
-                using (SQLiteDataReader reader = cmd.ExecuteReader())
+                using SQLiteDataReader reader = cmd.ExecuteReader();
+                while (reader.Read())
                 {
-                    while (reader.Read())
-                    {
-                        loadedThreads.Add(new LoadedThreadData(reader));
-                    }
+                    loadedThreads.Add(new LoadedThreadData(reader));
                 }
             }
 
@@ -187,38 +183,32 @@ namespace GChan.Data
 
         public static void SaveBoards(IList<Board> boards)
         {
-            using (var cmd = new SQLiteCommand(Connection))
+            using var cmd = new SQLiteCommand(Connection);
+            cmd.CommandText = $"DELETE FROM {TB_BOARD}";
+            cmd.ExecuteNonQuery();
+
+            for (int i = 0; i < boards.Count; i++)
             {
-                cmd.CommandText = $"DELETE FROM {TB_BOARD}";
+                cmd.CommandText = $@"INSERT INTO {TB_BOARD} ({COL_URL}, {COL_GREATEST_THREAD_ID}) VALUES (@{COL_URL}, @{COL_GREATEST_THREAD_ID})";
+                cmd.Parameters.AddWithValue(COL_URL, boards[i].Url);
+                cmd.Parameters.AddWithValue(COL_GREATEST_THREAD_ID, boards[i].GreatestThreadId);
 
                 cmd.ExecuteNonQuery();
-
-                for (int i = 0; i < boards.Count; i++)
-                {
-
-                    cmd.CommandText = $@"INSERT INTO {TB_BOARD} ({COL_URL}, {COL_GREATEST_THREAD_ID}) VALUES (@{COL_URL}, @{COL_GREATEST_THREAD_ID})";
-                    cmd.Parameters.AddWithValue(COL_URL, boards[i].Url);
-                    cmd.Parameters.AddWithValue(COL_GREATEST_THREAD_ID, boards[i].GreatestThreadId);
-
-                    cmd.ExecuteNonQuery();
-                }
             }
         }
 
         public static IList<LoadedBoardData> LoadBoards()
         {
-            List<LoadedBoardData> loadedBoards = new List<LoadedBoardData>();
+            var loadedBoards = new List<LoadedBoardData>();
 
             using (var cmd = new SQLiteCommand(Connection))
             {
                 cmd.CommandText = $"SELECT * FROM {TB_BOARD}";
 
-                using (SQLiteDataReader reader = cmd.ExecuteReader())
+                using SQLiteDataReader reader = cmd.ExecuteReader();
+                while (reader.Read())
                 {
-                    while (reader.Read())
-                    {
-                        loadedBoards.Add(new LoadedBoardData(reader));
-                    }
+                    loadedBoards.Add(new LoadedBoardData(reader));
                 }
             }
 

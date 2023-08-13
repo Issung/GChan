@@ -6,8 +6,8 @@
     public class LoadedData
     {
         /// <summary>
-        /// 
+        /// Url of the tracker.
         /// </summary>
-        public string URL;
+        public string Url;
     }
 }

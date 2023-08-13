@@ -14,6 +14,9 @@ namespace GChan.Helpers
             }
         }
 
+        /// <summary>
+        /// If <paramref name="includeAlreadySaved"/> is false then remove items from <paramref name="links"/> if they are already in <paramref name="savedIds"/>.
+        /// </summary>
         public static IEnumerable<ImageLink> MaybeRemoveAlreadySavedLinks(
             this IEnumerable<ImageLink> links,
             bool includeAlreadySaved,

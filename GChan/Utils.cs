@@ -94,7 +94,7 @@ namespace GChan
             // TODO: Should be making trackers based on the LoadedData (pass loadeddata to constructor).
             // Rather than making them and then loading them with more data.
             // This would help app-startup ui responsiveness as it would reduce the notify property changed spam greatly.
-            var tracker = CreateNewTracker(data.URL);
+            var tracker = CreateNewTracker(data.Url);
 
             if (data is LoadedThreadData threadData && tracker is Thread thread)
             {

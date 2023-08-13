@@ -9,7 +9,7 @@ namespace GChan.Data
         public LoadedBoardData(SQLiteDataReader dataReader)
         {
             var index = 0;
-            URL = dataReader.GetString(index++) ?? "";
+            Url = dataReader.GetString(index++) ?? "";
             GreatestThreadId = dataReader.GetInt64(index++);
         }
     }
