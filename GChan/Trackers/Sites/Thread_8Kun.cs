@@ -57,7 +57,7 @@ namespace GChan.Trackers
                 var links = new List<ImageLink>();
 
                 // Get the numbers of replies that have 1 or more images.
-                var nos = jObject.SelectTokens("posts[?(@.tim)].no").Select(x => long.Parse(x.ToString())).ToList();
+                var nos = jObject.SelectTokens("posts[?(@.tim)].no").Select(x => x.Value<long>()).ToList();
 
                 // Loop through each reply.
                 foreach (var no in nos)
@@ -77,7 +77,7 @@ namespace GChan.Trackers
                                 Fpath1Url(tims[j], exts[j]); // "1"
 
                             // Save image link using reply no (number) as tim because 8kun tims have letters and numbers in them. The reply number will work just fine.
-                            links.Add(new ImageLink(no, url, filenames[j]));
+                            links.Add(new ImageLink(no, url, filenames[j], no));
                         }
                     }
                 }

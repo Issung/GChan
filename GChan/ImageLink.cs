@@ -5,12 +5,16 @@ namespace GChan
 {
     public class ImageLink
     {
+        /// <summary>
+        /// For 4chan: Unix timestamp with microseconds at which the image was uploaded.
+        /// For 8kun: The ID of the post this image belongs to (same as No).
+        /// </summary>
         public long Tim;
 
         /// <summary>
         /// URL to the access the image.
         /// </summary>
-        public string URL;
+        public string Url;
 
         /// <summary>
         /// The filename the image was uploaded with. 
@@ -18,26 +22,26 @@ namespace GChan
         /// </summary>
         public string UploadedFilename;
 
-        public ImageLink(string url, string uploadedFilename)
-        {
-            URL = url;
-            UploadedFilename = uploadedFilename;
-        }
+        /// <summary>
+        /// The ID of the post this image belongs to.
+        /// </summary>
+        public long No;
 
-        public ImageLink(long tim, string url, string uploadedFilename)
+        public ImageLink(long tim, string url, string uploadedFilename, long no)
         {
             Tim = tim;
-            URL = url;
+            Url = url;
             UploadedFilename = uploadedFilename;
+            No = no;
         }
 
-        public string GenerateNewFilename(ImageFileNameFormat format)
+        public string GenerateFilename(ImageFileNameFormat format)
         {
             //const int FILENAME_MAX_LENGTH = 254;
-            string[] parts = URL.Split('/');
-            string lastPart = (parts.Length > 0) ? parts.Last() : URL;
+            string[] parts = Url.Split('/');
+            string lastPart = (parts.Length > 0) ? parts.Last() : Url;
 
-            string extension = Path.GetExtension(URL); // Contains period (.).
+            string extension = Path.GetExtension(Url); // Contains period (.).
 
             string result;
 
@@ -51,7 +55,7 @@ namespace GChan
                     break;
                 case ImageFileNameFormat.IDAndOriginalFilename:
                 default:
-                    result = Path.GetFileNameWithoutExtension(URL) + " - " + UploadedFilename + extension;
+                    result = Path.GetFileNameWithoutExtension(Url) + " - " + UploadedFilename + extension;
                     break;
             }
 
@@ -65,11 +69,11 @@ namespace GChan
             }
             else if (format == ImageFileNameFormat.IDAndOriginalFilename)
             {
-                result = Path.GetFileNameWithoutExtension(URL) + " - " + UploadedFilename + extension;
+                result = Path.GetFileNameWithoutExtension(Url) + " - " + UploadedFilename + extension;
             }
             else //ImageFileFormat == OriginalFilenameAndID
             {
-                result = UploadedFilename + " - " + Path.GetFileNameWithoutExtension(URL) + extension;
+                result = UploadedFilename + " - " + Path.GetFileNameWithoutExtension(Url) + extension;
             }
 
             //if (result.Length > FILENAME_MAX_LENGTH)
@@ -84,7 +88,7 @@ namespace GChan
 
         public override string ToString()
         {
-            return $"ImageLink {{ Tim: '{Tim}', URL: '{URL}', UploadedFilename: '{UploadedFilename}' }}";
+            return $"ImageLink {{ Tim: '{Tim}', Url: '{Url}', UploadedFilename: '{UploadedFilename}', No: '{No}' }}";
         }
     }
 }

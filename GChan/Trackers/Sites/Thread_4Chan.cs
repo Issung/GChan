@@ -61,7 +61,8 @@ namespace GChan.Trackers
                         new ImageLink(
                             x[timPath].GetTimHashCode(),
                             baseUrl + Uri.EscapeDataString(x[timPath].Value<string>()) + x["ext"],  // Require escaping for the flash files stored with arbitrary string names.
-                            x["filename"].Value<string>()
+                            x["filename"].Value<string>(),
+                            x["no"].Value<long>()
                         )
                     )
                     .ToArray();
@@ -114,9 +115,11 @@ namespace GChan.Trackers
 
                     //get the actual filename saved
                     string filename = Path.GetFileNameWithoutExtension(
-                        new ImageLink(old,
-                            post["filename"].ToString())
-                            .GenerateNewFilename((ImageFileNameFormat)Settings.Default.ImageFilenameFormat));
+                        new ImageLink(post["tim"].Value<long>(),
+                                old,
+                                post["filename"].ToString(),
+                                post["no"].Value<long>())
+                            .GenerateFilename((ImageFileNameFormat)Settings.Default.ImageFilenameFormat));
 
                     //Save thumbs for files that need it
                     if (replacement.Split('.')[1] == "webm")

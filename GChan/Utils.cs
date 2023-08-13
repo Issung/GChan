@@ -198,12 +198,12 @@ namespace GChan
                 Directory.CreateDirectory(dir);
             }
 
-            string destFilepath = CombinePathAndFilename(dir, link.GenerateNewFilename((ImageFileNameFormat)Settings.Default.ImageFilenameFormat));
+            string destFilepath = CombinePathAndFilename(dir, link.GenerateFilename((ImageFileNameFormat)Settings.Default.ImageFilenameFormat));
 
             try
             {
                 using var webClient = new WebClient();
-                webClient.DownloadFile(link.URL, destFilepath);
+                webClient.DownloadFile(link.Url, destFilepath);
 
                 // TODO: Figure out how to make the async downloading work properly.
                 // This line is currently not working and downloads 0 byte files 100% of the time.
@@ -220,7 +220,7 @@ namespace GChan
             }
             catch (WebException ex)
             {
-                logger.Error(ex, $"Error occured while downloading link {link.URL}.");
+                logger.Error(ex, $"Error occured while downloading link {link.Url}.");
                 return false;
             }
         }
