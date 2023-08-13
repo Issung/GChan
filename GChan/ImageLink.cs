@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using NLog;
+using System;
+using System.IO;
 using System.Linq;
 
 namespace GChan
@@ -17,10 +19,12 @@ namespace GChan
         public string Url;
 
         /// <summary>
-        /// The filename the image was uploaded with. 
-        /// e.g. "LittleSaintJames.jpg", NOT the stored filename e.g. "1265123123.jpg".
+        /// The filename the image was uploaded as <strong>without an extension</strong>.<br/>
+        /// e.g. "LittleSaintJames", NOT the stored filename e.g. "1265123123.jpg".
         /// </summary>
         public string UploadedFilename;
+
+        private readonly ILogger logger = LogManager.GetCurrentClassLogger();
 
         /// <summary>
         /// The ID of the post this image belongs to.
@@ -37,51 +41,18 @@ namespace GChan
 
         public string GenerateFilename(ImageFileNameFormat format)
         {
-            //const int FILENAME_MAX_LENGTH = 254;
-            string[] parts = Url.Split('/');
-            string lastPart = (parts.Length > 0) ? parts.Last() : Url;
+            var extension = Path.GetExtension(Url); // Contains period (.).
 
-            string extension = Path.GetExtension(Url); // Contains period (.).
-
-            string result;
-
-            switch (format)
+            var result = format switch
             {
-                case ImageFileNameFormat.ID:
-                    result = lastPart;
-                    break;
-                case ImageFileNameFormat.OriginalFilename:
-                    result = UploadedFilename + extension;
-                    break;
-                case ImageFileNameFormat.IDAndOriginalFilename:
-                default:
-                    result = Path.GetFileNameWithoutExtension(Url) + " - " + UploadedFilename + extension;
-                    break;
-            }
+                ImageFileNameFormat.ID => $"{No}{extension}",
+                ImageFileNameFormat.OriginalFilename => $"{UploadedFilename}{extension}",
+                ImageFileNameFormat.IDAndOriginalFilename => $"{No} - {UploadedFilename}{extension}",
+                ImageFileNameFormat.OriginalFilenameAndID => $"{UploadedFilename} - {No}{extension}",
+                _ => throw new ArgumentException("Given value for 'format' is unknown.")
+            };
 
-            if (format == ImageFileNameFormat.ID)
-            {
-                result = lastPart;
-            }
-            else if (format == ImageFileNameFormat.OriginalFilename)
-            {
-                result = UploadedFilename + extension;
-            }
-            else if (format == ImageFileNameFormat.IDAndOriginalFilename)
-            {
-                result = Path.GetFileNameWithoutExtension(Url) + " - " + UploadedFilename + extension;
-            }
-            else //ImageFileFormat == OriginalFilenameAndID
-            {
-                result = UploadedFilename + " - " + Path.GetFileNameWithoutExtension(Url) + extension;
-            }
-
-            //if (result.Length > FILENAME_MAX_LENGTH)
-            //{
-            //    result = result.Substring(0, FILENAME_MAX_LENGTH - extension.Length) + extension;
-            //}
-
-            //Program.Log($"Filename generated: {result}. Length: {result.Length}");
+            logger.Info($"Filename generated: {result}. Length: {result.Length}");
 
             return result;
         }
