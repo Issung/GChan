@@ -184,7 +184,7 @@ namespace GChan.Trackers
                             if (rawjson.Substring(i, SUB_ENDER.Length) == SUB_ENDER)
                             {
                                 subject = rawjson.Substring(subStartIndex + SUB_HEADER.Length, i - (subStartIndex + SUB_HEADER.Length));
-                                subject = Utils.SanitiseSubjectString(WebUtility.HtmlDecode(subject));
+                                subject = Utils.SanitiseSubject(WebUtility.HtmlDecode(subject));
                                 break;
                             }
                         }

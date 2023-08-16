@@ -160,7 +160,7 @@ namespace GChan.Trackers
 
         public string GetURLWithSubject()
         {
-            return (Url + ("/?subject=" + Utils.SanitiseSubjectString(Subject).Replace(' ', '_'))).Replace("\r", "");
+            return (Url + ("/?subject=" + Utils.SanitiseSubject(Subject).Replace(' ', '_'))).Replace("\r", "");
         }
     }
 }
