@@ -8,8 +8,6 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Reflection;
-using System.Text;
-using System.Threading;
 using System.Windows.Forms;
 using Thread = GChan.Trackers.Thread;
 
@@ -21,6 +19,9 @@ namespace GChan
     internal class Utils
     {
         public const string PROGRAM_NAME = "GChan";
+
+        public static readonly char[] IllegalSubjectCharacters = Path.GetInvalidFileNameChars();
+        public static readonly char[] IllegalFilenameCharacters = Path.GetInvalidFileNameChars();
 
         private static readonly ILogger logger = LogManager.GetCurrentClassLogger();
 
@@ -233,7 +234,7 @@ namespace GChan
         public static void MoveThread(Thread thread)
         {
             string currentDirectory = thread.SaveTo.Replace("\r", "");
-            string subject = SanitiseSubjectString(thread.Subject);
+            string subject = Utils.SanitiseSubject(thread.Subject);
 
             // There are \r characters appearing from the custom subjects, TODO: need to get to the bottom of the cause of this.
             var folderNameFormat = (ThreadFolderNameFormat)Settings.Default.ThreadFolderNameFormat;
@@ -287,37 +288,30 @@ namespace GChan
             return fullpath;
         }
 
-        public static string RemoveCharactersFromString(string haystack, params char[] charactersToRemove)
+        /// <summary>
+        /// Remove a string of characters illegal for a folder name.<br/>
+        /// Used for thread subjects if addThreadSubjectToFolder setting is enabled.
+        /// </summary>
+        public static string SanitiseSubject(string subject)
         {
-            string ret = haystack;
-
-            for (int i = 0; i < charactersToRemove.Length; i++)
-            { 
-                ret = ret.Replace(charactersToRemove[i].ToString(), "");
-            }
-
-            return ret;
+            return RemoveCharactersFromString(subject, IllegalSubjectCharacters);
         }
 
-        readonly static char[] SubjectIllegalCharacters = Path.GetInvalidFileNameChars();
+        public static string SanitiseFilename(string filename)
+        {
+            return RemoveCharactersFromString(filename, IllegalFilenameCharacters);
+        }
+
 
         /// <summary>
-        /// Remove a string of characters illegal for a folder name. Used for thread subjects if 
-        /// addThreadSubjectToFolder setting is enabled.
+        /// Remove <paramref name="chars"/> from <paramref name="input"/>.
         /// </summary>
-        public static string SanitiseSubjectString(string subject)
+        /// <remarks>
+        /// Found to be the fastest method by: https://stackoverflow.com/a/48590650/8306962.
+        /// </remarks>
+        public static string RemoveCharactersFromString(string input, params char[] chars) 
         {
-            StringBuilder sb = new StringBuilder();
-
-            for (int i = 0; i < subject.Length; i++)
-            {
-                if (!SubjectIllegalCharacters.Contains(subject[i]))
-                {
-                    sb.Append(subject[i]);
-                }
-            }
-
-            return sb.ToString();
+            return string.Join(string.Empty, input.Split(chars));
         }
 
         /// <summary>

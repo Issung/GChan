@@ -19,8 +19,8 @@ namespace GChan
         public string Url;
 
         /// <summary>
-        /// The filename the image was uploaded as <strong>without an extension</strong>.<br/>
-        /// e.g. "LittleSaintJames", NOT the stored filename e.g. "1265123123.jpg".
+        /// The <strong>sanitised</strong> filename the image was uploaded as <strong>without an extension</strong>.<br/>
+        /// e.g. "LittleSaintJames", <strong>not</strong> the stored filename e.g. "1265123123.jpg".
         /// </summary>
         public string UploadedFilename;
 
@@ -35,7 +35,7 @@ namespace GChan
         {
             Tim = tim;
             Url = url;
-            UploadedFilename = uploadedFilename;
+            UploadedFilename = Utils.SanitiseFilename(uploadedFilename);
             No = no;
         }
 
