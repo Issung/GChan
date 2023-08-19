@@ -1,13 +1,12 @@
-﻿using GChan.Properties;
+﻿using GChan.Helpers;
+using GChan.Properties;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Text;
 using System.Text.RegularExpressions;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace GChan.Trackers
 {
@@ -30,7 +29,7 @@ namespace GChan.Trackers
             Match idCodeMatch = Regex.Match(url, ID_CODE_REGEX);
             ID = idCodeMatch.Groups[0].Value;
 
-            SaveTo = Settings.Default.SavePath + "\\" + SiteName + "\\" + BoardCode + "\\" + ID;
+            SaveTo = Path.Combine(Settings.Default.SavePath, SiteName, BoardCode, ID);
 
             if (subject == null)
                 Subject = GetThreadSubject();
@@ -41,41 +40,41 @@ namespace GChan.Trackers
             return Regex.IsMatch(url, THREAD_REGEX);
         }
 
-        protected override ImageLink[] GetImageLinks()
+        protected override ImageLink[] GetImageLinks(bool includeAlreadySaved = false)
         {
-            List<ImageLink> links = new List<ImageLink>();
-            string JSONUrl = "http://a.4cdn.org/" + BoardCode + "/thread/" + ID + ".json";
-            string baseURL = "http://i.4cdn.org/" + BoardCode + "/";
+            var baseUrl = $"http://i.4cdn.org/{BoardCode}/";
+            var jsonUrl = $"http://a.4cdn.org/{BoardCode}/thread/{ID}.json";
 
             try
             {
-                JObject jObject;
-                using (var web = new WebClient())
-                {
-                    string json = web.DownloadString(JSONUrl);
-                    jObject = JObject.Parse(json);
-                }
+                using var web = new WebClient();
+                var json = web.DownloadString(jsonUrl);
+                var jObject = JObject.Parse(json);
 
                 // The /f/ board (flash) saves the files with their uploaded name.
                 var timPath = BoardCode == "f" ? "filename" : "tim";
-                links = jObject
+
+                var links = jObject
                     .SelectTokens("posts[*]")
                     .Where(x => x["ext"] != null)
                     .Select(x =>
-                        new ImageLink(x[timPath].Value<long>(),
-                            baseURL + x[timPath] + x["ext"],
-                            x["filename"].ToString(),
-                            x["no"].Value<long>()))
-                    .ToList();
+                        new ImageLink(
+                            x[timPath].GetTimHashCode(),
+                            baseUrl + Uri.EscapeDataString(x[timPath].Value<string>()) + x["ext"],  // Require escaping for the flash files stored with arbitrary string names.
+                            x["filename"].Value<string>(),
+                            x["no"].Value<long>()
+                        )
+                    )
+                    .ToArray();
+
+                FileCount = links.Length;
+                return links.MaybeRemoveAlreadySavedLinks(includeAlreadySaved, SavedIds).ToArray();
             }
             catch (Exception ex)
             {
                 logger.Error(ex, $"Encountered an exception in GetImageLinks() {this}.");
                 throw;
             }
-
-            FileCount = links.Count;
-            return links.ToArray();
         }
 
         protected override void DownloadHTMLPage()

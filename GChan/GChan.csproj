@@ -84,9 +84,9 @@
     <Compile Include="Controllers\MainController.cs" />
     <Compile Include="Controllers\UpdateController.cs" />
     <Compile Include="Controls\DataGridViewPreferencesSetting.cs" />
-    <Compile Include="Data\LoadedBoardInfo.cs" />
-    <Compile Include="Data\LoadedInfo.cs" />
-    <Compile Include="Data\LoadedThreadInfo.cs" />
+    <Compile Include="Data\LoadedBoardData.cs" />
+    <Compile Include="Data\LoadedData.cs" />
+    <Compile Include="Data\LoadedThreadData.cs" />
     <Compile Include="Forms\AboutBox.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -107,6 +107,7 @@
       <DependentUpon>UpdateInfoForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Helpers\EnumerableExtensions.cs" />
+    <Compile Include="Helpers\JTokenExtensions.cs" />
     <Compile Include="ImageLink.cs" />
     <Compile Include="Controls\PreferencesDataGridView.cs">
       <SubType>Component</SubType>
@@ -117,7 +118,9 @@
     <Compile Include="Forms\GetStringMessageBox.Designer.cs">
       <DependentUpon>GetStringMessageBox.cs</DependentUpon>
     </Compile>
+    <Compile Include="Models\ConcurrentHashSet.cs" />
     <Compile Include="Models\MainFormModel.cs" />
+    <Compile Include="Models\SavedIdsCollection.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

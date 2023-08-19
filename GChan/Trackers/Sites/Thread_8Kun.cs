@@ -8,6 +8,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using GChan.Helpers;
 
 namespace GChan.Trackers
 {
@@ -41,22 +42,19 @@ namespace GChan.Trackers
             return Regex.IsMatch(url, threadRegex);
         }
 
-        protected override ImageLink[] GetImageLinks()
+        protected override ImageLink[] GetImageLinks(bool includeAlreadySaved = false)
         {
-            List<ImageLink> links = new List<ImageLink>();
-            string JSONUrl = ("http://8kun.top/" + BoardCode + "/res/" + ID + ".json"); // Thread JSON url
+            string jsonUrl = $"http://8kun.top/{BoardCode}/res/{ID}.json"; // Thread JSON url
 
             string Fpath0Url(string boardcode, string tim, string ext) => $"https://8kun.top/{boardcode}/src/{tim}{ext}";
             string Fpath1Url(string tim, string ext) => $"https://8kun.top/file_store/{tim}{ext}";
 
             try
             {
-                JObject jObject;
-                using (var web = new WebClient())
-                {
-                    string json = web.DownloadString(JSONUrl);
-                    jObject = JObject.Parse(json);
-                }
+                using var web = new WebClient();
+                var json = web.DownloadString(jsonUrl);
+                var jObject = JObject.Parse(json);
+                var links = new List<ImageLink>();
 
                 // Get the numbers of replies that have 1 or more images.
                 var nos = jObject.SelectTokens("posts[?(@.tim)].no").Select(x => x.Value<long>()).ToList();
@@ -83,16 +81,18 @@ namespace GChan.Trackers
                         }
                     }
                 }
+
+                FileCount = links.Count;
+                return links.MaybeRemoveAlreadySavedLinks(includeAlreadySaved, SavedIds).ToArray();
             }
             catch (WebException webEx)
             {
                 if (webEx.Status == WebExceptionStatus.ProtocolError)   // 404
+                {
                     Gone = true;
+                }
                 throw;
             }
-
-            FileCount = links.Count;
-            return links.ToArray();
         }
 
         protected override void DownloadHTMLPage()

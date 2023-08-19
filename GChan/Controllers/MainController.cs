@@ -296,7 +296,7 @@ namespace GChan.Controllers
                         {
                             var id = GetThreadId(board, threadUrl);
 
-                            if (id != null && id > board.LargestAddedThreadNo)
+                            if (id != null && id > board.GreatestThreadId)
                             {
                                 var newThread = (Thread)Utils.CreateNewTracker(threadUrl);
 
@@ -319,7 +319,7 @@ namespace GChan.Controllers
                         }
                     });
 
-                    board.LargestAddedThreadNo = greatestThreadId;
+                    board.GreatestThreadId = greatestThreadId;
                 }
             }
 
