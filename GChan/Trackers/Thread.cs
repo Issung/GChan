@@ -128,12 +128,16 @@ namespace GChan.Trackers
                     {
                         if (link.Tim > GreatestSavedFileTim)
                         {
+#if DEBUG
                             logger.Debug($"Downloading file {link} because its Tim was greater than {GreatestSavedFileTim}.");
+#endif
                             Utils.DownloadToDir(link, SaveTo);
                         }
                         else
                         {
+#if DEBUG
                             logger.Debug($"Skipping downloading file {link} because its Tim was less than than {GreatestSavedFileTim}.");
+#endif
                         }
                     }
                 });
