@@ -52,8 +52,6 @@ namespace GChan
                 _ => throw new ArgumentException("Given value for 'format' is unknown.")
             };
 
-            logger.Info($"Filename generated: {result}. Length: {result.Length}");
-
             return result;
         }
 

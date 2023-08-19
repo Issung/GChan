@@ -115,13 +115,17 @@ namespace GChan.Trackers
                     {
                         if (!SavedIds.Contains(link.Tim))
                         {
+#if DEBUG
                             logger.Debug($"Downloading file {link} because its Tim is not in the saved set.");
+#endif
                             Utils.DownloadToDir(link, SaveTo);
                             SavedIds.Add(link.Tim);
                         }
                         else
                         {
+#if DEBUG
                             logger.Debug($"Skipping downloading file {link} because its Tim is in the saved set.");
+#endif
                         }
                     }
                 });
