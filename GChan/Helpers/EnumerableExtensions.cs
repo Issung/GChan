@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GChan.Models;
+using System;
 using System.Collections.Generic;
 
 namespace GChan.Helpers
@@ -10,6 +11,26 @@ namespace GChan.Helpers
             foreach (var item in source)
             {
                 action(item);
+            }
+        }
+
+        /// <summary>
+        /// If <paramref name="includeAlreadySaved"/> is false then remove items from <paramref name="links"/> if they are already in <paramref name="savedIds"/>.
+        /// </summary>
+        public static IEnumerable<ImageLink> MaybeRemoveAlreadySavedLinks(
+            this IEnumerable<ImageLink> links,
+            bool includeAlreadySaved,
+            SavedIdsCollection savedIds
+            )
+        {
+            foreach (var link in links)
+            {
+                var alreadySaved = savedIds.Contains(link.Tim);
+
+                if (includeAlreadySaved || !alreadySaved)
+                {
+                    yield return link;
+                }
             }
         }
     }

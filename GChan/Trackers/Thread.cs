@@ -1,4 +1,5 @@
-﻿using GChan.Properties;
+﻿using GChan.Models;
+using GChan.Properties;
 using System;
 using System.ComponentModel;
 using System.IO;
@@ -18,25 +19,9 @@ namespace GChan.Trackers
 
         protected string subject { get; private set; } = null;
 
-        protected long greatestSavedFileTim = 0;
-
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public long GreatestSavedFileTim
-        {
-            get
-            {
-                return greatestSavedFileTim;
-            }
-
-            set
-            {
-                if (value > greatestSavedFileTim)
-                {
-                    greatestSavedFileTim = value;
-                }
-            }
-        }
+        public SavedIdsCollection SavedIds { get; set; } = new();
 
         public string Subject
         {
@@ -92,7 +77,9 @@ namespace GChan.Trackers
 
         public void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
         {
+#if DEBUG
             logger.Debug($"NotifyPropertyChanged! propertyName: {propertyName}.");
+#endif
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
@@ -126,22 +113,22 @@ namespace GChan.Trackers
                 {
                     if (Scraping)
                     {
-                        if (link.Tim > GreatestSavedFileTim)
+                        if (!SavedIds.Contains(link.Tim))
                         {
-                            logger.Debug($"Downloading file {link} because its Tim was greater than {GreatestSavedFileTim}.");
+#if DEBUG
+                            logger.Debug($"Downloading file {link} because its Tim is not in the saved set.");
+#endif
                             Utils.DownloadToDir(link, SaveTo);
+                            SavedIds.Add(link.Tim);
                         }
                         else
                         {
-                            logger.Debug($"Skipping downloading file {link} because its Tim was less than than {GreatestSavedFileTim}.");
+#if DEBUG
+                            logger.Debug($"Skipping downloading file {link} because its Tim is in the saved set.");
+#endif
                         }
                     }
                 });
-
-                if (imageLinks.Length > 0)
-                {
-                    GreatestSavedFileTim = imageLinks.Max(t => t.Tim);
-                }
             }
             catch (WebException webEx)
             {
@@ -169,7 +156,7 @@ namespace GChan.Trackers
             }
         }
 
-        protected abstract ImageLink[] GetImageLinks();
+        protected abstract ImageLink[] GetImageLinks(bool includeAlreadySaved = false);
 
         protected abstract void DownloadHTMLPage();
 
@@ -177,7 +164,7 @@ namespace GChan.Trackers
 
         public string GetURLWithSubject()
         {
-            return (Url + ("/?subject=" + Utils.SanitiseSubjectString(Subject).Replace(' ', '_'))).Replace("\r", "");
+            return (Url + ("/?subject=" + Utils.SanitiseSubject(Subject).Replace(' ', '_'))).Replace("\r", "");
         }
     }
 }
