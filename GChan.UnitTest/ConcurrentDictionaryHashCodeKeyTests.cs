@@ -1,4 +1,5 @@
 ﻿using FluentAssertions;
+using GChan.Trackers;
 using System.Collections.Concurrent;
 using Xunit;
 
@@ -9,9 +10,11 @@ namespace GChan.UnitTest
     /// </summary>
     public class ConcurrentDictionaryHashCodeKeyTests
     {
+        readonly static Thread thread = new Thread_4Chan("https://boards.4chan.org/hr/thread/123");
+
         // Two different image link instances, with the same data.
-        readonly ImageLink il1 = new ImageLink(123, "http://test.com", "test123");
-        readonly ImageLink il2 = new ImageLink(123, "http://test.com", "test123");
+        readonly static ImageLink il1 = new ImageLink(123, "http://test.com", "test123", 1, thread);
+        readonly static ImageLink il2 = new ImageLink(123, "http://test.com", "test123", 1, thread);
 
         [Fact]
         public void TestAddAndRetrieveWithIndexOperator()

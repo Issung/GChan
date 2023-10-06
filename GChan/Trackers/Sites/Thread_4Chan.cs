@@ -40,7 +40,7 @@ namespace GChan.Trackers
             return Regex.IsMatch(url, THREAD_REGEX);
         }
 
-        protected override ImageLink[] GetImageLinks(bool includeAlreadySaved = false)
+        protected override ImageLink[] GetImageLinksImpl(bool includeAlreadySaved = false)
         {
             var baseUrl = $"http://i.4cdn.org/{BoardCode}/";
             var jsonUrl = $"http://a.4cdn.org/{BoardCode}/thread/{ID}.json";
@@ -62,7 +62,8 @@ namespace GChan.Trackers
                             x[timPath].GetTimHashCode(),
                             baseUrl + Uri.EscapeDataString(x[timPath].Value<string>()) + x["ext"],  // Require escaping for the flash files stored with arbitrary string names.
                             x["filename"].Value<string>(),
-                            x["no"].Value<long>()
+                            x["no"].Value<long>(),
+                            this
                         )
                     )
                     .ToArray();
@@ -118,7 +119,9 @@ namespace GChan.Trackers
                         new ImageLink(post["tim"].Value<long>(),
                                 old,
                                 post["filename"].ToString(),
-                                post["no"].Value<long>())
+                                post["no"].Value<long>(),
+                                this
+                            )
                             .GenerateFilename((ImageFileNameFormat)Settings.Default.ImageFilenameFormat));
 
                     //Save thumbs for files that need it

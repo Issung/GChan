@@ -1,4 +1,5 @@
-﻿using GChan.Models;
+﻿using GChan.Controllers;
+using GChan.Models;
 using GChan.Properties;
 using System;
 using System.ComponentModel;
@@ -83,52 +84,26 @@ namespace GChan.Trackers
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        public void Download(object callback)
+        /// <summary>
+        /// Get imagelinks for this thread.
+        /// </summary>
+        public ImageLink[] GetImageLinks()
         {
             if (Gone)
             {
                 logger.Info($"Download(object callback) called on {this}, but will not download because {nameof(Gone)} is true.");
+                return Array.Empty<ImageLink>();
             }
-            else
-            {
-                DownloadImages();
 
-                if (!Gone && Settings.Default.SaveHTML)
-                {
-                    DownloadHTMLPage();
-                }
-            }
-        }
-
-        private void DownloadImages()
-        {
             try
             {
                 if (!Directory.Exists(SaveTo))
+                { 
                     Directory.CreateDirectory(SaveTo);
+                }
 
-                ImageLink[] imageLinks = GetImageLinks();
-
-                Parallel.ForEach(imageLinks, (link) =>
-                {
-                    if (Scraping)
-                    {
-                        if (!SavedIds.Contains(link.Tim))
-                        {
-#if DEBUG
-                            logger.Debug($"Downloading file {link} because its Tim is not in the saved set.");
-#endif
-                            Utils.DownloadToDir(link, SaveTo);
-                            SavedIds.Add(link.Tim);
-                        }
-                        else
-                        {
-#if DEBUG
-                            logger.Debug($"Skipping downloading file {link} because its Tim is in the saved set.");
-#endif
-                        }
-                    }
-                });
+                var imageLinks = GetImageLinksImpl();
+                return imageLinks;
             }
             catch (WebException webEx)
             {
@@ -137,7 +112,7 @@ namespace GChan.Trackers
 
                 if (webEx.Status == WebExceptionStatus.ProtocolError && goneStatusCodes.Contains(statusCode))
                 {
-                    logger.Info(webEx, $"404 occured in {this} {nameof(DownloadImages)}. 'Gone' set to true.");
+                    logger.Info(webEx, $"404 occured in {this} {nameof(GetImageLinks)}. 'Gone' set to true.");
                     Gone = true;
                 }
                 else
@@ -145,18 +120,18 @@ namespace GChan.Trackers
                     logger.Error(webEx);
                 }
             }
-            catch (UnauthorizedAccessException uaex)
-            {
-                MessageBox.Show(uaex.Message, $"No Permission to access folder {SaveTo}.");
-                logger.Error(uaex);
-            }
             catch (Exception ex)
             {
                 logger.Error(ex);
             }
+
+            return Array.Empty<ImageLink>();
         }
 
-        protected abstract ImageLink[] GetImageLinks(bool includeAlreadySaved = false);
+        /// <summary>
+        /// Implementation point for website specific image link retreival.
+        /// </summary>
+        protected abstract ImageLink[] GetImageLinksImpl(bool includeAlreadySaved = false);
 
         protected abstract void DownloadHTMLPage();
 
@@ -165,6 +140,18 @@ namespace GChan.Trackers
         public string GetURLWithSubject()
         {
             return (Url + ("/?subject=" + Utils.SanitiseSubject(Subject).Replace(' ', '_'))).Replace("\r", "");
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 3;
+                hash = hash * 13 + SiteName.GetHashCode();
+                hash = hash * 13 + BoardCode.GetHashCode();
+                hash = hash * 13 + ID.GetHashCode();
+                return hash;
+            }
         }
     }
 }

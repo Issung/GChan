@@ -1,7 +1,10 @@
-﻿using NLog;
+﻿using GChan.Properties;
+using GChan.Trackers;
+using NLog;
 using System;
 using System.IO;
-using System.Linq;
+using System.Net;
+using System.Windows.Forms;
 
 namespace GChan
 {
@@ -24,19 +27,63 @@ namespace GChan
         /// </summary>
         public string UploadedFilename;
 
-        private readonly ILogger logger = LogManager.GetCurrentClassLogger();
-
         /// <summary>
         /// The ID of the post this image belongs to.
         /// </summary>
         public long No;
 
-        public ImageLink(long tim, string url, string uploadedFilename, long no)
+        /// <summary>
+        /// The thread this image is from.
+        /// </summary>
+        public Thread Thread;
+
+        private static readonly ILogger logger = LogManager.GetCurrentClassLogger();
+
+        public ImageLink(
+            long tim, 
+            string url, 
+            string uploadedFilename, 
+            long no,
+            Thread thread
+        )
         {
             Tim = tim;
             Url = url;
             UploadedFilename = Utils.SanitiseFilename(uploadedFilename);
             No = no;
+            Thread = thread;
+        }
+
+        public void Download(Action<ImageLink> successCallback)
+        {
+            if (!Directory.Exists(Thread.SaveTo))
+            {
+                Directory.CreateDirectory(Thread.SaveTo);
+            }
+
+            string destFilepath = Utils.CombinePathAndFilename(Thread.SaveTo, GenerateFilename((ImageFileNameFormat)Settings.Default.ImageFilenameFormat));
+
+            try
+            {
+                // TODO: Async/Taskify.
+                using var webClient = new WebClient();
+                webClient.DownloadFile(Url, destFilepath);
+                Thread.SavedIds.Add(Tim);
+                successCallback(this);
+            }
+            catch (WebException ex)
+            {
+                logger.Error(ex, $"Error occured while downloading link {Url}.");
+            }
+            catch (UnauthorizedAccessException uaex)
+            {
+                MessageBox.Show(uaex.Message, $"No Permission to access folder {Thread.SaveTo}.");
+                logger.Error(uaex);
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+            }
         }
 
         public string GenerateFilename(ImageFileNameFormat format)
@@ -55,8 +102,6 @@ namespace GChan
             return result;
         }
 
-        public bool Download()
-
         public bool Equals(ImageLink other)
         {
             if (other == null)
@@ -65,7 +110,7 @@ namespace GChan
             }
 
             return Tim == other.Tim &&
-                   URL == other.URL &&
+                   Url == other.Url &&
                    UploadedFilename == other.UploadedFilename;
         }
 
@@ -85,8 +130,10 @@ namespace GChan
             {
                 int hash = 17;
                 hash = hash * 23 + Tim.GetHashCode();
-                hash = hash * 23 + (URL?.GetHashCode() ?? 0);
+                hash = hash * 23 + (Url?.GetHashCode() ?? 0);
                 hash = hash * 23 + (UploadedFilename?.GetHashCode() ?? 0);
+                hash = hash * 23 + No.GetHashCode();
+                hash = hash * 23 + Thread.GetHashCode();
                 return hash;
             }
         }

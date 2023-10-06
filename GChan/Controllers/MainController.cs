@@ -17,6 +17,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using SysThread = System.Threading.Thread;
 using Thread = GChan.Trackers.Thread;
+using Timer = System.Windows.Forms.Timer;
 using Type = GChan.Trackers.Type;
 
 namespace GChan.Controllers
@@ -29,7 +30,9 @@ namespace GChan.Controllers
 
         private SysThread scanThread = null;
 
-        private readonly System.Windows.Forms.Timer scanTimer = new System.Windows.Forms.Timer();
+        private readonly FileDownloadController fileDownloadController = new();
+
+        private readonly Timer scanTimer = new();
 
         private readonly ILogger logger = LogManager.GetCurrentClassLogger();
 
@@ -329,8 +332,9 @@ namespace GChan.Controllers
             for (int i = 0; i < threads.Length; i++)
             {
                 if (threads[i].Scraping)
-                { 
-                    ThreadPool.QueueUserWorkItem(new WaitCallback(threads[i].Download));
+                {
+                    var links = threads[i].GetImageLinks();
+                    fileDownloadController.Queue(links);
                 }
             }
         }

@@ -192,7 +192,12 @@ namespace GChan
         /// <summary>
         /// New DownloadToDir overload that takes a new ImageLink class, this is used to retain the image's uploaded filename.
         /// </summary>
-        public static bool DownloadToDir(ImageLink link, string dir)
+        /// <param name="successCallback">Action to call when download completes successfully.</param>
+        public static void DownloadToDir(
+            ImageLink link, 
+            string dir, 
+            Action<ImageLink> successCallback
+        )
         {
             if (!Directory.Exists(dir))
             { 
@@ -217,12 +222,11 @@ namespace GChan
                     }
                 });*/
 
-                return true;
+                successCallback(link);
             }
             catch (WebException ex)
             {
                 logger.Error(ex, $"Error occured while downloading link {link.Url}.");
-                return false;
             }
         }
 
