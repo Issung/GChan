@@ -30,7 +30,7 @@ namespace GChan.Controllers
 
         private SysThread scanThread = null;
 
-        private readonly FileDownloadController fileDownloadController = new();
+        private readonly DownloadManager<ImageLink> imageDownloadManager = new();
 
         private readonly Timer scanTimer = new();
 
@@ -48,7 +48,7 @@ namespace GChan.Controllers
         { 
             get 
             {
-                StackFrame frame = new StackFrame(1, true);
+                var frame = new StackFrame(1, true);
                 logger.Trace($"threadLock acquired by: {frame.GetMethod().Name} at line {frame.GetFileLineNumber()} on thread {SysThread.CurrentThread.ManagedThreadId}.");
                 return threadLock;
             } 
@@ -60,7 +60,7 @@ namespace GChan.Controllers
         {
             get
             {
-                StackFrame frame = new StackFrame(1, true);
+                var frame = new StackFrame(1, true);
                 logger.Trace($"boardLock acquired by: {frame.GetMethod().Name} at line {frame.GetFileLineNumber()} on thread {SysThread.CurrentThread.ManagedThreadId}.");
                 return boardLock;
             }
@@ -334,7 +334,7 @@ namespace GChan.Controllers
                 if (threads[i].Scraping)
                 {
                     var links = threads[i].GetImageLinks();
-                    fileDownloadController.Queue(links);
+                    imageDownloadManager.Queue(links);
                 }
             }
         }

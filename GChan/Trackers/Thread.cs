@@ -1,14 +1,10 @@
-﻿using GChan.Controllers;
-using GChan.Models;
-using GChan.Properties;
+﻿using GChan.Models;
 using System;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 
 namespace GChan.Trackers
 {
@@ -45,12 +41,6 @@ namespace GChan.Trackers
         /// The identifier of the thread (AKA No. (number))
         /// </summary>
         public string ID { get; protected set; }
-
-        private readonly HttpStatusCode[] goneStatusCodes =
-        {
-            HttpStatusCode.NotFound,
-            HttpStatusCode.Gone,
-        };
 
         public int? FileCount
         {
@@ -110,7 +100,7 @@ namespace GChan.Trackers
                 var httpWebResponse = (HttpWebResponse)webEx.Response;
                 var statusCode = httpWebResponse.StatusCode;
 
-                if (webEx.Status == WebExceptionStatus.ProtocolError && goneStatusCodes.Contains(statusCode))
+                if (webEx.Status == WebExceptionStatus.ProtocolError && GoneStatusCodes.Contains(statusCode))
                 {
                     logger.Info(webEx, $"404 occured in {this} {nameof(GetImageLinks)}. 'Gone' set to true.");
                     Gone = true;
