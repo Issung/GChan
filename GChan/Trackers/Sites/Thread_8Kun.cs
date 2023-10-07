@@ -1,14 +1,11 @@
-﻿using GChan.Properties;
-using System;
+﻿using GChan.Helpers;
+using GChan.Properties;
+using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Text;
 using System.Text.RegularExpressions;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using GChan.Helpers;
 
 namespace GChan.Trackers
 {
@@ -34,7 +31,9 @@ namespace GChan.Trackers
             SaveTo = Path.Combine(Settings.Default.SavePath, SiteName, BoardCode, ID);
 
             if (subject == null)
+            {
                 Subject = GetThreadSubject();
+            }
         }
 
         public static bool UrlIsThread(string url)
@@ -46,7 +45,6 @@ namespace GChan.Trackers
         {
             string Fpath0Url(string boardcode, string tim, string ext) => $"https://8kun.top/{boardcode}/src/{tim}{ext}";
             string Fpath1Url(string tim, string ext) => $"https://8kun.top/file_store/{tim}{ext}";
-
 
             using var webClient = new WebClient();
             var jsonUrl = $"http://8kun.top/{BoardCode}/res/{ID}.json"; // Thread JSON url
@@ -84,81 +82,76 @@ namespace GChan.Trackers
             return links.MaybeRemoveAlreadySavedLinks(includeAlreadySaved, SavedIds).ToArray();
         }
 
-        protected override void DownloadHTMLPage()
+        public override void DownloadHtmlImpl()
         {
             var thumbs = new List<string>();
             var htmlPage = "";
 
-            try
+            JObject jObject;
+            using (var web = new WebClient())
             {
-                JObject jObject;
-                using (var web = new WebClient())
-                {
-                    htmlPage = new WebClient().DownloadString(Url);
+                htmlPage = new WebClient().DownloadString(Url);
 
-                    string JURL = Url.Replace(".html", ".json");
+                var jsonUrl = Url.Replace(".html", ".json");
 
-                    string json = web.DownloadString(JURL);
-                    jObject = JObject.Parse(json);
-                }
-
-                // get single images
-                var posts = jObject
-                    .SelectTokens("posts[*]")
-                    .Where(x => x["ext"] != null)
-                    .ToList();
-                
-                foreach (var post in posts)
-                {
-                    var tim = post["tim"].ToString();
-                    var ext = post["ext"].ToString();
-                    //                        if(ext == ".webm")
-                    //                            ext = ".jpg";
-                    thumbs.Add("https://8kun.top/file_store/thumb/" + post["tim"] + ext);
-
-                    htmlPage = htmlPage.Replace("https://8kun.top/file_store/thumb/" + tim + ext, "thumb/" + tim + ext);
-                    htmlPage = htmlPage.Replace("=\"/file_store/thumb/" + tim + ext, "=\"thumb/" + tim + ext);
-                    htmlPage = htmlPage.Replace("=\"/file_store/" + tim + ext, "=\"" + tim + ext);
-                    htmlPage = htmlPage.Replace("https://media.8kun.top/file_store/thumb/" + tim + ext, "thumb/" + tim + ext);
-                    htmlPage = htmlPage.Replace("https://media.8kun.top/file_store/" + tim + ext, tim + ext);
-                    htmlPage = htmlPage.Replace("https://8kun.top/file_store/" + tim + ext, tim + ext);
-                }
-
-                // get images of posts with multiple images
-                var extras = jObject
-                    .SelectTokens("posts.extra_files[*]")
-                    .Where(x => x["ext"] != null)
-                    .ToList();
-                
-                foreach (var extra in extras)
-                {
-                    var tim = extra["tim"].ToString();
-                    var ext = extra["ext"].ToString();
-                    //                        if(ext == ".webm")
-                    //                            ext = ".jpg";
-                    thumbs.Add("https://8kun.top/file_store/thumb/" + tim + ext);
-
-                    htmlPage = htmlPage.Replace("https://8kun.top/file_store/thumb/" + tim + ext, "thumb/" + tim + ext);
-                    htmlPage = htmlPage.Replace("=\"/file_store/thumb/" + tim + ext, "=\"thumb/" + tim + ext);
-                    htmlPage = htmlPage.Replace("=\"/file_store/" + tim + ext, "=\"" + tim + ext);
-                    htmlPage = htmlPage.Replace("https://media.8kun.top/file_store/thumb/" + tim + ext, "thumb/" + tim + ext);
-                    htmlPage = htmlPage.Replace("https://media.8kun.top/file_store/" + tim + ext, tim + ext);
-                    htmlPage = htmlPage.Replace("https://8kun.top/file_store/" + tim + ext, tim + ext);
-                }
-
-                htmlPage = htmlPage.Replace("=\"/", "=\"https://8kun.top/");
-
-                for (int i = 0; i < thumbs.Count; i++)
-                {
-                    Utils.DownloadFile(thumbs[i], SaveTo + "\\thumb");
-                }
-
-                if (!String.IsNullOrWhiteSpace(htmlPage))
-                    File.WriteAllText(SaveTo + "\\Thread.html", htmlPage); // save thread
+                var json = web.DownloadString(jsonUrl);
+                jObject = JObject.Parse(json);
             }
-            catch
+
+            // get single images
+            var posts = jObject
+                .SelectTokens("posts[*]")
+                .Where(x => x["ext"] != null)
+                .ToList();
+                
+            foreach (var post in posts)
             {
-                throw;
+                var tim = post["tim"].ToString();
+                var ext = post["ext"].ToString();
+                //                        if(ext == ".webm")
+                //                            ext = ".jpg";
+                thumbs.Add("https://8kun.top/file_store/thumb/" + post["tim"] + ext);
+
+                htmlPage = htmlPage.Replace("https://8kun.top/file_store/thumb/" + tim + ext, "thumb/" + tim + ext);
+                htmlPage = htmlPage.Replace("=\"/file_store/thumb/" + tim + ext, "=\"thumb/" + tim + ext);
+                htmlPage = htmlPage.Replace("=\"/file_store/" + tim + ext, "=\"" + tim + ext);
+                htmlPage = htmlPage.Replace("https://media.8kun.top/file_store/thumb/" + tim + ext, "thumb/" + tim + ext);
+                htmlPage = htmlPage.Replace("https://media.8kun.top/file_store/" + tim + ext, tim + ext);
+                htmlPage = htmlPage.Replace("https://8kun.top/file_store/" + tim + ext, tim + ext);
+            }
+
+            // get images of posts with multiple images
+            var extras = jObject
+                .SelectTokens("posts.extra_files[*]")
+                .Where(x => x["ext"] != null)
+                .ToList();
+                
+            foreach (var extra in extras)
+            {
+                var tim = extra["tim"].ToString();
+                var ext = extra["ext"].ToString();
+                //                        if(ext == ".webm")
+                //                            ext = ".jpg";
+                thumbs.Add("https://8kun.top/file_store/thumb/" + tim + ext);
+
+                htmlPage = htmlPage.Replace("https://8kun.top/file_store/thumb/" + tim + ext, "thumb/" + tim + ext);
+                htmlPage = htmlPage.Replace("=\"/file_store/thumb/" + tim + ext, "=\"thumb/" + tim + ext);
+                htmlPage = htmlPage.Replace("=\"/file_store/" + tim + ext, "=\"" + tim + ext);
+                htmlPage = htmlPage.Replace("https://media.8kun.top/file_store/thumb/" + tim + ext, "thumb/" + tim + ext);
+                htmlPage = htmlPage.Replace("https://media.8kun.top/file_store/" + tim + ext, tim + ext);
+                htmlPage = htmlPage.Replace("https://8kun.top/file_store/" + tim + ext, tim + ext);
+            }
+
+            htmlPage = htmlPage.Replace("=\"/", "=\"https://8kun.top/");
+
+            for (int i = 0; i < thumbs.Count; i++)
+            {
+                Utils.DownloadFile(thumbs[i], SaveTo + "\\thumb");
+            }
+
+            if (!string.IsNullOrWhiteSpace(htmlPage))
+            {
+                File.WriteAllText(SaveTo + "\\Thread.html", htmlPage); // save thread
             }
         }
 

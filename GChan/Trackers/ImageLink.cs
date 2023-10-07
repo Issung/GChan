@@ -1,10 +1,10 @@
 ﻿using GChan.Controllers;
+using GChan.Helpers;
 using GChan.Properties;
 using GChan.Trackers;
 using NLog;
 using System;
 using System.IO;
-using System.Linq;
 using System.Net;
 
 namespace GChan
@@ -75,9 +75,9 @@ namespace GChan
                 Thread.SavedIds.Add(Tim);
                 successCallback(this);
             }
-            catch (WebException webException) when ((webException.Response is HttpWebResponse webResponse) && Tracker.GoneStatusCodes.Contains(webResponse.StatusCode))
+            catch (WebException webException) when (webException.IsGone(out var httpWebResponse))
             {
-                logger.Debug("Downloading {image_link} resulted in {status_code}", this, webResponse.StatusCode);
+                logger.Debug("Downloading {image_link} resulted in {status_code}", this, httpWebResponse.StatusCode);
                 failureCallback(this, false);   // Don't retry.
             }
             catch (Exception ex)

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 
 namespace GChan.Controllers
@@ -11,8 +12,10 @@ namespace GChan.Controllers
     /// <typeparamref name="T"/> must provide a good implementation of <see cref="object.GetHashCode"/>.<br/>
     /// </summary>
     /// <remarks>
-    /// TODO: Add "download" property to <see cref="IDownloadable{T}"/> so an item can skip downloading once it is attempted.
-    /// TODO: Add <see cref="CancellationToken"/> to <see cref="IDownloadable{T}"/> and a way to cancel specific items / items that match a predicate.
+    /// TODO: Add "download" property to <see cref="IDownloadable{T}"/> so an item can skip downloading once it is attempted.<br/>
+    /// TODO: Add <see cref="CancellationToken"/> to <see cref="IDownloadable{T}"/> and a way to cancel specific items / items that match a predicate.<br/>
+    /// TODO: Add ability to clear the manager completely, for certain situations e.g. someone disables the setting to save thread html.<br/>
+    /// TODO: Use async/tasks instead of threads.<br/>
     /// </remarks>
     public class DownloadManager<T> where T: IDownloadable<T>
     {
@@ -28,6 +31,7 @@ namespace GChan.Controllers
         private readonly ConcurrentQueue<T> waiting = new();
         private readonly bool removeSuccessfulItems;
         private readonly Timer timer;
+        private readonly string typeName;
 
         /// <summary>
         /// Constructor.
@@ -39,12 +43,16 @@ namespace GChan.Controllers
         public DownloadManager(bool removeSuccessfulItems)
         { 
             this.removeSuccessfulItems = removeSuccessfulItems;
-            timer = new(TimerTick, null, interval, interval);
+            this.timer = new(TimerTick, null, TimeSpan.Zero, interval);
+            this.typeName = typeof(T).Name + "s";
         }
 
         public void Queue(T item)
         {
-            waiting.Enqueue(item);
+            if (!waiting.Contains(item))    // TODO: What is the performance of this?
+            { 
+                waiting.Enqueue(item);
+            }
         }
 
         public void Queue(IEnumerable<T> items)
@@ -64,7 +72,7 @@ namespace GChan.Controllers
         {
             var skimCount = ConcurrentCount - downloading.Count;
             var items = Skim(skimCount);
-            logger.Log(LogLevel.Info, "Skimming {skim_count} items from queue, got {skim_result_count}.", skimCount, items.Count);
+            logger.Info("Skimming {skim_count} {type} from queue, got {skim_result_count}.", skimCount, typeName, items.Count);  // TODO: Appears to be double-logging.
 
             // TODO: If no images were found in queue set the timer to a slightly longer interval, to stop poll spamming.
 
@@ -98,12 +106,18 @@ namespace GChan.Controllers
         private void DownloadSuccess(T item)
         {
             logger.Log(LogLevel.Debug, "Item {item} completed downloading succesfully.", item);
-            downloading.TryRemove(item, out var _);
 
-            // If manager is not supposed remove items after a successful download, add back onto the queue.
-            if (!removeSuccessfulItems)
+            if (downloading.TryRemove(item, out var _))
             {
-                waiting.Enqueue(item);
+                // If manager is not supposed remove items after a successful download, add back onto the queue.
+                if (!removeSuccessfulItems)
+                {
+                    waiting.Enqueue(item);
+                }
+            }
+            else
+            { 
+                logger.Warn("DownloadSuccess callback was called with {item} but was not in the downloading dictionary.", item);
             }
         }
 
@@ -116,11 +130,16 @@ namespace GChan.Controllers
         {
             logger.Log(LogLevel.Debug, "Item {item} completed downloading succesfully.", item);
 
-            downloading.TryRemove(item, out var _);
-
-            if (retry)
-            { 
-                waiting.Enqueue(item);
+            if (downloading.TryRemove(item, out var _))
+            {
+                if (retry)
+                { 
+                    waiting.Enqueue(item);
+                }
+            }
+            else
+            {
+                logger.Warn("DownloadFailed callback was called with {item} but was not in the downloading dictionary.", item);
             }
         }
     }

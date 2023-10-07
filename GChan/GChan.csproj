@@ -108,7 +108,7 @@
       <DependentUpon>UpdateInfoForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Helpers\EnumerableExtensions.cs" />
-    <Compile Include="Helpers\JTokenExtensions.cs" />
+    <Compile Include="Helpers\ExceptionExtensions.cs" />
     <Compile Include="Trackers\IDownloadable.cs" />
     <Compile Include="Trackers\ImageLink.cs" />
     <Compile Include="Controls\PreferencesDataGridView.cs">

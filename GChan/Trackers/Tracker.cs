@@ -29,7 +29,7 @@ namespace GChan.Trackers
         /// <summary>
         /// Response status codes that indicate content is no longer available.
         /// </summary>
-        public static readonly HttpStatusCode[] GoneStatusCodes =
+        public static readonly HttpStatusCode?[] GoneStatusCodes =
         {
             HttpStatusCode.NotFound,
             HttpStatusCode.Gone,

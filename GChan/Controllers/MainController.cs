@@ -31,6 +31,7 @@ namespace GChan.Controllers
         private SysThread scanThread = null;
 
         private readonly DownloadManager<ImageLink> imageDownloadManager = new(true);
+        private readonly DownloadManager<Thread> threadHtmlDownloadManager = new(true); // Allow threads to be removed after download, we just re-add them. TODO: Maybe improve.
 
         private readonly Timer scanTimer = new();
 
@@ -326,15 +327,20 @@ namespace GChan.Controllers
                 }
             }
 
-            // Make a copy of the current threads and download them.
+            // Make a copy of the current threads and queue them for downloading them.
             var threads = Model.Threads.ToArray();
 
-            for (int i = 0; i < threads.Length; i++)
+            foreach (var thread in threads)
             {
-                if (threads[i].Scraping)
+                if (thread.Scraping)
                 {
-                    var links = threads[i].GetImageLinks();
+                    var links = thread.GetImageLinks();
                     imageDownloadManager.Queue(links);
+
+                    if (Settings.Default.SaveHTML)
+                    { 
+                        threadHtmlDownloadManager.Queue(thread);
+                    }
                 }
             }
         }

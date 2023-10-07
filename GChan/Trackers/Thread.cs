@@ -1,14 +1,19 @@
-﻿using GChan.Models;
+﻿using GChan.Controllers;
+using GChan.Helpers;
+using GChan.Models;
 using System;
 using System.ComponentModel;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Runtime.CompilerServices;
 
 namespace GChan.Trackers
 {
-    public abstract class Thread : Tracker, INotifyPropertyChanged
+    /// <summary>
+    /// <see cref="IDownloadable{T}"/> implementation is for downloading the website HTML.<br/>
+    /// For downloading images <see cref="GetImageLinks"/> is used and results queued into a download manager.
+    /// </summary>
+    public abstract class Thread : Tracker, IDownloadable<Thread>, INotifyPropertyChanged
     {
         public const string NO_SUBJECT = "No Subject";
 
@@ -74,6 +79,37 @@ namespace GChan.Trackers
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
+        public void Download(
+            DownloadManager<Thread>.SuccessCallback successCallback,
+            DownloadManager<Thread>.FailureCallback failureCallback
+        )
+        {
+            if (Gone)
+            {
+                logger.Info($"Download(object callback) called on {this}, but will not download because {nameof(Gone)} is true.");
+                successCallback(this);
+                return;
+            }
+
+            try
+            {
+                DownloadHtmlImpl();
+            }
+            catch (WebException webEx) when (webEx.IsGone(out var httpWebResponse))
+            {
+                Gone = true;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                failureCallback(this, true);
+            }
+
+            successCallback(this);
+        }
+
+        public abstract void DownloadHtmlImpl();
+
         /// <summary>
         /// Get imagelinks for this thread.
         /// </summary>
@@ -95,20 +131,9 @@ namespace GChan.Trackers
                 var imageLinks = GetImageLinksImpl();
                 return imageLinks;
             }
-            catch (WebException webEx)
+            catch (WebException webEx) when (webEx.IsGone(out var httpWebResponse))
             {
-                var httpWebResponse = (HttpWebResponse)webEx.Response;
-                var statusCode = httpWebResponse.StatusCode;
-
-                if (webEx.Status == WebExceptionStatus.ProtocolError && GoneStatusCodes.Contains(statusCode))
-                {
-                    logger.Info(webEx, $"404 occured in {this} {nameof(GetImageLinks)}. 'Gone' set to true.");
-                    Gone = true;
-                }
-                else
-                {
-                    logger.Error(webEx);
-                }
+                Gone = true;
             }
             catch (Exception ex)
             {
@@ -122,8 +147,6 @@ namespace GChan.Trackers
         /// Implementation point for website specific image link retreival.
         /// </summary>
         protected abstract ImageLink[] GetImageLinksImpl(bool includeAlreadySaved = false);
-
-        protected abstract void DownloadHTMLPage();
 
         protected abstract string GetThreadSubject();
 
