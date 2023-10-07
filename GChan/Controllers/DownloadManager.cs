@@ -8,10 +8,11 @@ namespace GChan.Controllers
 {
     /// <summary>
     /// Class that manages a file download pool.<br/>
-    /// <typeparamref name="T"/> must provide a good implementation of <see cref="object.GetHashCode"/>.
+    /// <typeparamref name="T"/> must provide a good implementation of <see cref="object.GetHashCode"/>.<br/>
     /// </summary>
     /// <remarks>
-    /// TODO: Genericise to accept any class that implements an interface e.g. "IDownloadable".
+    /// TODO: Add "download" property to <see cref="IDownloadable{T}"/> so an item can skip downloading once it is attempted.
+    /// TODO: Add <see cref="CancellationToken"/> to <see cref="IDownloadable{T}"/> and a way to cancel specific items / items that match a predicate.
     /// </remarks>
     public class DownloadManager<T> where T: IDownloadable<T>
     {
@@ -25,10 +26,19 @@ namespace GChan.Controllers
 
         private readonly ConcurrentDictionary<T, Thread> downloading = new();
         private readonly ConcurrentQueue<T> waiting = new();
+        private readonly bool removeSuccessfulItems;
         private readonly Timer timer;
 
-        public DownloadManager()
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="removeSuccessfulItems">
+        /// Should items that successfully download be removed from the download manager?<br/>
+        /// If false, after a successful download will enter the back of the queue again, for later re-downloading.
+        /// </param>
+        public DownloadManager(bool removeSuccessfulItems)
         { 
+            this.removeSuccessfulItems = removeSuccessfulItems;
             timer = new(TimerTick, null, interval, interval);
         }
 
@@ -60,7 +70,7 @@ namespace GChan.Controllers
 
             foreach (var image in items)
             {
-                var newThread = new Thread(() => image.Download(DownloadComplete, DownloadFailed));
+                var newThread = new Thread(() => image.Download(DownloadSuccess, DownloadFailed));
                 newThread.Start();
                 downloading.TryAdd(image, newThread);
             }
@@ -85,10 +95,16 @@ namespace GChan.Controllers
         /// Called when a download has completed successfully.<br/>
         /// Removes <paramref name="item"/> from the downloading dict.
         /// </summary>
-        private void DownloadComplete(T item)
+        private void DownloadSuccess(T item)
         {
             logger.Log(LogLevel.Debug, "Item {item} completed downloading succesfully.", item);
             downloading.TryRemove(item, out var _);
+
+            // If manager is not supposed remove items after a successful download, add back onto the queue.
+            if (!removeSuccessfulItems)
+            {
+                waiting.Enqueue(item);
+            }
         }
 
         /// <summary>

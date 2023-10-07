@@ -30,7 +30,7 @@ namespace GChan.Controllers
 
         private SysThread scanThread = null;
 
-        private readonly DownloadManager<ImageLink> imageDownloadManager = new();
+        private readonly DownloadManager<ImageLink> imageDownloadManager = new(true);
 
         private readonly Timer scanTimer = new();
 

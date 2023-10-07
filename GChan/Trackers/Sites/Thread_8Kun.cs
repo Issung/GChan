@@ -44,61 +44,50 @@ namespace GChan.Trackers
 
         protected override ImageLink[] GetImageLinksImpl(bool includeAlreadySaved = false)
         {
-            string jsonUrl = $"http://8kun.top/{BoardCode}/res/{ID}.json"; // Thread JSON url
-
             string Fpath0Url(string boardcode, string tim, string ext) => $"https://8kun.top/{boardcode}/src/{tim}{ext}";
             string Fpath1Url(string tim, string ext) => $"https://8kun.top/file_store/{tim}{ext}";
 
-            try
+
+            using var webClient = new WebClient();
+            var jsonUrl = $"http://8kun.top/{BoardCode}/res/{ID}.json"; // Thread JSON url
+            var json = webClient.DownloadString(jsonUrl);
+            var jObject = JObject.Parse(json);
+            var links = new List<ImageLink>();
+
+            // Get the numbers of replies that have 1 or more images.
+            var nos = jObject.SelectTokens("posts[?(@.tim)].no").Select(x => x.Value<long>()).ToList();
+
+            // Loop through each reply.
+            foreach (var no in nos)
             {
-                using var web = new WebClient();
-                var json = web.DownloadString(jsonUrl);
-                var jObject = JObject.Parse(json);
-                var links = new List<ImageLink>();
+                // Get the tims, filenames and extensions of each image in this reply.
+                var tims = jObject.SelectTokens($"posts[?(@.no == {no})]..tim").Select(x => x.ToString()).ToList();
+                var filenames = jObject.SelectTokens($"posts[?(@.no == {no})]..filename").Select(x => x.ToString()).ToList();
+                var exts = jObject.SelectTokens($"posts[?(@.no == {no})]..ext").Select(x => x.ToString()).ToList();
+                var fpaths = jObject.SelectTokens($"posts[?(@.no == {no})]..fpath").Select(x => x.ToString()).ToList();
 
-                // Get the numbers of replies that have 1 or more images.
-                var nos = jObject.SelectTokens("posts[?(@.tim)].no").Select(x => x.Value<long>()).ToList();
-
-                // Loop through each reply.
-                foreach (var no in nos)
+                for (int j = 0; j < tims.Count; j++)
                 {
-                    // Get the tims, filenames and extensions of each image in this reply.
-                    var tims = jObject.SelectTokens($"posts[?(@.no == {no})]..tim").Select(x => x.ToString()).ToList();
-                    var filenames = jObject.SelectTokens($"posts[?(@.no == {no})]..filename").Select(x => x.ToString()).ToList();
-                    var exts = jObject.SelectTokens($"posts[?(@.no == {no})]..ext").Select(x => x.ToString()).ToList();
-                    var fpaths = jObject.SelectTokens($"posts[?(@.no == {no})]..fpath").Select(x => x.ToString()).ToList();
-
-                    for (int j = 0; j < tims.Count; j++)
+                    if (exts[j] != "deleted")
                     {
-                        if (exts[j] != "deleted")
-                        {
-                            var url = fpaths[j] == "0" ? 
-                                Fpath0Url(BoardCode, tims[j], exts[j]) :
-                                Fpath1Url(tims[j], exts[j]); // "1"
+                        var url = fpaths[j] == "0" ? 
+                            Fpath0Url(BoardCode, tims[j], exts[j]) :
+                            Fpath1Url(tims[j], exts[j]); // "1"
 
-                            // Save image link using reply no (number) as tim because 8kun tims have letters and numbers in them. The reply number will work just fine.
-                            links.Add(new ImageLink(no, url, filenames[j], no, this));
-                        }
+                        // Save image link using reply no (number) as tim because 8kun tims have letters and numbers in them. The reply number will work just fine.
+                        links.Add(new ImageLink(no, url, filenames[j], no, this));
                     }
                 }
+            }
 
-                FileCount = links.Count;
-                return links.MaybeRemoveAlreadySavedLinks(includeAlreadySaved, SavedIds).ToArray();
-            }
-            catch (WebException webEx)
-            {
-                if (webEx.Status == WebExceptionStatus.ProtocolError)   // 404
-                {
-                    Gone = true;
-                }
-                throw;
-            }
+            FileCount = links.Count;
+            return links.MaybeRemoveAlreadySavedLinks(includeAlreadySaved, SavedIds).ToArray();
         }
 
         protected override void DownloadHTMLPage()
         {
-            List<string> thumbs = new List<string>();
-            string htmlPage = "";
+            var thumbs = new List<string>();
+            var htmlPage = "";
 
             try
             {

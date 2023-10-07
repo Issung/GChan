@@ -45,45 +45,37 @@ namespace GChan.Trackers
             var baseUrl = $"http://i.4cdn.org/{BoardCode}/";
             var jsonUrl = $"http://a.4cdn.org/{BoardCode}/thread/{ID}.json";
 
-            try
-            {
-                using var web = new WebClient();
-                var json = web.DownloadString(jsonUrl);
-                var jObject = JObject.Parse(json);
+            using var web = new WebClient();
+            var json = web.DownloadString(jsonUrl);
+            var jObject = JObject.Parse(json);
 
-                // The /f/ board (flash) saves the files with their uploaded name.
-                var timPath = BoardCode == "f" ? "filename" : "tim";
+            // The /f/ board (flash) saves the files with their uploaded name.
+            var timPath = BoardCode == "f" ? "filename" : "tim";
 
-                var links = jObject
-                    .SelectTokens("posts[*]")
-                    .Where(x => x["ext"] != null)
-                    .Select(x =>
-                        new ImageLink(
-                            x[timPath].GetTimHashCode(),
-                            baseUrl + Uri.EscapeDataString(x[timPath].Value<string>()) + x["ext"],  // Require escaping for the flash files stored with arbitrary string names.
-                            x["filename"].Value<string>(),
-                            x["no"].Value<long>(),
-                            this
-                        )
+            var links = jObject
+                .SelectTokens("posts[*]")
+                .Where(x => x["ext"] != null)
+                .Select(x =>
+                    new ImageLink(
+                        x[timPath].GetTimHashCode(),
+                        baseUrl + Uri.EscapeDataString(x[timPath].Value<string>()) + x["ext"],  // Require escaping for the flash files stored with arbitrary string names.
+                        x["filename"].Value<string>(),
+                        x["no"].Value<long>(),
+                        this
                     )
-                    .ToArray();
+                )
+                .ToArray();
 
-                FileCount = links.Length;
-                return links.MaybeRemoveAlreadySavedLinks(includeAlreadySaved, SavedIds).ToArray();
-            }
-            catch (Exception ex)
-            {
-                logger.Error(ex, $"Encountered an exception in GetImageLinks() {this}.");
-                throw;
-            }
+            FileCount = links.Length;
+            return links.MaybeRemoveAlreadySavedLinks(includeAlreadySaved, SavedIds).ToArray();
         }
 
         protected override void DownloadHTMLPage()
         {
-            List<string> thumbs = new List<string>();
-            string htmlPage = "";
-            string baseURL = "//i.4cdn.org/" + BoardCode + "/";
-            string JURL = "http://a.4cdn.org/" + BoardCode + "/thread/" + ID + ".json";
+            var thumbs = new List<string>();
+            var htmlPage = "";
+            var baseURL = "//i.4cdn.org/" + BoardCode + "/";
+            var JURL = "http://a.4cdn.org/" + BoardCode + "/thread/" + ID + ".json";
 
             try
             {
@@ -99,7 +91,7 @@ namespace GChan.Trackers
                     //Prevent the html from being destroyed by the anti adblock script
                     htmlPage = htmlPage.Replace("f=\"to\"", "f=\"penis\"");
                     
-                    string json = web.DownloadString(JURL);
+                    var json = web.DownloadString(JURL);
                     jObject = JObject.Parse(json);
                 }
 
@@ -110,19 +102,20 @@ namespace GChan.Trackers
                 
                 foreach (var post in posts)
                 {
-                    string old = baseURL + post["tim"] + post["ext"];
-                    string replacement = post["tim"] + (string) post["ext"];
+                    var old = baseURL + post["tim"] + post["ext"];
+                    var replacement = post["tim"] + (string) post["ext"];
                     htmlPage = htmlPage.Replace(old, replacement);
 
                     //get the actual filename saved
-                    string filename = Path.GetFileNameWithoutExtension(
-                        new ImageLink(post["tim"].Value<long>(),
+                    var filename = Path
+                        .GetFileNameWithoutExtension(
+                            new ImageLink(post["tim"].Value<long>(),
                                 old,
                                 post["filename"].ToString(),
                                 post["no"].Value<long>(),
                                 this
                             )
-                            .GenerateFilename((ImageFileNameFormat)Settings.Default.ImageFilenameFormat));
+                        .GenerateFilename((ImageFileNameFormat)Settings.Default.ImageFilenameFormat));
 
                     //Save thumbs for files that need it
                     if (replacement.Split('.')[1] == "webm")
@@ -135,7 +128,7 @@ namespace GChan.Trackers
                     }
                     else
                     {
-                        string thumbName = replacement.Split('.')[0] + "s";
+                        var thumbName = replacement.Split('.')[0] + "s";
                         htmlPage = htmlPage.Replace(thumbName + ".jpg", replacement.Split('.')[0] + "." + replacement.Split('.')[1]);
                         htmlPage = htmlPage.Replace("/" + thumbName, thumbName);
 
