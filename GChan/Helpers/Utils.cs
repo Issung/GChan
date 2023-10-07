@@ -184,7 +184,7 @@ namespace GChan
             catch (Exception e)
             {
                 // Should we throw?
-                logger.Log(LogLevel.Warn, e, "Exception occured downloading file.");
+                logger.Warn(e, "Exception occured downloading file.");
                 return false;
             }
         }

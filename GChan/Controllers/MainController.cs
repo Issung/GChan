@@ -432,7 +432,7 @@ namespace GChan.Controllers
         /// </remarks>
         public void RemoveThread(Thread thread, bool manualRemove = false)
         {
-            logger.Info($"Removing thread {thread}.");
+            logger.Trace($"Removing thread {thread}.");
 
             thread.Scraping = false;
 
@@ -506,6 +506,9 @@ namespace GChan.Controllers
             Form.systemTrayNotifyIcon.Dispose();
             scanTimer.Enabled = false;
             scanTimer.Dispose();
+
+            imageDownloadManager.Dispose();
+            threadHtmlDownloadManager.Dispose();
 
             if (Settings.Default.SaveListsOnClose)
             {

@@ -17,7 +17,7 @@ namespace GChan.Controllers
     /// TODO: Add ability to clear the manager completely, for certain situations e.g. someone disables the setting to save thread html.<br/>
     /// TODO: Use async/tasks instead of threads.<br/>
     /// </remarks>
-    public class DownloadManager<T> where T: IDownloadable<T>
+    public class DownloadManager<T> : IDisposable where T: IDownloadable<T>
     {
         public delegate void SuccessCallback(T item);
         public delegate void FailureCallback(T item, bool retry);
@@ -59,7 +59,7 @@ namespace GChan.Controllers
         {
             foreach (var item in items)
             {
-                logger.Log(LogLevel.Info, "Queueing {item} for download.", item);
+                logger.Trace("Queueing {item} for download.", item);
                 waiting.Enqueue(item);
             }
         }
@@ -72,7 +72,7 @@ namespace GChan.Controllers
         {
             var skimCount = ConcurrentCount - downloading.Count;
             var items = Skim(skimCount);
-            logger.Info("Skimming {skim_count} {type} from queue, got {skim_result_count}.", skimCount, typeName, items.Count);  // TODO: Appears to be double-logging.
+            logger.Trace("Skimming {skim_count} {type} from queue, got {skim_result_count}.", skimCount, typeName, items.Count);  // TODO: Appears to be double-logging.
 
             // TODO: If no images were found in queue set the timer to a slightly longer interval, to stop poll spamming.
 
@@ -105,7 +105,7 @@ namespace GChan.Controllers
         /// </summary>
         private void DownloadSuccess(T item)
         {
-            logger.Log(LogLevel.Debug, "Item {item} completed downloading succesfully.", item);
+            logger.Trace("Item {item} completed downloading succesfully.", item);
 
             if (downloading.TryRemove(item, out var _))
             {
@@ -128,7 +128,7 @@ namespace GChan.Controllers
         /// </summary>
         private void DownloadFailed(T item, bool retry)
         {
-            logger.Log(LogLevel.Debug, "Item {item} completed downloading succesfully.", item);
+            logger.Trace("Item {item} downloading failed.", item);
 
             if (downloading.TryRemove(item, out var _))
             {
@@ -140,6 +140,18 @@ namespace GChan.Controllers
             else
             {
                 logger.Warn("DownloadFailed callback was called with {item} but was not in the downloading dictionary.", item);
+            }
+        }
+
+        public void Dispose()
+        {
+            timer.Dispose();
+
+            // TODO: Cancellation token all downloading threads.
+            foreach (var download in downloading)
+            {
+                var thread = download.Value;
+                thread.Abort();
             }
         }
     }
