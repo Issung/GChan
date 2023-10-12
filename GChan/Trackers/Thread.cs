@@ -17,24 +17,15 @@ namespace GChan.Trackers
     {
         public const string NO_SUBJECT = "No Subject";
 
-        private int? fileCount = null;
-
-        protected string subject { get; private set; } = null;
-
         public event PropertyChangedEventHandler PropertyChanged;
 
         public SavedIdsCollection SavedIds { get; set; } = new();
 
+        public bool ShouldDownload => !Gone;
+
         public string Subject
         {
-            get
-            {
-                if (subject == null)
-                    return NO_SUBJECT;
-                else
-                    return subject;
-            }
-
+            get => subject == null ? NO_SUBJECT : subject;
             set
             {
                 subject = value;
@@ -58,6 +49,9 @@ namespace GChan.Trackers
         }
 
         public bool Gone { get; protected set; } = false;
+
+        protected string subject { get; private set; } = null;
+        private int? fileCount = null;
 
         protected Thread(string url) : base(url)
         {
@@ -84,9 +78,8 @@ namespace GChan.Trackers
             DownloadManager<Thread>.FailureCallback failureCallback
         )
         {
-            if (Gone)
+            if (!ShouldDownload)
             {
-                logger.Info($"Download(object callback) called on {this}, but will not download because {nameof(Gone)} is true.");
                 successCallback(this);
                 return;
             }

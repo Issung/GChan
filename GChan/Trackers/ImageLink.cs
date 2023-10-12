@@ -40,6 +40,8 @@ namespace GChan
 
         private static readonly ILogger logger = LogManager.GetCurrentClassLogger();
 
+        public bool ShouldDownload => !Thread.Gone;
+
         public ImageLink(
             long tim, 
             string url, 
@@ -60,6 +62,12 @@ namespace GChan
             DownloadManager<ImageLink>.FailureCallback failureCallback
         )
         {
+            if (!ShouldDownload)
+            {
+                successCallback(this);
+                return;
+            }
+
             if (!Directory.Exists(Thread.SaveTo))
             {
                 Directory.CreateDirectory(Thread.SaveTo);

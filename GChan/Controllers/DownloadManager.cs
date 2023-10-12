@@ -12,7 +12,6 @@ namespace GChan.Controllers
     /// <typeparamref name="T"/> must provide a good implementation of <see cref="object.GetHashCode"/>.<br/>
     /// </summary>
     /// <remarks>
-    /// TODO: Add "download" property to <see cref="IDownloadable{T}"/> so an item can skip downloading once it is attempted.<br/>
     /// TODO: Add <see cref="CancellationToken"/> to <see cref="IDownloadable{T}"/> and a way to cancel specific items / items that match a predicate.<br/>
     /// TODO: Add ability to clear the manager completely, for certain situations e.g. someone disables the setting to save thread html.<br/>
     /// TODO: Use async/tasks instead of threads.<br/>
@@ -70,30 +69,37 @@ namespace GChan.Controllers
         /// <param name="_">Unnecessary paramater.</param>
         private void TimerTick(object _)
         {
-            var skimCount = ConcurrentCount - downloading.Count;
-            var items = Skim(skimCount);
-            logger.Trace("Skimming {skim_count} {type} from queue, got {skim_result_count}.", skimCount, typeName, items.Count);  // TODO: Appears to be double-logging.
+            var dequeueCount = ConcurrentCount - downloading.Count;
+            var items = Dequeue(dequeueCount);
+            logger.Trace("Dequeue {dequeue_count} {type} from queue, got {dequeue_result_count}.", dequeueCount, typeName, items.Count);  // TODO: Appears to be double-logging.
 
             // TODO: If no images were found in queue set the timer to a slightly longer interval, to stop poll spamming.
 
-            foreach (var image in items)
+            foreach (var item in items)
             {
-                var newThread = new Thread(() => image.Download(DownloadSuccess, DownloadFailed));
+                var newThread = new Thread(() => item.Download(DownloadSuccess, DownloadFailed));
                 newThread.Start();
-                downloading.TryAdd(image, newThread);
+                downloading.TryAdd(item, newThread);
             }
         }
 
         /// <summary>
         /// Take some items off of the queue.
         /// </summary>
-        private List<T> Skim(int amount)
+        private List<T> Dequeue(int amount)
         {
             var chunk = new List<T>(amount);
 
             while (chunk.Count < amount && waiting.TryDequeue(out var item))
-            { 
-                chunk.Add(item);
+            {
+                if (item.ShouldDownload)
+                {
+                    chunk.Add(item);
+                }
+                else
+                {
+                    // If shouldn't download don't add to chunk. The item has already been removed from the queue.
+                }
             }
 
             return chunk;
