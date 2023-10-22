@@ -96,8 +96,16 @@ namespace GChan.Controllers
             }
         }
 
+        /// <summary>
+        /// Clear the entire download manager (waiting and currently downloading), and cancel those that were in progress.
+        /// </summary>
         public void Clear()
         {
+            while (waiting.Count > 0)
+            {
+                waiting.TryDequeue(out _);
+            }
+
             while (downloading.Count > 0) 
             {
                 var kvp = downloading.FirstOrDefault();

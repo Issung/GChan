@@ -23,7 +23,7 @@ namespace GChan.Controllers
         }
 
         /// <summary>
-        /// Cancel and dispose of download.
+        /// Cancel download and dispose resources.
         /// </summary>
         public void Dispose()
         {
