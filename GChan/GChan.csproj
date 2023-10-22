@@ -80,6 +80,7 @@
     <Reference Include="System.Xml.Serialization" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controllers\Download.cs" />
     <Compile Include="Controllers\DownloadManager.cs" />
     <Compile Include="Data\DataController.cs" />
     <Compile Include="Controllers\MainController.cs" />

@@ -6,6 +6,7 @@ using NLog;
 using System;
 using System.IO;
 using System.Net;
+using CancellationToken = System.Threading.CancellationToken;
 
 namespace GChan
 {
@@ -59,7 +60,8 @@ namespace GChan
 
         public void Download(
             DownloadManager<ImageLink>.SuccessCallback successCallback,
-            DownloadManager<ImageLink>.FailureCallback failureCallback
+            DownloadManager<ImageLink>.FailureCallback failureCallback,
+            CancellationToken cancellationToken
         )
         {
             if (!ShouldDownload)
@@ -78,6 +80,7 @@ namespace GChan
             try
             {
                 // TODO: Asyncify/Taskify.
+                // TODO: Use cancellation token.
                 using var webClient = new WebClient();
                 webClient.DownloadFile(Url, destFilepath);
                 Thread.SavedIds.Add(Tim);

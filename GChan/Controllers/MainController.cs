@@ -30,8 +30,8 @@ namespace GChan.Controllers
 
         private SysThread scanThread = null;
 
-        private readonly DownloadManager<ImageLink> imageDownloadManager = new(true);
-        private readonly DownloadManager<Thread> threadHtmlDownloadManager = new(true); // Allow threads to be removed after download, we just re-add them. TODO: Maybe improve.
+        private readonly DownloadManager<ImageLink> imageDownloader = new(true);
+        private readonly DownloadManager<Thread> threadHtmlDownloader = new(true); // Allow threads to be removed after download, we just re-add them. TODO: Maybe improve.
 
         private readonly Timer scanTimer = new();
 
@@ -335,11 +335,11 @@ namespace GChan.Controllers
                 if (thread.Scraping)
                 {
                     var links = thread.GetImageLinks();
-                    imageDownloadManager.Queue(links);
+                    imageDownloader.Queue(links);
 
                     if (Settings.Default.SaveHTML)
                     { 
-                        threadHtmlDownloadManager.Queue(thread);
+                        threadHtmlDownloader.Queue(thread);
                     }
                 }
             }
@@ -433,8 +433,10 @@ namespace GChan.Controllers
         public void RemoveThread(Thread thread, bool manualRemove = false)
         {
             logger.Trace($"Removing thread {thread}.");
-
             thread.Scraping = false;
+            // TODO: #41 - Cancellation currently not working, implement later.
+            //imageDownloader.Cancel(i => i.Thread == thread);
+            //threadHtmlDownloader.Cancel(thread);
 
             try
             {
@@ -507,8 +509,8 @@ namespace GChan.Controllers
             scanTimer.Enabled = false;
             scanTimer.Dispose();
 
-            imageDownloadManager.Dispose();
-            threadHtmlDownloadManager.Dispose();
+            imageDownloader.Dispose();
+            threadHtmlDownloader.Dispose();
 
             if (Settings.Default.SaveListsOnClose)
             {

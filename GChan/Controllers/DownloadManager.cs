@@ -12,7 +12,6 @@ namespace GChan.Controllers
     /// <typeparamref name="T"/> must provide a good implementation of <see cref="object.GetHashCode"/>.<br/>
     /// </summary>
     /// <remarks>
-    /// TODO: Add <see cref="CancellationToken"/> to <see cref="IDownloadable{T}"/> and a way to cancel specific items / items that match a predicate.<br/>
     /// TODO: Add ability to clear the manager completely, for certain situations e.g. someone disables the setting to save thread html.<br/>
     /// TODO: Use async/tasks instead of threads.<br/>
     /// </remarks>
@@ -26,7 +25,7 @@ namespace GChan.Controllers
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
         private static readonly TimeSpan interval = TimeSpan.FromSeconds(1);
 
-        private readonly ConcurrentDictionary<T, Thread> downloading = new();
+        private readonly ConcurrentDictionary<T, Download> downloading = new();
         private readonly ConcurrentQueue<T> waiting = new();
         private readonly bool removeSuccessfulItems;
         private readonly Timer timer;
@@ -64,6 +63,50 @@ namespace GChan.Controllers
         }
 
         /// <summary>
+        /// Cancel a download of an item if it is currently downloading.<br/>
+        /// To cancel downloads of items that are queued for download, set <see cref="IDownloadable{T}.ShouldDownload"/> to false.
+        /// </summary>
+        public void Cancel(T item)
+        {
+            if (downloading.TryRemove(item, out var download))
+            {
+                download.Dispose();
+            }
+        }
+
+        /// <summary>
+        /// Cancel all currently downloading items that match <paramref name="predicate"/>.<br/>
+        /// To cancel downloads of items that are queued for download, set <see cref="IDownloadable{T}.ShouldDownload"/> to false.
+        /// </summary>
+        /// <remarks>
+        /// TODO: Not thread-safe because the dictionary could change over the loop.
+        /// </remarks>
+        public void Cancel(Func<T, bool> predicate)
+        {
+            foreach (var kvp in downloading) 
+            {
+                var item = kvp.Key;
+                var download = kvp.Value;
+
+                if (predicate(item))
+                {
+                    downloading.TryRemove(kvp.Key, out var _);
+                    download.Cancel();
+                }
+            }
+        }
+
+        public void Clear()
+        {
+            while (downloading.Count > 0) 
+            {
+                var kvp = downloading.FirstOrDefault();
+                downloading.TryRemove(kvp.Key, out _);
+                kvp.Value.Dispose();
+            }
+        }
+
+        /// <summary>
         /// A tick of the timer.
         /// </summary>
         /// <param name="_">Unnecessary paramater.</param>
@@ -77,9 +120,13 @@ namespace GChan.Controllers
 
             foreach (var item in items)
             {
-                var newThread = new Thread(() => item.Download(DownloadSuccess, DownloadFailed));
-                newThread.Start();
-                downloading.TryAdd(item, newThread);
+                var cancellationTokenSource = new CancellationTokenSource();
+                var thread = new Thread(() => item.Download(DownloadSuccess, DownloadFailed, cancellationTokenSource.Token));
+
+                var download = new Download(thread, cancellationTokenSource);
+                thread.Start();
+
+                downloading.TryAdd(item, download);
             }
         }
 
@@ -153,11 +200,11 @@ namespace GChan.Controllers
         {
             timer.Dispose();
 
-            // TODO: Cancellation token all downloading threads.
-            foreach (var download in downloading)
+            foreach (var kvp in downloading)
             {
-                var thread = download.Value;
-                thread.Abort();
+                var download = kvp.Value;
+                download.Cancel();
+                download.Dispose();
             }
         }
     }

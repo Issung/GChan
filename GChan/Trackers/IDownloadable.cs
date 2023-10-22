@@ -1,4 +1,5 @@
 ﻿using GChan.Controllers;
+using System.Threading;
 
 namespace GChan
 {
@@ -15,7 +16,8 @@ namespace GChan
         /// </summary>
         void Download(
             DownloadManager<T>.SuccessCallback successCallback,
-            DownloadManager<T>.FailureCallback failureCallback
+            DownloadManager<T>.FailureCallback failureCallback,
+            CancellationToken cancellationToken
         );
     }
 }

@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Net;
 using System.Runtime.CompilerServices;
+using CancellationToken = System.Threading.CancellationToken;
 
 namespace GChan.Trackers
 {
@@ -75,7 +76,8 @@ namespace GChan.Trackers
 
         public void Download(
             DownloadManager<Thread>.SuccessCallback successCallback,
-            DownloadManager<Thread>.FailureCallback failureCallback
+            DownloadManager<Thread>.FailureCallback failureCallback,
+            CancellationToken cancellationToken
         )
         {
             if (!ShouldDownload)
@@ -86,6 +88,7 @@ namespace GChan.Trackers
 
             try
             {
+                // TODO: Forward cancellation token and use in each implementation.
                 DownloadHtmlImpl();
             }
             catch (WebException webEx) when (webEx.IsGone(out var httpWebResponse))

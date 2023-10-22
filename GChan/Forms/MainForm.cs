@@ -175,14 +175,17 @@ namespace GChan.Forms
 
         private void settingsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            SettingsForm tSettings = new SettingsForm();
-            tSettings.ShowDialog();
-            tSettings.Dispose();
-            if (Settings.Default.MinimizeToTray)
-                systemTrayNotifyIcon.Visible = true;
-            else
-                systemTrayNotifyIcon.Visible = false;
+            var form = new SettingsForm();
+            form.ShowDialog();
+            form.Dispose();
 
+            // TODO: #41 - Cancellation currently not working, implement later.
+            //if (!Settings.Default.SaveHTML)
+            //{
+            //    // Clear all downloads on main controller threadHtmlDownloader.
+            //}
+
+            systemTrayNotifyIcon.Visible = Settings.Default.MinimizeToTray;
             Controller.ScanTimerInterval = Settings.Default.ScanTimer;
         }
 
