@@ -1,7 +1,6 @@
 ﻿using GChan.Data;
 using GChan.Properties;
 using GChan.Trackers;
-using Microsoft.Win32;
 using NLog;
 using System;
 using System.IO;
@@ -24,53 +23,6 @@ namespace GChan
         public static readonly char[] IllegalFilenameCharacters = Path.GetInvalidFileNameChars();
 
         private static readonly ILogger logger = LogManager.GetCurrentClassLogger();
-
-        /// <summary>
-        /// Save settings to disk.
-        /// </summary>
-        /// <param name="path">Path to where the application downloads</param>
-        /// <param name="time">Thrad refresh timer in seconds</param>
-        /// <param name="loadHTML">Save HTML or not</param>
-        /// <param name="saveOnclose">Save URLs or not</param>
-        /// <param name="minimizeToTray">Minimize to tray or not</param>
-        /// <param name="closeWarn">Warn before closing or not</param>
-        public static void SaveSettings(
-            string path,
-            int time,
-            ImageFileNameFormat imageFileNameFormat,
-            ThreadFolderNameFormat threadFolderNameFormat,
-            bool loadHTML,
-            bool saveOnclose,
-            bool minimizeToTray,
-            bool closeWarn,
-            bool startWithWindows,
-            bool startWithWindowsMinimized,
-            bool addThreadSubjectToFolder,
-            bool addUrlFromClipboardWhenTextboxEmpty,
-            bool checkForUpdatesOnStart)
-        {
-            Settings.Default.SavePath = path;
-            Settings.Default.ScanTimer = time;
-            Settings.Default.ImageFilenameFormat = (byte)imageFileNameFormat;
-            Settings.Default.ThreadFolderNameFormat = (byte)threadFolderNameFormat;
-            Settings.Default.SaveHTML = loadHTML;
-            Settings.Default.SaveListsOnClose = saveOnclose;
-            Settings.Default.MinimizeToTray = minimizeToTray;
-            Settings.Default.WarnOnClose = closeWarn;
-            Settings.Default.StartWithWindowsMinimized = startWithWindowsMinimized;
-            Settings.Default.AddThreadSubjectToFolder = addThreadSubjectToFolder;
-            Settings.Default.AddUrlFromClipboardWhenTextboxEmpty = addUrlFromClipboardWhenTextboxEmpty;
-            Settings.Default.CheckForUpdatesOnStart = checkForUpdatesOnStart;
-
-            Settings.Default.Save();
-
-            RegistryKey registryKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
-
-            if (startWithWindows)
-                registryKey.SetValue(PROGRAM_NAME, '"' + Application.ExecutablePath + '"' + (minimizeToTray && startWithWindowsMinimized ? $" {Program.TRAY_CMDLINE_ARG}" : ""));
-            else if (registryKey.GetValue(PROGRAM_NAME) != null)
-                registryKey.DeleteValue(PROGRAM_NAME);
-        }
 
         /// <summary>
         /// Validates if the string only contains digits

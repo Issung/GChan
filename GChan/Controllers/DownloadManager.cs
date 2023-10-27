@@ -20,7 +20,10 @@ namespace GChan.Controllers
         public delegate void SuccessCallback(T item);
         public delegate void FailureCallback(T item, bool retry);
 
-        private const int ConcurrentCount = 25;
+        /// <summary>
+        /// How many operations may be running concurrently.
+        /// </summary>
+        public int ConcurrentCount { get; set; } = Properties.Settings.Default.MaximumConcurrentDownloads;
 
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
         private static readonly TimeSpan interval = TimeSpan.FromSeconds(1);

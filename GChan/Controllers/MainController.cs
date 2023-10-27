@@ -419,6 +419,11 @@ namespace GChan.Controllers
             }
         }
 
+        public void SettingsUpdated()
+        {
+            this.imageDownloader.ConcurrentCount = Settings.Default.MaximumConcurrentDownloads;
+        }
+
         /// <summary>
         /// Remove a thread from tracking.
         /// </summary>

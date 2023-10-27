@@ -1,15 +1,15 @@
 ﻿using GChan.Properties;
 using Microsoft.Win32;
+using Microsoft.WindowsAPICodePack.Dialogs;
 using System;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
-using Microsoft.WindowsAPICodePack.Dialogs;
 
 namespace GChan
 {
-    public enum ImageFileNameFormat 
+    public enum ImageFileNameFormat
     {
         [Description("ID (eg. '1570301.jpg')")]
         ID = 0,
@@ -21,7 +21,7 @@ namespace GChan
         OriginalFilenameAndID = 3
     };
 
-    public enum ThreadFolderNameFormat 
+    public enum ThreadFolderNameFormat
     {
         [Description("ID - Subject")]
         IdSubject = 0,
@@ -64,6 +64,7 @@ namespace GChan
             directoryTextBox.Text = directory;
 
             timerNumeric.Value = (Settings.Default.ScanTimer / 1000);
+            concurrentDownloadsNumeric.Value = Settings.Default.MaximumConcurrentDownloads;
 
             imageFilenameFormatComboBox.SelectedIndex = Settings.Default.ImageFilenameFormat;
             threadFolderNameFormatComboBox.SelectedIndex = Settings.Default.ThreadFolderNameFormat;
@@ -83,11 +84,9 @@ namespace GChan
             checkForUpdatesOnStartCheckBox.Checked = Settings.Default.CheckForUpdatesOnStart;
         }
 
-        private void btnSSave_Click(object sender, EventArgs e)
+        private void buttonSave_Click(object sender, EventArgs e)
         {
-            string reason;
-
-            if (!hasWriteAccessToFolder(directory, out reason))
+            if (!HasWriteAccessToFolder(directory, out var reason))
             {
                 MessageBox.Show(reason, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
@@ -99,39 +98,58 @@ namespace GChan
             }
             else
             {
-                Utils.SaveSettings(
-                    directory, 
-                    (int)timerNumeric.Value * 1000,
-                    (ImageFileNameFormat)imageFilenameFormatComboBox.SelectedIndex,
-                    (ThreadFolderNameFormat)threadFolderNameFormatComboBox.SelectedIndex,
-                    chkHTML.Checked,
-                    chkSave.Checked,
-                    chkTray.Checked,
-                    chkWarn.Checked,
-                    chkStartWithWindows.Checked,
-                    chkStartWithWindowsMinimized.Checked,
-                    renameThreadFolderCheckBox.Checked,
-                    addUrlFromClipboardWhenTextboxEmpty.Checked,
-                    checkForUpdatesOnStartCheckBox.Checked
-                );
+                SaveSettings();
 
                 Close();
             }
         }
 
-        private void btnSCan_Click(object sender, EventArgs e)
+        private void buttonCancel_Click(object sender, EventArgs e)
         {
             Close();
         }
 
+        private void SaveSettings()
+        {
+            Settings.Default.SavePath = directory;
+            Settings.Default.ScanTimer = (int)timerNumeric.Value * 1000;
+            Settings.Default.MaximumConcurrentDownloads = (int)concurrentDownloadsNumeric.Value;
+            Settings.Default.ImageFilenameFormat = (byte)imageFilenameFormatComboBox.SelectedIndex;
+            Settings.Default.ThreadFolderNameFormat = (byte)threadFolderNameFormatComboBox.SelectedIndex;
+            Settings.Default.SaveHTML = chkHTML.Checked;
+            Settings.Default.SaveListsOnClose = chkSave.Checked;
+            Settings.Default.MinimizeToTray = chkTray.Checked;
+            Settings.Default.WarnOnClose = chkWarn.Checked;
+            Settings.Default.StartWithWindowsMinimized = chkStartWithWindowsMinimized.Checked;
+            Settings.Default.AddThreadSubjectToFolder = renameThreadFolderCheckBox.Checked;
+            Settings.Default.AddUrlFromClipboardWhenTextboxEmpty = addUrlFromClipboardWhenTextboxEmpty.Checked;
+            Settings.Default.CheckForUpdatesOnStart = checkForUpdatesOnStartCheckBox.Checked;
+
+            Settings.Default.Save();
+
+            var registryKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+            if (chkStartWithWindows.Checked)
+            {
+                var args = (Settings.Default.MinimizeToTray && Settings.Default.StartWithWindowsMinimized) ? $" {Program.TRAY_CMDLINE_ARG}" : "";
+                registryKey.SetValue(
+                    Utils.PROGRAM_NAME,
+                    '"' + Application.ExecutablePath + '"' + args
+                );
+            }
+            else if (registryKey.GetValue(Utils.PROGRAM_NAME) != null)
+            {
+                registryKey.DeleteValue(Utils.PROGRAM_NAME);
+            }
+        }
+
         //Source: https://stackoverflow.com/q/1410127/8306962
-        private bool hasWriteAccessToFolder(string folderPath, out string reason)
+        private bool HasWriteAccessToFolder(string folderPath, out string reason)
         {
             try
             {
                 // Attempt to get a list of security permissions from the folder.
                 // This will raise an exception if the path is read only or do not have access to view the permissions.
-                System.Security.AccessControl.DirectorySecurity ds = Directory.GetAccessControl(folderPath);
+                var directorySecurity = Directory.GetAccessControl(folderPath);
                 reason = "No problem";
                 return true;
             }
@@ -166,24 +184,9 @@ namespace GChan
             System.Diagnostics.Process.Start("explorer.exe", string.Format(directory));
         }
 
-        /// <summary>
-        /// Extends the ComboBox's dropdown horizontally to accomodate for long length items.
-        /// https://stackoverflow.com/a/28271652/8306962
-        /// </summary>
-        private void imageFilenameFormatComboBox_DropDown(object sender, EventArgs e)
+        private void chkTray_CheckedChanged(object sender, EventArgs e)
         {
-            /*Graphics g = imageFilenameFormatComboBox.CreateGraphics();
-            float largestSize = 0;
-
-            for (int i = 0; i < imageFilenameFormatComboBox.Items.Count; i++)
-            {
-                SizeF textSize = g.MeasureString(imageFilenameFormatComboBox.Items[i].ToString(), imageFilenameFormatComboBox.Font);
-                if (textSize.Width > largestSize)
-                    largestSize = textSize.Width;
-            }
-
-            if (largestSize > 0)
-                imageFilenameFormatComboBox.DropDownWidth = (int)largestSize;*/
+            EnableChkStartWithWindowsMinimizedCheckBox();
         }
 
         private void chkStartWithWindows_CheckedChanged(object sender, EventArgs e)
@@ -191,17 +194,9 @@ namespace GChan
             EnableChkStartWithWindowsMinimizedCheckBox();
         }
 
-        private void chkTray_CheckedChanged(object sender, EventArgs e)
-        {
-            EnableChkStartWithWindowsMinimizedCheckBox();
-        }
-
         private void EnableChkStartWithWindowsMinimizedCheckBox()
         {
-            if (chkTray.Checked && chkStartWithWindows.Checked)
-                chkStartWithWindowsMinimized.Enabled = true;
-            else
-                chkStartWithWindowsMinimized.Enabled = false;
+            chkStartWithWindowsMinimized.Enabled = chkTray.Checked && chkStartWithWindows.Checked;
         }
 
         private void renameThreadFolderCheckBox_CheckedChanged(object sender, EventArgs e)
