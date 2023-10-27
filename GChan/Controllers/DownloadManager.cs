@@ -47,9 +47,15 @@ namespace GChan.Controllers
 
         public void Queue(T item)
         {
-            if (!waiting.Contains(item))    // TODO: What is the performance of this?
+            // Don't queue if already downloading or already in waiting list.
+            if (!downloading.ContainsKey(item))
             { 
-                waiting.Enqueue(item);
+                if (!waiting.Contains(item))    // TODO: What is the performance of this?
+                { 
+                    logger.Trace("Queueing {item} for download.", item);
+                    waiting.Enqueue(item);
+                    return;
+                }
             }
         }
 
@@ -57,8 +63,7 @@ namespace GChan.Controllers
         {
             foreach (var item in items)
             {
-                logger.Trace("Queueing {item} for download.", item);
-                waiting.Enqueue(item);
+                Queue(item);
             }
         }
 
