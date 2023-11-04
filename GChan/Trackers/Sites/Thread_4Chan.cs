@@ -40,122 +40,115 @@ namespace GChan.Trackers
             return Regex.IsMatch(url, THREAD_REGEX);
         }
 
-        protected override ImageLink[] GetImageLinks(bool includeAlreadySaved = false)
+        protected override ImageLink[] GetImageLinksImpl(bool includeAlreadySaved = false)
         {
             var baseUrl = $"http://i.4cdn.org/{BoardCode}/";
             var jsonUrl = $"http://a.4cdn.org/{BoardCode}/thread/{ID}.json";
 
-            try
-            {
-                using var web = new WebClient();
-                var json = web.DownloadString(jsonUrl);
-                var jObject = JObject.Parse(json);
+            using var web = new WebClient();
+            var json = web.DownloadString(jsonUrl);
+            var jObject = JObject.Parse(json);
 
-                // The /f/ board (flash) saves the files with their uploaded name.
-                var timPath = BoardCode == "f" ? "filename" : "tim";
+            // The /f/ board (flash) saves the files with their uploaded name.
+            var timPath = BoardCode == "f" ? "filename" : "tim";
 
-                var links = jObject
-                    .SelectTokens("posts[*]")
-                    .Where(x => x["ext"] != null)
-                    .Select(x =>
-                        new ImageLink(
-                            x[timPath].GetTimHashCode(),
-                            baseUrl + Uri.EscapeDataString(x[timPath].Value<string>()) + x["ext"],  // Require escaping for the flash files stored with arbitrary string names.
-                            x["filename"].Value<string>(),
-                            x["no"].Value<long>()
-                        )
+            var links = jObject
+                .SelectTokens("posts[*]")
+                .Where(x => x["ext"] != null)
+                .Select(x =>
+                    new ImageLink(
+                        x[timPath].Value<long>(),
+                        baseUrl + Uri.EscapeDataString(x[timPath].Value<string>()) + x["ext"],  // Require escaping for the flash files stored with arbitrary string names.
+                        x["filename"].Value<string>(),
+                        x["no"].Value<long>(),
+                        this
                     )
-                    .ToArray();
+                )
+                .ToArray();
 
-                FileCount = links.Length;
-                return links.MaybeRemoveAlreadySavedLinks(includeAlreadySaved, SavedIds).ToArray();
-            }
-            catch (Exception ex)
-            {
-                logger.Error(ex, $"Encountered an exception in GetImageLinks() {this}.");
-                throw;
-            }
+            FileCount = links.Length;
+            return links.MaybeRemoveAlreadySavedLinks(includeAlreadySaved, SavedIds).ToArray();
         }
 
-        protected override void DownloadHTMLPage()
+        public override void DownloadHtmlImpl()
         {
-            List<string> thumbs = new List<string>();
-            string htmlPage = "";
-            string baseURL = "//i.4cdn.org/" + BoardCode + "/";
-            string JURL = "http://a.4cdn.org/" + BoardCode + "/thread/" + ID + ".json";
+            var thumbs = new List<string>();
+            var htmlPage = "";
+            var baseUrl = "//i.4cdn.org/" + BoardCode + "/";
+            var jsonUrl = "http://a.4cdn.org/" + BoardCode + "/thread/" + ID + ".json";
 
-            try
+            JObject jObject;
+
+            using (var web = new WebClient())
             {
-                JObject jObject;
+                //Add a UserAgent to prevent 403
+                web.Headers["User-Agent"] = "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0";
 
-                using (var web = new WebClient())
-                {
-                    //Add a UserAgent to prevent 403
-                    web.Headers["User-Agent"] = "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0";
+                htmlPage = web.DownloadString(Url);
 
-                    htmlPage = web.DownloadString(Url);
-
-                    //Prevent the html from being destroyed by the anti adblock script
-                    htmlPage = htmlPage.Replace("f=\"to\"", "f=\"penis\"");
+                //Prevent the html from being destroyed by the anti adblock script
+                htmlPage = htmlPage.Replace("f=\"to\"", "f=\"penis\"");
                     
-                    string json = web.DownloadString(JURL);
-                    jObject = JObject.Parse(json);
-                }
+                var json = web.DownloadString(jsonUrl);
+                jObject = JObject.Parse(json);
+            }
 
-                var posts = jObject
-                    .SelectTokens("posts[*]")
-                    .Where(x => x["ext"] != null)
-                    .ToList();
+            var posts = jObject
+                .SelectTokens("posts[*]")
+                .Where(x => x["ext"] != null)
+                .ToList();
                 
-                foreach (var post in posts)
-                {
-                    string old = baseURL + post["tim"] + post["ext"];
-                    string replacement = post["tim"] + (string) post["ext"];
-                    htmlPage = htmlPage.Replace(old, replacement);
+            foreach (var post in posts)
+            {
+                var old = baseUrl + post["tim"] + post["ext"];
+                var replacement = post["tim"] + (string) post["ext"];
+                htmlPage = htmlPage.Replace(old, replacement);
 
-                    //get the actual filename saved
-                    string filename = Path.GetFileNameWithoutExtension(
+                //get the actual filename saved
+                var filename = Path
+                    .GetFileNameWithoutExtension(
                         new ImageLink(post["tim"].Value<long>(),
-                                old,
-                                post["filename"].ToString(),
-                                post["no"].Value<long>())
-                            .GenerateFilename((ImageFileNameFormat)Settings.Default.ImageFilenameFormat));
-
-                    //Save thumbs for files that need it
-                    if (replacement.Split('.')[1] == "webm")
-                    {
-                        old = "//t.4cdn.org/" + BoardCode + "/" + post["tim"] + "s.jpg";
-                        thumbs.Add("http:" + old);
-
-                        htmlPage = htmlPage.Replace(post["tim"].ToString(), filename);
-                        htmlPage = htmlPage.Replace("//i.4cdn.org/" + BoardCode + "/" + filename, "thumb/" + post["tim"]);
-                    }
-                    else
-                    {
-                        string thumbName = replacement.Split('.')[0] + "s";
-                        htmlPage = htmlPage.Replace(thumbName + ".jpg", replacement.Split('.')[0] + "." + replacement.Split('.')[1]);
-                        htmlPage = htmlPage.Replace("/" + thumbName, thumbName);
-
-                        htmlPage = htmlPage.Replace("//i.4cdn.org/" + BoardCode + "/" + post["tim"], post["tim"].ToString());
-                        htmlPage = htmlPage.Replace(post["tim"].ToString(), filename); //easy fix for images
-                    }
-
-                    htmlPage = htmlPage.Replace("//is2.4chan.org/" + BoardCode + "/" + post["tim"], post["tim"].ToString()); //bandaid fix for is2 urls
-                    htmlPage = htmlPage.Replace("/" + replacement, replacement);
-                }
-
-                htmlPage = htmlPage.Replace("=\"//", "=\"http://");
+                            old,
+                            post["filename"].ToString(),
+                            post["no"].Value<long>(),
+                            this
+                        )
+                    .GenerateFilename((ImageFileNameFormat)Settings.Default.ImageFilenameFormat));
 
                 //Save thumbs for files that need it
-                for (int i = 0; i < thumbs.Count; i++)
-                    Utils.DownloadFile(thumbs[i], SaveTo + "\\thumb");
+                if (replacement.Split('.')[1] == "webm")
+                {
+                    old = "//t.4cdn.org/" + BoardCode + "/" + post["tim"] + "s.jpg";
+                    thumbs.Add("http:" + old);
 
-                if (!string.IsNullOrWhiteSpace(htmlPage))
-                    File.WriteAllText(SaveTo + "\\Thread.html", htmlPage);
+                    htmlPage = htmlPage.Replace(post["tim"].ToString(), filename);
+                    htmlPage = htmlPage.Replace("//i.4cdn.org/" + BoardCode + "/" + filename, "thumb/" + post["tim"]);
+                }
+                else
+                {
+                    var thumbName = replacement.Split('.')[0] + "s";
+                    htmlPage = htmlPage.Replace(thumbName + ".jpg", replacement.Split('.')[0] + "." + replacement.Split('.')[1]);
+                    htmlPage = htmlPage.Replace("/" + thumbName, thumbName);
+
+                    htmlPage = htmlPage.Replace("//i.4cdn.org/" + BoardCode + "/" + post["tim"], post["tim"].ToString());
+                    htmlPage = htmlPage.Replace(post["tim"].ToString(), filename); //easy fix for images
+                }
+
+                htmlPage = htmlPage.Replace("//is2.4chan.org/" + BoardCode + "/" + post["tim"], post["tim"].ToString()); //bandaid fix for is2 urls
+                htmlPage = htmlPage.Replace("/" + replacement, replacement);
             }
-            catch (Exception ex)
+
+            htmlPage = htmlPage.Replace("=\"//", "=\"http://");
+
+            //Save thumbs for files that need it
+            for (int i = 0; i < thumbs.Count; i++)
             {
-                logger.Error(ex);
+                Utils.DownloadFile(thumbs[i], SaveTo + "\\thumb");
+            }
+
+            if (!string.IsNullOrWhiteSpace(htmlPage))
+            {
+                File.WriteAllText(SaveTo + "\\Thread.html", htmlPage);
             }
         }
 

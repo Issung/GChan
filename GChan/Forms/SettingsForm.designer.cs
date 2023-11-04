@@ -25,8 +25,8 @@
         private void InitializeComponent() {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SettingsForm));
-            this.btnSSave = new System.Windows.Forms.Button();
-            this.btnSCan = new System.Windows.Forms.Button();
+            this.buttonSave = new System.Windows.Forms.Button();
+            this.buttonCancel = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.chkHTML = new System.Windows.Forms.CheckBox();
@@ -40,36 +40,39 @@
             this.tooltip = new System.Windows.Forms.ToolTip(this.components);
             this.renameThreadFolderCheckBox = new System.Windows.Forms.CheckBox();
             this.chkStartWithWindowsMinimized = new System.Windows.Forms.CheckBox();
+            this.concurrentDownloadsLabel = new System.Windows.Forms.Label();
             this.imageFilenameFormatLabel = new System.Windows.Forms.Label();
             this.imageFilenameFormatComboBox = new System.Windows.Forms.ComboBox();
             this.addUrlFromClipboardWhenTextboxEmpty = new System.Windows.Forms.CheckBox();
             this.threadFolderNameFormatLabel = new System.Windows.Forms.Label();
             this.threadFolderNameFormatComboBox = new System.Windows.Forms.ComboBox();
             this.checkForUpdatesOnStartCheckBox = new System.Windows.Forms.CheckBox();
+            this.concurrentDownloadsNumeric = new System.Windows.Forms.NumericUpDown();
             ((System.ComponentModel.ISupportInitialize)(this.timerNumeric)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.concurrentDownloadsNumeric)).BeginInit();
             this.SuspendLayout();
             // 
-            // btnSSave
+            // buttonSave
             // 
-            this.btnSSave.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
-            this.btnSSave.Location = new System.Drawing.Point(76, 338);
-            this.btnSSave.Name = "btnSSave";
-            this.btnSSave.Size = new System.Drawing.Size(92, 23);
-            this.btnSSave.TabIndex = 0;
-            this.btnSSave.Text = "Save";
-            this.btnSSave.UseVisualStyleBackColor = true;
-            this.btnSSave.Click += new System.EventHandler(this.btnSSave_Click);
+            this.buttonSave.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
+            this.buttonSave.Location = new System.Drawing.Point(69, 357);
+            this.buttonSave.Name = "buttonSave";
+            this.buttonSave.Size = new System.Drawing.Size(92, 23);
+            this.buttonSave.TabIndex = 0;
+            this.buttonSave.Text = "Save";
+            this.buttonSave.UseVisualStyleBackColor = true;
+            this.buttonSave.Click += new System.EventHandler(this.buttonSave_Click);
             // 
-            // btnSCan
+            // buttonCancel
             // 
-            this.btnSCan.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
-            this.btnSCan.Location = new System.Drawing.Point(174, 338);
-            this.btnSCan.Name = "btnSCan";
-            this.btnSCan.Size = new System.Drawing.Size(94, 23);
-            this.btnSCan.TabIndex = 1;
-            this.btnSCan.Text = "Cancel";
-            this.btnSCan.UseVisualStyleBackColor = true;
-            this.btnSCan.Click += new System.EventHandler(this.btnSCan_Click);
+            this.buttonCancel.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
+            this.buttonCancel.Location = new System.Drawing.Point(167, 357);
+            this.buttonCancel.Name = "buttonCancel";
+            this.buttonCancel.Size = new System.Drawing.Size(94, 23);
+            this.buttonCancel.TabIndex = 1;
+            this.buttonCancel.Text = "Cancel";
+            this.buttonCancel.UseVisualStyleBackColor = true;
+            this.buttonCancel.Click += new System.EventHandler(this.buttonCancel_Click);
             // 
             // label1
             // 
@@ -88,11 +91,12 @@
             this.label2.Size = new System.Drawing.Size(59, 13);
             this.label2.TabIndex = 3;
             this.label2.Text = "Timer (sec)";
+            this.tooltip.SetToolTip(this.label2, "How often to check threads/boards for updates.");
             // 
             // chkHTML
             // 
             this.chkHTML.AutoSize = true;
-            this.chkHTML.Location = new System.Drawing.Point(15, 141);
+            this.chkHTML.Location = new System.Drawing.Point(15, 162);
             this.chkHTML.Name = "chkHTML";
             this.chkHTML.Size = new System.Drawing.Size(107, 17);
             this.chkHTML.TabIndex = 6;
@@ -102,7 +106,7 @@
             // chkSave
             // 
             this.chkSave.AutoSize = true;
-            this.chkSave.Location = new System.Drawing.Point(15, 186);
+            this.chkSave.Location = new System.Drawing.Point(15, 207);
             this.chkSave.Name = "chkSave";
             this.chkSave.Size = new System.Drawing.Size(115, 17);
             this.chkSave.TabIndex = 7;
@@ -112,7 +116,7 @@
             // chkTray
             // 
             this.chkTray.AutoSize = true;
-            this.chkTray.Location = new System.Drawing.Point(15, 209);
+            this.chkTray.Location = new System.Drawing.Point(15, 230);
             this.chkTray.Name = "chkTray";
             this.chkTray.Size = new System.Drawing.Size(102, 17);
             this.chkTray.TabIndex = 8;
@@ -124,7 +128,7 @@
             // chkWarn
             // 
             this.chkWarn.AutoSize = true;
-            this.chkWarn.Location = new System.Drawing.Point(15, 164);
+            this.chkWarn.Location = new System.Drawing.Point(15, 185);
             this.chkWarn.Name = "chkWarn";
             this.chkWarn.Size = new System.Drawing.Size(116, 17);
             this.chkWarn.TabIndex = 9;
@@ -144,7 +148,7 @@
             // chkStartWithWindows
             // 
             this.chkStartWithWindows.AutoSize = true;
-            this.chkStartWithWindows.Location = new System.Drawing.Point(15, 233);
+            this.chkStartWithWindows.Location = new System.Drawing.Point(15, 254);
             this.chkStartWithWindows.Name = "chkStartWithWindows";
             this.chkStartWithWindows.Size = new System.Drawing.Size(153, 17);
             this.chkStartWithWindows.TabIndex = 11;
@@ -160,9 +164,20 @@
             -1,
             -1,
             0});
+            this.timerNumeric.Minimum = new decimal(new int[] {
+            5,
+            0,
+            0,
+            0});
             this.timerNumeric.Name = "timerNumeric";
+            this.timerNumeric.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.timerNumeric.Size = new System.Drawing.Size(242, 20);
             this.timerNumeric.TabIndex = 12;
+            this.timerNumeric.Value = new decimal(new int[] {
+            5,
+            0,
+            0,
+            0});
             // 
             // directoryTextBox
             // 
@@ -178,7 +193,7 @@
             // renameThreadFolderCheckBox
             // 
             this.renameThreadFolderCheckBox.AutoSize = true;
-            this.renameThreadFolderCheckBox.Location = new System.Drawing.Point(15, 90);
+            this.renameThreadFolderCheckBox.Location = new System.Drawing.Point(15, 111);
             this.renameThreadFolderCheckBox.Name = "renameThreadFolderCheckBox";
             this.renameThreadFolderCheckBox.Size = new System.Drawing.Size(201, 17);
             this.renameThreadFolderCheckBox.TabIndex = 14;
@@ -190,7 +205,7 @@
             // chkStartWithWindowsMinimized
             // 
             this.chkStartWithWindowsMinimized.AutoSize = true;
-            this.chkStartWithWindowsMinimized.Location = new System.Drawing.Point(25, 256);
+            this.chkStartWithWindowsMinimized.Location = new System.Drawing.Point(25, 277);
             this.chkStartWithWindowsMinimized.Name = "chkStartWithWindowsMinimized";
             this.chkStartWithWindowsMinimized.Size = new System.Drawing.Size(149, 17);
             this.chkStartWithWindowsMinimized.TabIndex = 20;
@@ -200,10 +215,20 @@
         ".");
             this.chkStartWithWindowsMinimized.UseVisualStyleBackColor = true;
             // 
+            // concurrentDownloadsLabel
+            // 
+            this.concurrentDownloadsLabel.AutoSize = true;
+            this.concurrentDownloadsLabel.Location = new System.Drawing.Point(12, 64);
+            this.concurrentDownloadsLabel.Name = "concurrentDownloadsLabel";
+            this.concurrentDownloadsLabel.Size = new System.Drawing.Size(115, 13);
+            this.concurrentDownloadsLabel.TabIndex = 22;
+            this.concurrentDownloadsLabel.Text = "Concurrent Downloads";
+            this.tooltip.SetToolTip(this.concurrentDownloadsLabel, resources.GetString("concurrentDownloadsLabel.ToolTip"));
+            // 
             // imageFilenameFormatLabel
             // 
             this.imageFilenameFormatLabel.AutoSize = true;
-            this.imageFilenameFormatLabel.Location = new System.Drawing.Point(12, 65);
+            this.imageFilenameFormatLabel.Location = new System.Drawing.Point(12, 87);
             this.imageFilenameFormatLabel.Name = "imageFilenameFormatLabel";
             this.imageFilenameFormatLabel.Size = new System.Drawing.Size(116, 13);
             this.imageFilenameFormatLabel.TabIndex = 15;
@@ -214,17 +239,16 @@
             this.imageFilenameFormatComboBox.DisplayMember = "EnumDescription";
             this.imageFilenameFormatComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.imageFilenameFormatComboBox.DropDownWidth = 300;
-            this.imageFilenameFormatComboBox.Location = new System.Drawing.Point(134, 62);
+            this.imageFilenameFormatComboBox.Location = new System.Drawing.Point(134, 84);
             this.imageFilenameFormatComboBox.Name = "imageFilenameFormatComboBox";
             this.imageFilenameFormatComboBox.Size = new System.Drawing.Size(185, 21);
             this.imageFilenameFormatComboBox.TabIndex = 16;
             this.imageFilenameFormatComboBox.ValueMember = "EnumValue";
-            this.imageFilenameFormatComboBox.DropDown += new System.EventHandler(this.imageFilenameFormatComboBox_DropDown);
             // 
             // addUrlFromClipboardWhenTextboxEmpty
             // 
             this.addUrlFromClipboardWhenTextboxEmpty.AutoSize = true;
-            this.addUrlFromClipboardWhenTextboxEmpty.Location = new System.Drawing.Point(15, 279);
+            this.addUrlFromClipboardWhenTextboxEmpty.Location = new System.Drawing.Point(15, 300);
             this.addUrlFromClipboardWhenTextboxEmpty.Name = "addUrlFromClipboardWhenTextboxEmpty";
             this.addUrlFromClipboardWhenTextboxEmpty.Size = new System.Drawing.Size(225, 17);
             this.addUrlFromClipboardWhenTextboxEmpty.TabIndex = 17;
@@ -234,7 +258,7 @@
             // threadFolderNameFormatLabel
             // 
             this.threadFolderNameFormatLabel.AutoSize = true;
-            this.threadFolderNameFormatLabel.Location = new System.Drawing.Point(22, 114);
+            this.threadFolderNameFormatLabel.Location = new System.Drawing.Point(22, 135);
             this.threadFolderNameFormatLabel.Name = "threadFolderNameFormatLabel";
             this.threadFolderNameFormatLabel.Size = new System.Drawing.Size(139, 13);
             this.threadFolderNameFormatLabel.TabIndex = 18;
@@ -245,7 +269,7 @@
             this.threadFolderNameFormatComboBox.DisplayMember = "EnumDescription";
             this.threadFolderNameFormatComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.threadFolderNameFormatComboBox.FormattingEnabled = true;
-            this.threadFolderNameFormatComboBox.Location = new System.Drawing.Point(167, 112);
+            this.threadFolderNameFormatComboBox.Location = new System.Drawing.Point(167, 133);
             this.threadFolderNameFormatComboBox.Name = "threadFolderNameFormatComboBox";
             this.threadFolderNameFormatComboBox.Size = new System.Drawing.Size(152, 21);
             this.threadFolderNameFormatComboBox.TabIndex = 19;
@@ -254,21 +278,45 @@
             // checkForUpdatesOnStartCheckBox
             // 
             this.checkForUpdatesOnStartCheckBox.AutoSize = true;
-            this.checkForUpdatesOnStartCheckBox.Location = new System.Drawing.Point(15, 302);
+            this.checkForUpdatesOnStartCheckBox.Location = new System.Drawing.Point(15, 323);
             this.checkForUpdatesOnStartCheckBox.Name = "checkForUpdatesOnStartCheckBox";
             this.checkForUpdatesOnStartCheckBox.Size = new System.Drawing.Size(206, 17);
             this.checkForUpdatesOnStartCheckBox.TabIndex = 21;
             this.checkForUpdatesOnStartCheckBox.Text = "Check for updates when GChan starts";
             this.checkForUpdatesOnStartCheckBox.UseVisualStyleBackColor = true;
             // 
-            // Settings
+            // concurrentDownloadsNumeric
             // 
-            this.AcceptButton = this.btnSSave;
+            this.concurrentDownloadsNumeric.Location = new System.Drawing.Point(134, 60);
+            this.concurrentDownloadsNumeric.Maximum = new decimal(new int[] {
+            1000,
+            0,
+            0,
+            0});
+            this.concurrentDownloadsNumeric.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.concurrentDownloadsNumeric.Name = "concurrentDownloadsNumeric";
+            this.concurrentDownloadsNumeric.Size = new System.Drawing.Size(185, 20);
+            this.concurrentDownloadsNumeric.TabIndex = 23;
+            this.concurrentDownloadsNumeric.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            // 
+            // SettingsForm
+            // 
+            this.AcceptButton = this.buttonSave;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.ClientSize = new System.Drawing.Size(325, 363);
+            this.ClientSize = new System.Drawing.Size(328, 392);
             this.ControlBox = false;
+            this.Controls.Add(this.concurrentDownloadsNumeric);
+            this.Controls.Add(this.concurrentDownloadsLabel);
             this.Controls.Add(this.checkForUpdatesOnStartCheckBox);
             this.Controls.Add(this.chkStartWithWindowsMinimized);
             this.Controls.Add(this.threadFolderNameFormatComboBox);
@@ -283,22 +331,23 @@
             this.Controls.Add(this.setPathButton);
             this.Controls.Add(this.chkHTML);
             this.Controls.Add(this.chkWarn);
-            this.Controls.Add(this.btnSSave);
+            this.Controls.Add(this.buttonSave);
             this.Controls.Add(this.chkTray);
-            this.Controls.Add(this.btnSCan);
+            this.Controls.Add(this.buttonCancel);
             this.Controls.Add(this.chkSave);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
-            this.Name = "Settings";
+            this.Name = "SettingsForm";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Settings";
             this.Shown += new System.EventHandler(this.Settings_Shown);
             ((System.ComponentModel.ISupportInitialize)(this.timerNumeric)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.concurrentDownloadsNumeric)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -306,8 +355,8 @@
 
         #endregion
 
-        private System.Windows.Forms.Button btnSSave;
-        private System.Windows.Forms.Button btnSCan;
+        private System.Windows.Forms.Button buttonSave;
+        private System.Windows.Forms.Button buttonCancel;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.CheckBox chkHTML;
@@ -327,5 +376,7 @@
         private System.Windows.Forms.ComboBox threadFolderNameFormatComboBox;
         private System.Windows.Forms.CheckBox chkStartWithWindowsMinimized;
         private System.Windows.Forms.CheckBox checkForUpdatesOnStartCheckBox;
+        private System.Windows.Forms.Label concurrentDownloadsLabel;
+        private System.Windows.Forms.NumericUpDown concurrentDownloadsNumeric;
     }
 }

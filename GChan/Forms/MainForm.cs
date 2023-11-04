@@ -161,29 +161,35 @@ namespace GChan.Forms
 
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            AboutBox tAbout = new AboutBox();
-            tAbout.ShowDialog();
-            tAbout.Dispose();
+            var about = new AboutBox();
+            about.ShowDialog();
+            about.Dispose();
         }
 
         private void changelogToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Changelog tvInf = new Changelog();
-            tvInf.ShowDialog();
-            tvInf.Dispose();
+            var changelog = new Changelog();
+            changelog.ShowDialog();
+            changelog.Dispose();
         }
 
         private void settingsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            SettingsForm tSettings = new SettingsForm();
-            tSettings.ShowDialog();
-            tSettings.Dispose();
-            if (Settings.Default.MinimizeToTray)
-                systemTrayNotifyIcon.Visible = true;
-            else
-                systemTrayNotifyIcon.Visible = false;
+            var settings = new SettingsForm();
+            settings.ShowDialog();
+            settings.Dispose();
 
+            // TODO: #41 - Cancellation currently not working, implement later.
+            //if (!Settings.Default.SaveHTML)
+            //{
+            //  Clear all downloads on main controller threadHtmlDownloader.
+            //  threadHtmlDownloader.Clear();
+            //}
+
+            systemTrayNotifyIcon.Visible = Settings.Default.MinimizeToTray;
             Controller.ScanTimerInterval = Settings.Default.ScanTimer;
+
+            Controller.SettingsUpdated();
         }
 
         private void openBoardFolderToolStripMenuItem_Click(object sender, EventArgs e)

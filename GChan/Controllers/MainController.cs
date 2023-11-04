@@ -17,6 +17,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using SysThread = System.Threading.Thread;
 using Thread = GChan.Trackers.Thread;
+using Timer = System.Windows.Forms.Timer;
 using Type = GChan.Trackers.Type;
 
 namespace GChan.Controllers
@@ -29,7 +30,10 @@ namespace GChan.Controllers
 
         private SysThread scanThread = null;
 
-        private readonly System.Windows.Forms.Timer scanTimer = new System.Windows.Forms.Timer();
+        private readonly DownloadManager<ImageLink> imageDownloader = new(true);
+        private readonly DownloadManager<Thread> threadHtmlDownloader = new(true); // Allow threads to be removed after download, we just re-add them. TODO: Maybe improve.
+
+        private readonly Timer scanTimer = new();
 
         private readonly ILogger logger = LogManager.GetCurrentClassLogger();
 
@@ -45,7 +49,7 @@ namespace GChan.Controllers
         { 
             get 
             {
-                StackFrame frame = new StackFrame(1, true);
+                var frame = new StackFrame(1, true);
                 logger.Trace($"threadLock acquired by: {frame.GetMethod().Name} at line {frame.GetFileLineNumber()} on thread {SysThread.CurrentThread.ManagedThreadId}.");
                 return threadLock;
             } 
@@ -57,7 +61,7 @@ namespace GChan.Controllers
         {
             get
             {
-                StackFrame frame = new StackFrame(1, true);
+                var frame = new StackFrame(1, true);
                 logger.Trace($"boardLock acquired by: {frame.GetMethod().Name} at line {frame.GetFileLineNumber()} on thread {SysThread.CurrentThread.ManagedThreadId}.");
                 return boardLock;
             }
@@ -323,14 +327,20 @@ namespace GChan.Controllers
                 }
             }
 
-            // Make a copy of the current threads and download them.
+            // Make a copy of the current threads and queue them for downloading them.
             var threads = Model.Threads.ToArray();
 
-            for (int i = 0; i < threads.Length; i++)
+            foreach (var thread in threads)
             {
-                if (threads[i].Scraping)
-                { 
-                    ThreadPool.QueueUserWorkItem(new WaitCallback(threads[i].Download));
+                if (thread.Scraping)
+                {
+                    var links = thread.GetImageLinks();
+                    imageDownloader.Queue(links);
+
+                    if (Settings.Default.SaveHTML)
+                    { 
+                        threadHtmlDownloader.Queue(thread);
+                    }
                 }
             }
         }
@@ -409,6 +419,11 @@ namespace GChan.Controllers
             }
         }
 
+        public void SettingsUpdated()
+        {
+            this.imageDownloader.ConcurrentCount = Settings.Default.MaximumConcurrentDownloads;
+        }
+
         /// <summary>
         /// Remove a thread from tracking.
         /// </summary>
@@ -422,9 +437,11 @@ namespace GChan.Controllers
         /// </remarks>
         public void RemoveThread(Thread thread, bool manualRemove = false)
         {
-            logger.Info($"Removing thread {thread}.");
-
+            logger.Trace($"Removing thread {thread}.");
             thread.Scraping = false;
+            // TODO: #41 - Cancellation currently not working, implement later.
+            //imageDownloader.Cancel(i => i.Thread == thread);
+            //threadHtmlDownloader.Cancel(thread);
 
             try
             {
@@ -496,6 +513,9 @@ namespace GChan.Controllers
             Form.systemTrayNotifyIcon.Dispose();
             scanTimer.Enabled = false;
             scanTimer.Dispose();
+
+            imageDownloader.Dispose();
+            threadHtmlDownloader.Dispose();
 
             if (Settings.Default.SaveListsOnClose)
             {

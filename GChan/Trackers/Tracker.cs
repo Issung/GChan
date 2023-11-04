@@ -1,4 +1,5 @@
 ﻿using NLog;
+using System.Net;
 
 namespace GChan.Trackers
 {
@@ -24,6 +25,15 @@ namespace GChan.Trackers
         /// Whether or not to keep scraping this tracker.
         /// </summary>
         public bool Scraping { get; set; } = true;
+
+        /// <summary>
+        /// Response status codes that indicate content is no longer available.
+        /// </summary>
+        public static readonly HttpStatusCode?[] GoneStatusCodes =
+        {
+            HttpStatusCode.NotFound,
+            HttpStatusCode.Gone,
+        };
 
         protected readonly ILogger logger = LogManager.GetCurrentClassLogger();
 

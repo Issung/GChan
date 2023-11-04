@@ -1,6 +1,4 @@
-﻿using GChan.Helpers;
-using Newtonsoft.Json.Linq;
-using System;
+﻿using System;
 using System.Linq;
 
 namespace GChan.Models
@@ -49,12 +47,6 @@ namespace GChan.Models
         {
             var array = ToArray();
             return string.Join(",", array);
-        }
-
-        public bool Contains(JToken token)
-        {
-            var hash = token.GetTimHashCode();
-            return base.Contains(hash);
         }
     }
 }

@@ -1,38 +1,32 @@
-﻿using GChan.Models;
-using GChan.Properties;
+﻿using GChan.Controllers;
+using GChan.Helpers;
+using GChan.Models;
 using System;
 using System.ComponentModel;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+using CancellationToken = System.Threading.CancellationToken;
 
 namespace GChan.Trackers
 {
-    public abstract class Thread : Tracker, INotifyPropertyChanged
+    /// <summary>
+    /// <see cref="IDownloadable{T}"/> implementation is for downloading the website HTML.<br/>
+    /// For downloading images <see cref="GetImageLinks"/> is used and results queued into a download manager.
+    /// </summary>
+    public abstract class Thread : Tracker, IDownloadable<Thread>, INotifyPropertyChanged
     {
         public const string NO_SUBJECT = "No Subject";
-
-        private int? fileCount = null;
-
-        protected string subject { get; private set; } = null;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
         public SavedIdsCollection SavedIds { get; set; } = new();
 
+        public bool ShouldDownload => !Gone;
+
         public string Subject
         {
-            get
-            {
-                if (subject == null)
-                    return NO_SUBJECT;
-                else
-                    return subject;
-            }
-
+            get => subject == null ? NO_SUBJECT : subject;
             set
             {
                 subject = value;
@@ -45,12 +39,6 @@ namespace GChan.Trackers
         /// </summary>
         public string ID { get; protected set; }
 
-        private readonly HttpStatusCode[] goneStatusCodes =
-        {
-            HttpStatusCode.NotFound,
-            HttpStatusCode.Gone,
-        };
-
         public int? FileCount
         {
             get => fileCount;
@@ -62,6 +50,9 @@ namespace GChan.Trackers
         }
 
         public bool Gone { get; protected set; } = false;
+
+        protected string subject { get; private set; } = null;
+        private int? fileCount = null;
 
         protected Thread(string url) : base(url)
         {
@@ -83,88 +74,93 @@ namespace GChan.Trackers
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        public void Download(object callback)
+        public void Download(
+            DownloadManager<Thread>.SuccessCallback successCallback,
+            DownloadManager<Thread>.FailureCallback failureCallback,
+            CancellationToken cancellationToken
+        )
+        {
+            if (!ShouldDownload)
+            {
+                successCallback(this);
+                return;
+            }
+
+            try
+            {
+                // TODO: Forward cancellation token and use in each implementation.
+                DownloadHtmlImpl();
+            }
+            catch (WebException webEx) when (webEx.IsGone(out var httpWebResponse))
+            {
+                Gone = true;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                failureCallback(this, true);
+            }
+
+            successCallback(this);
+        }
+
+        public abstract void DownloadHtmlImpl();
+
+        /// <summary>
+        /// Get imagelinks for this thread.
+        /// </summary>
+        public ImageLink[] GetImageLinks()
         {
             if (Gone)
             {
                 logger.Info($"Download(object callback) called on {this}, but will not download because {nameof(Gone)} is true.");
+                return Array.Empty<ImageLink>();
             }
-            else
-            {
-                DownloadImages();
 
-                if (!Gone && Settings.Default.SaveHTML)
-                {
-                    DownloadHTMLPage();
-                }
-            }
-        }
-
-        private void DownloadImages()
-        {
             try
             {
                 if (!Directory.Exists(SaveTo))
+                { 
                     Directory.CreateDirectory(SaveTo);
-
-                ImageLink[] imageLinks = GetImageLinks();
-
-                Parallel.ForEach(imageLinks, (link) =>
-                {
-                    if (Scraping)
-                    {
-                        if (!SavedIds.Contains(link.Tim))
-                        {
-#if DEBUG
-                            logger.Debug($"Downloading file {link} because its Tim is not in the saved set.");
-#endif
-                            Utils.DownloadToDir(link, SaveTo);
-                            SavedIds.Add(link.Tim);
-                        }
-                        else
-                        {
-#if DEBUG
-                            logger.Debug($"Skipping downloading file {link} because its Tim is in the saved set.");
-#endif
-                        }
-                    }
-                });
-            }
-            catch (WebException webEx)
-            {
-                var httpWebResponse = (HttpWebResponse)webEx.Response;
-                var statusCode = httpWebResponse.StatusCode;
-
-                if (webEx.Status == WebExceptionStatus.ProtocolError && goneStatusCodes.Contains(statusCode))
-                {
-                    logger.Info(webEx, $"404 occured in {this} {nameof(DownloadImages)}. 'Gone' set to true.");
-                    Gone = true;
                 }
-                else
-                {
-                    logger.Error(webEx);
-                }
+
+                var imageLinks = GetImageLinksImpl();
+                return imageLinks;
             }
-            catch (UnauthorizedAccessException uaex)
+            catch (WebException webEx) when (webEx.IsGone(out var httpWebResponse))
             {
-                MessageBox.Show(uaex.Message, $"No Permission to access folder {SaveTo}.");
-                logger.Error(uaex);
+                Gone = true;
             }
             catch (Exception ex)
             {
                 logger.Error(ex);
             }
+
+            return Array.Empty<ImageLink>();
         }
 
-        protected abstract ImageLink[] GetImageLinks(bool includeAlreadySaved = false);
-
-        protected abstract void DownloadHTMLPage();
+        /// <summary>
+        /// Implementation point for website specific image link retreival.
+        /// </summary>
+        protected abstract ImageLink[] GetImageLinksImpl(bool includeAlreadySaved = false);
 
         protected abstract string GetThreadSubject();
 
         public string GetURLWithSubject()
         {
             return (Url + ("/?subject=" + Utils.SanitiseSubject(Subject).Replace(' ', '_'))).Replace("\r", "");
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 3;
+                hash = hash * 13 + SiteName.GetHashCode();
+                hash = hash * 13 + BoardCode.GetHashCode();
+                hash = hash * 13 + ID.GetHashCode();
+                return hash;
+            }
         }
     }
 }

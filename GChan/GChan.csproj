@@ -27,7 +27,7 @@
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
     <ApplicationRevision>1</ApplicationRevision>
-    <ApplicationVersion>5.0.0.%2a</ApplicationVersion>
+    <ApplicationVersion>5.0.1.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>
@@ -80,6 +80,8 @@
     <Reference Include="System.Xml.Serialization" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controllers\Download.cs" />
+    <Compile Include="Controllers\DownloadManager.cs" />
     <Compile Include="Data\DataController.cs" />
     <Compile Include="Controllers\MainController.cs" />
     <Compile Include="Controllers\UpdateController.cs" />
@@ -93,7 +95,7 @@
     <Compile Include="Forms\AboutBox.Designer.cs">
       <DependentUpon>AboutBox.cs</DependentUpon>
     </Compile>
-    <Compile Include="EnumHelper.cs" />
+    <Compile Include="Helpers\EnumHelper.cs" />
     <Compile Include="Forms\MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -107,8 +109,9 @@
       <DependentUpon>UpdateInfoForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Helpers\EnumerableExtensions.cs" />
-    <Compile Include="Helpers\JTokenExtensions.cs" />
-    <Compile Include="ImageLink.cs" />
+    <Compile Include="Helpers\ExceptionExtensions.cs" />
+    <Compile Include="Trackers\IDownloadable.cs" />
+    <Compile Include="Trackers\ImageLink.cs" />
     <Compile Include="Controls\PreferencesDataGridView.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -133,7 +136,7 @@
     <Compile Include="Trackers\Thread.cs" />
     <Compile Include="Trackers\Sites\Thread_4Chan.cs" />
     <Compile Include="Trackers\Tracker.cs" />
-    <Compile Include="Utils.cs" />
+    <Compile Include="Helpers\Utils.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Controls\SortableBindingList\PropertyComparer.cs" />

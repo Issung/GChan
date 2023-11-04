@@ -125,4 +125,13 @@
 is enabled GChan will rename thread's folder using the desired format selected below.
 If the thread has a custom subject set then that is used instead.</value>
   </data>
+  <data name="concurrentDownloadsLabel.ToolTip" xml:space="preserve">
+    <value>The maximum amount of files allowed to be downloading at once.
+If set too high, sites (e.g. 4chan) can rate limit your requests.
+A high amount can effect your network (e.g. gaming latency).
+Each download uses a thread, which may effect system performance.</value>
+  </data>
+  <metadata name="$this.TrayHeight" type="System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <value>61</value>
+  </metadata>
 </root>
