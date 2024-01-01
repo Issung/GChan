@@ -2,6 +2,7 @@
 using GChan.Models;
 using GChan.Properties;
 using GChan.Trackers;
+using NLog;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -24,6 +25,8 @@ namespace GChan.Forms
         private int ThreadGridViewSelectedRowIndex => threadGridView?.CurrentCell?.RowIndex ?? -1;
 
         private int BoardsListBoxSelectedRowIndex { get { return boardsListBox.SelectedIndex; } set {boardsListBox.SelectedIndex = value;} }
+
+        private static readonly ILogger logger = LogManager.GetCurrentClassLogger();
 
         public MainForm()
         {
@@ -383,6 +386,11 @@ namespace GChan.Forms
         internal void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             e.Cancel = Controller.Closing();
+        }
+
+        private void threadGridView_DataError(object sender, DataGridViewDataErrorEventArgs e)
+        {
+            logger.Error(e.Exception, $"A data error occured on the threadGridView. RowIndex: {e.RowIndex}, ColumnIndex: {e.ColumnIndex}, Context: {e.Context}.");
         }
     }
 }

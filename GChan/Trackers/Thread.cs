@@ -26,7 +26,7 @@ namespace GChan.Trackers
 
         public string Subject
         {
-            get => subject == null ? NO_SUBJECT : subject;
+            get => subject ?? NO_SUBJECT;
             set
             {
                 subject = value;
@@ -39,13 +39,15 @@ namespace GChan.Trackers
         /// </summary>
         public string ID { get; protected set; }
 
+        public string FileCountDisplay => fileCount.ToString() ?? string.Empty;
+
         public int? FileCount
         {
             get => fileCount;
             set
             {
                 fileCount = value;
-                Program.mainForm.Invoke(new Action(() => { NotifyPropertyChanged(nameof(FileCount)); }));
+                Program.mainForm.Invoke(() => { NotifyPropertyChanged(nameof(FileCount)); });
             }
         }
 

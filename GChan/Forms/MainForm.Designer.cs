@@ -40,11 +40,6 @@
             this.listsTabControl = new System.Windows.Forms.TabControl();
             this.threadsTabPage = new System.Windows.Forms.TabPage();
             this.threadGridView = new GChan.Controls.PreferencesDataGridView();
-            this.subjectDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.SiteName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.boardCodeDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.iDDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.FileCount = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.threadsContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.openFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openInBrowserToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -69,6 +64,11 @@
             this.clearAllButton = new System.Windows.Forms.Button();
             this.clipboardButton = new System.Windows.Forms.Button();
             this.toolTip = new System.Windows.Forms.ToolTip(this.components);
+            this.subjectDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.SiteName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.boardCodeDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.iDDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.FileCount = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.menuStrip.SuspendLayout();
             this.listsTabControl.SuspendLayout();
             this.threadsTabPage.SuspendLayout();
@@ -255,48 +255,8 @@
             this.threadGridView.ShowRowErrors = false;
             this.threadGridView.Size = new System.Drawing.Size(552, 198);
             this.threadGridView.TabIndex = 1;
+            this.threadGridView.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.threadGridView_DataError);
             this.threadGridView.MouseDown += new System.Windows.Forms.MouseEventHandler(this.threadGridView_MouseDown);
-            // 
-            // subjectDataGridViewTextBoxColumn
-            // 
-            this.subjectDataGridViewTextBoxColumn.DataPropertyName = "Subject";
-            this.subjectDataGridViewTextBoxColumn.FillWeight = 25F;
-            this.subjectDataGridViewTextBoxColumn.HeaderText = "Subject";
-            this.subjectDataGridViewTextBoxColumn.Name = "subjectDataGridViewTextBoxColumn";
-            this.subjectDataGridViewTextBoxColumn.ReadOnly = true;
-            // 
-            // SiteName
-            // 
-            this.SiteName.DataPropertyName = "SiteName";
-            this.SiteName.FillWeight = 8F;
-            this.SiteName.HeaderText = "Site";
-            this.SiteName.Name = "SiteName";
-            this.SiteName.ReadOnly = true;
-            this.SiteName.ToolTipText = "The website the thread is hosted on.";
-            // 
-            // boardCodeDataGridViewTextBoxColumn
-            // 
-            this.boardCodeDataGridViewTextBoxColumn.DataPropertyName = "BoardCode";
-            this.boardCodeDataGridViewTextBoxColumn.FillWeight = 8.387236F;
-            this.boardCodeDataGridViewTextBoxColumn.HeaderText = "Board";
-            this.boardCodeDataGridViewTextBoxColumn.Name = "boardCodeDataGridViewTextBoxColumn";
-            this.boardCodeDataGridViewTextBoxColumn.ReadOnly = true;
-            // 
-            // iDDataGridViewTextBoxColumn
-            // 
-            this.iDDataGridViewTextBoxColumn.DataPropertyName = "ID";
-            this.iDDataGridViewTextBoxColumn.FillWeight = 8.387236F;
-            this.iDDataGridViewTextBoxColumn.HeaderText = "ID";
-            this.iDDataGridViewTextBoxColumn.Name = "iDDataGridViewTextBoxColumn";
-            this.iDDataGridViewTextBoxColumn.ReadOnly = true;
-            // 
-            // FileCount
-            // 
-            this.FileCount.DataPropertyName = "FileCount";
-            this.FileCount.FillWeight = 8.387236F;
-            this.FileCount.HeaderText = "File Count";
-            this.FileCount.Name = "FileCount";
-            this.FileCount.ReadOnly = true;
             // 
             // threadsContextMenu
             // 
@@ -509,6 +469,47 @@
             this.toolTip.SetToolTip(this.clipboardButton, "Copy Thread URLs to Clipboard (Delimited by commas)");
             this.clipboardButton.UseVisualStyleBackColor = true;
             this.clipboardButton.Click += new System.EventHandler(this.clipboardButton_Click);
+            // 
+            // subjectDataGridViewTextBoxColumn
+            // 
+            this.subjectDataGridViewTextBoxColumn.DataPropertyName = "Subject";
+            this.subjectDataGridViewTextBoxColumn.FillWeight = 25F;
+            this.subjectDataGridViewTextBoxColumn.HeaderText = "Subject";
+            this.subjectDataGridViewTextBoxColumn.Name = "subjectDataGridViewTextBoxColumn";
+            this.subjectDataGridViewTextBoxColumn.ReadOnly = true;
+            // 
+            // SiteName
+            // 
+            this.SiteName.DataPropertyName = "SiteName";
+            this.SiteName.FillWeight = 8F;
+            this.SiteName.HeaderText = "Site";
+            this.SiteName.Name = "SiteName";
+            this.SiteName.ReadOnly = true;
+            this.SiteName.ToolTipText = "The website the thread is hosted on.";
+            // 
+            // boardCodeDataGridViewTextBoxColumn
+            // 
+            this.boardCodeDataGridViewTextBoxColumn.DataPropertyName = "BoardCode";
+            this.boardCodeDataGridViewTextBoxColumn.FillWeight = 8.387236F;
+            this.boardCodeDataGridViewTextBoxColumn.HeaderText = "Board";
+            this.boardCodeDataGridViewTextBoxColumn.Name = "boardCodeDataGridViewTextBoxColumn";
+            this.boardCodeDataGridViewTextBoxColumn.ReadOnly = true;
+            // 
+            // iDDataGridViewTextBoxColumn
+            // 
+            this.iDDataGridViewTextBoxColumn.DataPropertyName = "ID";
+            this.iDDataGridViewTextBoxColumn.FillWeight = 8.387236F;
+            this.iDDataGridViewTextBoxColumn.HeaderText = "ID";
+            this.iDDataGridViewTextBoxColumn.Name = "iDDataGridViewTextBoxColumn";
+            this.iDDataGridViewTextBoxColumn.ReadOnly = true;
+            // 
+            // FileCount
+            // 
+            this.FileCount.DataPropertyName = "FileCountDisplay";
+            this.FileCount.FillWeight = 8.387236F;
+            this.FileCount.HeaderText = "File Count";
+            this.FileCount.Name = "FileCount";
+            this.FileCount.ReadOnly = true;
             // 
             // MainForm
             // 
