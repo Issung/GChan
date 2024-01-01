@@ -25,6 +25,7 @@
         private void InitializeComponent() {
             this.components = new System.ComponentModel.Container();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.menuStrip = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -64,11 +65,11 @@
             this.clearAllButton = new System.Windows.Forms.Button();
             this.clipboardButton = new System.Windows.Forms.Button();
             this.toolTip = new System.Windows.Forms.ToolTip(this.components);
-            this.subjectDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.SiteName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.boardCodeDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.iDDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.FileCount = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.threadGridSubjectColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.threadGridSiteColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.threadGridBoardCodeColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.threadGridIdColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.threadGridFileCountColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.menuStrip.SuspendLayout();
             this.listsTabControl.SuspendLayout();
             this.threadsTabPage.SuspendLayout();
@@ -225,6 +226,7 @@
             this.threadGridView.AllowUserToOrderColumns = true;
             this.threadGridView.AllowUserToResizeRows = false;
             dataGridViewCellStyle1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(245)))), ((int)(((byte)(245)))), ((int)(((byte)(245)))));
+            dataGridViewCellStyle1.NullValue = " ";
             this.threadGridView.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle1;
             this.threadGridView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
@@ -234,13 +236,22 @@
             this.threadGridView.BackgroundColor = System.Drawing.Color.White;
             this.threadGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.threadGridView.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.subjectDataGridViewTextBoxColumn,
-            this.SiteName,
-            this.boardCodeDataGridViewTextBoxColumn,
-            this.iDDataGridViewTextBoxColumn,
-            this.FileCount});
+            this.threadGridSubjectColumn,
+            this.threadGridSiteColumn,
+            this.threadGridBoardCodeColumn,
+            this.threadGridIdColumn,
+            this.threadGridFileCountColumn});
             this.threadGridView.ContextMenuStrip = this.threadsContextMenu;
             this.threadGridView.DataSource = this.threadsBindingSource;
+            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle2.NullValue = " ";
+            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.threadGridView.DefaultCellStyle = dataGridViewCellStyle2;
             this.threadGridView.GridColor = System.Drawing.SystemColors.Window;
             this.threadGridView.Location = new System.Drawing.Point(-1, -1);
             this.threadGridView.Margin = new System.Windows.Forms.Padding(0);
@@ -470,46 +481,46 @@
             this.clipboardButton.UseVisualStyleBackColor = true;
             this.clipboardButton.Click += new System.EventHandler(this.clipboardButton_Click);
             // 
-            // subjectDataGridViewTextBoxColumn
+            // threadGridSubjectColumn
             // 
-            this.subjectDataGridViewTextBoxColumn.DataPropertyName = "Subject";
-            this.subjectDataGridViewTextBoxColumn.FillWeight = 25F;
-            this.subjectDataGridViewTextBoxColumn.HeaderText = "Subject";
-            this.subjectDataGridViewTextBoxColumn.Name = "subjectDataGridViewTextBoxColumn";
-            this.subjectDataGridViewTextBoxColumn.ReadOnly = true;
+            this.threadGridSubjectColumn.DataPropertyName = "Subject";
+            this.threadGridSubjectColumn.FillWeight = 25F;
+            this.threadGridSubjectColumn.HeaderText = "Subject";
+            this.threadGridSubjectColumn.Name = "threadGridSubjectColumn";
+            this.threadGridSubjectColumn.ReadOnly = true;
             // 
-            // SiteName
+            // threadGridSiteColumn
             // 
-            this.SiteName.DataPropertyName = "SiteName";
-            this.SiteName.FillWeight = 8F;
-            this.SiteName.HeaderText = "Site";
-            this.SiteName.Name = "SiteName";
-            this.SiteName.ReadOnly = true;
-            this.SiteName.ToolTipText = "The website the thread is hosted on.";
+            this.threadGridSiteColumn.DataPropertyName = "SiteName";
+            this.threadGridSiteColumn.FillWeight = 8F;
+            this.threadGridSiteColumn.HeaderText = "Site";
+            this.threadGridSiteColumn.Name = "threadGridSiteColumn";
+            this.threadGridSiteColumn.ReadOnly = true;
+            this.threadGridSiteColumn.ToolTipText = "The website the thread is hosted on.";
             // 
-            // boardCodeDataGridViewTextBoxColumn
+            // threadGridBoardCodeColumn
             // 
-            this.boardCodeDataGridViewTextBoxColumn.DataPropertyName = "BoardCode";
-            this.boardCodeDataGridViewTextBoxColumn.FillWeight = 8.387236F;
-            this.boardCodeDataGridViewTextBoxColumn.HeaderText = "Board";
-            this.boardCodeDataGridViewTextBoxColumn.Name = "boardCodeDataGridViewTextBoxColumn";
-            this.boardCodeDataGridViewTextBoxColumn.ReadOnly = true;
+            this.threadGridBoardCodeColumn.DataPropertyName = "BoardCode";
+            this.threadGridBoardCodeColumn.FillWeight = 8.387236F;
+            this.threadGridBoardCodeColumn.HeaderText = "Board";
+            this.threadGridBoardCodeColumn.Name = "threadGridBoardCodeColumn";
+            this.threadGridBoardCodeColumn.ReadOnly = true;
             // 
-            // iDDataGridViewTextBoxColumn
+            // threadGridIdColumn
             // 
-            this.iDDataGridViewTextBoxColumn.DataPropertyName = "ID";
-            this.iDDataGridViewTextBoxColumn.FillWeight = 8.387236F;
-            this.iDDataGridViewTextBoxColumn.HeaderText = "ID";
-            this.iDDataGridViewTextBoxColumn.Name = "iDDataGridViewTextBoxColumn";
-            this.iDDataGridViewTextBoxColumn.ReadOnly = true;
+            this.threadGridIdColumn.DataPropertyName = "ID";
+            this.threadGridIdColumn.FillWeight = 8.387236F;
+            this.threadGridIdColumn.HeaderText = "ID";
+            this.threadGridIdColumn.Name = "threadGridIdColumn";
+            this.threadGridIdColumn.ReadOnly = true;
             // 
-            // FileCount
+            // threadGridFileCountColumn
             // 
-            this.FileCount.DataPropertyName = "FileCountDisplay";
-            this.FileCount.FillWeight = 8.387236F;
-            this.FileCount.HeaderText = "File Count";
-            this.FileCount.Name = "FileCount";
-            this.FileCount.ReadOnly = true;
+            this.threadGridFileCountColumn.DataPropertyName = "FileCount";
+            this.threadGridFileCountColumn.FillWeight = 8.387236F;
+            this.threadGridFileCountColumn.HeaderText = "File Count";
+            this.threadGridFileCountColumn.Name = "threadGridFileCountColumn";
+            this.threadGridFileCountColumn.ReadOnly = true;
             // 
             // MainForm
             // 
@@ -594,11 +605,11 @@
         internal System.Windows.Forms.TextBox urlTextBox;
         internal System.Windows.Forms.ToolStripMenuItem updateAvailableToolStripMenuItem;
         private System.Windows.Forms.DataGridViewTextBoxColumn fileCountDataGridViewTextBoxColumn;
-        private System.Windows.Forms.DataGridViewTextBoxColumn subjectDataGridViewTextBoxColumn;
-        private System.Windows.Forms.DataGridViewTextBoxColumn SiteName;
-        private System.Windows.Forms.DataGridViewTextBoxColumn boardCodeDataGridViewTextBoxColumn;
-        private System.Windows.Forms.DataGridViewTextBoxColumn iDDataGridViewTextBoxColumn;
-        private System.Windows.Forms.DataGridViewTextBoxColumn FileCount;
+        private System.Windows.Forms.DataGridViewTextBoxColumn threadGridSubjectColumn;
+        private System.Windows.Forms.DataGridViewTextBoxColumn threadGridSiteColumn;
+        private System.Windows.Forms.DataGridViewTextBoxColumn threadGridBoardCodeColumn;
+        private System.Windows.Forms.DataGridViewTextBoxColumn threadGridIdColumn;
+        private System.Windows.Forms.DataGridViewTextBoxColumn threadGridFileCountColumn;
     }
 }
 

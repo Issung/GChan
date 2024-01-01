@@ -39,15 +39,17 @@ namespace GChan.Trackers
         /// </summary>
         public string ID { get; protected set; }
 
-        public string FileCountDisplay => fileCount.ToString() ?? string.Empty;
-
         public int? FileCount
         {
             get => fileCount;
             set
             {
                 fileCount = value;
-                Program.mainForm.Invoke(() => { NotifyPropertyChanged(nameof(FileCount)); });
+
+                if (!Program.mainForm.Disposing && !Program.mainForm.IsDisposed)
+                { 
+                    Program.mainForm.Invoke(() => { NotifyPropertyChanged(nameof(FileCount)); });
+                }
             }
         }
 
