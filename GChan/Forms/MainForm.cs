@@ -260,10 +260,8 @@ namespace GChan.Forms
         }
 
         /// <summary>
-        /// Quality of life features.
-        ///     Left click allows user to deselect all rows by clicking white space. 
-        ///     Right click highlights the clicked row (otherwise it would not be done, just looks nicer with the context menu).
-        ///         But this is also 100% necessary because for the context menu click events we must know which row is selected.
+        /// Left click: Allows user to deselect all rows by clicking white space.
+        /// Right click: Select the clicked row (not normally done with right click). Is necessary for future events so we know which row to operate on (e.g. remove tracker).
         /// </summary>
         private void threadGridView_MouseDown(object sender, MouseEventArgs e)
         {
@@ -279,15 +277,11 @@ namespace GChan.Forms
             }
             else if (e.Button == MouseButtons.Right)
             {
-                if (e.Button == MouseButtons.Right)
+                if (hitInfo.RowIndex != -1)
                 {
-                    if (hitInfo.RowIndex != -1)
-                    {
-                        threadGridView.ClearSelection();
-                        threadGridView.Rows[hitInfo.RowIndex].Selected = true;
-                        threadGridView.CurrentCell = threadGridView.Rows[hitInfo.RowIndex].Cells[0];
-                        threadsContextMenu.Show(Cursor.Position);
-                    }
+                    threadGridView.ClearSelection();
+                    threadGridView.Rows[hitInfo.RowIndex].Selected = true;
+                    threadGridView.CurrentCell = threadGridView.Rows[hitInfo.RowIndex].Cells[0];
                 }
             }
         }
