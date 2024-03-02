@@ -112,6 +112,10 @@ namespace GChan
             return fileName;
         }
 
+        /// <summary>
+        /// Creates <paramref name="directory"/> if it doesn't already exist.
+        /// </summary>
+        /// <param name="directory">Directory path, exlcluding filename.</param>
         /// <returns>True if file was downloaded or already existed, false for error occured.</returns>
         public static bool DownloadFile(string url, string directory)
         {

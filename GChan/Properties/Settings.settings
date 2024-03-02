@@ -47,5 +47,8 @@
     <Setting Name="MaximumConcurrentDownloads" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">35</Value>
     </Setting>
+    <Setting Name="SaveThumbnails" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

@@ -144,9 +144,12 @@ namespace GChan.Trackers
 
             htmlPage = htmlPage.Replace("=\"/", "=\"https://8kun.top/");
 
-            for (int i = 0; i < thumbs.Count; i++)
+            if (Settings.Default.SaveThumbnails)
             {
-                Utils.DownloadFile(thumbs[i], SaveTo + "\\thumb");
+                for (int i = 0; i < thumbs.Count; i++)
+                {
+                    Utils.DownloadFile(thumbs[i], SaveTo + "\\thumb");
+                }
             }
 
             if (!string.IsNullOrWhiteSpace(htmlPage))

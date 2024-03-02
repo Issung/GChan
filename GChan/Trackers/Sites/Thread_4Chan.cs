@@ -140,10 +140,13 @@ namespace GChan.Trackers
 
             htmlPage = htmlPage.Replace("=\"//", "=\"http://");
 
-            //Save thumbs for files that need it
-            for (int i = 0; i < thumbs.Count; i++)
+            if (Settings.Default.SaveThumbnails)
             {
-                Utils.DownloadFile(thumbs[i], SaveTo + "\\thumb");
+                //Save thumbs for files that need it
+                for (int i = 0; i < thumbs.Count; i++)
+                {
+                    Utils.DownloadFile(thumbs[i], SaveTo + "\\thumb");
+                }
             }
 
             if (!string.IsNullOrWhiteSpace(htmlPage))
