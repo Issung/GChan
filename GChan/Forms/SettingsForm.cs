@@ -69,7 +69,8 @@ namespace GChan
             imageFilenameFormatComboBox.SelectedIndex = Settings.Default.ImageFilenameFormat;
             threadFolderNameFormatComboBox.SelectedIndex = Settings.Default.ThreadFolderNameFormat;
 
-            chkHTML.Checked = Settings.Default.SaveHTML;
+            chkSaveHtml.Checked = Settings.Default.SaveHtml;
+            chkSaveThumbnails.Checked = Settings.Default.SaveThumbnails;
             chkSave.Checked = Settings.Default.SaveListsOnClose;
             chkTray.Checked = Settings.Default.MinimizeToTray;
             chkWarn.Checked = Settings.Default.WarnOnClose;
@@ -91,17 +92,15 @@ namespace GChan
                 MessageBox.Show(reason, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
+
             if (timerNumeric.Value < 5)
             {
-                MessageBox.Show("Timer has to be higher than 5 seconds");
+                MessageBox.Show("Timer must be greater than 5 seconds.");
                 return;
             }
-            else
-            {
-                SaveSettings();
 
-                Close();
-            }
+            SaveSettings();
+            Close();
         }
 
         private void buttonCancel_Click(object sender, EventArgs e)
@@ -116,7 +115,8 @@ namespace GChan
             Settings.Default.MaximumConcurrentDownloads = (int)concurrentDownloadsNumeric.Value;
             Settings.Default.ImageFilenameFormat = (byte)imageFilenameFormatComboBox.SelectedIndex;
             Settings.Default.ThreadFolderNameFormat = (byte)threadFolderNameFormatComboBox.SelectedIndex;
-            Settings.Default.SaveHTML = chkHTML.Checked;
+            Settings.Default.SaveHtml = chkSaveHtml.Checked;
+            Settings.Default.SaveThumbnails = chkSaveThumbnails.Checked;
             Settings.Default.SaveListsOnClose = chkSave.Checked;
             Settings.Default.MinimizeToTray = chkTray.Checked;
             Settings.Default.WarnOnClose = chkWarn.Checked;
@@ -203,6 +203,11 @@ namespace GChan
         {
             threadFolderNameFormatLabel.Enabled = renameThreadFolderCheckBox.Checked;
             threadFolderNameFormatComboBox.Enabled = renameThreadFolderCheckBox.Checked;
+        }
+
+        private void chkHTML_CheckedChanged(object sender, EventArgs e)
+        {
+            chkSaveThumbnails.Enabled = chkSaveHtml.Checked;
         }
     }
 }
