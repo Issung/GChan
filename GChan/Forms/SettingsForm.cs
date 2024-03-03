@@ -69,7 +69,7 @@ namespace GChan
             imageFilenameFormatComboBox.SelectedIndex = Settings.Default.ImageFilenameFormat;
             threadFolderNameFormatComboBox.SelectedIndex = Settings.Default.ThreadFolderNameFormat;
 
-            chkHTML.Checked = Settings.Default.SaveHTML;
+            chkSaveHtml.Checked = Settings.Default.SaveHtml;
             chkSaveThumbnails.Checked = Settings.Default.SaveThumbnails;
             chkSave.Checked = Settings.Default.SaveListsOnClose;
             chkTray.Checked = Settings.Default.MinimizeToTray;
@@ -115,7 +115,7 @@ namespace GChan
             Settings.Default.MaximumConcurrentDownloads = (int)concurrentDownloadsNumeric.Value;
             Settings.Default.ImageFilenameFormat = (byte)imageFilenameFormatComboBox.SelectedIndex;
             Settings.Default.ThreadFolderNameFormat = (byte)threadFolderNameFormatComboBox.SelectedIndex;
-            Settings.Default.SaveHTML = chkHTML.Checked;
+            Settings.Default.SaveHtml = chkSaveHtml.Checked;
             Settings.Default.SaveThumbnails = chkSaveThumbnails.Checked;
             Settings.Default.SaveListsOnClose = chkSave.Checked;
             Settings.Default.MinimizeToTray = chkTray.Checked;
@@ -207,7 +207,7 @@ namespace GChan
 
         private void chkHTML_CheckedChanged(object sender, EventArgs e)
         {
-            chkSaveThumbnails.Enabled = chkHTML.Checked;
+            chkSaveThumbnails.Enabled = chkSaveHtml.Checked;
         }
     }
 }

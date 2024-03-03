@@ -29,7 +29,7 @@
             this.buttonCancel = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
-            this.chkHTML = new System.Windows.Forms.CheckBox();
+            this.chkSaveHtml = new System.Windows.Forms.CheckBox();
             this.chkSave = new System.Windows.Forms.CheckBox();
             this.chkTray = new System.Windows.Forms.CheckBox();
             this.chkWarn = new System.Windows.Forms.CheckBox();
@@ -96,15 +96,15 @@
             // 
             // chkHTML
             // 
-            this.chkHTML.AutoSize = true;
-            this.chkHTML.Location = new System.Drawing.Point(15, 162);
-            this.chkHTML.Name = "chkHTML";
-            this.chkHTML.Size = new System.Drawing.Size(144, 17);
-            this.chkHTML.TabIndex = 6;
-            this.chkHTML.Text = "Download Thread HTML";
-            this.tooltip.SetToolTip(this.chkHTML, "Routinely save the HTML of each scraped thread.");
-            this.chkHTML.UseVisualStyleBackColor = true;
-            this.chkHTML.CheckedChanged += new System.EventHandler(this.chkHTML_CheckedChanged);
+            this.chkSaveHtml.AutoSize = true;
+            this.chkSaveHtml.Location = new System.Drawing.Point(15, 162);
+            this.chkSaveHtml.Name = "chkHTML";
+            this.chkSaveHtml.Size = new System.Drawing.Size(144, 17);
+            this.chkSaveHtml.TabIndex = 6;
+            this.chkSaveHtml.Text = "Download Thread HTML";
+            this.tooltip.SetToolTip(this.chkSaveHtml, "Routinely save the HTML of each scraped thread.");
+            this.chkSaveHtml.UseVisualStyleBackColor = true;
+            this.chkSaveHtml.CheckedChanged += new System.EventHandler(this.chkHTML_CheckedChanged);
             // 
             // chkSave
             // 
@@ -345,7 +345,7 @@
             this.Controls.Add(this.timerNumeric);
             this.Controls.Add(this.chkStartWithWindows);
             this.Controls.Add(this.setPathButton);
-            this.Controls.Add(this.chkHTML);
+            this.Controls.Add(this.chkSaveHtml);
             this.Controls.Add(this.chkWarn);
             this.Controls.Add(this.buttonSave);
             this.Controls.Add(this.chkTray);
@@ -375,7 +375,7 @@
         private System.Windows.Forms.Button buttonCancel;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.CheckBox chkHTML;
+        private System.Windows.Forms.CheckBox chkSaveHtml;
         private System.Windows.Forms.CheckBox chkSave;
         private System.Windows.Forms.CheckBox chkTray;
         private System.Windows.Forms.CheckBox chkWarn;

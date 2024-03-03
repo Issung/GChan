@@ -8,7 +8,7 @@
     <Setting Name="ScanTimer" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">60000</Value>
     </Setting>
-    <Setting Name="SaveHTML" Type="System.Boolean" Scope="User">
+    <Setting Name="SaveHtml" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="IsFirstStart" Type="System.Boolean" Scope="User">

@@ -337,7 +337,7 @@ namespace GChan.Controllers
                     var links = thread.GetImageLinks();
                     imageDownloader.Queue(links);
 
-                    if (Settings.Default.SaveHTML)
+                    if (Settings.Default.SaveHtml)
                     { 
                         threadHtmlDownloader.Queue(thread);
                     }
