@@ -1,4 +1,5 @@
 ﻿using GChan.Trackers;
+using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
 using System.IO;
@@ -14,7 +15,7 @@ namespace GChan.Data
 
         private const string DATABASE_FILENAME = "trackers.db";
         private static readonly string DATABASE_FOLDERNAME = "data";
-        private static readonly string DATABASE_PATH = DATABASE_FOLDERNAME + "/" + DATABASE_FILENAME;
+        private static readonly string DATABASE_PATH = Path.Combine(AppContext.BaseDirectory, DATABASE_FOLDERNAME, DATABASE_FILENAME);
         private static readonly string DATABASE_CONNECTION_STRING = "DataSource=" + DATABASE_PATH;
 
         /// <summary>
