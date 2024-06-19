@@ -118,7 +118,10 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <metadata name="tooltip.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>17, 17</value>
+    <value>22, 20</value>
+  </metadata>
+  <metadata name="tooltip.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>22, 20</value>
   </metadata>
   <data name="renameThreadFolderCheckBox.ToolTip" xml:space="preserve">
     <value>When a thread is automatically or manually removed from GChan's tracking list, if this option 
@@ -130,6 +133,9 @@ If the thread has a custom subject set then that is used instead.</value>
 If set too high, sites (e.g. 4chan) can rate limit your requests.
 A high amount can effect your network (e.g. gaming latency).
 Each download uses a thread, which may effect system performance.</value>
+  </data>
+  <data name="userAgentLabel.ToolTip" xml:space="preserve">
+    <value>User-Agent headers are sent with every scraping request. The default value should be fine in most cases but if GChan is getting blocked you may wish to change it to the User-Agent header your browser uses. You should only need to mess with this if you know what you are doing.</value>
   </data>
   <metadata name="$this.TrayHeight" type="System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>61</value>

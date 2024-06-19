@@ -46,7 +46,7 @@ namespace GChan.Trackers
             string Fpath0Url(string boardcode, string tim, string ext) => $"https://8kun.top/{boardcode}/src/{tim}{ext}";
             string Fpath1Url(string tim, string ext) => $"https://8kun.top/file_store/{tim}{ext}";
 
-            using var webClient = new WebClient();
+            using var webClient = Utils.CreateWebClient();
             var jsonUrl = $"http://8kun.top/{BoardCode}/res/{ID}.json"; // Thread JSON url
             var json = webClient.DownloadString(jsonUrl);
             var jObject = JObject.Parse(json);
@@ -88,9 +88,9 @@ namespace GChan.Trackers
             var htmlPage = "";
 
             JObject jObject;
-            using (var web = new WebClient())
+            using (var web = Utils.CreateWebClient())
             {
-                htmlPage = new WebClient().DownloadString(Url);
+                htmlPage = web.DownloadString(Url);
 
                 var jsonUrl = Url.Replace(".html", ".json");
 
@@ -170,7 +170,7 @@ namespace GChan.Trackers
                 const string SUB_ENDER = "\",";
                 const string ITEM_ENDER = "},";
 
-                using (var web = new WebClient())
+                using (var web = Utils.CreateWebClient())
                 {
                     string rawjson = web.DownloadString(JSONUrl);
                     int subStartIndex = rawjson.IndexOf(SUB_HEADER);

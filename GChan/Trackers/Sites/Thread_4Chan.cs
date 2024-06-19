@@ -45,7 +45,7 @@ namespace GChan.Trackers
             var baseUrl = $"http://i.4cdn.org/{BoardCode}/";
             var jsonUrl = $"http://a.4cdn.org/{BoardCode}/thread/{ID}.json";
 
-            using var web = new WebClient();
+            using var web = Utils.CreateWebClient();
             var json = web.DownloadString(jsonUrl);
             var jObject = JObject.Parse(json);
 
@@ -79,11 +79,8 @@ namespace GChan.Trackers
 
             JObject jObject;
 
-            using (var web = new WebClient())
+            using (var web = Utils.CreateWebClient())
             {
-                //Add a UserAgent to prevent 403
-                web.Headers["User-Agent"] = "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0";
-
                 htmlPage = web.DownloadString(Url);
 
                 //Prevent the html from being destroyed by the anti adblock script
@@ -166,7 +163,7 @@ namespace GChan.Trackers
                 const string SUB_HEADER = "\"sub\":\"";
                 const string SUB_ENDER = "\",";
 
-                using (var web = new WebClient())
+                using (var web = Utils.CreateWebClient())
                 {
                     string rawjson = web.DownloadString(JSONUrl);
                     int subStartIndex = rawjson.IndexOf(SUB_HEADER);

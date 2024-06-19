@@ -81,7 +81,7 @@ namespace GChan
             {
                 // TODO: Asyncify/Taskify.
                 // TODO: Use cancellation token.
-                using var webClient = new WebClient();
+                using var webClient = Utils.CreateWebClient();
                 webClient.DownloadFile(Url, destFilepath);
                 Thread.SavedIds.Add(Tim);
                 successCallback(this);

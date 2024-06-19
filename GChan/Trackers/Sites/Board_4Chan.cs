@@ -38,7 +38,7 @@ namespace GChan.Trackers
             try
             {
                 JArray jArray;
-                using (var web = new WebClient())
+                using (var web = Utils.CreateWebClient())
                 {
                     string json = web.DownloadString(URL);
                     jArray = JArray.Parse(json);

@@ -40,6 +40,16 @@ namespace GChan
         }
 
         /// <summary>
+        /// Build a WebClient for one-time use, should be disposed of once done.
+        /// </summary>
+        public static WebClient CreateWebClient()
+        {
+            var client = new WebClient();
+            client.Headers["User-Agent"] = Settings.Default.UserAgent;
+            return client;
+        }
+
+        /// <summary>
         /// Create a new Tracker (Thread or Board).
         /// </summary>
         public static Tracker CreateNewTracker(LoadedData data)
@@ -131,7 +141,7 @@ namespace GChan
             {
                 if (!File.Exists(fullpath))
                 {
-                    using var client = new WebClient();
+                    using var client = CreateWebClient();
                     client.DownloadFile(url, fullpath);
                 }
 
@@ -164,7 +174,7 @@ namespace GChan
 
             try
             {
-                using var webClient = new WebClient();
+                using var webClient = CreateWebClient();
                 webClient.DownloadFile(link.Url, destFilepath);
 
                 // TODO: Figure out how to make the async downloading work properly.

@@ -57,9 +57,13 @@ namespace GChan
                 .ToList();
         }
 
+        /// <summary>
+        /// Load settings into controls.
+        /// </summary>
         private void Settings_Shown(object sender, EventArgs e)
         {
-            // Load settings into controls
+            userAgentTextBox.Text = Settings.Default.UserAgent;
+
             directory = Settings.Default.SavePath;
             directoryTextBox.Text = directory;
 
@@ -110,6 +114,7 @@ namespace GChan
 
         private void SaveSettings()
         {
+            Settings.Default.UserAgent = userAgentTextBox.Text;
             Settings.Default.SavePath = directory;
             Settings.Default.ScanTimer = (int)timerNumeric.Value * 1000;
             Settings.Default.MaximumConcurrentDownloads = (int)concurrentDownloadsNumeric.Value;

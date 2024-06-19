@@ -49,6 +49,8 @@
             this.threadFolderNameFormatComboBox = new System.Windows.Forms.ComboBox();
             this.checkForUpdatesOnStartCheckBox = new System.Windows.Forms.CheckBox();
             this.concurrentDownloadsNumeric = new System.Windows.Forms.NumericUpDown();
+            this.userAgentLabel = new System.Windows.Forms.Label();
+            this.userAgentTextBox = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.timerNumeric)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.concurrentDownloadsNumeric)).BeginInit();
             this.SuspendLayout();
@@ -56,7 +58,7 @@
             // buttonSave
             // 
             this.buttonSave.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
-            this.buttonSave.Location = new System.Drawing.Point(69, 384);
+            this.buttonSave.Location = new System.Drawing.Point(73, 407);
             this.buttonSave.Name = "buttonSave";
             this.buttonSave.Size = new System.Drawing.Size(92, 23);
             this.buttonSave.TabIndex = 0;
@@ -67,7 +69,7 @@
             // buttonCancel
             // 
             this.buttonCancel.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
-            this.buttonCancel.Location = new System.Drawing.Point(167, 384);
+            this.buttonCancel.Location = new System.Drawing.Point(171, 407);
             this.buttonCancel.Name = "buttonCancel";
             this.buttonCancel.Size = new System.Drawing.Size(94, 23);
             this.buttonCancel.TabIndex = 1;
@@ -78,27 +80,28 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(12, 12);
+            this.label1.Location = new System.Drawing.Point(8, 47);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(29, 13);
             this.label1.TabIndex = 2;
             this.label1.Text = "Path";
+            this.tooltip.SetToolTip(this.label1, "The path for scraped images, videos & HTML to be downloaded into.");
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(12, 38);
+            this.label2.Location = new System.Drawing.Point(8, 73);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(59, 13);
             this.label2.TabIndex = 3;
             this.label2.Text = "Timer (sec)";
             this.tooltip.SetToolTip(this.label2, "How often to check threads/boards for updates.");
             // 
-            // chkHTML
+            // chkSaveHtml
             // 
             this.chkSaveHtml.AutoSize = true;
-            this.chkSaveHtml.Location = new System.Drawing.Point(15, 162);
-            this.chkSaveHtml.Name = "chkHTML";
+            this.chkSaveHtml.Location = new System.Drawing.Point(11, 197);
+            this.chkSaveHtml.Name = "chkSaveHtml";
             this.chkSaveHtml.Size = new System.Drawing.Size(144, 17);
             this.chkSaveHtml.TabIndex = 6;
             this.chkSaveHtml.Text = "Download Thread HTML";
@@ -109,7 +112,7 @@
             // chkSave
             // 
             this.chkSave.AutoSize = true;
-            this.chkSave.Location = new System.Drawing.Point(15, 226);
+            this.chkSave.Location = new System.Drawing.Point(11, 261);
             this.chkSave.Name = "chkSave";
             this.chkSave.Size = new System.Drawing.Size(115, 17);
             this.chkSave.TabIndex = 7;
@@ -119,7 +122,7 @@
             // chkTray
             // 
             this.chkTray.AutoSize = true;
-            this.chkTray.Location = new System.Drawing.Point(15, 249);
+            this.chkTray.Location = new System.Drawing.Point(11, 284);
             this.chkTray.Name = "chkTray";
             this.chkTray.Size = new System.Drawing.Size(102, 17);
             this.chkTray.TabIndex = 8;
@@ -131,7 +134,7 @@
             // chkWarn
             // 
             this.chkWarn.AutoSize = true;
-            this.chkWarn.Location = new System.Drawing.Point(15, 204);
+            this.chkWarn.Location = new System.Drawing.Point(11, 239);
             this.chkWarn.Name = "chkWarn";
             this.chkWarn.Size = new System.Drawing.Size(116, 17);
             this.chkWarn.TabIndex = 9;
@@ -140,7 +143,7 @@
             // 
             // setPathButton
             // 
-            this.setPathButton.Location = new System.Drawing.Point(295, 7);
+            this.setPathButton.Location = new System.Drawing.Point(291, 42);
             this.setPathButton.Name = "setPathButton";
             this.setPathButton.Size = new System.Drawing.Size(25, 22);
             this.setPathButton.TabIndex = 10;
@@ -151,7 +154,7 @@
             // chkStartWithWindows
             // 
             this.chkStartWithWindows.AutoSize = true;
-            this.chkStartWithWindows.Location = new System.Drawing.Point(15, 273);
+            this.chkStartWithWindows.Location = new System.Drawing.Point(11, 308);
             this.chkStartWithWindows.Name = "chkStartWithWindows";
             this.chkStartWithWindows.Size = new System.Drawing.Size(153, 17);
             this.chkStartWithWindows.TabIndex = 11;
@@ -161,7 +164,7 @@
             // 
             // timerNumeric
             // 
-            this.timerNumeric.Location = new System.Drawing.Point(77, 35);
+            this.timerNumeric.Location = new System.Drawing.Point(73, 70);
             this.timerNumeric.Maximum = new decimal(new int[] {
             -1,
             -1,
@@ -184,7 +187,7 @@
             // 
             // directoryTextBox
             // 
-            this.directoryTextBox.Location = new System.Drawing.Point(77, 9);
+            this.directoryTextBox.Location = new System.Drawing.Point(73, 44);
             this.directoryTextBox.Name = "directoryTextBox";
             this.directoryTextBox.ReadOnly = true;
             this.directoryTextBox.Size = new System.Drawing.Size(211, 20);
@@ -196,7 +199,7 @@
             // renameThreadFolderCheckBox
             // 
             this.renameThreadFolderCheckBox.AutoSize = true;
-            this.renameThreadFolderCheckBox.Location = new System.Drawing.Point(15, 111);
+            this.renameThreadFolderCheckBox.Location = new System.Drawing.Point(11, 146);
             this.renameThreadFolderCheckBox.Name = "renameThreadFolderCheckBox";
             this.renameThreadFolderCheckBox.Size = new System.Drawing.Size(201, 17);
             this.renameThreadFolderCheckBox.TabIndex = 14;
@@ -208,7 +211,7 @@
             // chkStartWithWindowsMinimized
             // 
             this.chkStartWithWindowsMinimized.AutoSize = true;
-            this.chkStartWithWindowsMinimized.Location = new System.Drawing.Point(25, 296);
+            this.chkStartWithWindowsMinimized.Location = new System.Drawing.Point(21, 331);
             this.chkStartWithWindowsMinimized.Name = "chkStartWithWindowsMinimized";
             this.chkStartWithWindowsMinimized.Size = new System.Drawing.Size(149, 17);
             this.chkStartWithWindowsMinimized.TabIndex = 20;
@@ -221,7 +224,7 @@
             // concurrentDownloadsLabel
             // 
             this.concurrentDownloadsLabel.AutoSize = true;
-            this.concurrentDownloadsLabel.Location = new System.Drawing.Point(12, 64);
+            this.concurrentDownloadsLabel.Location = new System.Drawing.Point(8, 99);
             this.concurrentDownloadsLabel.Name = "concurrentDownloadsLabel";
             this.concurrentDownloadsLabel.Size = new System.Drawing.Size(115, 13);
             this.concurrentDownloadsLabel.TabIndex = 22;
@@ -231,7 +234,7 @@
             // chkSaveThumbnails
             // 
             this.chkSaveThumbnails.AutoSize = true;
-            this.chkSaveThumbnails.Location = new System.Drawing.Point(25, 183);
+            this.chkSaveThumbnails.Location = new System.Drawing.Point(21, 218);
             this.chkSaveThumbnails.Name = "chkSaveThumbnails";
             this.chkSaveThumbnails.Size = new System.Drawing.Size(131, 17);
             this.chkSaveThumbnails.TabIndex = 24;
@@ -243,7 +246,7 @@
             // imageFilenameFormatLabel
             // 
             this.imageFilenameFormatLabel.AutoSize = true;
-            this.imageFilenameFormatLabel.Location = new System.Drawing.Point(12, 87);
+            this.imageFilenameFormatLabel.Location = new System.Drawing.Point(8, 122);
             this.imageFilenameFormatLabel.Name = "imageFilenameFormatLabel";
             this.imageFilenameFormatLabel.Size = new System.Drawing.Size(116, 13);
             this.imageFilenameFormatLabel.TabIndex = 15;
@@ -254,7 +257,7 @@
             this.imageFilenameFormatComboBox.DisplayMember = "EnumDescription";
             this.imageFilenameFormatComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.imageFilenameFormatComboBox.DropDownWidth = 300;
-            this.imageFilenameFormatComboBox.Location = new System.Drawing.Point(134, 84);
+            this.imageFilenameFormatComboBox.Location = new System.Drawing.Point(130, 119);
             this.imageFilenameFormatComboBox.Name = "imageFilenameFormatComboBox";
             this.imageFilenameFormatComboBox.Size = new System.Drawing.Size(185, 21);
             this.imageFilenameFormatComboBox.TabIndex = 16;
@@ -263,7 +266,7 @@
             // addUrlFromClipboardWhenTextboxEmpty
             // 
             this.addUrlFromClipboardWhenTextboxEmpty.AutoSize = true;
-            this.addUrlFromClipboardWhenTextboxEmpty.Location = new System.Drawing.Point(15, 319);
+            this.addUrlFromClipboardWhenTextboxEmpty.Location = new System.Drawing.Point(11, 354);
             this.addUrlFromClipboardWhenTextboxEmpty.Name = "addUrlFromClipboardWhenTextboxEmpty";
             this.addUrlFromClipboardWhenTextboxEmpty.Size = new System.Drawing.Size(225, 17);
             this.addUrlFromClipboardWhenTextboxEmpty.TabIndex = 17;
@@ -273,7 +276,7 @@
             // threadFolderNameFormatLabel
             // 
             this.threadFolderNameFormatLabel.AutoSize = true;
-            this.threadFolderNameFormatLabel.Location = new System.Drawing.Point(22, 135);
+            this.threadFolderNameFormatLabel.Location = new System.Drawing.Point(18, 170);
             this.threadFolderNameFormatLabel.Name = "threadFolderNameFormatLabel";
             this.threadFolderNameFormatLabel.Size = new System.Drawing.Size(139, 13);
             this.threadFolderNameFormatLabel.TabIndex = 18;
@@ -284,7 +287,7 @@
             this.threadFolderNameFormatComboBox.DisplayMember = "EnumDescription";
             this.threadFolderNameFormatComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.threadFolderNameFormatComboBox.FormattingEnabled = true;
-            this.threadFolderNameFormatComboBox.Location = new System.Drawing.Point(167, 133);
+            this.threadFolderNameFormatComboBox.Location = new System.Drawing.Point(163, 168);
             this.threadFolderNameFormatComboBox.Name = "threadFolderNameFormatComboBox";
             this.threadFolderNameFormatComboBox.Size = new System.Drawing.Size(152, 21);
             this.threadFolderNameFormatComboBox.TabIndex = 19;
@@ -293,7 +296,7 @@
             // checkForUpdatesOnStartCheckBox
             // 
             this.checkForUpdatesOnStartCheckBox.AutoSize = true;
-            this.checkForUpdatesOnStartCheckBox.Location = new System.Drawing.Point(15, 342);
+            this.checkForUpdatesOnStartCheckBox.Location = new System.Drawing.Point(11, 377);
             this.checkForUpdatesOnStartCheckBox.Name = "checkForUpdatesOnStartCheckBox";
             this.checkForUpdatesOnStartCheckBox.Size = new System.Drawing.Size(206, 17);
             this.checkForUpdatesOnStartCheckBox.TabIndex = 21;
@@ -302,7 +305,7 @@
             // 
             // concurrentDownloadsNumeric
             // 
-            this.concurrentDownloadsNumeric.Location = new System.Drawing.Point(134, 60);
+            this.concurrentDownloadsNumeric.Location = new System.Drawing.Point(130, 95);
             this.concurrentDownloadsNumeric.Maximum = new decimal(new int[] {
             1000,
             0,
@@ -322,14 +325,33 @@
             0,
             0});
             // 
+            // userAgentLabel
+            // 
+            this.userAgentLabel.AutoSize = true;
+            this.userAgentLabel.Location = new System.Drawing.Point(8, 20);
+            this.userAgentLabel.Name = "userAgentLabel";
+            this.userAgentLabel.Size = new System.Drawing.Size(60, 13);
+            this.userAgentLabel.TabIndex = 25;
+            this.userAgentLabel.Text = "User-Agent";
+            this.tooltip.SetToolTip(this.userAgentLabel, resources.GetString("userAgentLabel.ToolTip"));
+            // 
+            // userAgentTextBox
+            // 
+            this.userAgentTextBox.Location = new System.Drawing.Point(73, 16);
+            this.userAgentTextBox.Name = "userAgentTextBox";
+            this.userAgentTextBox.Size = new System.Drawing.Size(241, 20);
+            this.userAgentTextBox.TabIndex = 26;
+            // 
             // SettingsForm
             // 
             this.AcceptButton = this.buttonSave;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.ClientSize = new System.Drawing.Size(320, 411);
+            this.ClientSize = new System.Drawing.Size(324, 442);
             this.ControlBox = false;
+            this.Controls.Add(this.userAgentTextBox);
+            this.Controls.Add(this.userAgentLabel);
             this.Controls.Add(this.chkSaveThumbnails);
             this.Controls.Add(this.concurrentDownloadsNumeric);
             this.Controls.Add(this.concurrentDownloadsLabel);
@@ -395,5 +417,7 @@
         private System.Windows.Forms.Label concurrentDownloadsLabel;
         private System.Windows.Forms.NumericUpDown concurrentDownloadsNumeric;
         private System.Windows.Forms.CheckBox chkSaveThumbnails;
+        private System.Windows.Forms.Label userAgentLabel;
+        private System.Windows.Forms.TextBox userAgentTextBox;
     }
 }
