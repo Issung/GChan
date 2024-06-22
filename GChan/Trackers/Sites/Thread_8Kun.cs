@@ -148,7 +148,7 @@ namespace GChan.Trackers
             {
                 for (int i = 0; i < thumbs.Count; i++)
                 {
-                    Utils.DownloadFile(thumbs[i], SaveTo + "\\thumb");
+                    Utils.DownloadFileIfDoesntExist(thumbs[i], SaveTo + "\\thumb");
                 }
             }
 

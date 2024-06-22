@@ -72,20 +72,17 @@ namespace GChan.Trackers
 
         public override void DownloadHtmlImpl()
         {
-            var thumbs = new List<string>();
-            var htmlPage = "";
-            var baseUrl = "//i.4cdn.org/" + BoardCode + "/";
-            var jsonUrl = "http://a.4cdn.org/" + BoardCode + "/thread/" + ID + ".json";
-
+            var thumbUrls = new List<string>();
+            var baseUrl = $"//i.4cdn.org/{BoardCode}/";
+            var jsonUrl = $"http://a.4cdn.org/{BoardCode}/thread/{ID}.json";
+            var htmlPage = string.Empty;
             JObject jObject;
 
             using (var web = Utils.CreateWebClient())
             {
                 htmlPage = web.DownloadString(Url);
-
-                //Prevent the html from being destroyed by the anti adblock script
                 htmlPage = htmlPage.Replace("f=\"to\"", "f=\"penis\"");
-                    
+
                 var json = web.DownloadString(jsonUrl);
                 jObject = JObject.Parse(json);
             }
@@ -94,63 +91,67 @@ namespace GChan.Trackers
                 .SelectTokens("posts[*]")
                 .Where(x => x["ext"] != null)
                 .ToList();
-                
+
             foreach (var post in posts)
             {
-                var old = baseUrl + post["tim"] + post["ext"];
-                var replacement = post["tim"] + (string) post["ext"];
-                htmlPage = htmlPage.Replace(old, replacement);
+                var tim = post["tim"].ToString();
+                var ext = post["ext"].ToString();
+                var oldUrl = baseUrl + tim + ext;
+                var newFilename = Path.GetFileNameWithoutExtension(
+                    new ImageLink(
+                        post["tim"].Value<long>(),
+                        oldUrl,
+                        post["filename"].ToString(),
+                        post["no"].Value<long>(),
+                        this
+                    ).GenerateFilename((ImageFileNameFormat)Settings.Default.ImageFilenameFormat)
+                );
 
-                //get the actual filename saved
-                var filename = Path
-                    .GetFileNameWithoutExtension(
-                        new ImageLink(post["tim"].Value<long>(),
-                            old,
-                            post["filename"].ToString(),
-                            post["no"].Value<long>(),
-                            this
-                        )
-                    .GenerateFilename((ImageFileNameFormat)Settings.Default.ImageFilenameFormat));
+                htmlPage = htmlPage.Replace(oldUrl, tim + ext);
 
-                //Save thumbs for files that need it
-                if (replacement.Split('.')[1] == "webm")
+                if (ext == ".webm")
                 {
-                    old = "//t.4cdn.org/" + BoardCode + "/" + post["tim"] + "s.jpg";
-                    thumbs.Add("http:" + old);
+                    var thumbUrl = $"//t.4cdn.org/{BoardCode}/{tim}s.jpg";
+                    thumbUrls.Add($"http:{thumbUrl}");
 
-                    htmlPage = htmlPage.Replace(post["tim"].ToString(), filename);
-                    htmlPage = htmlPage.Replace("//i.4cdn.org/" + BoardCode + "/" + filename, "thumb/" + post["tim"]);
+                    htmlPage = htmlPage.Replace(tim, newFilename);
+                    htmlPage = htmlPage.Replace($"{baseUrl}{newFilename}", $"thumb/{tim}");
                 }
                 else
                 {
-                    var thumbName = replacement.Split('.')[0] + "s";
-                    htmlPage = htmlPage.Replace(thumbName + ".jpg", replacement.Split('.')[0] + "." + replacement.Split('.')[1]);
-                    htmlPage = htmlPage.Replace("/" + thumbName, thumbName);
+                    var thumbName = tim + "s";
+                    htmlPage = htmlPage.Replace($"{thumbName}.jpg", tim + ext);
+                    htmlPage = htmlPage.Replace($"/{thumbName}", thumbName);
 
-                    htmlPage = htmlPage.Replace("//i.4cdn.org/" + BoardCode + "/" + post["tim"], post["tim"].ToString());
-                    htmlPage = htmlPage.Replace(post["tim"].ToString(), filename); //easy fix for images
+                    htmlPage = htmlPage.Replace($"{baseUrl}{tim}", tim);
+                    htmlPage = htmlPage.Replace(tim, newFilename);
                 }
 
-                htmlPage = htmlPage.Replace("//is2.4chan.org/" + BoardCode + "/" + post["tim"], post["tim"].ToString()); //bandaid fix for is2 urls
-                htmlPage = htmlPage.Replace("/" + replacement, replacement);
+                htmlPage = htmlPage.Replace($"//is2.4chan.org/{BoardCode}/{tim}", tim);
+                htmlPage = htmlPage.Replace($"/{tim}{ext}", tim + ext);
             }
 
+            // 4chan uses double slash urls (copy current protocol), when the user views it locally the protocol will no longer be http, so build it in.
+            // This is used for javascript references.
             htmlPage = htmlPage.Replace("=\"//", "=\"http://");
+
+            // Alter all content links like "http://is2.4chan.org/tv/123.jpg" to become local like "123.jpg".
+            htmlPage = htmlPage.Replace($"http://is2.4chan.org/{BoardCode}/", string.Empty);
 
             if (Settings.Default.SaveThumbnails)
             {
-                //Save thumbs for files that need it
-                for (int i = 0; i < thumbs.Count; i++)
+                foreach (var thumb in thumbUrls)
                 {
-                    Utils.DownloadFile(thumbs[i], SaveTo + "\\thumb");
+                    Utils.DownloadFileIfDoesntExist(thumb, $"{SaveTo}\\thumb");
                 }
             }
 
             if (!string.IsNullOrWhiteSpace(htmlPage))
             {
-                File.WriteAllText(SaveTo + "\\Thread.html", htmlPage);
+                File.WriteAllText($"{SaveTo}\\Thread.html", htmlPage);
             }
         }
+
 
         protected override string GetThreadSubject()
         {
