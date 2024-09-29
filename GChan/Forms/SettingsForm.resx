@@ -120,9 +120,6 @@
   <metadata name="tooltip.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>22, 20</value>
   </metadata>
-  <metadata name="tooltip.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>22, 20</value>
-  </metadata>
   <data name="renameThreadFolderCheckBox.ToolTip" xml:space="preserve">
     <value>When a thread is automatically or manually removed from GChan's tracking list, if this option 
 is enabled GChan will rename thread's folder using the desired format selected below.

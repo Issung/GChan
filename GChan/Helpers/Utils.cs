@@ -6,7 +6,10 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Reflection;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using Thread = GChan.Trackers.Thread;
 
@@ -23,6 +26,8 @@ namespace GChan
         public static readonly char[] IllegalFilenameCharacters = Path.GetInvalidFileNameChars();
 
         private static readonly ILogger logger = LogManager.GetCurrentClassLogger();
+
+        private static readonly HttpClient httpClient = CreateHttpClient();
 
         /// <summary>
         /// Validates if the string only contains digits
@@ -47,6 +52,18 @@ namespace GChan
             var client = new WebClient();
             client.Headers["User-Agent"] = Settings.Default.UserAgent;
             return client;
+        }
+
+        /// <remarks>Do not dispose it.</remarks>
+        public static HttpClient GetHttpClient()
+        {
+            return httpClient;
+        }
+
+        public static async Task WriteFileBytesAsync(string path, byte[] bytes)
+        {
+            using var fileStream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None, bufferSize: 4096, useAsync: true);
+            await fileStream.WriteAsync(bytes, 0, bytes.Length);
         }
 
         /// <summary>
@@ -115,6 +132,15 @@ namespace GChan
             return url;
         }
 
+        private static HttpClient CreateHttpClient()
+        {
+            var client = new HttpClient();
+            client.DefaultRequestHeaders.UserAgent.Clear();
+            client.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", Settings.Default.UserAgent);
+            //client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue(Settings.Default.UserAgent, string.Empty));
+            return client;
+        }
+
         private static string GetFilenameFromUrl(string hrefLink)
         {
             var parts = hrefLink.Split('/');
@@ -152,47 +178,6 @@ namespace GChan
                 // Should we throw?
                 logger.Warn(e, "Exception occured downloading file.");
                 return false;
-            }
-        }
-
-        /// <summary>
-        /// New DownloadToDir overload that takes a new ImageLink class, this is used to retain the image's uploaded filename.
-        /// </summary>
-        /// <param name="successCallback">Action to call when download completes successfully.</param>
-        public static void DownloadToDir(
-            ImageLink link, 
-            string dir, 
-            Action<ImageLink> successCallback
-        )
-        {
-            if (!Directory.Exists(dir))
-            { 
-                Directory.CreateDirectory(dir);
-            }
-
-            string destFilepath = CombinePathAndFilename(dir, link.GenerateFilename((ImageFileNameFormat)Settings.Default.ImageFilenameFormat));
-
-            try
-            {
-                using var webClient = CreateWebClient();
-                webClient.DownloadFile(link.Url, destFilepath);
-
-                // TODO: Figure out how to make the async downloading work properly.
-                // This line is currently not working and downloads 0 byte files 100% of the time.
-                //webClient.DownloadFileAsync(new Uri(link.URL), destFilepath);
-                /*Task.Run(() => { 
-                    webClient.DownloadFileAsync(new Uri(link.URL), destFilepath);
-                    while (webClient.IsBusy)
-                    { 
-                        //Do nothing?
-                    }
-                });*/
-
-                successCallback(link);
-            }
-            catch (WebException ex)
-            {
-                logger.Error(ex, $"Error occured while downloading link {link.Url}.");
             }
         }
 

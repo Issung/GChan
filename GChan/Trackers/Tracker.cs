@@ -1,5 +1,6 @@
 ﻿using NLog;
 using System.Net;
+using System.Threading;
 
 namespace GChan.Trackers
 {
@@ -7,6 +8,15 @@ namespace GChan.Trackers
 
     public abstract class Tracker
     {
+        /// <summary>
+        /// Response status codes that indicate content is no longer available.
+        /// </summary>
+        public static readonly HttpStatusCode?[] GoneStatusCodes =
+        {
+            HttpStatusCode.NotFound,
+            HttpStatusCode.Gone,
+        };
+
         public string Url { get; protected set; }
 
         public string SaveTo { get; protected set; }
@@ -24,18 +34,13 @@ namespace GChan.Trackers
         /// <summary>
         /// Whether or not to keep scraping this tracker.
         /// </summary>
-        public bool Scraping { get; set; } = true;
+        public bool Scraping { get; private set; } = true;
 
-        /// <summary>
-        /// Response status codes that indicate content is no longer available.
-        /// </summary>
-        public static readonly HttpStatusCode?[] GoneStatusCodes =
-        {
-            HttpStatusCode.NotFound,
-            HttpStatusCode.Gone,
-        };
+        public CancellationToken CancellationToken => cancellationTokenSource.Token;
 
         protected readonly ILogger logger = LogManager.GetCurrentClassLogger();
+
+        protected readonly CancellationTokenSource cancellationTokenSource = new();
 
         protected Tracker(string url)
         {
@@ -56,6 +61,12 @@ namespace GChan.Trackers
             {
                 return $"{this.GetType().Name} {{ {SiteName}, /{BoardCode}/ }}";
             }
+        }
+
+        public void Cancel()
+        {
+            Scraping = false;
+            cancellationTokenSource.Cancel();
         }
     }
 }

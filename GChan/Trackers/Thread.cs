@@ -6,6 +6,8 @@ using System.ComponentModel;
 using System.IO;
 using System.Net;
 using System.Runtime.CompilerServices;
+using System.Threading;
+using System.Threading.Tasks;
 using CancellationToken = System.Threading.CancellationToken;
 
 namespace GChan.Trackers
@@ -14,7 +16,7 @@ namespace GChan.Trackers
     /// <see cref="IDownloadable{T}"/> implementation is for downloading the website HTML.<br/>
     /// For downloading images <see cref="GetImageLinks"/> is used and results queued into a download manager.
     /// </summary>
-    public abstract class Thread : Tracker, IDownloadable<Thread>, INotifyPropertyChanged
+    public abstract class Thread : Tracker, IDownloadable, INotifyPropertyChanged
     {
         public const string NO_SUBJECT = "No Subject";
 
@@ -78,37 +80,36 @@ namespace GChan.Trackers
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        public void Download(
-            DownloadManager<Thread>.SuccessCallback successCallback,
-            DownloadManager<Thread>.FailureCallback failureCallback,
-            CancellationToken cancellationToken
-        )
+        public async Task<DownloadResult> DownloadAsync()
         {
             if (!ShouldDownload)
             {
-                successCallback(this);
-                return;
+                return new(false);
             }
 
             try
             {
-                // TODO: Forward cancellation token and use in each implementation.
-                DownloadHtmlImpl();
+                await DownloadHtmlImpl(CancellationToken);
             }
-            catch (WebException webEx) when (webEx.IsGone(out var httpWebResponse))
+            catch (OperationCanceledException)
+            {
+                logger.Debug("Cancelling download for {image_link}.");
+                return new(false);
+            }
+            catch (StatusCodeException e) when (e.IsGone())
             {
                 Gone = true;
             }
             catch (Exception ex)
             {
                 logger.Error(ex);
-                failureCallback(this, true);
+                return new(true);
             }
 
-            successCallback(this);
+            return new(false);
         }
 
-        public abstract void DownloadHtmlImpl();
+        public abstract Task DownloadHtmlImpl(CancellationToken cancellationToken);
 
         /// <summary>
         /// Get imagelinks for this thread.

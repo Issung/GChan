@@ -68,6 +68,7 @@ namespace GChan
             directoryTextBox.Text = directory;
 
             timerNumeric.Value = (Settings.Default.ScanTimer / 1000);
+            max1RequestPerSecondCheckBox.Checked = Settings.Default.Max1RequestPerSecond;
             concurrentDownloadsNumeric.Value = Settings.Default.MaximumConcurrentDownloads;
 
             imageFilenameFormatComboBox.SelectedIndex = Settings.Default.ImageFilenameFormat;
@@ -117,6 +118,7 @@ namespace GChan
             Settings.Default.UserAgent = userAgentTextBox.Text;
             Settings.Default.SavePath = directory;
             Settings.Default.ScanTimer = (int)timerNumeric.Value * 1000;
+            Settings.Default.Max1RequestPerSecond = max1RequestPerSecondCheckBox.Checked;
             Settings.Default.MaximumConcurrentDownloads = (int)concurrentDownloadsNumeric.Value;
             Settings.Default.ImageFilenameFormat = (byte)imageFilenameFormatComboBox.SelectedIndex;
             Settings.Default.ThreadFolderNameFormat = (byte)threadFolderNameFormatComboBox.SelectedIndex;

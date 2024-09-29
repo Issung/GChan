@@ -2,6 +2,7 @@
 using System;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 
 namespace GChan.Helpers
 {
@@ -18,6 +19,11 @@ namespace GChan.Helpers
             var isGoneStatusCode = Tracker.GoneStatusCodes.Contains(httpWebResponse?.StatusCode);
 
             return isProtocolError && (httpWebResponse != null && isGoneStatusCode);
+        }
+
+        public static bool IsGone(this StatusCodeException exception)
+        {
+            return Tracker.GoneStatusCodes.Contains(exception.StatusCode);
         }
     }
 }

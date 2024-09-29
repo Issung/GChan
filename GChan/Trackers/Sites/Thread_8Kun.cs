@@ -6,6 +6,8 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace GChan.Trackers
 {
@@ -82,21 +84,17 @@ namespace GChan.Trackers
             return links.MaybeRemoveAlreadySavedLinks(includeAlreadySaved, SavedIds).ToArray();
         }
 
-        public override void DownloadHtmlImpl()
+        public override async Task DownloadHtmlImpl(CancellationToken cancellationToken)
         {
             var thumbs = new List<string>();
-            var htmlPage = "";
 
-            JObject jObject;
-            using (var web = Utils.CreateWebClient())
-            {
-                htmlPage = web.DownloadString(Url);
+            var client = Utils.GetHttpClient();
+            var htmlPage = await client.GetStringAsync(Url, cancellationToken);
 
-                var jsonUrl = Url.Replace(".html", ".json");
+            var jsonUrl = Url.Replace(".html", ".json");
 
-                var json = web.DownloadString(jsonUrl);
-                jObject = JObject.Parse(json);
-            }
+            var json = await client.GetStringAsync(jsonUrl, cancellationToken);
+            var jObject = JObject.Parse(json);
 
             // get single images
             var posts = jObject

@@ -1,9 +1,21 @@
-﻿using GChan.Controllers;
-using System.Threading;
+﻿using System.Threading.Tasks;
 
 namespace GChan
 {
-    public interface IDownloadable<T> where T : IDownloadable<T>
+    public class DownloadResult
+    {
+        /// <summary>
+        /// Should this download be retried.
+        /// </summary>
+        public bool Retry { get; }
+
+        public DownloadResult(bool retry)
+        {
+            this.Retry = retry;
+        }
+    }
+
+    public interface IDownloadable
     {
         /// <summary>
         /// Should this item be downloaded.<br/>
@@ -14,10 +26,6 @@ namespace GChan
         /// <summary>
         /// Perform download for this item.
         /// </summary>
-        void Download(
-            DownloadManager<T>.SuccessCallback successCallback,
-            DownloadManager<T>.FailureCallback failureCallback,
-            CancellationToken cancellationToken
-        );
+        Task<DownloadResult> DownloadAsync();
     }
 }

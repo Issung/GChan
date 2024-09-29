@@ -30,8 +30,9 @@ namespace GChan.Controllers
 
         private SysThread scanThread = null;
 
-        private readonly DownloadManager<ImageLink> imageDownloader = new(true);
-        private readonly DownloadManager<Thread> threadHtmlDownloader = new(true); // Allow threads to be removed after download, we just re-add them. TODO: Maybe improve.
+        private static readonly DownloadQueue downloadQueue = new(default);
+        private readonly DownloadManager<ImageLink> imageDownloader = new(true, downloadQueue);
+        private readonly DownloadManager<Thread> threadHtmlDownloader = new(true, downloadQueue); // Allow threads to be removed after download, we just re-add them. TODO: Maybe improve.
 
         private readonly Timer scanTimer = new();
 
@@ -408,7 +409,7 @@ namespace GChan.Controllers
 
         public void RemoveBoard(Board board)
         {
-            board.Scraping = false;
+            board.Cancel();
 
             lock (BoardLock)
             {
@@ -438,10 +439,7 @@ namespace GChan.Controllers
         public void RemoveThread(Thread thread, bool manualRemove = false)
         {
             logger.Trace($"Removing thread {thread}.");
-            thread.Scraping = false;
-            // TODO: #41 - Cancellation currently not working, implement later.
-            //imageDownloader.Cancel(i => i.Thread == thread);
-            //threadHtmlDownloader.Cancel(thread);
+            thread.Cancel();
 
             try
             {

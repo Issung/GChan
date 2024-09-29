@@ -1,16 +1,14 @@
-﻿using GChan.Controllers;
-using GChan.Helpers;
+﻿using GChan.Helpers;
 using GChan.Properties;
-using GChan.Trackers;
 using NLog;
 using System;
 using System.IO;
-using System.Net;
-using CancellationToken = System.Threading.CancellationToken;
+using System.Threading.Tasks;
+using Thread = GChan.Trackers.Thread;
 
 namespace GChan
 {
-    public class ImageLink : IDownloadable<ImageLink>, IEquatable<ImageLink>
+    public class ImageLink : IDownloadable, IEquatable<ImageLink>
     {
         /// <summary>
         /// For 4chan: Unix timestamp with microseconds at which the image was uploaded.
@@ -58,16 +56,11 @@ namespace GChan
             Thread = thread;
         }
 
-        public void Download(
-            DownloadManager<ImageLink>.SuccessCallback successCallback,
-            DownloadManager<ImageLink>.FailureCallback failureCallback,
-            CancellationToken cancellationToken
-        )
+        public async Task<DownloadResult> DownloadAsync()
         {
             if (!ShouldDownload)
             {
-                successCallback(this);
-                return;
+                return new(false);
             }
 
             if (!Directory.Exists(Thread.SaveTo))
@@ -79,23 +72,29 @@ namespace GChan
 
             try
             {
-                // TODO: Asyncify/Taskify.
-                // TODO: Use cancellation token.
-                using var webClient = Utils.CreateWebClient();
-                webClient.DownloadFile(Url, destFilepath);
+                var client = Utils.GetHttpClient();
+                var fileBytes = await client.GetByteArrayAsync(Url, Thread.CancellationToken);
+                await Utils.WriteFileBytesAsync(destFilepath, fileBytes);
+
                 Thread.SavedIds.Add(Tim);
-                successCallback(this);
             }
-            catch (WebException webException) when (webException.IsGone(out var httpWebResponse))
+            catch (OperationCanceledException)
             {
-                logger.Debug("Downloading {image_link} resulted in {status_code}", this, httpWebResponse.StatusCode);
-                failureCallback(this, false);   // Don't retry.
+                logger.Debug("Cancelling download for {image_link}.");
+                return new(false);
+            }
+            catch (StatusCodeException e) when (e.IsGone())
+            {
+                logger.Debug("Downloading {image_link} resulted in {status_code}", this, e.StatusCode);
+                return new(false);  // Thread is gone, don't retry.
             }
             catch (Exception ex)
             {
                 logger.Error(ex, "An error occured downloading an image.");
-                failureCallback(this, true);
+                return new(true);   // Unknown error, retry.
             }
+
+            return new(false);
         }
 
         public string GenerateFilename(ImageFileNameFormat format)

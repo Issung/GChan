@@ -7,6 +7,9 @@ using System.Threading;
 
 namespace GChan.Controllers
 {
+    public delegate void DownloadSuccessCallback(object item);
+    public delegate void DownloadFailureCallback(object item, bool retry);
+
     /// <summary>
     /// Class that manages a file download pool.<br/>
     /// <typeparamref name="T"/> must provide a good implementation of <see cref="object.GetHashCode"/>.<br/>
@@ -15,10 +18,34 @@ namespace GChan.Controllers
     /// TODO: Add ability to clear the manager completely, for certain situations e.g. someone disables the setting to save thread html.<br/>
     /// TODO: Use async/tasks instead of threads.<br/>
     /// </remarks>
-    public class DownloadManager<T> : IDisposable where T: IDownloadable<T>
+    public class DownloadManager<T> : IDisposable where T: IDownloadable
     {
-        public delegate void SuccessCallback(T item);
-        public delegate void FailureCallback(T item, bool retry);
+        class Download : IDisposable
+        {
+            private readonly CancellationTokenSource cancellationTokenSource;
+
+            public Download(CancellationTokenSource cancellationTokenSource)
+            {
+                this.cancellationTokenSource = cancellationTokenSource;
+            }
+
+            /// <summary>
+            /// Signal cancellation to the thread.
+            /// </summary>
+            public void Cancel()
+            {
+                cancellationTokenSource.Cancel();
+            }
+
+            /// <summary>
+            /// Cancel download and dispose resources.
+            /// </summary>
+            public void Dispose()
+            {
+                this.cancellationTokenSource.Cancel();
+                this.cancellationTokenSource.Dispose();
+            }
+        }
 
         /// <summary>
         /// How many operations may be running concurrently.
@@ -31,6 +58,7 @@ namespace GChan.Controllers
         private readonly ConcurrentDictionary<T, Download> downloading = new();
         private readonly ConcurrentQueue<T> waiting = new();
         private readonly bool removeSuccessfulItems;
+        private readonly DownloadQueue queue;
         private readonly Timer timer;
         private readonly string typeName;
 
@@ -41,9 +69,11 @@ namespace GChan.Controllers
         /// Should items that successfully download be removed from the download manager?<br/>
         /// If false, after a successful download will enter the back of the queue again, for later re-downloading.
         /// </param>
-        public DownloadManager(bool removeSuccessfulItems)
+        public DownloadManager(bool removeSuccessfulItems, DownloadQueue queue)
         { 
             this.removeSuccessfulItems = removeSuccessfulItems;
+            this.queue = queue;
+
             this.timer = new(TimerTick, null, TimeSpan.Zero, interval);
             this.typeName = typeof(T).Name + "s";
         }
@@ -136,13 +166,10 @@ namespace GChan.Controllers
 
             foreach (var item in items)
             {
-                var cancellationTokenSource = new CancellationTokenSource();
-                var thread = new Thread(() => item.Download(DownloadSuccess, DownloadFailed, cancellationTokenSource.Token));
+                queue.Enqueue(item);
 
-                var download = new Download(thread, cancellationTokenSource);
-                thread.Start();
-
-                downloading.TryAdd(item, download);
+                // TODO: Track the item in the download queue so it can be cancelled.
+                //downloading.TryAdd(item, download);
             }
         }
 
@@ -172,16 +199,17 @@ namespace GChan.Controllers
         /// Called when a download has completed successfully.<br/>
         /// Removes <paramref name="item"/> from the downloading dict.
         /// </summary>
-        private void DownloadSuccess(T item)
+        private void DownloadSuccess(object item)
         {
+            var titem = (T)item;
             logger.Trace("Item {item} completed downloading succesfully.", item);
 
-            if (downloading.TryRemove(item, out var _))
+            if (downloading.TryRemove(titem, out var _))
             {
                 // If manager is not supposed remove items after a successful download, add back onto the queue.
                 if (!removeSuccessfulItems)
                 {
-                    waiting.Enqueue(item);
+                    waiting.Enqueue(titem);
                 }
             }
             else
@@ -195,15 +223,16 @@ namespace GChan.Controllers
         /// Removes <paramref name="item"/> from the downloading dict and requeues it pending download.<br/>
         /// If the failure is permanent (e.g. image is gone) then <paramref name="retry"/> can be set to false.
         /// </summary>
-        private void DownloadFailed(T item, bool retry)
+        private void DownloadFailed(object item, bool retry)
         {
+            var titem = (T)item;
             logger.Trace("Item {item} downloading failed.", item);
 
-            if (downloading.TryRemove(item, out var _))
+            if (downloading.TryRemove(titem, out var _))
             {
                 if (retry)
                 { 
-                    waiting.Enqueue(item);
+                    waiting.Enqueue(titem);
                 }
             }
             else

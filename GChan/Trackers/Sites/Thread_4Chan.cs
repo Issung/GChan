@@ -7,6 +7,8 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace GChan.Trackers
 {
@@ -70,22 +72,19 @@ namespace GChan.Trackers
             return links.MaybeRemoveAlreadySavedLinks(includeAlreadySaved, SavedIds).ToArray();
         }
 
-        public override void DownloadHtmlImpl()
+        public override async Task DownloadHtmlImpl(CancellationToken cancellationToken)
         {
             var thumbUrls = new List<string>();
             var baseUrl = $"//i.4cdn.org/{BoardCode}/";
             var jsonUrl = $"http://a.4cdn.org/{BoardCode}/thread/{ID}.json";
-            var htmlPage = string.Empty;
             JObject jObject;
 
-            using (var web = Utils.CreateWebClient())
-            {
-                htmlPage = web.DownloadString(Url);
-                htmlPage = htmlPage.Replace("f=\"to\"", "f=\"penis\"");
+            var client = Utils.GetHttpClient();
+            var htmlPage = await client.GetStringAsync(Url, cancellationToken);
+            htmlPage = htmlPage.Replace("f=\"to\"", "f=\"penis\"");
 
-                var json = web.DownloadString(jsonUrl);
-                jObject = JObject.Parse(json);
-            }
+            var json = await client.GetStringAsync(jsonUrl, cancellationToken);
+            jObject = JObject.Parse(json);
 
             var posts = jObject
                 .SelectTokens("posts[*]")
