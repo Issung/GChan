@@ -34,7 +34,7 @@ namespace GChan.Trackers
         /// <summary>
         /// Whether or not to keep scraping this tracker.
         /// </summary>
-        public bool Scraping { get; private set; } = true;
+        public bool Scraping => !CancellationToken.IsCancellationRequested;
 
         public CancellationToken CancellationToken => cancellationTokenSource.Token;
 
@@ -65,7 +65,6 @@ namespace GChan.Trackers
 
         public void Cancel()
         {
-            Scraping = false;
             cancellationTokenSource.Cancel();
         }
     }

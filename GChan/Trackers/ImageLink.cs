@@ -39,7 +39,7 @@ namespace GChan
 
         private static readonly ILogger logger = LogManager.GetCurrentClassLogger();
 
-        public bool ShouldDownload => !Thread.Gone;
+        public bool ShouldDownload => Thread.Scraping && !Thread.Gone;
 
         public ImageLink(
             long tim, 
