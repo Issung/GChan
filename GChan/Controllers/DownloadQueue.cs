@@ -39,8 +39,10 @@ namespace GChan.Controllers
                     await semaphore.WaitAsync();
                 }
 
-                var download = await DequeueAsync();
-                await download.DownloadAsync();
+                var item = await DequeueAsync();
+                var result = await item.DownloadAsync();
+
+                HandleResult(item, result);
 
                 if (max1PerSecond)
                 {
@@ -51,7 +53,7 @@ namespace GChan.Controllers
         }
 
         /// <summary>
-        /// Holds control until a downloadable with <see cref="IDownloadable.ShouldDownload"/> true s found.
+        /// Holds control until a downloadable with <see cref="IDownloadable.ShouldDownload"/> true is found.
         /// </summary>
         private async Task<IDownloadable> DequeueAsync()
         {
@@ -69,6 +71,14 @@ namespace GChan.Controllers
                         return downloadable;
                     }
                 }
+            }
+        }
+
+        private void HandleResult(IDownloadable item, DownloadResult result)
+        {
+            if (result.Retry)
+            {
+                queue.Enqueue(item);
             }
         }
     }
