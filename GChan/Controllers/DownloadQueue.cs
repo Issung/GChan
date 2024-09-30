@@ -1,4 +1,5 @@
-﻿using GChan.Properties;
+﻿using GChan.Helpers;
+using GChan.Properties;
 using System;
 using System.Collections.Concurrent;
 using System.Threading;
@@ -6,15 +7,19 @@ using System.Threading.Tasks;
 
 namespace GChan.Controllers
 {
+    /// <summary>
+    /// A queue for <see cref="IDownloadable"/>s. Controls how often they are started.
+    /// </summary>
     public class DownloadQueue
     {
         private readonly SemaphoreSlim semaphore = new(1, 1);
-        private readonly CancellationToken cancellationToken;
+        private readonly CancellationToken shutdownCancellationToken;
         private readonly ConcurrentQueue<IDownloadable> queue = new();
+        private readonly TaskPool<IDownloadable> pool = new();
 
-        public DownloadQueue(CancellationToken cancellationToken)
+        public DownloadQueue(CancellationToken shutdownCancellationToken)
         {
-            this.cancellationToken = cancellationToken;
+            this.shutdownCancellationToken = shutdownCancellationToken;
 
 #pragma warning disable CS4014 // Run Task in background.
             WorkAsync();
@@ -30,7 +35,7 @@ namespace GChan.Controllers
         {
             bool max1PerSecond;
 
-            while (!cancellationToken.IsCancellationRequested)
+            while (!shutdownCancellationToken.IsCancellationRequested)
             {
                 max1PerSecond = Settings.Default.Max1RequestPerSecond;
 
@@ -40,7 +45,10 @@ namespace GChan.Controllers
                 }
 
                 var item = await DequeueAsync();
-                var result = await item.DownloadAsync();
+
+                var combinedToken = Utils.CombineCancellationTokens(shutdownCancellationToken, item.CancellationToken);
+
+                var result = await item.DownloadAsync(combinedToken);
 
                 HandleResult(item, result);
 

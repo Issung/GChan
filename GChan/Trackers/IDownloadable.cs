@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
 
 namespace GChan
 {
@@ -17,6 +18,8 @@ namespace GChan
 
     public interface IDownloadable
     {
+        public CancellationToken CancellationToken { get; }
+
         /// <summary>
         /// Should this item be downloaded.<br/>
         /// Decision may have changed since being added to download manager.
@@ -26,6 +29,7 @@ namespace GChan
         /// <summary>
         /// Perform download for this item.
         /// </summary>
-        Task<DownloadResult> DownloadAsync();
+        /// <param name="cancellationToken">The CancellationToken for this <see cref="IDownloadable"/> combined with another CancellationToken for program shutdown.</param>
+        Task<DownloadResult> DownloadAsync(CancellationToken cancellationToken);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -8,7 +9,7 @@ namespace GChan.Models
     /// <summary>
     /// Credit: Ben Mosher https://stackoverflow.com/a/18923091/8306962
     /// </summary>
-    public class ConcurrentHashSet<T> : IDisposable
+    public class ConcurrentHashSet<T> : IEnumerable<T>, IDisposable
     {
         protected readonly ReaderWriterLockSlim locker = new(LockRecursionPolicy.SupportsRecursion);
         protected readonly HashSet<T> set = new();
@@ -115,6 +116,18 @@ namespace GChan.Models
                     locker.ExitReadLock();
                 }
             }
+        }
+
+        /// <remarks>Is this correct? What happens if the enumerator changes during enumeration? Should we return a copy with ToArray() instead?</remarks>
+        public IEnumerator<T> GetEnumerator()
+        {
+            return set.GetEnumerator();
+        }
+
+        /// <remarks>Is this correct? What happens if the enumerator changes during enumeration? Should we return a copy with ToArray() instead?</remarks>
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return set.GetEnumerator();
         }
 
         public void Dispose()
