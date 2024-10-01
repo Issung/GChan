@@ -99,18 +99,10 @@ namespace GChan
             {
                 return new Thread_4Chan(url);
             }
-            else if (Thread_8Kun.UrlIsThread(url))
-            {
-                return new Thread_8Kun(url);
-            }
 
             if (Board_4Chan.UrlIsBoard(url))
             {
                 return new Board_4Chan(url);
-            }
-            else if (Board_8Kun.UrlIsBoard(url))
-            {
-                return new Board_8Kun(url);
             }
 
             return null;

@@ -353,7 +353,6 @@ namespace GChan.Controllers
                 var idCodeMatch = board.SiteName switch
                 {
                     Board_4Chan.SITE_NAME => Regex.Match(url, Thread_4Chan.ID_CODE_REGEX),
-                    Board_8Kun.SITE_NAME => Regex.Match(url, Thread_8Kun.ID_CODE_REGEX),
                     _ => null,
                 };
 

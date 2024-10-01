@@ -1,7 +1,6 @@
 ﻿Todo items:
 	Add (proper scaled) icons to all context menus.
 	Archived thread indicator (with red text/highlight or seperate column (archived yes/no)).
-	Add support for 8kun.top.
 	Asynchronous General.DownloadToDir downloads files as 0bytes empty files, fix this immediately.
 	Make boards view a datagridview and make it use databinding.
 	Add options to task bar right click

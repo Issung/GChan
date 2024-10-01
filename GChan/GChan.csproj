@@ -132,9 +132,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="Trackers\Board.cs" />
-    <Compile Include="Trackers\Sites\Board_8Kun.cs" />
     <Compile Include="Trackers\Sites\Board_4Chan.cs" />
-    <Compile Include="Trackers\Sites\Thread_8Kun.cs" />
     <Compile Include="Trackers\Thread.cs" />
     <Compile Include="Trackers\Sites\Thread_4Chan.cs" />
     <Compile Include="Trackers\Tracker.cs" />
