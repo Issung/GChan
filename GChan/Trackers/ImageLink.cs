@@ -14,7 +14,6 @@ namespace GChan
     {
         /// <summary>
         /// For 4chan: Unix timestamp with microseconds at which the image was uploaded.
-        /// For 8kun: The ID of the post this image belongs to (same as No).
         /// </summary>
         public long Tim;
 

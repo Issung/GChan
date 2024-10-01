@@ -11,7 +11,6 @@ GChan is a fork of YChan which aims to improve stability and add extra features 
 
 ### Supported Websites: 
 * [4chan.org](http://4chan.org/)
-* [8kun.top](https://8kun.top/index.html) [Pending Release]
 
 Requires .NET Framework 4.8 or higher, made with Windows Forms.
 
