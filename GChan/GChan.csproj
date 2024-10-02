@@ -113,7 +113,7 @@
     <Compile Include="Helpers\HttpClientExtensions.cs" />
     <Compile Include="Helpers\TaskPool.cs" />
     <Compile Include="Trackers\IDownloadable.cs" />
-    <Compile Include="Trackers\ImageLink.cs" />
+    <Compile Include="Trackers\Asset.cs" />
     <Compile Include="Controls\PreferencesDataGridView.cs">
       <SubType>Component</SubType>
     </Compile>

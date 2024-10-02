@@ -32,7 +32,7 @@ namespace GChan.Controllers
 
         private readonly CancellationTokenSource cancellationTokenSource = new();
         private readonly DownloadQueue downloadQueue;
-        private readonly DownloadManager<ImageLink> imageDownloader;
+        private readonly DownloadManager<Asset> assetDownloader;
         private readonly DownloadManager<Thread> threadHtmlDownloader;
 
         private readonly Timer scanTimer = new();
@@ -77,7 +77,7 @@ namespace GChan.Controllers
         {
             // Controller Setup
             downloadQueue = new(cancellationTokenSource.Token);
-            imageDownloader = new(true, downloadQueue);
+            assetDownloader = new(true, downloadQueue);
             threadHtmlDownloader = new(true, downloadQueue); // Allow threads to be removed after download, we just re-add them. TODO: Maybe improve.
 
             scanTimer.Enabled = false;
@@ -282,7 +282,7 @@ namespace GChan.Controllers
         /// <summary>
         /// Thread entry-point.
         /// </summary>
-        private void ScanRoutine()
+        private void ScanRoutine()  // TODO: Replace this whole bullshit by shoving threads into the download queue with some property like "RemoveOnSuccess" set to false.
         {
             lock (ThreadLock)
             {
@@ -342,8 +342,8 @@ namespace GChan.Controllers
             {
                 if (thread.Scraping)
                 {
-                    var links = thread.GetImageLinks();
-                    imageDownloader.Queue(links);
+                    var assets = thread.GetImageLinks();
+                    assetDownloader.Queue(assets);
 
                     if (Settings.Default.SaveHtml)
                     { 
@@ -428,7 +428,7 @@ namespace GChan.Controllers
 
         public void SettingsUpdated()
         {
-            this.imageDownloader.ConcurrentCount = Settings.Default.MaximumConcurrentDownloads;
+            this.assetDownloader.ConcurrentCount = Settings.Default.MaximumConcurrentDownloads;
         }
 
         /// <summary>
@@ -519,7 +519,7 @@ namespace GChan.Controllers
             scanTimer.Enabled = false;
             scanTimer.Dispose();
 
-            imageDownloader.Dispose();
+            assetDownloader.Dispose();
             threadHtmlDownloader.Dispose();
 
             if (Settings.Default.SaveListsOnClose)

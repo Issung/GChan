@@ -12,7 +12,7 @@ namespace GChan.Trackers
 {
     /// <summary>
     /// <see cref="IDownloadable{T}"/> implementation is for downloading the website HTML.<br/>
-    /// For downloading images <see cref="GetImageLinks"/> is used and results queued into a download manager.
+    /// For downloading images <see cref="GetUploadAssets"/> is used and results queued into a download manager.
     /// </summary>
     public abstract class Thread : Tracker, IDownloadable, INotifyPropertyChanged
     {
@@ -88,7 +88,7 @@ namespace GChan.Trackers
             try
             {
                 await DownloadHtmlImpl(cancellationToken);
-                await GetImageLinks(cancellationToken);
+                await GetUploadAssets(cancellationToken);
             }
             catch (OperationCanceledException)
             {
@@ -113,12 +113,12 @@ namespace GChan.Trackers
         /// <summary>
         /// Get imagelinks for this thread.
         /// </summary>
-        private ImageLink[] GetImageLinks(CancellationToken cancellationToken)
+        public async Task<Asset[]> GetUploadAssets(CancellationToken cancellationToken)
         {
             if (Gone)
             {
                 logger.Info($"Download(object callback) called on {this}, but will not download because {nameof(Gone)} is true.");
-                return Array.Empty<ImageLink>();
+                return Array.Empty<Asset>();
             }
 
             try
@@ -128,7 +128,7 @@ namespace GChan.Trackers
                     Directory.CreateDirectory(SaveTo);
                 }
 
-                var imageLinks = GetImageLinksImpl();
+                var imageLinks = await GetImageLinksImpl(false, cancellationToken);
                 return imageLinks;
             }
             catch (WebException webEx) when (webEx.IsGone(out var httpWebResponse))
@@ -140,13 +140,13 @@ namespace GChan.Trackers
                 logger.Error(ex);
             }
 
-            return Array.Empty<ImageLink>();
+            return Array.Empty<Asset>();
         }
 
         /// <summary>
         /// Implementation point for website specific image link retreival.
         /// </summary>
-        protected abstract Task<ImageLink[]> GetImageLinksImpl(bool includeAlreadySaved, CancellationToken cancellationToken);
+        protected abstract Task<Asset[]> GetImageLinksImpl(bool includeAlreadySaved, CancellationToken cancellationToken);    // TODO: Always return all found assets, and the caller can filter out those already saved.
 
         protected abstract string GetThreadSubject();
 

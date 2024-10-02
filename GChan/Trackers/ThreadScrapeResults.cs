@@ -4,14 +4,14 @@ using System.Collections.Generic;
 public class ThreadScrapeResults
 {
     public string ThreadHtml { get; }
-    public IEnumerable<ImageLink> ImageLinks { get; }
+    public IEnumerable<Asset> Thumbnails { get; }
 
     public ThreadScrapeResults(
         string threadHtml,
-        IEnumerable<ImageLink> imageLinks
+        IEnumerable<Asset> imageLinks
     )
     {
         ThreadHtml = threadHtml;
-        ImageLinks = imageLinks;
+        Thumbnails = imageLinks;
     }
 }

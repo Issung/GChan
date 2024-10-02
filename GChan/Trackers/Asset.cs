@@ -9,7 +9,7 @@ using Thread = GChan.Trackers.Thread;
 
 namespace GChan
 {
-    public class ImageLink : IDownloadable, IEquatable<ImageLink>
+    public class Asset : IDownloadable, IEquatable<Asset>
     {
         /// <summary>
         /// For 4chan: Unix timestamp with microseconds at which the image was uploaded.
@@ -43,7 +43,7 @@ namespace GChan
 
         public bool ShouldDownload => Thread.Scraping && !Thread.Gone;
 
-        public ImageLink(
+        public Asset(
             long tim, 
             string url, 
             string uploadedFilename, 
@@ -115,7 +115,7 @@ namespace GChan
             return result;
         }
 
-        public bool Equals(ImageLink other)
+        public bool Equals(Asset other)
         {
             if (other == null)
             {
@@ -134,7 +134,7 @@ namespace GChan
                 return false;
             }
 
-            return this.Equals((ImageLink)other);
+            return this.Equals((Asset)other);
         }
 
         public override int GetHashCode()
