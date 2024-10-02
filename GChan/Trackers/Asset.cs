@@ -10,7 +10,7 @@ using CancellationToken = System.Threading.CancellationToken;
 
 namespace GChan
 {
-    public class ImageLink : IDownloadable<ImageLink>, IEquatable<ImageLink>
+    public class Asset : IDownloadable<Asset>, IEquatable<Asset>
     {
         /// <summary>
         /// For 4chan: Unix timestamp with microseconds at which the image was uploaded.
@@ -42,7 +42,7 @@ namespace GChan
 
         public bool ShouldDownload => !Thread.Gone;
 
-        public ImageLink(
+        public Asset(
             long tim, 
             string url, 
             string uploadedFilename, 
@@ -58,8 +58,8 @@ namespace GChan
         }
 
         public void Download(
-            DownloadManager<ImageLink>.SuccessCallback successCallback,
-            DownloadManager<ImageLink>.FailureCallback failureCallback,
+            DownloadManager<Asset>.SuccessCallback successCallback,
+            DownloadManager<Asset>.FailureCallback failureCallback,
             CancellationToken cancellationToken
         )
         {
@@ -113,7 +113,7 @@ namespace GChan
             return result;
         }
 
-        public bool Equals(ImageLink other)
+        public bool Equals(Asset other)
         {
             if (other == null)
             {
@@ -132,7 +132,7 @@ namespace GChan
                 return false;
             }
 
-            return this.Equals((ImageLink)other);
+            return this.Equals((Asset)other);
         }
 
         public override int GetHashCode()

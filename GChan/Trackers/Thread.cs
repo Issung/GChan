@@ -113,12 +113,12 @@ namespace GChan.Trackers
         /// <summary>
         /// Get imagelinks for this thread.
         /// </summary>
-        public ImageLink[] GetImageLinks()
+        public Asset[] GetImageLinks()
         {
             if (Gone)
             {
                 logger.Info($"Download(object callback) called on {this}, but will not download because {nameof(Gone)} is true.");
-                return Array.Empty<ImageLink>();
+                return Array.Empty<Asset>();
             }
 
             try
@@ -140,13 +140,13 @@ namespace GChan.Trackers
                 logger.Error(ex);
             }
 
-            return Array.Empty<ImageLink>();
+            return Array.Empty<Asset>();
         }
 
         /// <summary>
         /// Implementation point for website specific image link retreival.
         /// </summary>
-        protected abstract ImageLink[] GetImageLinksImpl(bool includeAlreadySaved = false);
+        protected abstract Asset[] GetImageLinksImpl(bool includeAlreadySaved = false);
 
         protected abstract string GetThreadSubject();
 

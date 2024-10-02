@@ -30,7 +30,7 @@ namespace GChan.Controllers
 
         private SysThread scanThread = null;
 
-        private readonly DownloadManager<ImageLink> imageDownloader = new(true);
+        private readonly DownloadManager<Asset> assetDownloader = new(true);
         private readonly DownloadManager<Thread> threadHtmlDownloader = new(true); // Allow threads to be removed after download, we just re-add them. TODO: Maybe improve.
 
         private readonly Timer scanTimer = new();
@@ -335,7 +335,7 @@ namespace GChan.Controllers
                 if (thread.Scraping)
                 {
                     var links = thread.GetImageLinks();
-                    imageDownloader.Queue(links);
+                    assetDownloader.Queue(links);
 
                     if (Settings.Default.SaveHtml)
                     { 
@@ -420,7 +420,7 @@ namespace GChan.Controllers
 
         public void SettingsUpdated()
         {
-            this.imageDownloader.ConcurrentCount = Settings.Default.MaximumConcurrentDownloads;
+            this.assetDownloader.ConcurrentCount = Settings.Default.MaximumConcurrentDownloads;
         }
 
         /// <summary>
@@ -513,7 +513,7 @@ namespace GChan.Controllers
             scanTimer.Enabled = false;
             scanTimer.Dispose();
 
-            imageDownloader.Dispose();
+            assetDownloader.Dispose();
             threadHtmlDownloader.Dispose();
 
             if (Settings.Default.SaveListsOnClose)

@@ -40,7 +40,7 @@ namespace GChan.Trackers
             return Regex.IsMatch(url, THREAD_REGEX);
         }
 
-        protected override ImageLink[] GetImageLinksImpl(bool includeAlreadySaved = false)
+        protected override Asset[] GetImageLinksImpl(bool includeAlreadySaved = false)
         {
             var baseUrl = $"http://i.4cdn.org/{BoardCode}/";
             var jsonUrl = $"http://a.4cdn.org/{BoardCode}/thread/{ID}.json";
@@ -56,7 +56,7 @@ namespace GChan.Trackers
                 .SelectTokens("posts[*]")
                 .Where(x => x["ext"] != null)
                 .Select(x =>
-                    new ImageLink(
+                    new Asset(
                         x[timPath].Value<long>(),
                         baseUrl + Uri.EscapeDataString(x[timPath].Value<string>()) + x["ext"],  // Require escaping for the flash files stored with arbitrary string names.
                         x["filename"].Value<string>(),
@@ -98,7 +98,7 @@ namespace GChan.Trackers
                 var ext = post["ext"].ToString();
                 var oldUrl = baseUrl + tim + ext;
                 var newFilename = Path.GetFileNameWithoutExtension(
-                    new ImageLink(
+                    new Asset(
                         post["tim"].Value<long>(),
                         oldUrl,
                         post["filename"].ToString(),

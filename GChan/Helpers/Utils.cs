@@ -152,9 +152,9 @@ namespace GChan
         /// </summary>
         /// <param name="successCallback">Action to call when download completes successfully.</param>
         public static void DownloadToDir(
-            ImageLink link, 
+            Asset link, 
             string dir, 
-            Action<ImageLink> successCallback
+            Action<Asset> successCallback
         )
         {
             if (!Directory.Exists(dir))
