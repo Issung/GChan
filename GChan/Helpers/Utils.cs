@@ -60,10 +60,17 @@ namespace GChan
             return httpClient;
         }
 
-        public static async Task WriteFileBytesAsync(string path, byte[] bytes)
+        public static async Task WriteAllTextAsync(string path, string content, CancellationToken cancellationToken)
+        {
+            var bytes = System.Text.Encoding.UTF8.GetBytes(content);
+            await WriteFileBytesAsync(path, bytes, cancellationToken);
+        }
+
+
+        public static async Task WriteFileBytesAsync(string path, byte[] bytes, CancellationToken cancellationToken)
         {
             using var fileStream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None, bufferSize: 4096, useAsync: true);
-            await fileStream.WriteAsync(bytes, 0, bytes.Length);
+            await fileStream.WriteAsync(bytes, 0, bytes.Length, cancellationToken);
         }
 
         /// <summary>

@@ -15,7 +15,7 @@ namespace GChan.Controllers
         private readonly SemaphoreSlim semaphore = new(1, 1);
         private readonly CancellationToken shutdownCancellationToken;
         private readonly ConcurrentQueue<IDownloadable> queue = new();
-        private readonly TaskPool<IDownloadable> pool = new();
+        private readonly TaskPool<IDownloadable> pool = new(_ => { });  // TODO: Do something with the completion listener.
 
         public DownloadQueue(CancellationToken shutdownCancellationToken)
         {

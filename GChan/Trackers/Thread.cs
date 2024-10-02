@@ -1,12 +1,10 @@
-﻿using GChan.Controllers;
-using GChan.Helpers;
+﻿using GChan.Helpers;
 using GChan.Models;
 using System;
 using System.ComponentModel;
 using System.IO;
 using System.Net;
 using System.Runtime.CompilerServices;
-using System.Threading;
 using System.Threading.Tasks;
 using CancellationToken = System.Threading.CancellationToken;
 
@@ -80,7 +78,7 @@ namespace GChan.Trackers
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        public async Task<DownloadResult> DownloadAsync()
+        public async Task<DownloadResult> DownloadAsync(CancellationToken cancellationToken)
         {
             if (!ShouldDownload)
             {
@@ -89,11 +87,12 @@ namespace GChan.Trackers
 
             try
             {
-                await DownloadHtmlImpl(CancellationToken);
+                await DownloadHtmlImpl(cancellationToken);
+                await GetImageLinks(cancellationToken);
             }
             catch (OperationCanceledException)
             {
-                logger.Debug("Cancelling download for {image_link}.");
+                logger.Debug("Cancelling download for {thread}.", this);
                 return new(false);
             }
             catch (StatusCodeException e) when (e.IsGone())
@@ -114,7 +113,7 @@ namespace GChan.Trackers
         /// <summary>
         /// Get imagelinks for this thread.
         /// </summary>
-        public ImageLink[] GetImageLinks()
+        private ImageLink[] GetImageLinks(CancellationToken cancellationToken)
         {
             if (Gone)
             {
@@ -147,7 +146,7 @@ namespace GChan.Trackers
         /// <summary>
         /// Implementation point for website specific image link retreival.
         /// </summary>
-        protected abstract ImageLink[] GetImageLinksImpl(bool includeAlreadySaved = false);
+        protected abstract Task<ImageLink[]> GetImageLinksImpl(bool includeAlreadySaved, CancellationToken cancellationToken);
 
         protected abstract string GetThreadSubject();
 

@@ -3,6 +3,7 @@ using GChan.Properties;
 using NLog;
 using System;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using Thread = GChan.Trackers.Thread;
 
@@ -38,6 +39,8 @@ namespace GChan
 
         private static readonly ILogger logger = LogManager.GetCurrentClassLogger();
 
+        public CancellationToken CancellationToken => Thread.CancellationToken;
+
         public bool ShouldDownload => Thread.Scraping && !Thread.Gone;
 
         public ImageLink(
@@ -55,7 +58,7 @@ namespace GChan
             Thread = thread;
         }
 
-        public async Task<DownloadResult> DownloadAsync()
+        public async Task<DownloadResult> DownloadAsync(CancellationToken cancellationToken)
         {
             if (!ShouldDownload)
             {
@@ -67,19 +70,19 @@ namespace GChan
                 Directory.CreateDirectory(Thread.SaveTo);
             }
 
-            var destFilepath = Utils.CombinePathAndFilename(Thread.SaveTo, GenerateFilename((ImageFileNameFormat)Settings.Default.ImageFilenameFormat));
+            var destinationPath = Utils.CombinePathAndFilename(Thread.SaveTo, GenerateFilename((ImageFileNameFormat)Settings.Default.ImageFilenameFormat));
 
             try
             {
                 var client = Utils.GetHttpClient();
-                var fileBytes = await client.GetByteArrayAsync(Url, Thread.CancellationToken);
-                await Utils.WriteFileBytesAsync(destFilepath, fileBytes);
+                var fileBytes = await client.GetByteArrayAsync(Url, cancellationToken);
+                await Utils.WriteFileBytesAsync(destinationPath, fileBytes, cancellationToken);
 
                 Thread.SavedIds.Add(Tim);
             }
             catch (OperationCanceledException)
             {
-                logger.Debug("Cancelling download for {image_link}.");
+                logger.Debug("Cancelling download for {image_link}.", this);
                 return new(false);
             }
             catch (StatusCodeException e) when (e.IsGone())

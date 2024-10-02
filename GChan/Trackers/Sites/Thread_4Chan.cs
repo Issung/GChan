@@ -147,7 +147,7 @@ namespace GChan.Trackers
 
             if (!string.IsNullOrWhiteSpace(htmlPage))
             {
-                File.WriteAllText($"{SaveTo}\\Thread.html", htmlPage);
+                await Utils.WriteAllTextAsync($"{SaveTo}\\Thread.html", htmlPage, cancellationToken);
             }
         }
 

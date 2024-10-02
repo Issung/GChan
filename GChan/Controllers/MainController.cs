@@ -30,9 +30,10 @@ namespace GChan.Controllers
 
         private SysThread scanThread = null;
 
-        private static readonly DownloadQueue downloadQueue = new(default);
-        private readonly DownloadManager<ImageLink> imageDownloader = new(true, downloadQueue);
-        private readonly DownloadManager<Thread> threadHtmlDownloader = new(true, downloadQueue); // Allow threads to be removed after download, we just re-add them. TODO: Maybe improve.
+        private readonly CancellationTokenSource cancellationTokenSource = new();
+        private readonly DownloadQueue downloadQueue;
+        private readonly DownloadManager<ImageLink> imageDownloader;
+        private readonly DownloadManager<Thread> threadHtmlDownloader;
 
         private readonly Timer scanTimer = new();
 
@@ -74,6 +75,16 @@ namespace GChan.Controllers
 
         public MainController(MainForm mainForm)
         {
+            // Controller Setup
+            downloadQueue = new(cancellationTokenSource.Token);
+            imageDownloader = new(true, downloadQueue);
+            threadHtmlDownloader = new(true, downloadQueue); // Allow threads to be removed after download, we just re-add them. TODO: Maybe improve.
+
+            scanTimer.Enabled = false;
+            scanTimer.Interval = Settings.Default.ScanTimer;
+            scanTimer.Tick += new EventHandler(StartScanThread);
+
+            // Form Setup
             Form = mainForm;
 
             Model = new MainFormModel(Form);
@@ -85,10 +96,6 @@ namespace GChan.Controllers
             { 
                 Form.systemTrayNotifyIcon.Visible = false;
             }
-
-            scanTimer.Enabled = false;
-            scanTimer.Interval = Settings.Default.ScanTimer;
-            scanTimer.Tick += new EventHandler(StartScanThread);
         }
 
         public void LoadTrackers()
@@ -494,6 +501,8 @@ namespace GChan.Controllers
         // TODO: This method has 2 functions, warning if needed and cleanup, seperate into 2 responsibilities.
         public bool Closing()
         {
+            cancellationTokenSource.Cancel();
+
             if (Settings.Default.WarnOnClose && Model.Threads.Count > 0)
             {
                 using var closeDialog = new CloseWarn();
@@ -505,7 +514,6 @@ namespace GChan.Controllers
                 }
             }
 
-            // TODO: Call cancel scraping method.
             Form.systemTrayNotifyIcon.Visible = false;
             Form.systemTrayNotifyIcon.Dispose();
             scanTimer.Enabled = false;

@@ -29,9 +29,9 @@ namespace GChan.Helpers
         private readonly ConcurrentHashSet<Task<T>> runningTasks = new();
         private readonly OnComplete completionListener;
 
-        public TaskPool(OnComplete completionListender)
+        public TaskPool(OnComplete completionListener)
         {
-            this.completionListener = completionListender;
+            this.completionListener = completionListener;
 
 #pragma warning disable CS4014 // Run in background
             Run();
