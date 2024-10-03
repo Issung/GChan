@@ -1,6 +1,8 @@
 ﻿using GChan.Models;
+using GChan.Trackers;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace GChan.Helpers
 {
@@ -15,23 +17,14 @@ namespace GChan.Helpers
         }
 
         /// <summary>
-        /// If <paramref name="includeAlreadySaved"/> is false then remove items from <paramref name="assets"/> if they are already in <paramref name="savedIds"/>.
+        /// Return <paramref name="assets"/> filtered to those not present in <paramref name="savedIds"/>.
         /// </summary>
-        public static IEnumerable<Asset> MaybeRemoveAlreadySavedLinks(
-            this IEnumerable<Asset> assets,
-            bool includeAlreadySaved,
-            SavedIdsCollection savedIds
-            )
+        public static IEnumerable<IAsset> FilterAssets(
+            this IEnumerable<IAsset> assets,
+            SavedAssetIdsCollection savedIds
+        )
         {
-            foreach (var link in assets)
-            {
-                var alreadySaved = savedIds.Contains(link.Tim);
-
-                if (includeAlreadySaved || !alreadySaved)
-                {
-                    yield return link;
-                }
-            }
+            return assets.Where(a => savedIds.Contains(a.Id));
         }
     }
 }

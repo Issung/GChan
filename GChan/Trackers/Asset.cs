@@ -1,159 +1,94 @@
-﻿using GChan.Helpers;
-using GChan.Properties;
-using NLog;
-using System;
-using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
-using Thread = GChan.Trackers.Thread;
+﻿using System;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
-namespace GChan
+namespace GChan.Trackers
 {
-    public class Asset : IDownloadable, IEquatable<Asset>
+    public enum AssetType
     {
+        Upload,
+        Thumbnail,
+    }
+
+    // TODO: This should probably be merged into IDownloadable. Or IDownloadable should become IAsset. The AssetId concept is nice and should remain I think.
+    // TODO: Should IAsset/IDownloadable be IEquatable<AssetId> (does that even work?)?
+    public interface IAsset : IDownloadable
+    {
+        public AssetId Id { get; }
+    }
+
+    /// <summary>
+    /// Act as the unique identifier for an asset.
+    /// </summary>
+    [JsonConverter(typeof(AssetIdJsonConverter))]
+    public class AssetId : IEquatable<AssetId>
+    {
+        public AssetType Type { get; set; }
+        
         /// <summary>
-        /// For 4chan: Unix timestamp with microseconds at which the image was uploaded.
+        /// May contain anything but a colon ":".
         /// </summary>
-        public long Tim;
+        public string Identifier { get; set; }
 
         /// <summary>
-        /// URL to the access the image.
+        /// Expecting the string in format "Type:Identifier"
         /// </summary>
-        public string Url;
-
-        /// <summary>
-        /// The <strong>sanitised</strong> filename the image was uploaded as <strong>without an extension</strong>.<br/>
-        /// e.g. "LittleSaintJames", <strong>not</strong> the stored filename e.g. "1265123123.jpg".
-        /// </summary>
-        public string UploadedFilename;
-
-        /// <summary>
-        /// The ID of the post this image belongs to.
-        /// </summary>
-        public long No;
-
-        /// <summary>
-        /// The thread this image is from.
-        /// </summary>
-        public Thread Thread;
-
-        private static readonly ILogger logger = LogManager.GetCurrentClassLogger();
-
-        public CancellationToken CancellationToken => Thread.CancellationToken;
-
-        public bool ShouldDownload => Thread.Scraping && !Thread.Gone;
-
-        public Asset(
-            long tim, 
-            string url, 
-            string uploadedFilename, 
-            long no,
-            Thread thread
-        )
+        public AssetId(string str)
         {
-            Tim = tim;
-            Url = url;
-            UploadedFilename = Utils.SanitiseFilename(uploadedFilename);
-            No = no;
-            Thread = thread;
+            var parts = str.Split(':');
+
+            Type = (AssetType)Enum.Parse(typeof(AssetType), parts[0]);
+            Identifier = ValidateIdentifier(parts[1]);
         }
 
-        public async Task<DownloadResult> DownloadAsync(CancellationToken cancellationToken)
+        /// <param name="identifier">May contain anything but a colon ":".</param>
+        public AssetId(AssetType type, string identifier)
         {
-            if (!ShouldDownload)
-            {
-                return new(false);
-            }
-
-            if (!Directory.Exists(Thread.SaveTo))
-            {
-                Directory.CreateDirectory(Thread.SaveTo);
-            }
-
-            var destinationPath = Utils.CombinePathAndFilename(Thread.SaveTo, GenerateFilename((ImageFileNameFormat)Settings.Default.ImageFilenameFormat));
-
-            try
-            {
-                var client = Utils.GetHttpClient();
-                var fileBytes = await client.GetByteArrayAsync(Url, cancellationToken);
-                await Utils.WriteFileBytesAsync(destinationPath, fileBytes, cancellationToken);
-
-                Thread.SavedIds.Add(Tim);
-            }
-            catch (OperationCanceledException)
-            {
-                logger.Debug("Cancelling download for {image_link}.", this);
-                return new(false);
-            }
-            catch (StatusCodeException e) when (e.IsGone())
-            {
-                logger.Debug("Downloading {image_link} resulted in {status_code}", this, e.StatusCode);
-                return new(false);  // Thread is gone, don't retry.
-            }
-            catch (Exception ex)
-            {
-                logger.Error(ex, "An error occured downloading an image.");
-                return new(true);   // Unknown error, retry.
-            }
-
-            return new(false);
+            this.Type = type;
+            this.Identifier = ValidateIdentifier(identifier);
         }
 
-        public string GenerateFilename(ImageFileNameFormat format)
+        public bool Equals(AssetId other)
         {
-            var extension = Path.GetExtension(Url); // Contains period (.).
-
-            var result = format switch
-            {
-                ImageFileNameFormat.ID => $"{No}{extension}",
-                ImageFileNameFormat.OriginalFilename => $"{UploadedFilename}{extension}",
-                ImageFileNameFormat.IDAndOriginalFilename => $"{No} - {UploadedFilename}{extension}",
-                ImageFileNameFormat.OriginalFilenameAndID => $"{UploadedFilename} - {No}{extension}",
-                _ => throw new ArgumentException("Given value for 'format' is unknown.")
-            };
-
-            return result;
-        }
-
-        public bool Equals(Asset other)
-        {
-            if (other == null)
-            {
-                return false;
-            }
-
-            return Tim == other.Tim &&
-                   Url == other.Url &&
-                   UploadedFilename == other.UploadedFilename;
-        }
-
-        public override bool Equals(object other)
-        {
-            if (other == null || GetType() != other.GetType())
-            {
-                return false;
-            }
-
-            return this.Equals((Asset)other);
+            return Type == other.Type && Identifier == other.Identifier;
         }
 
         public override int GetHashCode()
         {
-            unchecked
-            {
-                int hash = 17;
-                hash = hash * 23 + Tim.GetHashCode();
-                hash = hash * 23 + (Url?.GetHashCode() ?? 0);
-                hash = hash * 23 + (UploadedFilename?.GetHashCode() ?? 0);
-                hash = hash * 23 + No.GetHashCode();
-                hash = hash * 23 + Thread.GetHashCode();
-                return hash;
-            }
+            // Using prime numbers for a good distribution of hash codes
+            int hash = 17;
+            hash = hash * 31 + Type.GetHashCode();
+            hash = hash * 31 + (Identifier != null ? Identifier.GetHashCode() : 0);
+            return hash;
         }
 
         public override string ToString()
         {
-            return $"ImageLink {{ Tim: '{Tim}', Url: '{Url}', UploadedFilename: '{UploadedFilename}', No: '{No}' }}";
+            return $"{Type}:{Identifier}";
+        }
+
+        private string ValidateIdentifier(string identifier)
+        {
+            if (identifier.Contains(":"))
+            {
+                throw new Exception("AssetId identifiers may not contain a colon.");
+            }
+
+            return identifier;
+        }
+    }
+
+    public class AssetIdJsonConverter : JsonConverter<AssetId>
+    {
+        public override AssetId Read(ref Utf8JsonReader reader, System.Type typeToConvert, JsonSerializerOptions options)
+        {
+            var stringValue = reader.GetString();
+            return new AssetId(stringValue);
+        }
+
+        public override void Write(Utf8JsonWriter writer, AssetId value, JsonSerializerOptions options)
+        {
+            writer.WriteStringValue(value.ToString());
         }
     }
 }

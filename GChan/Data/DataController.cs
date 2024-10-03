@@ -157,7 +157,7 @@ namespace GChan.Data
 
                     cmd.Parameters.AddWithValue(COL_URL, threads[i].Url);
                     cmd.Parameters.AddWithValue(COL_SUBJECT, threads[i].Subject);
-                    cmd.Parameters.AddWithValue(COL_SAVED_IDS, threads[i].SavedIds.ToStringList());
+                    cmd.Parameters.AddWithValue(COL_SAVED_IDS, threads[i].SavedIds.ToJson());
 
                     cmd.ExecuteNonQuery();
                 }

@@ -32,7 +32,7 @@ namespace GChan.Controllers
 
         private readonly CancellationTokenSource cancellationTokenSource = new();
         private readonly DownloadQueue downloadQueue;
-        private readonly DownloadManager<Asset> assetDownloader;
+        private readonly DownloadManager<IAsset> assetDownloader;
         private readonly DownloadManager<Thread> threadHtmlDownloader;
 
         private readonly Timer scanTimer = new();

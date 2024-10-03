@@ -112,8 +112,10 @@
     <Compile Include="Helpers\ExceptionExtensions.cs" />
     <Compile Include="Helpers\HttpClientExtensions.cs" />
     <Compile Include="Helpers\TaskPool.cs" />
-    <Compile Include="Trackers\IDownloadable.cs" />
     <Compile Include="Trackers\Asset.cs" />
+    <Compile Include="Trackers\IDownloadable.cs" />
+    <Compile Include="Trackers\Thumbnail.cs" />
+    <Compile Include="Trackers\Upload.cs" />
     <Compile Include="Controls\PreferencesDataGridView.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -125,7 +127,7 @@
     </Compile>
     <Compile Include="Models\ConcurrentHashSet.cs" />
     <Compile Include="Models\MainFormModel.cs" />
-    <Compile Include="Models\SavedIdsCollection.cs" />
+    <Compile Include="Models\SavedAssetIdsCollection.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

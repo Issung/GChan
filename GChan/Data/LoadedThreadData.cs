@@ -7,14 +7,14 @@ namespace GChan.Data
     {
         public string Subject;
 
-        public SavedIdsCollection SavedIds;
+        public SavedAssetIdsCollection SavedIds;
 
         public LoadedThreadData(SQLiteDataReader dataReader)
         {
             var index = 0;
             Url = dataReader.GetString(index++) ?? "";
             Subject = dataReader.GetString(index++) ?? "";
-            SavedIds = new SavedIdsCollection(dataReader.GetString(index++) ?? "");
+            SavedIds = new SavedAssetIdsCollection(dataReader.GetString(index++) ?? "");
         }
     }
 }

@@ -140,7 +140,7 @@ namespace GChan
             return client;
         }
 
-        private static string GetFilenameFromUrl(string hrefLink)
+        public static string GetFilenameFromUrl(string hrefLink)
         {
             var parts = hrefLink.Split('/');
             var fileName = parts.LastOrDefault() ?? hrefLink;

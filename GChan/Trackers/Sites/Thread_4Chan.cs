@@ -42,23 +42,23 @@ namespace GChan.Trackers
             return Regex.IsMatch(url, THREAD_REGEX);
         }
 
-        protected override Asset[] GetImageLinksImpl(bool includeAlreadySaved = false)
+        protected override async Task<Upload[]> ScrapeUploadsImpl(CancellationToken cancellationToken)
         {
             var baseUrl = $"http://i.4cdn.org/{BoardCode}/";
             var jsonUrl = $"http://a.4cdn.org/{BoardCode}/thread/{ID}.json";
 
-            using var web = Utils.CreateWebClient();
-            var json = web.DownloadString(jsonUrl);
+            var client = Utils.GetHttpClient();
+            var json = await client.GetStringAsync(jsonUrl, cancellationToken);
             var jObject = JObject.Parse(json);
 
             // The /f/ board (flash) saves the files with their uploaded name.
             var timPath = BoardCode == "f" ? "filename" : "tim";
 
-            var links = jObject
+            var uploads = jObject
                 .SelectTokens("posts[*]")
                 .Where(x => x["ext"] != null)
                 .Select(x =>
-                    new Asset(
+                    new Upload(
                         x[timPath].Value<long>(),
                         baseUrl + Uri.EscapeDataString(x[timPath].Value<string>()) + x["ext"],  // Require escaping for the flash files stored with arbitrary string names.
                         x["filename"].Value<string>(),
@@ -68,25 +68,26 @@ namespace GChan.Trackers
                 )
                 .ToArray();
 
-            FileCount = links.Length;
-            return links.MaybeRemoveAlreadySavedLinks(includeAlreadySaved, SavedIds).ToArray();
+            FileCount = uploads.Length;
+
+            return uploads;
         }
 
-        public override async Task DownloadHtmlImpl(CancellationToken cancellationToken)
+        // TODO: Separate thread scrape & thumbnail scrape to save on string traversal & manipulation. If thread scraping is on get the html. If thumb scraping is on, pass the thread html to the get thumbnails method, etc.
+        protected override async Task<ThreadScrapeResults> ScrapeThreadImpl(CancellationToken cancellationToken)
         {
             var thumbUrls = new List<string>();
             var baseUrl = $"//i.4cdn.org/{BoardCode}/";
             var jsonUrl = $"http://a.4cdn.org/{BoardCode}/thread/{ID}.json";
-            JObject jObject;
 
             var client = Utils.GetHttpClient();
             var htmlPage = await client.GetStringAsync(Url, cancellationToken);
             htmlPage = htmlPage.Replace("f=\"to\"", "f=\"penis\"");
 
             var json = await client.GetStringAsync(jsonUrl, cancellationToken);
-            jObject = JObject.Parse(json);
 
-            var posts = jObject
+            var posts = JObject
+                .Parse(json)
                 .SelectTokens("posts[*]")
                 .Where(x => x["ext"] != null)
                 .ToList();
@@ -97,7 +98,7 @@ namespace GChan.Trackers
                 var ext = post["ext"].ToString();
                 var oldUrl = baseUrl + tim + ext;
                 var newFilename = Path.GetFileNameWithoutExtension(
-                    new Asset(
+                    new Upload(
                         post["tim"].Value<long>(),
                         oldUrl,
                         post["filename"].ToString(),
@@ -137,18 +138,8 @@ namespace GChan.Trackers
             // Alter all content links like "http://is2.4chan.org/tv/123.jpg" to become local like "123.jpg".
             htmlPage = htmlPage.Replace($"http://is2.4chan.org/{BoardCode}/", string.Empty);
 
-            if (Settings.Default.SaveThumbnails)
-            {
-                foreach (var thumb in thumbUrls)
-                {
-                    Utils.DownloadFileIfDoesntExist(thumb, $"{SaveTo}\\thumb");
-                }
-            }
-
-            if (!string.IsNullOrWhiteSpace(htmlPage))
-            {
-                await Utils.WriteAllTextAsync($"{SaveTo}\\Thread.html", htmlPage, cancellationToken);
-            }
+            var thumbAssets = thumbUrls.Select(thumbUrl => new Thumbnail(this, thumbUrl));
+            return new(htmlPage, thumbAssets);
         }
 
 

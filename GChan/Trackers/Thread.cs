@@ -1,8 +1,8 @@
 ﻿using GChan.Helpers;
 using GChan.Models;
+using GChan.Properties;
 using System;
 using System.ComponentModel;
-using System.IO;
 using System.Net;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
@@ -12,7 +12,7 @@ namespace GChan.Trackers
 {
     /// <summary>
     /// <see cref="IDownloadable{T}"/> implementation is for downloading the website HTML.<br/>
-    /// For downloading images <see cref="GetUploadAssets"/> is used and results queued into a download manager.
+    /// For downloading images <see cref="ScrapeUploadedAssets"/> is used and results queued into a download manager.
     /// </summary>
     public abstract class Thread : Tracker, IDownloadable, INotifyPropertyChanged
     {
@@ -20,7 +20,7 @@ namespace GChan.Trackers
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public SavedIdsCollection SavedIds { get; set; } = new();
+        public SavedAssetIdsCollection SavedIds { get; set; } = new();
 
         public bool ShouldDownload => !Gone;
 
@@ -47,7 +47,7 @@ namespace GChan.Trackers
                 fileCount = value;
 
                 if (!Program.mainForm.Disposing && !Program.mainForm.IsDisposed)
-                { 
+                {
                     Program.mainForm.Invoke(() => { NotifyPropertyChanged(nameof(FileCount)); });
                 }
             }
@@ -87,8 +87,9 @@ namespace GChan.Trackers
 
             try
             {
-                await DownloadHtmlImpl(cancellationToken);
-                await GetUploadAssets(cancellationToken);
+                // Should we be able to return more IDownloadables in DownloadResult to be added to the queue?
+                await ScrapeThread(cancellationToken);
+                await ScrapeUploadedAssets(cancellationToken);
             }
             catch (OperationCanceledException)
             {
@@ -108,28 +109,46 @@ namespace GChan.Trackers
             return new(false);
         }
 
-        public abstract Task DownloadHtmlImpl(CancellationToken cancellationToken);
+        /// <summary>
+        /// Website specific implementation for scraping a thread, returning html and thumbnail assets.<br/>
+        /// <see cref="Thread"/> base class will only call this if needed, and will only save what is needed.
+        /// </summary>
+        protected abstract Task<ThreadScrapeResults> ScrapeThreadImpl(CancellationToken cancellationToken);
 
         /// <summary>
-        /// Get imagelinks for this thread.
+        /// Website specific implementation to obtain a collection of assets specific image link retreival.
         /// </summary>
-        public async Task<Asset[]> GetUploadAssets(CancellationToken cancellationToken)
-        {
-            if (Gone)
-            {
-                logger.Info($"Download(object callback) called on {this}, but will not download because {nameof(Gone)} is true.");
-                return Array.Empty<Asset>();
-            }
+        protected abstract Task<Upload[]> ScrapeUploadsImpl(CancellationToken cancellationToken);
 
-            try
+        private async Task ScrapeThread(CancellationToken cancellationToken)
+        {
+            if (Settings.Default.SaveHtml)
             {
-                if (!Directory.Exists(SaveTo))
-                { 
-                    Directory.CreateDirectory(SaveTo);
+                var results = await ScrapeThreadImpl(cancellationToken);
+
+                if (!string.IsNullOrWhiteSpace(results.ThreadHtml))
+                {
+                    await Utils.WriteAllTextAsync($"{SaveTo}\\Thread.html", results.ThreadHtml, cancellationToken);
                 }
 
-                var imageLinks = await GetImageLinksImpl(false, cancellationToken);
-                return imageLinks;
+                if (Settings.Default.SaveThumbnails)
+                {
+                    var thumbnails = results.Thumbnails;
+
+                    // How can we filter out thumbnails that are already in the queue? Keep 2 collections? SeenIds & SavedIds?
+                    // What do we do with the new ones?
+                }
+            }
+        }
+
+        private async Task ScrapeUploadedAssets(CancellationToken cancellationToken)
+        {
+            try
+            {
+                var uploads = await ScrapeUploadsImpl(cancellationToken);
+
+                // How can we filter out uploads that are already in the queue? Keep 2 collections? SeenIds & SavedIds?
+                // What do we do with them now?
             }
             catch (WebException webEx) when (webEx.IsGone(out var httpWebResponse))
             {
@@ -139,21 +158,9 @@ namespace GChan.Trackers
             {
                 logger.Error(ex);
             }
-
-            return Array.Empty<Asset>();
         }
-
-        /// <summary>
-        /// Implementation point for website specific image link retreival.
-        /// </summary>
-        protected abstract Task<Asset[]> GetImageLinksImpl(bool includeAlreadySaved, CancellationToken cancellationToken);    // TODO: Always return all found assets, and the caller can filter out those already saved.
 
         protected abstract string GetThreadSubject();
-
-        public string GetURLWithSubject()
-        {
-            return (Url + ("/?subject=" + Utils.SanitiseSubject(Subject).Replace(' ', '_'))).Replace("\r", "");
-        }
 
         public override int GetHashCode()
         {
