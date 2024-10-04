@@ -80,8 +80,8 @@
     <Reference Include="System.Xml.Serialization" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Controllers\DownloadManager.cs" />
-    <Compile Include="Controllers\DownloadQueue.cs" />
+    <Compile Include="Controllers\ProcessManager.cs" />
+    <Compile Include="Controllers\ProcessQueue.cs" />
     <Compile Include="Data\DataController.cs" />
     <Compile Include="Controllers\MainController.cs" />
     <Compile Include="Controllers\UpdateController.cs" />
@@ -113,7 +113,7 @@
     <Compile Include="Helpers\HttpClientExtensions.cs" />
     <Compile Include="Helpers\TaskPool.cs" />
     <Compile Include="Trackers\Asset.cs" />
-    <Compile Include="Trackers\IDownloadable.cs" />
+    <Compile Include="Trackers\IProcessable.cs" />
     <Compile Include="Trackers\Thumbnail.cs" />
     <Compile Include="Trackers\Upload.cs" />
     <Compile Include="Controls\PreferencesDataGridView.cs">

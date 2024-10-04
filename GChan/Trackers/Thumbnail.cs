@@ -11,7 +11,7 @@ namespace GChan.Trackers
     /// <summary>
     /// Thumbnail of an upload.
     /// </summary>
-    public class Thumbnail : IAsset<Thumbnail>, IEquatable<Thumbnail>
+    public class Thumbnail : IAsset, IEquatable<Thumbnail>
     {
         public AssetId Id { get; private set; }
 
@@ -29,7 +29,7 @@ namespace GChan.Trackers
 
         public CancellationToken CancellationToken => Thread.CancellationToken;
 
-        public bool ShouldDownload => Thread.Scraping && !Thread.Gone && Settings.Default.SaveThumbnails;
+        public bool ShouldProcess => Thread.Scraping && !Thread.Gone && Settings.Default.SaveThumbnails;
 
         public Thumbnail(
             Thread thread,
@@ -40,9 +40,9 @@ namespace GChan.Trackers
             Thread = thread;
         }
 
-        public async Task<DownloadResult> DownloadAsync(CancellationToken cancellationToken)
+        public async Task<ProcessResult> ProcessAsync(CancellationToken cancellationToken)
         {
-            if (!ShouldDownload)
+            if (!ShouldProcess)
             {
                 return new(false);
             }

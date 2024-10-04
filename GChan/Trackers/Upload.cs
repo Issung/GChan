@@ -11,7 +11,7 @@ namespace GChan.Trackers
     /// <summary>
     /// Original content uploaded by a user.
     /// </summary>
-    public class Upload : IAsset<Upload>, IEquatable<Upload>
+    public class Upload : IAsset, IEquatable<Upload>
     {
         public AssetId Id { get; private set; }
 
@@ -45,7 +45,7 @@ namespace GChan.Trackers
 
         public CancellationToken CancellationToken => Thread.CancellationToken;
 
-        public bool ShouldDownload => Thread.Scraping && !Thread.Gone;
+        public bool ShouldProcess => Thread.Scraping && !Thread.Gone;
 
         public Upload(
             long tim,
@@ -63,9 +63,9 @@ namespace GChan.Trackers
             Thread = thread;
         }
 
-        public async Task<DownloadResult> DownloadAsync(CancellationToken cancellationToken)
+        public async Task<ProcessResult> ProcessAsync(CancellationToken cancellationToken)
         {
-            if (!ShouldDownload)
+            if (!ShouldProcess)
             {
                 return new(false);
             }

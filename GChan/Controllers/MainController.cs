@@ -31,9 +31,9 @@ namespace GChan.Controllers
         private SysThread scanThread = null;
 
         private readonly CancellationTokenSource cancellationTokenSource = new();
-        private readonly DownloadQueue downloadQueue;
-        private readonly DownloadManager<IAsset> assetDownloader;
-        private readonly DownloadManager<Thread> threadHtmlDownloader;
+        private readonly ProcessQueue downloadQueue;
+        private readonly ProcessManager<IAsset> assetDownloader;
+        private readonly ProcessManager<Thread> threadHtmlDownloader;
 
         private readonly Timer scanTimer = new();
 

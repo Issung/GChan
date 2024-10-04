@@ -8,16 +8,16 @@ using System.Threading.Tasks;
 namespace GChan.Controllers
 {
     /// <summary>
-    /// A queue for <see cref="IDownloadable"/>s. Controls how often they are started.
+    /// A queue for <see cref="IProcessable"/>s. Controls how often they are started.
     /// </summary>
-    public class DownloadQueue
+    public class ProcessQueue
     {
         private readonly SemaphoreSlim semaphore = new(1, 1);
         private readonly CancellationToken shutdownCancellationToken;
-        private readonly ConcurrentQueue<IDownloadable> queue = new();
-        private readonly TaskPool<IDownloadable> pool = new(_ => { });  // TODO: Do something with the completion listener.
+        private readonly ConcurrentQueue<IProcessable> queue = new();
+        private readonly TaskPool<IProcessable> pool = new(_ => { });  // TODO: Do something with the completion listener.
 
-        public DownloadQueue(CancellationToken shutdownCancellationToken)
+        public ProcessQueue(CancellationToken shutdownCancellationToken)
         {
             this.shutdownCancellationToken = shutdownCancellationToken;
 
@@ -26,7 +26,7 @@ namespace GChan.Controllers
 #pragma warning restore CS4014
         }
 
-        public void Enqueue(IDownloadable download)
+        public void Enqueue(IProcessable download)
         {
             queue.Enqueue(download);
         }
@@ -48,7 +48,7 @@ namespace GChan.Controllers
 
                 var combinedToken = Utils.CombineCancellationTokens(shutdownCancellationToken, item.CancellationToken);
 
-                var result = await item.DownloadAsync(combinedToken);
+                var result = await item.ProcessAsync(combinedToken);
 
                 HandleResult(item, result);
 
@@ -61,9 +61,9 @@ namespace GChan.Controllers
         }
 
         /// <summary>
-        /// Holds control until a downloadable with <see cref="IDownloadable.ShouldDownload"/> true is found.
+        /// Holds control until a downloadable with <see cref="IProcessable.ShouldProcess"/> true is found.
         /// </summary>
-        private async Task<IDownloadable> DequeueAsync()
+        private async Task<IProcessable> DequeueAsync()
         {
             while (true)
             {
@@ -74,7 +74,7 @@ namespace GChan.Controllers
 
                 if (queue.TryDequeue(out var downloadable))
                 {
-                    if (downloadable.ShouldDownload)
+                    if (downloadable.ShouldProcess)
                     {
                         return downloadable;
                     }
@@ -82,7 +82,7 @@ namespace GChan.Controllers
             }
         }
 
-        private void HandleResult(IDownloadable item, DownloadResult result)
+        private void HandleResult(IProcessable item, ProcessResult result)
         {
             if (result.Retry)
             {

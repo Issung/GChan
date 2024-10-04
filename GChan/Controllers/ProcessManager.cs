@@ -7,8 +7,8 @@ using System.Threading;
 
 namespace GChan.Controllers
 {
-    public delegate void DownloadSuccessCallback(object item);
-    public delegate void DownloadFailureCallback(object item, bool retry);
+    public delegate void ProcessSuccessCallback(object item);
+    public delegate void ProcessFailureCallback(object item, bool retry);
 
     /// <summary>
     /// Class that manages a file download pool.<br/>
@@ -18,7 +18,7 @@ namespace GChan.Controllers
     /// TODO: Add ability to clear the manager completely, for certain situations e.g. someone disables the setting to save thread html.<br/>
     /// TODO: Use async/tasks instead of threads.<br/>
     /// </remarks>
-    public class DownloadManager<T> : IDisposable where T: IDownloadable
+    public class ProcessManager<T> : IDisposable where T: IProcessable
     {
         class Download : IDisposable
         {
@@ -58,7 +58,7 @@ namespace GChan.Controllers
         private readonly ConcurrentDictionary<T, Download> downloading = new();
         private readonly ConcurrentQueue<T> waiting = new();
         private readonly bool removeSuccessfulItems;
-        private readonly DownloadQueue queue;
+        private readonly ProcessQueue queue;
         private readonly Timer timer;
         private readonly string typeName;
 
@@ -69,7 +69,7 @@ namespace GChan.Controllers
         /// Should items that successfully download be removed from the download manager?<br/>
         /// If false, after a successful download will enter the back of the queue again, for later re-downloading.
         /// </param>
-        public DownloadManager(bool removeSuccessfulItems, DownloadQueue queue)
+        public ProcessManager(bool removeSuccessfulItems, ProcessQueue queue)
         { 
             this.removeSuccessfulItems = removeSuccessfulItems;
             this.queue = queue;
@@ -102,7 +102,7 @@ namespace GChan.Controllers
 
         /// <summary>
         /// Cancel a download of an item if it is currently downloading.<br/>
-        /// To cancel downloads of items that are queued for download, set <see cref="IDownloadable{T}.ShouldDownload"/> to false.
+        /// To cancel downloads of items that are queued for download, set <see cref="IProcessable{T}.ShouldDownload"/> to false.
         /// </summary>
         public void Cancel(T item)
         {
@@ -114,7 +114,7 @@ namespace GChan.Controllers
 
         /// <summary>
         /// Cancel all currently downloading items that match <paramref name="predicate"/>.<br/>
-        /// To cancel downloads of items that are queued for download, set <see cref="IDownloadable{T}.ShouldDownload"/> to false.
+        /// To cancel downloads of items that are queued for download, set <see cref="IProcessable{T}.ShouldDownload"/> to false.
         /// </summary>
         /// <remarks>
         /// TODO: Not thread-safe because the dictionary could change over the loop.
@@ -182,7 +182,7 @@ namespace GChan.Controllers
 
             while (chunk.Count < amount && waiting.TryDequeue(out var item))
             {
-                if (item.ShouldDownload)
+                if (item.ShouldProcess)
                 {
                     chunk.Add(item);
                 }

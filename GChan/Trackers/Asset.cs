@@ -12,7 +12,7 @@ namespace GChan.Trackers
 
     // TODO: This should probably be merged into IDownloadable. Or IDownloadable should become IAsset. The AssetId concept is nice and should remain I think.
     // TODO: Should IAsset/IDownloadable be IEquatable<AssetId> (does that even work?)?
-    public interface IAsset : IDownloadable
+    public interface IAsset : IProcessable
     {
         public AssetId Id { get; }
     }

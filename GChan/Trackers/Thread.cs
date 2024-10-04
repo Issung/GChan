@@ -14,7 +14,7 @@ namespace GChan.Trackers
     /// <see cref="IDownloadable{T}"/> implementation is for downloading the website HTML.<br/>
     /// For downloading images <see cref="ScrapeUploadedAssets"/> is used and results queued into a download manager.
     /// </summary>
-    public abstract class Thread : Tracker, IDownloadable, INotifyPropertyChanged
+    public abstract class Thread : Tracker, IProcessable, INotifyPropertyChanged
     {
         public const string NO_SUBJECT = "No Subject";
 
@@ -22,7 +22,7 @@ namespace GChan.Trackers
 
         public SavedAssetIdsCollection SavedIds { get; set; } = new();
 
-        public bool ShouldDownload => !Gone;
+        public bool ShouldProcess => !Gone;
 
         public string Subject
         {
@@ -78,9 +78,9 @@ namespace GChan.Trackers
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        public async Task<DownloadResult> DownloadAsync(CancellationToken cancellationToken)
+        public async Task<ProcessResult> ProcessAsync(CancellationToken cancellationToken)
         {
-            if (!ShouldDownload)
+            if (!ShouldProcess)
             {
                 return new(false);
             }
