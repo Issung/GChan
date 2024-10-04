@@ -86,7 +86,8 @@ namespace GChan
             if (data is LoadedThreadData threadData && tracker is Thread thread)
             {
                 thread.Subject = threadData.Subject;
-                thread.SavedIds = threadData.SavedIds;
+                thread.SeenAssets = threadData.SavedIds;
+                thread.SavedAssets = threadData.SavedIds;
                 thread.FileCount = threadData.SavedIds.Count;
             }
             else if (data is LoadedBoardData boardData && tracker is Board board)

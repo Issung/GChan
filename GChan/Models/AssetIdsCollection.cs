@@ -6,16 +6,16 @@ namespace GChan.Models
     /// <summary>
     /// Thread safe collection of <see cref="long"/>s. For saving downloaded image ids.
     /// </summary>
-    public class SavedAssetIdsCollection : ConcurrentHashSet<AssetId>
+    public class AssetIdsCollection : ConcurrentHashSet<AssetId>
     {
         private static readonly JsonSerializerOptions jsonOptions = new();
 
-        public SavedAssetIdsCollection()
+        public AssetIdsCollection()
         { 
         
         }
 
-        public SavedAssetIdsCollection(string json)
+        public AssetIdsCollection(string json)
         {
             LoadJson(json);
         }

@@ -2,8 +2,9 @@
 using GChan.Models;
 using GChan.Properties;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
-using System.Net;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using CancellationToken = System.Threading.CancellationToken;
@@ -14,13 +15,24 @@ namespace GChan.Trackers
     /// <see cref="IDownloadable{T}"/> implementation is for downloading the website HTML.<br/>
     /// For downloading images <see cref="ScrapeUploadedAssets"/> is used and results queued into a download manager.
     /// </summary>
+    // TODO: Threads should save their last scrape time and use the If-Modified-Since header in requests https://github.com/4chan/4chan-API#:~:text=Use%20If%2DModified%2DSince%20when%20doing%20your%20requests.
     public abstract class Thread : Tracker, IProcessable, INotifyPropertyChanged
     {
         public const string NO_SUBJECT = "No Subject";
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public SavedAssetIdsCollection SavedIds { get; set; } = new();
+        /// <summary>
+        /// Assets that no longer need to be put in processing. This should load the saved assets from the database.
+        /// </summary>
+        // TODO: Make readonly
+        public AssetIdsCollection SeenAssets { get; set; } = new();
+
+        /// <summary>
+        /// Assetss that have successfully completed processing. This should be saved in the database.
+        /// </summary>
+        // TODO: Make readonly
+        public AssetIdsCollection SavedAssets { get; set; } = new();
 
         public bool ShouldProcess => !Gone;
 
@@ -82,19 +94,24 @@ namespace GChan.Trackers
         {
             if (!ShouldProcess)
             {
-                return new(false);
+                return new(this, removeFromQueue: true);
             }
 
             try
             {
                 // Should we be able to return more IDownloadables in DownloadResult to be added to the queue?
-                await ScrapeThread(cancellationToken);
-                await ScrapeUploadedAssets(cancellationToken);
+                var thumbs = await ScrapeThread(cancellationToken);
+                var uploads = await ScrapeUploadedAssets(cancellationToken);
+
+                var assets = Enumerable.Concat<IAsset>(thumbs, uploads);
+                var newAssets = assets.Where(a => !SeenAssets.Contains(a.Id));
+
+                return new(this, removeFromQueue: false, newProcessables: newAssets);
             }
             catch (OperationCanceledException)
             {
                 logger.Debug("Cancelling download for {thread}.", this);
-                return new(false);
+                return new(this, removeFromQueue: true);
             }
             catch (StatusCodeException e) when (e.IsGone())
             {
@@ -103,10 +120,10 @@ namespace GChan.Trackers
             catch (Exception ex)
             {
                 logger.Error(ex);
-                return new(true);
+                return new(this, removeFromQueue: false);
             }
 
-            return new(false);
+            return new(this, removeFromQueue: true);
         }
 
         /// <summary>
@@ -120,7 +137,7 @@ namespace GChan.Trackers
         /// </summary>
         protected abstract Task<Upload[]> ScrapeUploadsImpl(CancellationToken cancellationToken);
 
-        private async Task ScrapeThread(CancellationToken cancellationToken)
+        private async Task<IEnumerable<Thumbnail>> ScrapeThread(CancellationToken cancellationToken)
         {
             if (Settings.Default.SaveHtml)
             {
@@ -133,34 +150,18 @@ namespace GChan.Trackers
 
                 if (Settings.Default.SaveThumbnails)
                 {
-                    var thumbnails = results.Thumbnails;
-
-                    // How can we filter out thumbnails that are already in the queue? Keep 2 collections? SeenIds & SavedIds?
-                    // What do we do with the new ones?
+                    return results.Thumbnails;
                 }
             }
+
+            return Enumerable.Empty<Thumbnail>();
         }
 
-        private async Task ScrapeUploadedAssets(CancellationToken cancellationToken)
+        private async Task<IEnumerable<Upload>> ScrapeUploadedAssets(CancellationToken cancellationToken)
         {
-            try
-            {
-                var uploads = await ScrapeUploadsImpl(cancellationToken);
-
-                // How can we filter out uploads that are already in the queue? Keep 2 collections? SeenIds & SavedIds?
-                // What do we do with them now?
-            }
-            catch (WebException webEx) when (webEx.IsGone(out var httpWebResponse))
-            {
-                Gone = true;
-            }
-            catch (Exception ex)
-            {
-                logger.Error(ex);
-            }
+            var uploads = await ScrapeUploadsImpl(cancellationToken);
+            return uploads;
         }
-
-        protected abstract string GetThreadSubject();
 
         public override int GetHashCode()
         {
@@ -172,6 +173,12 @@ namespace GChan.Trackers
                 hash = hash * 13 + ID.GetHashCode();
                 return hash;
             }
+        }
+
+        public ValueTask DisposeAsync()
+        {
+            cancellationTokenSource.Dispose();
+            return default;
         }
     }
 }

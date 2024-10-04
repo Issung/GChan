@@ -84,7 +84,7 @@ namespace GChan.Controllers
 
         private void HandleResult(IProcessable item, ProcessResult result)
         {
-            if (result.Retry)
+            if (result.RemoveFromQueue)
             {
                 queue.Enqueue(item);
             }

@@ -44,7 +44,7 @@ namespace GChan.Trackers
         {
             if (!ShouldProcess)
             {
-                return new(false);
+                return new(this, removeFromQueue: true);
             }
 
             if (!Directory.Exists(Thread.SaveTo))
@@ -60,25 +60,25 @@ namespace GChan.Trackers
                 var fileBytes = await client.GetByteArrayAsync(Url, cancellationToken);
                 await Utils.WriteFileBytesAsync(destinationPath, fileBytes, cancellationToken);
 
-                Thread.SavedIds.Add(Id);
+                Thread.SavedAssets.Add(Id);
             }
             catch (OperationCanceledException)
             {
                 logger.Debug("Cancelling download for {thumbnail}.", this);
-                return new(false);
+                return new(this, removeFromQueue: true);
             }
             catch (StatusCodeException e) when (e.IsGone())
             {
                 logger.Debug("Downloading {thumbnail} resulted in {status_code}", this, e.StatusCode);
-                return new(false);  // Thread is gone, don't retry.
+                return new(this, removeFromQueue: true);  // Thread is gone, don't retry.
             }
             catch (Exception ex)
             {
                 logger.Error(ex, "An error occured downloading an image.");
-                return new(true);   // Unknown error, retry.
+                return new(this, removeFromQueue: false);   // Unknown error, retry.
             }
 
-            return new(false);
+            return new(this, removeFromQueue: true);
         }
 
         public bool Equals(Thumbnail other) => Id.Equals(other.Id);
@@ -89,5 +89,7 @@ namespace GChan.Trackers
         {
             return $"Thumbnail {{ Url: '{Url}' }}";
         }
+
+        public ValueTask DisposeAsync() => default;
     }
 }

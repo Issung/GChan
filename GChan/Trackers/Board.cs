@@ -1,5 +1,6 @@
 ﻿namespace GChan.Trackers
 {
+    // TODO: Make boards IProcessable.
     public abstract class Board : Tracker
     {
         protected int threadCount;

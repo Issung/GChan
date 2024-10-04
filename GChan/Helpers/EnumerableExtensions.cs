@@ -21,7 +21,7 @@ namespace GChan.Helpers
         /// </summary>
         public static IEnumerable<IAsset> FilterAssets(
             this IEnumerable<IAsset> assets,
-            SavedAssetIdsCollection savedIds
+            AssetIdsCollection savedIds
         )
         {
             return assets.Where(a => savedIds.Contains(a.Id));

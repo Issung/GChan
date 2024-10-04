@@ -282,7 +282,9 @@ namespace GChan.Controllers
         /// <summary>
         /// Thread entry-point.
         /// </summary>
-        private void ScanRoutine()  // TODO: Replace this whole bullshit by shoving threads into the download queue with some property like "RemoveOnSuccess" set to false.
+        // TODO: Get rid of this shit and make boards IProcessable like threads.
+        // TODO: Replace this whole bullshit by shoving threads into the download queue with some property like "RemoveOnSuccess" set to false.
+        private void ScanRoutine()
         {
             lock (ThreadLock)
             {
@@ -332,23 +334,6 @@ namespace GChan.Controllers
                     });
 
                     board.GreatestThreadId = greatestThreadId;
-                }
-            }
-
-            // Make a copy of the current threads and queue them for downloading them.
-            var threads = Model.Threads.ToArray();
-
-            foreach (var thread in threads)
-            {
-                if (thread.Scraping)
-                {
-                    var assets = thread.GetImageLinks();
-                    assetDownloader.Queue(assets);
-
-                    if (Settings.Default.SaveHtml)
-                    { 
-                        threadHtmlDownloader.Queue(thread);
-                    }
                 }
             }
         }

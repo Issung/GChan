@@ -127,7 +127,7 @@
     </Compile>
     <Compile Include="Models\ConcurrentHashSet.cs" />
     <Compile Include="Models\MainFormModel.cs" />
-    <Compile Include="Models\SavedAssetIdsCollection.cs" />
+    <Compile Include="Models\AssetIdsCollection.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

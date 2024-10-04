@@ -22,19 +22,21 @@ namespace GChan.Trackers
         {
             SiteName = Board_4Chan.SITE_NAME;
 
-            Match match = Regex.Match(url, @"boards.(4chan|4channel).org/[a-zA-Z0-9]*?/thread/\d*");
+            var match = Regex.Match(url, @"boards.(4chan|4channel).org/[a-zA-Z0-9]*?/thread/\d*");
             Url = "http://" + match.Groups[0].Value;
 
-            Match boardCodeMatch = Regex.Match(url, BOARD_CODE_REGEX);
+            var boardCodeMatch = Regex.Match(url, BOARD_CODE_REGEX);
             BoardCode = boardCodeMatch.Groups[0].Value;
 
-            Match idCodeMatch = Regex.Match(url, ID_CODE_REGEX);
+            var idCodeMatch = Regex.Match(url, ID_CODE_REGEX);
             ID = idCodeMatch.Groups[0].Value;
 
             SaveTo = Path.Combine(Settings.Default.SavePath, SiteName, BoardCode, ID);
 
             if (subject == null)
+            {
                 Subject = GetThreadSubject();
+            }
         }
 
         public static bool UrlIsThread(string url)
@@ -142,8 +144,7 @@ namespace GChan.Trackers
             return new(htmlPage, thumbAssets);
         }
 
-
-        protected override string GetThreadSubject()
+        private string GetThreadSubject()
         {
             string subject = NO_SUBJECT;
 

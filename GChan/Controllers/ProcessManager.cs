@@ -20,11 +20,11 @@ namespace GChan.Controllers
     /// </remarks>
     public class ProcessManager<T> : IDisposable where T: IProcessable
     {
-        class Download : IDisposable
+        class Process : IDisposable
         {
             private readonly CancellationTokenSource cancellationTokenSource;
 
-            public Download(CancellationTokenSource cancellationTokenSource)
+            public Process(CancellationTokenSource cancellationTokenSource)
             {
                 this.cancellationTokenSource = cancellationTokenSource;
             }
@@ -55,7 +55,7 @@ namespace GChan.Controllers
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
         private static readonly TimeSpan interval = TimeSpan.FromSeconds(1);
 
-        private readonly ConcurrentDictionary<T, Download> downloading = new();
+        private readonly ConcurrentDictionary<T, Process> downloading = new();
         private readonly ConcurrentQueue<T> waiting = new();
         private readonly bool removeSuccessfulItems;
         private readonly ProcessQueue queue;

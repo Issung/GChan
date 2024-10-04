@@ -1,4 +1,7 @@
-﻿using System.Threading;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace GChan
@@ -6,20 +9,36 @@ namespace GChan
     public class ProcessResult
     {
         /// <summary>
-        /// Should this download be retried.
+        /// The processable this result comes from.
         /// </summary>
-        public bool Retry { get; }
+        public IProcessable Processable { get; }
 
-        public ProcessResult(bool retry)
+        /// <summary>
+        /// Should this processable be removed from the queue.
+        /// </summary>
+        public bool RemoveFromQueue { get; }
+
+        /// <summary>
+        /// A collection of new processables to be added to the processing queue.
+        /// </summary>
+        public IEnumerable<IProcessable> NewProcessables { get; }
+
+        public ProcessResult(
+            IProcessable processable,
+            bool removeFromQueue,
+            IEnumerable<IProcessable> newProcessables = null
+        )
         {
-            this.Retry = retry;
+            this.Processable = processable;
+            this.RemoveFromQueue = removeFromQueue;
+            this.NewProcessables = newProcessables ?? Enumerable.Empty<IProcessable>();
         }
     }
 
     /// <summary>
     /// An item that can be processed.
     /// </summary>
-    public interface IProcessable
+    public interface IProcessable : IAsyncDisposable
     {
         /// <summary>
         /// A cancellation token provided by the this processable, for when it believes it should no longer be processed.
