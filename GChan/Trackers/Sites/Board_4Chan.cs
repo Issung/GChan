@@ -36,7 +36,7 @@ namespace GChan.Trackers
                 .Select(thread => {
                     var id = thread["no"].Value<long>();
                     var url = "http://boards.4chan.org/" + BoardCode + "/thread/" + id;
-                    var subject = thread["sub"].Value<string>();
+                    var subject = thread["sub"]?.Value<string>() ?? Thread.NO_SUBJECT;
                     var fileCount = thread["images"].Value<int>();
 
                     return new Thread_4Chan(url, subject, fileCount);
