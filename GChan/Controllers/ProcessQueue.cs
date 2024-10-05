@@ -1,6 +1,7 @@
 ﻿using GChan.Helpers;
 using GChan.Properties;
 using GChan.Trackers;
+using NLog;
 using System;
 using System.Collections.Concurrent;
 using System.Threading;
@@ -12,8 +13,11 @@ namespace GChan.Controllers
     /// A queue for <see cref="IProcessable"/>s. Controls how often they are started.
     /// </summary>
     // TODO: Maybe need a high priority queue for UI interactions (threads/boards being added by user). Take from that queue first before falling back to main queue.
+    // And maybe a low priority queue for thumbnails? IProcessable should have an enum property "Priority" that can change itself (e.g. a new thread is high, and after first scrape goes back to normal).
     public class ProcessQueue
     {
+        private static readonly ILogger logger = LogManager.GetCurrentClassLogger();
+
         private readonly SemaphoreSlim semaphore = new(1, 1);
         private readonly Action<Tracker> addTrackerCallback;
         private readonly CancellationToken shutdownCancellationToken;
@@ -30,14 +34,12 @@ namespace GChan.Controllers
             this.shutdownCancellationToken = shutdownCancellationToken;
             this.pool = new(HandleResult);
 
-            //task = WorkAsync();    // Something is dodgy, if both this class & TaskPool use Task.Run only 1 gets to run.
-            //Task.Run(WorkAsync);
-            Task.Factory.StartNew(WorkAsync, TaskCreationOptions.LongRunning);
+            task = Task.Factory.StartNew(WorkAsync, TaskCreationOptions.LongRunning);
         }
 
-        public void Enqueue(IProcessable download)
+        public void Enqueue(IProcessable processable)
         {
-            queue.Enqueue(download);
+            queue.Enqueue(processable);
         }
 
         public async Task WorkAsync()
@@ -51,39 +53,42 @@ namespace GChan.Controllers
                     await semaphore.WaitAsync();
                 }
 
-                var item = await DequeueAsync();
+                var item = MaybeDequeue();
 
-                var combinedToken = Utils.CombineCancellationTokens(shutdownCancellationToken, item.CancellationToken);
+                if (item != null)
+                {
+                    var combinedToken = Utils.CombineCancellationTokens(shutdownCancellationToken, item.CancellationToken);
 
-                pool.Enqueue(async () => await item.ProcessAsync(combinedToken));
+                    logger.Debug("Adding processable to process pool: {processable}.", item);
+                    
+                    pool.Enqueue(async () => await item.ProcessAsync(combinedToken));
+                }
 
                 if (max1PerSecond)
                 {
                     semaphore.Release();
                     await Task.Delay(TimeSpan.FromSeconds(1));
-                    //await Task.Yield();
                 }
             }
         }
 
         /// <summary>
-        /// Holds control until a downloadable with <see cref="IProcessable.ShouldProcess"/> true is found.
+        /// Dequeues processables until one is found that desires being processed, or the queue is depleted (returns null).
         /// </summary>
-        private async Task<IProcessable> DequeueAsync()
+        private IProcessable? MaybeDequeue()
         {
             while (true)
             {
-                if (queue.Count == 0)
-                {
-                    await Task.Delay(TimeSpan.FromSeconds(1));
-                }
-
                 if (queue.TryDequeue(out var downloadable))
                 {
                     if (downloadable.ShouldProcess)
                     {
                         return downloadable;
                     }
+                }
+                else
+                {
+                    return null;
                 }
             }
         }
@@ -93,6 +98,8 @@ namespace GChan.Controllers
             if (!result.RemoveFromQueue)
             {
                 Enqueue(result.Processable);
+
+                logger.Debug("Requeuing processable: {processable}.", result.Processable);
             }
 
             foreach (var newProcessable in result.NewProcessables)

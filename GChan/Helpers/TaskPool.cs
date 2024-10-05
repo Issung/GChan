@@ -35,8 +35,7 @@ namespace GChan.Helpers
         {
             this.completionListener = completionListener;
 
-            //task = Task.Run(Run);
-            Task.Factory.StartNew(Run, TaskCreationOptions.LongRunning);
+            task = Task.Factory.StartNew(WorkAsync, TaskCreationOptions.LongRunning);
         }
 
         public void Enqueue(Factory factory)
@@ -44,7 +43,7 @@ namespace GChan.Helpers
             queue.Enqueue(factory);
         }
 
-        private async Task Run()
+        private async Task WorkAsync()
         {
             while (true)
             {
@@ -64,7 +63,6 @@ namespace GChan.Helpers
                 else
                 {
                     await Task.Delay(TimeSpan.FromSeconds(1));
-                    //await Task.Yield();
                 }
             }
         }
