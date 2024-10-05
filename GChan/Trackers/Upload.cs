@@ -70,18 +70,15 @@ namespace GChan.Trackers
                 return new(this, removeFromQueue: true);
             }
 
-            if (!Directory.Exists(Thread.SaveTo))
-            {
-                Directory.CreateDirectory(Thread.SaveTo);
-            }
-
-            var destinationPath = Utils.CombinePathAndFilename(Thread.SaveTo, GenerateFilename((ImageFileNameFormat)Settings.Default.ImageFilenameFormat));
+            Directory.CreateDirectory(Thread.SaveTo);
+            var filename = GenerateFilename((ImageFileNameFormat)Settings.Default.ImageFilenameFormat);
+            var path = Utils.CombinePathAndFilename(Thread.SaveTo, filename);
 
             try
             {
                 var client = Utils.GetHttpClient();
                 var fileBytes = await client.GetByteArrayAsync(Url, cancellationToken);
-                await Utils.WriteFileBytesAsync(destinationPath, fileBytes, cancellationToken);
+                await Utils.WriteFileBytesAsync(path, fileBytes, cancellationToken);
 
                 Thread.SavedAssets.Add(Id);
             }

@@ -4,6 +4,7 @@ using GChan.Properties;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
@@ -147,7 +148,9 @@ namespace GChan.Trackers
 
                 if (!string.IsNullOrWhiteSpace(results.ThreadHtml))
                 {
-                    await Utils.WriteAllTextAsync($"{SaveTo}\\Thread.html", results.ThreadHtml, cancellationToken);
+                    Directory.CreateDirectory(SaveTo);
+                    var path = Path.Combine(SaveTo, "Thread.html");
+                    await Utils.WriteAllTextAsync(path, results.ThreadHtml, cancellationToken);
                 }
 
                 if (Settings.Default.SaveThumbnails)
@@ -175,6 +178,11 @@ namespace GChan.Trackers
                 hash = hash * 13 + Id.GetHashCode();
                 return hash;
             }
+        }
+
+        public override string ToString()
+        {
+            return $"Thread {{ {SiteName}.{Id} }}";
         }
 
         public ValueTask DisposeAsync()

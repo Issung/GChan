@@ -45,12 +45,9 @@ namespace GChan.Trackers
                 return new(this, removeFromQueue: true);
             }
 
-            if (!Directory.Exists(Thread.SaveTo))
-            {
-                Directory.CreateDirectory(Thread.SaveTo);
-            }
-
-            var destinationPath = Path.Combine(Thread.SaveTo, "thumb", Utils.GetFilenameFromUrl(Url));
+            var destinationDirectory = Path.Combine(thread.SaveTo, "thumb");
+            Directory.CreateDirectory(destinationDirectory);
+            var destinationPath = Path.Combine(destinationDirectory, Utils.GetFilenameFromUrl(url));
 
             try
             {
