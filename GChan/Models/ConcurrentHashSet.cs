@@ -51,6 +51,26 @@ namespace GChan.Models
             }
         }
 
+        public void AddRange(IEnumerable<T> items)
+        {
+            locker.EnterWriteLock();
+
+            try
+            {
+                foreach (T item in items)
+                {
+                    set.Add(item);
+                }
+            }
+            finally
+            {
+                if (locker.IsWriteLockHeld)
+                {
+                    locker.ExitWriteLock();
+                }
+            }
+        }
+
         public void Clear()
         {
             locker.EnterWriteLock();

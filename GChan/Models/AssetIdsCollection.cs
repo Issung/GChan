@@ -1,4 +1,6 @@
 ﻿using GChan.Trackers;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -19,6 +21,12 @@ namespace GChan.Models
         public AssetIdsCollection(string json)
         {
             LoadJson(json);
+        }
+
+        public void AddRange(IEnumerable<IAsset> assets)
+        {
+            var ids = assets.Select(a => a.Id);
+            AddRange(ids);
         }
 
         private void LoadJson(string json)

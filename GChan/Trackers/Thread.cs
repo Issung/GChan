@@ -106,6 +106,8 @@ namespace GChan.Trackers
                 var assets = Enumerable.Concat<IAsset>(thumbs, uploads);
                 var newAssets = assets.Where(a => !SeenAssets.Contains(a.Id));
 
+                SeenAssets.AddRange(newAssets);
+
                 return new(this, removeFromQueue: false, newProcessables: newAssets);
             }
             catch (OperationCanceledException)
