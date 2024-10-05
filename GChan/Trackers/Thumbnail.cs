@@ -15,29 +15,27 @@ namespace GChan.Trackers
     {
         public AssetId Id { get; private set; }
 
-        /// <summary>
-        /// URL to the access the image.
-        /// </summary>
-        public string Url;
+        public CancellationToken CancellationToken => thread.CancellationToken;
+
+        public bool ShouldProcess => thread.Scraping && !thread.Gone && Settings.Default.SaveThumbnails;
 
         /// <summary>
-        /// The thread this image is from.
+        /// URL to download the thumbnail.
         /// </summary>
-        public Thread Thread;
-
+        private readonly string url;
+        private readonly Thread thread;
         private static readonly ILogger logger = LogManager.GetCurrentClassLogger();
-
-        public CancellationToken CancellationToken => Thread.CancellationToken;
-
-        public bool ShouldProcess => Thread.Scraping && !Thread.Gone && Settings.Default.SaveThumbnails;
 
         public Thumbnail(
             Thread thread,
+            long replyId,
             string url
         )
         {
-            Id = new AssetId(AssetType.Thumbnail, url);
-            Thread = thread;
+            this.thread = thread;
+            this.url = url;
+
+            Id = new AssetId(AssetType.Thumbnail, $"{thread.SiteName}.{thread.Id}.{replyId}");
         }
 
         public async Task<ProcessResult> ProcessAsync(CancellationToken cancellationToken)
@@ -57,10 +55,10 @@ namespace GChan.Trackers
             try
             {
                 var client = Utils.GetHttpClient();
-                var fileBytes = await client.GetByteArrayAsync(Url, cancellationToken);
+                var fileBytes = await client.GetByteArrayAsync(url, cancellationToken);
                 await Utils.WriteFileBytesAsync(destinationPath, fileBytes, cancellationToken);
 
-                Thread.SavedAssets.Add(Id);
+                thread.SavedAssets.Add(Id);
             }
             catch (OperationCanceledException)
             {
@@ -87,7 +85,7 @@ namespace GChan.Trackers
 
         public override string ToString()
         {
-            return $"Thumbnail {{ Url: '{Url}' }}";
+            return $"Thumbnail {{ {Id.Identifier} }}";
         }
 
         public ValueTask DisposeAsync() => default;

@@ -74,10 +74,13 @@ namespace GChan.Trackers
         }
 
         // TODO: Separate thread scrape & thumbnail scrape to save on string traversal & manipulation. If thread scraping is on get the html. If thumb scraping is on, pass the thread html to the get thumbnails method, etc.
+        // TODO: Implement If-Modified-Since header header sending & handling.
         protected override async Task<ThreadScrapeResults> ScrapeThreadImpl(CancellationToken cancellationToken)
         {
-            var thumbUrls = new List<string>();
+            var thumbs = new List<(string Url, long ReplyId)>();
             var baseUrl = $"//i.4cdn.org/{BoardCode}/";
+            // TODO: If we are fetching the JSON here we could forward it to the next part that scrapes uploads from the JSON.
+            // Maybe Thread.cs should have 1 single abstract method that gets told what to do (e.g. save html, save thumbs, etc) and returns the html string, thumbnails list, uploads list for the common part (saving).
             var jsonUrl = $"http://a.4cdn.org/{BoardCode}/thread/{Id}.json";
 
             var client = Utils.GetHttpClient();
@@ -94,27 +97,29 @@ namespace GChan.Trackers
 
             foreach (var post in posts)
             {
-                var tim = post["tim"].ToString();
+                var no = post["no"].Value<long>();
+                var tim = post["tim"].Value<long>();
+                var timString = tim.ToString(); // Convert to string once to avoid repeated conversion.
                 var ext = post["ext"].ToString();
                 var oldUrl = baseUrl + tim + ext;
                 var newFilename = Path.GetFileNameWithoutExtension(
                     new Upload(
-                        post["tim"].Value<long>(),
+                        tim,
                         oldUrl,
                         post["filename"].ToString(),
-                        post["no"].Value<long>(),
+                        no,
                         this
                     ).GenerateFilename((ImageFileNameFormat)Settings.Default.ImageFilenameFormat)
                 );
 
                 htmlPage = htmlPage.Replace(oldUrl, tim + ext);
 
-                if (ext == ".webm")
+                if (ext == ".webm") // TODO: Need a better way to check this, flash files and pdfs can also be present.
                 {
                     var thumbUrl = $"//t.4cdn.org/{BoardCode}/{tim}s.jpg";
-                    thumbUrls.Add($"http:{thumbUrl}");
+                    thumbs.Add(($"http:{thumbUrl}", no));
 
-                    htmlPage = htmlPage.Replace(tim, newFilename);
+                    htmlPage = htmlPage.Replace(timString, newFilename);
                     htmlPage = htmlPage.Replace($"{baseUrl}{newFilename}", $"thumb/{tim}");
                 }
                 else
@@ -123,11 +128,11 @@ namespace GChan.Trackers
                     htmlPage = htmlPage.Replace($"{thumbName}.jpg", tim + ext);
                     htmlPage = htmlPage.Replace($"/{thumbName}", thumbName);
 
-                    htmlPage = htmlPage.Replace($"{baseUrl}{tim}", tim);
-                    htmlPage = htmlPage.Replace(tim, newFilename);
+                    htmlPage = htmlPage.Replace($"{baseUrl}{tim}", timString);
+                    htmlPage = htmlPage.Replace(timString, newFilename);
                 }
 
-                htmlPage = htmlPage.Replace($"//is2.4chan.org/{BoardCode}/{tim}", tim);
+                htmlPage = htmlPage.Replace($"//is2.4chan.org/{BoardCode}/{tim}", timString);
                 htmlPage = htmlPage.Replace($"/{tim}{ext}", tim + ext);
             }
 
@@ -138,11 +143,11 @@ namespace GChan.Trackers
             // Alter all content links like "http://is2.4chan.org/tv/123.jpg" to become local like "123.jpg".
             htmlPage = htmlPage.Replace($"http://is2.4chan.org/{BoardCode}/", string.Empty);
 
-            var thumbAssets = thumbUrls.Select(thumbUrl => new Thumbnail(this, thumbUrl));
+            var thumbAssets = thumbs.Select(thumb => new Thumbnail(this, thumb.ReplyId, thumb.Url));
             return new(htmlPage, thumbAssets);
         }
 
-        // TODO: Web request here that is non-async and not rate limited.
+        // TODO: Web request here that is non-async and not rate limited (via IProcessable pipeline).
         private string GetThreadSubject()
         {
             string subject = NO_SUBJECT;
