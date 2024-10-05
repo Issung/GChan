@@ -1,6 +1,7 @@
 ﻿using GChan.Data;
+using GChan.Models.Trackers;
+using GChan.Models.Trackers.Sites;
 using GChan.Properties;
-using GChan.Trackers;
 using NLog;
 using System;
 using System.IO;
@@ -11,7 +12,7 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using Thread = GChan.Trackers.Thread;
+using Thread = GChan.Models.Trackers.Thread;
 
 namespace GChan
 {

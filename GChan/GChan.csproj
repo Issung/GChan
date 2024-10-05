@@ -80,8 +80,7 @@
     <Reference Include="System.Xml.Serialization" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Controllers\ProcessManager.cs" />
-    <Compile Include="Controllers\ProcessQueue.cs" />
+    <Compile Include="Services\ProcessQueue.cs" />
     <Compile Include="Data\DataController.cs" />
     <Compile Include="Controllers\MainController.cs" />
     <Compile Include="Controllers\UpdateController.cs" />
@@ -111,11 +110,11 @@
     <Compile Include="Helpers\EnumerableExtensions.cs" />
     <Compile Include="Helpers\ExceptionExtensions.cs" />
     <Compile Include="Helpers\HttpClientExtensions.cs" />
-    <Compile Include="Helpers\TaskPool.cs" />
-    <Compile Include="Trackers\Asset.cs" />
-    <Compile Include="Trackers\IProcessable.cs" />
-    <Compile Include="Trackers\Thumbnail.cs" />
-    <Compile Include="Trackers\Upload.cs" />
+    <Compile Include="Services\TaskPool.cs" />
+    <Compile Include="Models\Asset.cs" />
+    <Compile Include="Services\IProcessable.cs" />
+    <Compile Include="Models\Thumbnail.cs" />
+    <Compile Include="Models\Upload.cs" />
     <Compile Include="Controls\PreferencesDataGridView.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -126,18 +125,18 @@
       <DependentUpon>GetStringMessageBox.cs</DependentUpon>
     </Compile>
     <Compile Include="Models\ConcurrentHashSet.cs" />
-    <Compile Include="Models\MainFormModel.cs" />
+    <Compile Include="ViewModels\MainFormModel.cs" />
     <Compile Include="Models\AssetIdsCollection.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Trackers\Board.cs" />
-    <Compile Include="Trackers\Sites\Board_4Chan.cs" />
-    <Compile Include="Trackers\Thread.cs" />
-    <Compile Include="Trackers\Sites\Thread_4Chan.cs" />
-    <Compile Include="Trackers\Tracker.cs" />
+    <Compile Include="Models\Trackers\Board.cs" />
+    <Compile Include="Models\Trackers\Sites\Board_4Chan.cs" />
+    <Compile Include="Models\Trackers\Thread.cs" />
+    <Compile Include="Models\Trackers\Sites\Thread_4Chan.cs" />
+    <Compile Include="Models\Trackers\Tracker.cs" />
     <Compile Include="Helpers\Utils.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -202,7 +201,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <Compile Include="Trackers\ThreadScrapeResults.cs" />
+    <Compile Include="Models\Trackers\ThreadScrapeResults.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -211,7 +210,6 @@
     <Content Include="4chanIcon.ico" />
     <None Include="Icons\alert.png" />
     <None Include="Icons\question.png" />
-    <None Include="Icons\clipboard1.png" />
     <Content Include="Icons\download.png" />
     <None Include="Icons\file.png" />
     <Content Include="Icons\Rename.png" />
@@ -220,7 +218,6 @@
     <None Include="Icons\settings-wrench.png" />
     <Content Include="Icons\world.png" />
     <Content Include="Icons\clipboard.png" />
-    <None Include="Resources\file.bmp" />
     <Content Include="TodoList.txt" />
   </ItemGroup>
   <ItemGroup>
@@ -272,6 +269,7 @@
       <Version>1.1.1</Version>
     </PackageReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
 		Other similar extension points exist, see Microsoft.Common.targets.

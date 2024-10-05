@@ -1,8 +1,7 @@
-﻿using GChan.Trackers;
+﻿using GChan.Models.Trackers;
 using System;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
 
 namespace GChan.Helpers
 {

@@ -1,11 +1,11 @@
 ﻿using GChan.Data;
 using GChan.Forms;
-using GChan.Models;
+using GChan.Models.Trackers;
 using GChan.Properties;
-using GChan.Trackers;
+using GChan.Services;
+using GChan.ViewModels;
 using NLog;
 using Onova.Models;
-using SQLitePCL;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -15,8 +15,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using SysThread = System.Threading.Thread;
-using Thread = GChan.Trackers.Thread;
-using Type = GChan.Trackers.Type;
+using Thread = GChan.Models.Trackers.Thread;
+using Type = GChan.Models.Trackers.Type;
 
 namespace GChan.Controllers
 {

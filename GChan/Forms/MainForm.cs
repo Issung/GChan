@@ -1,7 +1,7 @@
 ﻿using GChan.Controllers;
-using GChan.Models;
+using GChan.Models.Trackers;
 using GChan.Properties;
-using GChan.Trackers;
+using GChan.ViewModels;
 using NLog;
 using System;
 using System.Diagnostics;
@@ -9,7 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Windows.Forms;
-using Type = GChan.Trackers.Type;
+using Type = GChan.Models.Trackers.Type;
 
 namespace GChan.Forms
 {

@@ -1,13 +1,12 @@
-﻿using GChan.Helpers;
+﻿using GChan.Models.Trackers;
 using GChan.Properties;
-using GChan.Trackers;
 using NLog;
 using System;
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace GChan.Controllers
+namespace GChan.Services
 {
     /// <summary>
     /// A queue for <see cref="IProcessable"/>s. Controls how often they are started.

@@ -5,7 +5,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
 
-namespace GChan.Helpers
+namespace GChan.Services
 {
     /// <summary>
     /// A pool in which tasks can be thrown in at will. Ensures that only <see cref="MaxConcurrentTasks"/> are ever running at once.

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace GChan
+namespace GChan.Services
 {
     public class ProcessResult
     {
@@ -29,9 +29,9 @@ namespace GChan
             IEnumerable<IProcessable> newProcessables = null
         )
         {
-            this.Processable = processable;
-            this.RemoveFromQueue = removeFromQueue;
-            this.NewProcessables = newProcessables ?? Enumerable.Empty<IProcessable>();
+            Processable = processable;
+            RemoveFromQueue = removeFromQueue;
+            NewProcessables = newProcessables ?? Enumerable.Empty<IProcessable>();
         }
     }
 

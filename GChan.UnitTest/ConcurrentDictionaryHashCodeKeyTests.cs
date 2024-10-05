@@ -1,5 +1,7 @@
 ﻿using FluentAssertions;
-using GChan.Trackers;
+using GChan.Models;
+using GChan.Models.Trackers;
+using GChan.Models.Trackers.Sites;
 using System.Collections.Concurrent;
 using Xunit;
 

@@ -2,7 +2,7 @@
 using System.Net;
 using System.Threading;
 
-namespace GChan.Trackers
+namespace GChan.Models.Trackers
 {
     public enum Type { Board, Thread };
 
@@ -59,7 +59,7 @@ namespace GChan.Trackers
             }
             else
             {
-                return $"{this.GetType().Name} {{ {SiteName}, /{BoardCode}/ }}";
+                return $"{GetType().Name} {{ {SiteName}, /{BoardCode}/ }}";
             }
         }
 

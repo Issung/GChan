@@ -1,12 +1,14 @@
 ﻿using GChan.Helpers;
 using GChan.Properties;
+using GChan.Services;
 using NLog;
 using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using Thread = GChan.Models.Trackers.Thread;
 
-namespace GChan.Trackers
+namespace GChan.Models
 {
     /// <summary>
     /// Thumbnail of an upload.

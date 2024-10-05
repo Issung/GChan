@@ -1,8 +1,9 @@
-﻿using System;
+﻿using GChan.Services;
+using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace GChan.Trackers
+namespace GChan.Models
 {
     public enum AssetType
     {
@@ -22,7 +23,7 @@ namespace GChan.Trackers
     public class AssetId : IEquatable<AssetId>
     {
         public AssetType Type { get; set; }
-        
+
         /// <summary>
         /// Unique identifier for this asset. It may be a composite of multiple different locators (e.g. `4chan.threadId.replyId`).
         /// May contain anything but a colon ":".
@@ -43,8 +44,8 @@ namespace GChan.Trackers
         /// <param name="identifier">May contain anything but a colon ":".</param>
         public AssetId(AssetType type, string identifier)
         {
-            this.Type = type;
-            this.Identifier = ValidateIdentifier(identifier);
+            Type = type;
+            Identifier = ValidateIdentifier(identifier);
         }
 
         public bool Equals(AssetId other)
@@ -79,7 +80,7 @@ namespace GChan.Trackers
 
     public class AssetIdJsonConverter : JsonConverter<AssetId>
     {
-        public override AssetId Read(ref Utf8JsonReader reader, System.Type typeToConvert, JsonSerializerOptions options)
+        public override AssetId Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             var stringValue = reader.GetString();
             return new AssetId(stringValue);

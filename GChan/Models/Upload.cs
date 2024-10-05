@@ -1,12 +1,14 @@
 ﻿using GChan.Helpers;
 using GChan.Properties;
+using GChan.Services;
 using NLog;
 using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using Thread = GChan.Models.Trackers.Thread;
 
-namespace GChan.Trackers
+namespace GChan.Models
 {
     /// <summary>
     /// Original content uploaded by a user. Mostly images/webms, but can be flash files from /f/, or I've seen pdfs on /po/.

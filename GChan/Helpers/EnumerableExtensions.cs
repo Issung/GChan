@@ -1,5 +1,4 @@
 ﻿using GChan.Models;
-using GChan.Trackers;
 using System;
 using System.Collections.Generic;
 using System.Linq;

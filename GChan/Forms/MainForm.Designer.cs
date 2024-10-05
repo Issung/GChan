@@ -1,4 +1,7 @@
-﻿namespace GChan.Forms {
+﻿using GChan.ViewModels;
+
+namespace GChan.Forms
+{
     partial class MainForm {
         /// <summary>
         /// Erforderliche Designervariable.
@@ -334,7 +337,7 @@
             // 
             // mainFormModelBindingSource
             // 
-            this.mainFormModelBindingSource.DataSource = typeof(GChan.Models.MainFormModel);
+            this.mainFormModelBindingSource.DataSource = typeof(MainFormModel);
             // 
             // boardsTabPage
             // 

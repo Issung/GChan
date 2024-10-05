@@ -1,4 +1,4 @@
-﻿using GChan.Trackers;
+﻿using GChan.Models.Trackers;
 using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
