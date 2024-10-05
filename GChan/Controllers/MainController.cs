@@ -1,45 +1,33 @@
 ﻿using GChan.Data;
 using GChan.Forms;
-using GChan.Helpers;
 using GChan.Models;
 using GChan.Properties;
 using GChan.Trackers;
 using NLog;
 using Onova.Models;
+using SQLitePCL;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using SysThread = System.Threading.Thread;
 using Thread = GChan.Trackers.Thread;
-using Timer = System.Windows.Forms.Timer;
 using Type = GChan.Trackers.Type;
 
 namespace GChan.Controllers
 {
     class MainController
     {
-        internal MainForm Form;
-
-        internal MainFormModel Model;
-
-        private SysThread scanThread = null;
+        internal readonly MainForm Form;
+        internal readonly MainFormModel Model;
 
         private readonly CancellationTokenSource cancellationTokenSource = new();
-        private readonly ProcessQueue downloadQueue;
-        private readonly ProcessManager<IAsset> assetDownloader;
-        private readonly ProcessManager<Thread> threadHtmlDownloader;
-
-        private readonly Timer scanTimer = new();
-
+        private readonly ProcessQueue processQueue;
         private readonly ILogger logger = LogManager.GetCurrentClassLogger();
-
-        public int ScanTimerInterval { get { return scanTimer.Interval; } set { scanTimer.Interval = value; } }
 
 #if DEBUG
         /// Define special lock objects when in DEBUG mode that print when/where they are acquired.
@@ -76,13 +64,7 @@ namespace GChan.Controllers
         public MainController(MainForm mainForm)
         {
             // Controller Setup
-            downloadQueue = new(cancellationTokenSource.Token);
-            assetDownloader = new(true, downloadQueue);
-            threadHtmlDownloader = new(true, downloadQueue); // Allow threads to be removed after download, we just re-add them. TODO: Maybe improve.
-
-            scanTimer.Enabled = false;
-            scanTimer.Interval = Settings.Default.ScanTimer;
-            scanTimer.Tick += new EventHandler(StartScanThread);
+            processQueue = new(AddTrackerIfNew, cancellationTokenSource.Token);
 
             // Form Setup
             Form = mainForm;
@@ -134,9 +116,6 @@ namespace GChan.Controllers
             /// Executed once everything has finished being loaded.
             void FinishLoadingTrackers()
             {
-                scanTimer.Enabled = true;
-                StartScanThread(this, new EventArgs());
-
                 // Check for updates.
                 if (Settings.Default.CheckForUpdatesOnStart)
                 {
@@ -147,7 +126,6 @@ namespace GChan.Controllers
 
         public void AddUrls(IEnumerable<string> urls)
         {
-            bool trackerWasAdded = false;
             foreach (var url in urls)
             { 
                 var newTracker = Utils.CreateNewTracker(url);
@@ -158,11 +136,7 @@ namespace GChan.Controllers
 
                     if (IsUnique(newTracker, trackerList))
                     {
-                        var addSuccess = AddNewTracker(newTracker);
-                        if (addSuccess)
-                        { 
-                            trackerWasAdded = true;
-                        }
+                        AddNewTracker(newTracker);
                     }
                     else
                     {
@@ -186,14 +160,20 @@ namespace GChan.Controllers
                     MessageBox.Show($"Entered text '{url}' is not a supported site or board/thread!");
                 }
             }
+        }
 
-            if (trackerWasAdded)
+        // TODO: Bit of code duplication here with the above method, remedy eventually.
+        private void AddTrackerIfNew(Tracker tracker)
+        {
+            var trackerList = ((tracker.Type == Type.Board) ? Model.Boards.Cast<Tracker>() : Model.Threads.Cast<Tracker>()).ToArray();
+            
+            if (IsUnique(tracker, trackerList))
             {
-                scanTimer.Enabled = true;
-                StartScanThread(this, new EventArgs());
+                AddNewTracker(tracker);
             }
         }
 
+        /// <summary>Will also add the the process queue.</summary>
         /// <returns>Was <paramref name="tracker"/> added to a tracker list.</returns>
         private bool AddNewTracker(Tracker tracker)
         {
@@ -206,20 +186,16 @@ namespace GChan.Controllers
             {
                 lock (BoardLock)
                 {
-                    Form.Invoke((MethodInvoker)delegate () 
-                    {
-                        Model.Boards.Add(board);
-                    });
+                    Form.Invoke(() => Model.Boards.Add(board) );
+                    processQueue.Enqueue(board);
                 }
             }
             else if (tracker is Thread thread)
             {
                 lock (ThreadLock)
                 {
-                    Form.Invoke((MethodInvoker)delegate () 
-                    {
-                        Model.Threads.Add(thread);
-                    });
+                    Form.Invoke(() => Model.Threads.Add(thread));
+                    processQueue.Enqueue(thread);
                 }
             }
 
@@ -228,24 +204,25 @@ namespace GChan.Controllers
 
         internal void ClearTrackers(Type type)
         {
-            string typeName = type.ToString().ToLower() + "s";
+            var typeName = type.ToString().ToLower() + "s";
 
-            DialogResult dialogResult = MessageBox.Show(
+            var confirmResult = MessageBox.Show(
                 $"Are you sure you want to clear all {typeName}?",
                 $"Clear all {typeName}?",
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Warning,
-                MessageBoxDefaultButton.Button2);    // Confirmation prompt
+                MessageBoxDefaultButton.Button2
+            );
 
-            if (dialogResult == DialogResult.Yes)
+            if (confirmResult == DialogResult.Yes)
             {
                 if (type == Type.Thread)
                 {
                     lock (ThreadLock)
                     {
-                        for (int i = Model.Threads.Count - 1; i >= 0; i--)
+                        while (Model.Threads.Count > 0)
                         {
-                            RemoveThread(Model.Threads[i], true);
+                            RemoveThread(Model.Threads.Last());
                         }
                     }
                 }
@@ -253,112 +230,13 @@ namespace GChan.Controllers
                 {
                     lock (BoardLock)
                     {
-                        for (int i = Model.Boards.Count - 1; i >= 0; i--)
+                        while (Model.Boards.Count > 0)
                         {
-                            RemoveBoard(Model.Boards[i]);
+                            RemoveBoard(Model.Boards.Last());
                         }
                     }
                 }
             }
-        }
-
-        /// <summary>
-        /// Run the scan thread if it isn't already running.
-        /// </summary>
-        private void StartScanThread(object sender, EventArgs e)
-        {
-            if (scanThread == null || !scanThread.IsAlive)
-            {
-                scanThread = new SysThread(new ThreadStart(ScanRoutine))
-                {
-                    Name = "Scan Thread",
-                    IsBackground = true
-                };
-
-                scanThread.Start();
-            }
-        }
-
-        /// <summary>
-        /// Thread entry-point.
-        /// </summary>
-        // TODO: Get rid of this shit and make boards IProcessable like threads.
-        // TODO: Replace this whole bullshit by shoving threads into the download queue with some property like "RemoveOnSuccess" set to false.
-        private void ScanRoutine()
-        {
-            lock (ThreadLock)
-            {
-                // Remove 404'd threads
-                var removedThreads = Model.Threads.RemoveAll(t => t.Gone);
-                removedThreads.ForEach(t => RemoveThread(t));
-            }
-
-            // Make a copy of the current boards and scrape them for new threads.
-            var boards = Model.Boards.ToArray();
-
-            foreach (var board in boards)
-            {
-                if (board.Scraping)
-                {
-                    var threadUrls = board.GetThreadLinks();
-                    var greatestThreadIdLock = new object();
-                    var greatestThreadId = 0;
-
-                    Parallel.ForEach(threadUrls, (threadUrl) =>
-                    {
-                        if (board.Scraping)
-                        {
-                            var id = GetThreadId(board, threadUrl);
-
-                            if (id != null && id > board.GreatestThreadId)
-                            {
-                                var newThread = (Thread)Utils.CreateNewTracker(threadUrl);
-
-                                if (newThread != null && IsUnique(newThread, Model.Threads))
-                                {
-                                    var urlWasAdded = AddNewTracker(newThread);
-
-                                    if (urlWasAdded)
-                                    {
-                                        lock (greatestThreadIdLock)
-                                        { 
-                                            if (id > greatestThreadId)
-                                            {
-                                                greatestThreadId = id.Value;
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    });
-
-                    board.GreatestThreadId = greatestThreadId;
-                }
-            }
-        }
-
-        public int? GetThreadId(Board board, string url)
-        {
-            try
-            {
-                var idCodeMatch = board.SiteName switch
-                {
-                    Board_4Chan.SITE_NAME => Regex.Match(url, Thread_4Chan.ID_CODE_REGEX),
-                    _ => null,
-                };
-
-                if (idCodeMatch?.Groups.Count > 0)
-                {
-                    return int.Parse(idCodeMatch.Groups[0].Value);
-                }
-            }
-            catch
-            {
-
-            }
-
-            return null;
         }
 
         /// <summary>
@@ -371,7 +249,7 @@ namespace GChan.Controllers
                 return !list.OfType<Thread>().Any(t => 
                     t.SiteName == thread.SiteName &&
                     t.BoardCode == thread.BoardCode &&
-                    t.ID == thread.ID
+                    t.Id == thread.Id
                 );
             }
             else // Board
@@ -382,13 +260,13 @@ namespace GChan.Controllers
 
         public void RenameThreadSubjectPrompt(int threadBindingSourceIndex)
         {
-            Thread thread = Model.Threads[threadBindingSourceIndex];
-            GetStringMessageBox dialog = new GetStringMessageBox(thread.Subject)
+            var thread = Model.Threads[threadBindingSourceIndex];
+            var dialog = new GetStringMessageBox(thread.Subject)
             {
                 StartPosition = FormStartPosition.CenterParent
             };
 
-            DialogResult result = dialog.ShowDialog();
+            var result = dialog.ShowDialog();
 
             if (result == DialogResult.OK)
             {
@@ -413,7 +291,7 @@ namespace GChan.Controllers
 
         public void SettingsUpdated()
         {
-            this.assetDownloader.ConcurrentCount = Settings.Default.MaximumConcurrentDownloads;
+
         }
 
         /// <summary>
@@ -455,7 +333,7 @@ namespace GChan.Controllers
                 if (manualRemove)
                 {
                     MessageBox.Show(
-                        $"An error occured when trying to remove the thread {thread.Subject} ({thread.ID}). Please check the logs file in the ProgramData folder for more information.", 
+                        $"An error occured when trying to remove the thread {thread.Subject} ({thread.Id}). Please check the logs file in the ProgramData folder for more information.", 
                         "Thread Removal Error", 
                         MessageBoxButtons.OK, 
                         MessageBoxIcon.Error, 
@@ -501,11 +379,6 @@ namespace GChan.Controllers
 
             Form.systemTrayNotifyIcon.Visible = false;
             Form.systemTrayNotifyIcon.Dispose();
-            scanTimer.Enabled = false;
-            scanTimer.Dispose();
-
-            assetDownloader.Dispose();
-            threadHtmlDownloader.Dispose();
 
             if (Settings.Default.SaveListsOnClose)
             {

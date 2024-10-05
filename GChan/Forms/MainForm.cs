@@ -78,17 +78,15 @@ namespace GChan.Forms
 
         private void addButton_Click(object sender, EventArgs e)
         {
-            // This way, it doesn't flash text during lazy entry
-            string textBox = urlTextBox.Text; 
+            var text = urlTextBox.Text; 
+            urlTextBox.Text = string.Empty;   // Clear textbox.
 
-            // Clear TextBox faster
-            urlTextBox.Text = "";
+            if (string.IsNullOrWhiteSpace(text) && Clipboard.ContainsText() && Settings.Default.AddUrlFromClipboardWhenTextboxEmpty)
+            {
+                text = Clipboard.GetText();
+            }
 
-            if (string.IsNullOrWhiteSpace(textBox) && Clipboard.ContainsText() && Settings.Default.AddUrlFromClipboardWhenTextboxEmpty)
-                textBox = Clipboard.GetText();
-
-            // Get url from TextBox
-            var urls = textBox.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(Utils.PrepareURL);
+            var urls = text.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(Utils.PrepareURL);
             Controller.AddUrls(urls);
         }
 
@@ -190,7 +188,6 @@ namespace GChan.Forms
             //}
 
             systemTrayNotifyIcon.Visible = Settings.Default.MinimizeToTray;
-            Controller.ScanTimerInterval = Settings.Default.ScanTimer;
 
             Controller.SettingsUpdated();
         }

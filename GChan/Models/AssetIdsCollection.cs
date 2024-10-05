@@ -1,5 +1,6 @@
 ﻿using GChan.Trackers;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace GChan.Models
 {
@@ -8,7 +9,7 @@ namespace GChan.Models
     /// </summary>
     public class AssetIdsCollection : ConcurrentHashSet<AssetId>
     {
-        private static readonly JsonSerializerOptions jsonOptions = new();
+        private static readonly JsonSerializerOptions jsonOptions = new() { Converters = { new JsonStringEnumConverter() } };
 
         public AssetIdsCollection()
         { 

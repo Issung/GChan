@@ -1,5 +1,6 @@
 ﻿using GChan.Helpers;
 using GChan.Properties;
+using GChan.Trackers;
 using System;
 using System.Collections.Concurrent;
 using System.Threading;
@@ -10,20 +11,28 @@ namespace GChan.Controllers
     /// <summary>
     /// A queue for <see cref="IProcessable"/>s. Controls how often they are started.
     /// </summary>
+    // TODO: Maybe need a high priority queue for UI interactions (threads/boards being added by user). Take from that queue first before falling back to main queue.
     public class ProcessQueue
     {
         private readonly SemaphoreSlim semaphore = new(1, 1);
+        private readonly Action<Tracker> addTrackerCallback;
         private readonly CancellationToken shutdownCancellationToken;
         private readonly ConcurrentQueue<IProcessable> queue = new();
-        private readonly TaskPool<IProcessable> pool = new(_ => { });  // TODO: Do something with the completion listener.
+        private readonly TaskPool<ProcessResult> pool;  // TODO: Do something with the completion listener.
+        private readonly Task task;
 
-        public ProcessQueue(CancellationToken shutdownCancellationToken)
+        public ProcessQueue(
+            Action<Tracker> addTrackerCallback,
+            CancellationToken shutdownCancellationToken
+        )
         {
+            this.addTrackerCallback = addTrackerCallback;
             this.shutdownCancellationToken = shutdownCancellationToken;
+            this.pool = new(HandleResult);
 
-#pragma warning disable CS4014 // Run Task in background.
-            WorkAsync();
-#pragma warning restore CS4014
+            //task = WorkAsync();    // Something is dodgy, if both this class & TaskPool use Task.Run only 1 gets to run.
+            //Task.Run(WorkAsync);
+            Task.Factory.StartNew(WorkAsync, TaskCreationOptions.LongRunning);
         }
 
         public void Enqueue(IProcessable download)
@@ -33,11 +42,9 @@ namespace GChan.Controllers
 
         public async Task WorkAsync()
         {
-            bool max1PerSecond;
-
             while (!shutdownCancellationToken.IsCancellationRequested)
             {
-                max1PerSecond = Settings.Default.Max1RequestPerSecond;
+                var max1PerSecond = Settings.Default.Max1RequestPerSecond;  // Save setting temporarily incase it changes mid-loop.
 
                 if (max1PerSecond)
                 {
@@ -48,14 +55,13 @@ namespace GChan.Controllers
 
                 var combinedToken = Utils.CombineCancellationTokens(shutdownCancellationToken, item.CancellationToken);
 
-                var result = await item.ProcessAsync(combinedToken);
-
-                HandleResult(item, result);
+                pool.Enqueue(async () => await item.ProcessAsync(combinedToken));
 
                 if (max1PerSecond)
                 {
                     semaphore.Release();
                     await Task.Delay(TimeSpan.FromSeconds(1));
+                    //await Task.Yield();
                 }
             }
         }
@@ -82,11 +88,24 @@ namespace GChan.Controllers
             }
         }
 
-        private void HandleResult(IProcessable item, ProcessResult result)
+        private void HandleResult(ProcessResult result)
         {
-            if (result.RemoveFromQueue)
+            if (!result.RemoveFromQueue)
             {
-                queue.Enqueue(item);
+                Enqueue(result.Processable);
+            }
+
+            foreach (var newProcessable in result.NewProcessables)
+            {
+                // Board may return new threads as processables.
+                if (newProcessable is Tracker tracker)
+                {
+                    addTrackerCallback(tracker);    // The callback will enqueue the tracker.
+                }
+                else
+                {
+                    Enqueue(newProcessable);
+                }
             }
         }
     }

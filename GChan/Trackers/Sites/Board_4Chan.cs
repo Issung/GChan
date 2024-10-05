@@ -1,12 +1,7 @@
-﻿using System.Collections.Generic;
-using System.IO;
+﻿using Newtonsoft.Json.Linq;
 using System.Linq;
-using System.Net;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Windows.Forms;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using System.Threading.Tasks;
 
 namespace GChan.Trackers
 {
@@ -16,11 +11,11 @@ namespace GChan.Trackers
         public const string IS_BOARD_REGEX = "boards.(4chan|4channel).org/[a-zA-Z0-9]*?/*$";
         public const string BOARD_CODE_REGEX = "(?<=((chan|channel).org/))[a-zA-Z0-9]+(?=(/))?";
 
-        public Board_4Chan(string URL) : base(URL)
+        public Board_4Chan(string url) : base(url)
         {
             SiteName = SITE_NAME;
 
-            Match boardCodeMatch = Regex.Match(URL, BOARD_CODE_REGEX);
+            Match boardCodeMatch = Regex.Match(url, BOARD_CODE_REGEX);
             BoardCode = boardCodeMatch.Groups[0].Value;
         }
 
@@ -29,37 +24,26 @@ namespace GChan.Trackers
             return Regex.IsMatch(url, IS_BOARD_REGEX);
         }
 
-        override public string[] GetThreadLinks()
+        override protected async Task<Thread[]> GetThreadsImpl()
         {
-            //string URL = "http://a.4cdn.org/" + base.URL.Split('/')[3] + "/catalog.json"; //example: http://a.4cdn.org/b/catalog.json
-            string URL = "http://a.4cdn.org/" + BoardCode + "/catalog.json";
-            List<string> threadLinks = new List<string>();
+            var catalogUrl = "http://a.4cdn.org/" + BoardCode + "/catalog.json";
+            var client = Utils.GetHttpClient();
+            var json = await client.GetStringAsync(catalogUrl);
+            var jArray = JArray.Parse(json);
 
-            try
-            {
-                JArray jArray;
-                using (var web = Utils.CreateWebClient())
-                {
-                    string json = web.DownloadString(URL);
-                    jArray = JArray.Parse(json);
-                }
+            var threads = jArray
+                .SelectTokens("[*].threads[*]")
+                .Select(thread => {
+                    var id = thread["no"].Value<long>();
+                    var url = "http://boards.4chan.org/" + BoardCode + "/thread/" + id;
+                    var subject = thread["sub"].Value<string>();
+                    var fileCount = thread["images"].Value<int>();
 
-                threadLinks = jArray
-                    .SelectTokens("[*].threads[*]")
-                    .Select(x => "http://boards.4chan.org/" + BoardCode + "/thread/" + x["no"])
-                    .ToList();
-            }
-            catch (WebException webEx)
-            {
-                logger.Error(webEx, "Error occured attempting to get thread links.");
-                
-#if DEBUG
-                MessageBox.Show("Connection Error: " + webEx.Message);
-#endif
-            }
+                    return new Thread_4Chan(url, subject, fileCount);
+                })
+                .ToArray();
 
-            threadCount = threadLinks.Count;
-            return threadLinks.ToArray();
+            return threads;
         }
     }
 }

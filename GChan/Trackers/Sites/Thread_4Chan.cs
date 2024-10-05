@@ -18,7 +18,7 @@ namespace GChan.Trackers
         public const string BOARD_CODE_REGEX = "(?<=((chan|channel).org/))[a-zA-Z0-9]+(?=(/))?";
         public const string ID_CODE_REGEX = "(?<=(thread/))[0-9]*(?=(.*))";
 
-        public Thread_4Chan(string url) : base(url)
+        public Thread_4Chan(string url, string? subject = null, int? fileCount = null) : base(url)
         {
             SiteName = Board_4Chan.SITE_NAME;
 
@@ -29,14 +29,12 @@ namespace GChan.Trackers
             BoardCode = boardCodeMatch.Groups[0].Value;
 
             var idCodeMatch = Regex.Match(url, ID_CODE_REGEX);
-            ID = idCodeMatch.Groups[0].Value;
+            Id = long.Parse(idCodeMatch.Groups[0].Value);
 
-            SaveTo = Path.Combine(Settings.Default.SavePath, SiteName, BoardCode, ID);
+            SaveTo = Path.Combine(Settings.Default.SavePath, SiteName, BoardCode, Id.ToString());
 
-            if (subject == null)
-            {
-                Subject = GetThreadSubject();
-            }
+            Subject = subject ?? GetThreadSubject();
+            FileCount = fileCount;
         }
 
         public static bool UrlIsThread(string url)
@@ -47,7 +45,7 @@ namespace GChan.Trackers
         protected override async Task<Upload[]> ScrapeUploadsImpl(CancellationToken cancellationToken)
         {
             var baseUrl = $"http://i.4cdn.org/{BoardCode}/";
-            var jsonUrl = $"http://a.4cdn.org/{BoardCode}/thread/{ID}.json";
+            var jsonUrl = $"http://a.4cdn.org/{BoardCode}/thread/{Id}.json";
 
             var client = Utils.GetHttpClient();
             var json = await client.GetStringAsync(jsonUrl, cancellationToken);
@@ -80,7 +78,7 @@ namespace GChan.Trackers
         {
             var thumbUrls = new List<string>();
             var baseUrl = $"//i.4cdn.org/{BoardCode}/";
-            var jsonUrl = $"http://a.4cdn.org/{BoardCode}/thread/{ID}.json";
+            var jsonUrl = $"http://a.4cdn.org/{BoardCode}/thread/{Id}.json";
 
             var client = Utils.GetHttpClient();
             var htmlPage = await client.GetStringAsync(Url, cancellationToken);
@@ -144,13 +142,14 @@ namespace GChan.Trackers
             return new(htmlPage, thumbAssets);
         }
 
+        // TODO: Web request here that is non-async and not rate limited.
         private string GetThreadSubject()
         {
             string subject = NO_SUBJECT;
 
             try
             {
-                string JSONUrl = "http://a.4cdn.org/" + BoardCode + "/thread/" + ID + ".json";
+                string JSONUrl = "http://a.4cdn.org/" + BoardCode + "/thread/" + Id + ".json";
 
                 const string SUB_HEADER = "\"sub\":\"";
                 const string SUB_ENDER = "\",";

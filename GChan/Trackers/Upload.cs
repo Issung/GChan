@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace GChan.Trackers
 {
     /// <summary>
-    /// Original content uploaded by a user.
+    /// Original content uploaded by a user. Mostly images/webms, but can be flash files from /f/, or I've seen pdfs on /po/.
     /// </summary>
     public class Upload : IAsset, IEquatable<Upload>
     {
@@ -21,7 +21,7 @@ namespace GChan.Trackers
         public long Tim;
 
         /// <summary>
-        /// URL to the access the image.
+        /// URL to the access the upload.
         /// </summary>
         public string Url;
 
@@ -37,7 +37,7 @@ namespace GChan.Trackers
         public long No;
 
         /// <summary>
-        /// The thread this image is from.
+        /// The thread this upload is from.
         /// </summary>
         public Thread Thread;
 

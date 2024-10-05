@@ -57,6 +57,7 @@ namespace GChan
         /// <remarks>Do not dispose it.</remarks>
         public static HttpClient GetHttpClient()
         {
+            // TODO: The User-Agent header needs to be updated when the user changes the setting.
             return httpClient;
         }
 
@@ -197,7 +198,7 @@ namespace GChan
             var destinationDirectory = folderNameFormat switch
             {
                 ThreadFolderNameFormat.IdSubject => $"{currentDirectory} - {subject}",
-                ThreadFolderNameFormat.SubjectId => Path.Combine(Path.GetDirectoryName(currentDirectory), $"{subject} - {thread.ID}"),
+                ThreadFolderNameFormat.SubjectId => Path.Combine(Path.GetDirectoryName(currentDirectory), $"{subject} - {thread.Id}"),
                 _ => throw new Exception($"Unknown value {folderNameFormat} for thread folder name format."),
             };
 

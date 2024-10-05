@@ -1,5 +1,6 @@
 ﻿using GChan.Models;
 using GChan.Properties;
+using System;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
 
@@ -8,17 +9,17 @@ namespace GChan.Helpers
     /// <summary>
     /// A pool in which tasks can be thrown in at will. Ensures that only <see cref="MaxConcurrentTasks"/> are ever running at once.
     /// </summary>
-    public class TaskPool<T>
+    public class TaskPool<TResult>
     {
         /// <summary>
         /// A delegate that creates a task to be run.
         /// </summary>
-        public delegate Task<T> Factory();
+        public delegate Task<TResult> Factory();
 
         /// <summary>
         /// Listener for when a task completes. That could mean either success or failure.
         /// </summary>
-        public delegate void OnComplete(Task<T> task);
+        public delegate void OnComplete(TResult task);
 
         public int MaxConcurrentTasks => Settings.Default.MaximumConcurrentDownloads;
 
@@ -26,16 +27,16 @@ namespace GChan.Helpers
         public bool Full => runningTasks.Count >= MaxConcurrentTasks;
 
         private readonly ConcurrentQueue<Factory> queue = new();
-        private readonly ConcurrentHashSet<Task<T>> runningTasks = new();
+        private readonly ConcurrentHashSet<Task<TResult>> runningTasks = new();
         private readonly OnComplete completionListener;
+        private readonly Task task;
 
         public TaskPool(OnComplete completionListener)
         {
             this.completionListener = completionListener;
 
-#pragma warning disable CS4014 // Run in background
-            Run();
-#pragma warning restore CS4014
+            //task = Task.Run(Run);
+            Task.Factory.StartNew(Run, TaskCreationOptions.LongRunning);
         }
 
         public void Enqueue(Factory factory)
@@ -54,9 +55,17 @@ namespace GChan.Helpers
                     runningTasks.Add(newTask);
                 }
 
-                var firstCompletedTask = await Task.WhenAny(runningTasks);
-                runningTasks.Remove(firstCompletedTask);
-                completionListener(firstCompletedTask);
+                if (runningTasks.Count > 0)
+                {
+                    var firstCompletedTask = await Task.WhenAny(runningTasks);
+                    runningTasks.Remove(firstCompletedTask);
+                    completionListener(firstCompletedTask.Result);
+                }
+                else
+                {
+                    await Task.Delay(TimeSpan.FromSeconds(1));
+                    //await Task.Yield();
+                }
             }
         }
 

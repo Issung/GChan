@@ -51,7 +51,7 @@ namespace GChan.Trackers
         {
             if (this is Thread thread)
             {
-                return $"Thread {{ {SiteName}, /{BoardCode}/, {thread.ID}, Gone: {thread.Gone} }}";
+                return $"Thread {{ {SiteName}, /{BoardCode}/, {thread.Id}, Gone: {thread.Gone} }}";
             }
             else if (this is Board)
             {

@@ -6,6 +6,7 @@ namespace GChan.Trackers
 {
     public enum AssetType
     {
+        Board,
         Upload,
         Thumbnail,
     }

@@ -49,7 +49,7 @@ namespace GChan.Trackers
         /// <summary>
         /// The identifier of the thread (AKA No. (number))
         /// </summary>
-        public string ID { get; protected set; }
+        public long Id { get; protected set; }
 
         public int? FileCount
         {
@@ -170,7 +170,7 @@ namespace GChan.Trackers
                 int hash = 3;
                 hash = hash * 13 + SiteName.GetHashCode();
                 hash = hash * 13 + BoardCode.GetHashCode();
-                hash = hash * 13 + ID.GetHashCode();
+                hash = hash * 13 + Id.GetHashCode();
                 return hash;
             }
         }

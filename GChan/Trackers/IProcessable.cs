@@ -38,6 +38,8 @@ namespace GChan
     /// <summary>
     /// An item that can be processed.
     /// </summary>
+    // TODO: New "ReadyToProcess" bool property or "Status" enum, for threads to say they aren't ready to scrape again yet.
+    // The thread can save the last scrape datetime and check that the current datetime is greater than lastscrape + setting.
     public interface IProcessable : IAsyncDisposable
     {
         /// <summary>
@@ -53,9 +55,11 @@ namespace GChan
         public bool ShouldProcess { get; }
 
         /// <summary>
-        /// Perform download for this item.
+        /// Perform download for this item.<br/>
+        /// Must never throw, must always return a <see cref="ProcessResult"/>.
         /// </summary>
         /// <param name="cancellationToken">The CancellationToken for this <see cref="IProcessable"/> combined with another CancellationToken for program shutdown.</param>
+        // TODO: Make sure the never throw rule is done in all implementations.
         Task<ProcessResult> ProcessAsync(CancellationToken cancellationToken);
     }
 }
