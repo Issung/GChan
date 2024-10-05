@@ -6,13 +6,10 @@ namespace GChan.Trackers
 {
     public enum AssetType
     {
-        Board,
         Upload,
         Thumbnail,
     }
 
-    // TODO: This should probably be merged into IDownloadable. Or IDownloadable should become IAsset. The AssetId concept is nice and should remain I think.
-    // TODO: Should IAsset/IDownloadable be IEquatable<AssetId> (does that even work?)?
     public interface IAsset : IProcessable
     {
         public AssetId Id { get; }
@@ -27,6 +24,7 @@ namespace GChan.Trackers
         public AssetType Type { get; set; }
         
         /// <summary>
+        /// Unique identifier for this asset. It may be a composite of multiple different locators (e.g. `4chan.threadId.replyId`).
         /// May contain anything but a colon ":".
         /// </summary>
         public string Identifier { get; set; }
