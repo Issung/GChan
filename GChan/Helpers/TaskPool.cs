@@ -1,5 +1,6 @@
 ﻿using GChan.Models;
 using GChan.Properties;
+using NLog;
 using System;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
@@ -11,6 +12,8 @@ namespace GChan.Helpers
     /// </summary>
     public class TaskPool<TResult>
     {
+        private static readonly ILogger logger = LogManager.GetCurrentClassLogger();
+
         /// <summary>
         /// A delegate that creates a task to be run.
         /// </summary>
@@ -58,7 +61,16 @@ namespace GChan.Helpers
                 {
                     var firstCompletedTask = await Task.WhenAny(runningTasks);
                     runningTasks.Remove(firstCompletedTask);
-                    completionListener(firstCompletedTask.Result);
+
+                    if (firstCompletedTask.IsFaulted)
+                    {
+                        // If the task throws an exception we don't know what it was, leading to it essentially being lost.
+                        logger.Error(firstCompletedTask.Exception, "A task in the task pool threw an exception.");
+                    }
+                    else
+                    {
+                        completionListener(firstCompletedTask.Result);
+                    }
                 }
                 else
                 {

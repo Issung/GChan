@@ -22,7 +22,7 @@ namespace GChan.Controllers
         private readonly Action<Tracker> addTrackerCallback;
         private readonly CancellationToken shutdownCancellationToken;
         private readonly ConcurrentQueue<IProcessable> queue = new();
-        private readonly TaskPool<ProcessResult> pool;  // TODO: Do something with the completion listener.
+        private readonly TaskPool<ProcessResult> pool;
         private readonly Task task;
 
         public ProcessQueue(
