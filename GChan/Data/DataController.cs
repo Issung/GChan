@@ -11,7 +11,7 @@ namespace GChan.Data
         /// <summary>
         /// Current database version, change this when database structure is changed.
         /// </summary>
-        public const int DATABASE_VERSION = 2;
+        public const int DATABASE_VERSION = 3;
 
         private const string DATABASE_FILENAME = "trackers.db";
         private static readonly string DATABASE_FOLDERNAME = "data";
