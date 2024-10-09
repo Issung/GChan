@@ -1,19 +1,22 @@
-using System.Collections.Generic;
+using System;
 
 namespace GChan.Models.Trackers
 {
     public class ThreadScrapeResults
     {
-        public string ThreadHtml { get; }
-        public IEnumerable<Thumbnail> Thumbnails { get; }
+        public string? ThreadHtml { get; }
+        public Upload[] Uploads { get; }
+        public Thumbnail[] Thumbnails { get; }
 
         public ThreadScrapeResults(
-            string threadHtml,
-            IEnumerable<Thumbnail> thumbnails
+            string? threadHtml,
+            Upload[] uploads,
+            Thumbnail[] thumbnails
         )
         {
             ThreadHtml = threadHtml;
-            Thumbnails = thumbnails;
+            Uploads = uploads ?? Array.Empty<Upload>();
+            Thumbnails = thumbnails ?? Array.Empty<Thumbnail>();
         }
     }
 }

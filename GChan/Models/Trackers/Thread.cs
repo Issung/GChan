@@ -86,7 +86,7 @@ namespace GChan.Models.Trackers
         public void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
         {
 #if DEBUG
-            logger.Debug($"NotifyPropertyChanged! propertyName: {propertyName}.");
+            logger.Trace($"NotifyPropertyChanged! propertyName: {propertyName}.");
 #endif
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
@@ -101,11 +101,23 @@ namespace GChan.Models.Trackers
             try
             {
                 // Should we be able to return more IDownloadables in DownloadResult to be added to the queue?
-                var thumbs = await ScrapeThread(cancellationToken);
-                var uploads = await ScrapeUploadedAssets(cancellationToken);
+                var results = await ScrapeThreadImpl(
+                    Settings.Default.SaveHtml,
+                    Settings.Default.SaveThumbnails,
+                    cancellationToken
+                );
 
-                var assets = thumbs.Concat<IAsset>(uploads);
-                var newAssets = assets.Where(a => !SeenAssets.Contains(a.Id));
+                FileCount = results.Uploads.Length;
+
+                if (!string.IsNullOrWhiteSpace(results.ThreadHtml))
+                {
+                    Directory.CreateDirectory(SaveTo);
+                    var path = Path.Combine(SaveTo, "Thread.html");
+                    await Utils.WriteAllTextAsync(path, results.ThreadHtml, cancellationToken);
+                }
+
+                var assets = results.Uploads.Concat<IAsset>(results.Thumbnails).ToArray();
+                var newAssets = assets.Where(a => !SeenAssets.Contains(a.Id)).ToArray();
 
                 SeenAssets.AddRange(newAssets);
 
@@ -130,43 +142,13 @@ namespace GChan.Models.Trackers
         }
 
         /// <summary>
-        /// Website specific implementation for scraping a thread, returning html and thumbnail assets.<br/>
-        /// <see cref="Thread"/> base class will only call this if needed, and will only save what is needed.
+        /// Website specific implementation for scraping a thread, returning html, uploads and thumbnail assets.
         /// </summary>
-        protected abstract Task<ThreadScrapeResults> ScrapeThreadImpl(CancellationToken cancellationToken);
-
-        /// <summary>
-        /// Website specific implementation to obtain a collection of assets specific image link retreival.
-        /// </summary>
-        protected abstract Task<Upload[]> ScrapeUploadsImpl(CancellationToken cancellationToken);
-
-        private async Task<IEnumerable<Thumbnail>> ScrapeThread(CancellationToken cancellationToken)
-        {
-            if (Settings.Default.SaveHtml)
-            {
-                var results = await ScrapeThreadImpl(cancellationToken);
-
-                if (!string.IsNullOrWhiteSpace(results.ThreadHtml))
-                {
-                    Directory.CreateDirectory(SaveTo);
-                    var path = Path.Combine(SaveTo, "Thread.html");
-                    await Utils.WriteAllTextAsync(path, results.ThreadHtml, cancellationToken);
-                }
-
-                if (Settings.Default.SaveThumbnails)
-                {
-                    return results.Thumbnails;
-                }
-            }
-
-            return Enumerable.Empty<Thumbnail>();
-        }
-
-        private async Task<IEnumerable<Upload>> ScrapeUploadedAssets(CancellationToken cancellationToken)
-        {
-            var uploads = await ScrapeUploadsImpl(cancellationToken);
-            return uploads;
-        }
+        protected abstract Task<ThreadScrapeResults> ScrapeThreadImpl(
+            bool saveHtml,
+            bool saveThumbnails,
+            CancellationToken cancellationToken
+        );
 
         public override int GetHashCode()
         {

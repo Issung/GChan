@@ -42,17 +42,85 @@ namespace GChan.Models.Trackers.Sites
             return Regex.IsMatch(url, THREAD_REGEX);
         }
 
-        protected override async Task<Upload[]> ScrapeUploadsImpl(CancellationToken cancellationToken)
+        protected override async Task<ThreadScrapeResults> ScrapeThreadImpl(
+            bool saveHtml,
+            bool saveThumbnails,
+            CancellationToken cancellationToken
+        )
         {
-            var baseUrl = $"http://i.4cdn.org/{BoardCode}/";
-            var jsonUrl = $"http://a.4cdn.org/{BoardCode}/thread/{Id}.json";
+            string? html = null;
+            Thumbnail[] thumbnails = Array.Empty<Thumbnail>();
 
+            // TODO: Implement If-Modified-Since header header sending & handling.
+            var jObject = await GetThreadJson(cancellationToken);
+
+            var uploads = ScrapeUploads(jObject);
+
+            // TODO: If thread was not modified since, skip this step.
+            if (saveHtml)
+            {
+                html = saveHtml ? await GetThreadHtml(cancellationToken) : null;
+
+                if (saveThumbnails)
+                {
+                    thumbnails = ScrapeThumbnails(jObject);
+
+                    // TODO: Alter html with thumbnails knowledge to fix paths (extra data will need to be saved in thumbnails).
+                }
+            }
+
+            return new(html, uploads, thumbnails);
+        }
+
+        private async Task<string> GetThreadHtml(CancellationToken cancellationToken)
+        {
             var client = Utils.GetHttpClient();
+            var htmlPage = await client.GetStringAsync(Url, cancellationToken);
+            htmlPage = htmlPage.Replace("f=\"to\"", "f=\"penis\"");
+            return htmlPage;
+        }
+
+        // TODO: Implement If-Modified-Since header header sending & handling.
+        private async Task<JObject> GetThreadJson(CancellationToken cancellationToken)
+        {
+            var client = Utils.GetHttpClient();
+            var jsonUrl = $"http://a.4cdn.org/{BoardCode}/thread/{Id}.json";
             var json = await client.GetStringAsync(jsonUrl, cancellationToken);
             var jObject = JObject.Parse(json);
+            return jObject;
+        }
 
-            // The /f/ board (flash) saves the files with their uploaded name.
-            var timPath = BoardCode == "f" ? "filename" : "tim";
+        private Thumbnail[] ScrapeThumbnails(JObject jObject)
+        {
+            var thumbs = jObject
+                .SelectTokens("posts[*]")
+                .Where(post => post["ext"] != null)
+                .Select(post =>
+                {
+                    var no = post["no"].Value<long>();
+                    var tim = post["tim"].Value<long>();
+                    var ext = post["ext"].ToString();
+
+                    // Only save thumbs for filetypes that need it.
+                    if (ext == ".webm") // TODO: Figure out if flash files/pdfs need special handling like webms, and then figure out a better method to check for this condition.
+                    {
+                        var thumbUrl = $"http://t.4cdn.org/{BoardCode}/{tim}s.jpg";
+                        //return (thumbUrl, no);
+                        return new Thumbnail(this, no, thumbUrl);
+                    }
+
+                    return null;
+                })
+                .Where(t => t != null) // Filter nulls
+                .ToArray();
+
+            return thumbs;
+        }
+
+        private Upload[] ScrapeUploads(JObject jObject)
+        {
+            var baseUrl = $"http://i.4cdn.org/{BoardCode}/";
+            var timPath = BoardCode == "f" ? "filename" : "tim";    // The /f/ board (flash) saves the files with their uploaded name.
 
             var uploads = jObject
                 .SelectTokens("posts[*]")
@@ -68,83 +136,7 @@ namespace GChan.Models.Trackers.Sites
                 )
                 .ToArray();
 
-            FileCount = uploads.Length;
-
             return uploads;
-        }
-
-        // TODO: Separate thread scrape & thumbnail scrape to save on string traversal & manipulation. If thread scraping is on get the html. If thumb scraping is on, pass the thread html to the get thumbnails method, etc.
-        // TODO: Implement If-Modified-Since header header sending & handling.
-        protected override async Task<ThreadScrapeResults> ScrapeThreadImpl(CancellationToken cancellationToken)
-        {
-            var thumbs = new List<(string Url, long ReplyId)>();
-            var baseUrl = $"//i.4cdn.org/{BoardCode}/";
-            // TODO: If we are fetching the JSON here we could forward it to the next part that scrapes uploads from the JSON.
-            // Maybe Thread.cs should have 1 single abstract method that gets told what to do (e.g. save html, save thumbs, etc) and returns the html string, thumbnails list, uploads list for the common part (saving).
-            var jsonUrl = $"http://a.4cdn.org/{BoardCode}/thread/{Id}.json";
-
-            var client = Utils.GetHttpClient();
-            var htmlPage = await client.GetStringAsync(Url, cancellationToken);
-            htmlPage = htmlPage.Replace("f=\"to\"", "f=\"penis\"");
-
-            var json = await client.GetStringAsync(jsonUrl, cancellationToken);
-
-            var posts = JObject
-                .Parse(json)
-                .SelectTokens("posts[*]")
-                .Where(x => x["ext"] != null)
-                .ToList();
-
-            foreach (var post in posts)
-            {
-                var no = post["no"].Value<long>();
-                var tim = post["tim"].Value<long>();
-                var timString = tim.ToString(); // Convert to string once to avoid repeated conversion.
-                var ext = post["ext"].ToString();
-                var oldUrl = baseUrl + tim + ext;
-                var newFilename = Path.GetFileNameWithoutExtension(
-                    new Upload(
-                        tim,
-                        oldUrl,
-                        post["filename"].ToString(),
-                        no,
-                        this
-                    ).GenerateFilename((ImageFileNameFormat)Settings.Default.ImageFilenameFormat)
-                );
-
-                htmlPage = htmlPage.Replace(oldUrl, tim + ext);
-
-                if (ext == ".webm") // TODO: Need a better way to check this, flash files and pdfs can also be present.
-                {
-                    var thumbUrl = $"//t.4cdn.org/{BoardCode}/{tim}s.jpg";
-                    thumbs.Add(($"http:{thumbUrl}", no));
-
-                    htmlPage = htmlPage.Replace(timString, newFilename);
-                    htmlPage = htmlPage.Replace($"{baseUrl}{newFilename}", $"thumb/{tim}");
-                }
-                else
-                {
-                    var thumbName = tim + "s";
-                    htmlPage = htmlPage.Replace($"{thumbName}.jpg", tim + ext);
-                    htmlPage = htmlPage.Replace($"/{thumbName}", thumbName);
-
-                    htmlPage = htmlPage.Replace($"{baseUrl}{tim}", timString);
-                    htmlPage = htmlPage.Replace(timString, newFilename);
-                }
-
-                htmlPage = htmlPage.Replace($"//is2.4chan.org/{BoardCode}/{tim}", timString);
-                htmlPage = htmlPage.Replace($"/{tim}{ext}", tim + ext);
-            }
-
-            // 4chan uses double slash urls (copy current protocol), when the user views it locally the protocol will no longer be http, so build it in.
-            // This is used for javascript references.
-            htmlPage = htmlPage.Replace("=\"//", "=\"http://");
-
-            // Alter all content links like "http://is2.4chan.org/tv/123.jpg" to become local like "123.jpg".
-            htmlPage = htmlPage.Replace($"http://is2.4chan.org/{BoardCode}/", string.Empty);
-
-            var thumbAssets = thumbs.Select(thumb => new Thumbnail(this, thumb.ReplyId, thumb.Url));
-            return new(htmlPage, thumbAssets);
         }
 
         // TODO: Web request here that is non-async and not rate limited (via IProcessable pipeline).
