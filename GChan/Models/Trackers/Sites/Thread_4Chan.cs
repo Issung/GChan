@@ -2,7 +2,6 @@
 using GChan.Properties;
 using Newtonsoft.Json.Linq;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -65,7 +64,8 @@ namespace GChan.Models.Trackers.Sites
                 {
                     thumbnails = ScrapeThumbnails(jObject);
 
-                    // TODO: Alter html with thumbnails knowledge to fix paths (extra data will need to be saved in thumbnails).
+                    // TODO: This should be run even if save thumbs is false. We can still reference the local images, and 4chan js/css.
+                    html = FixThreadHtmlLinks(html, uploads);
                 }
             }
 
@@ -130,13 +130,52 @@ namespace GChan.Models.Trackers.Sites
                         x[timPath].Value<long>(),
                         baseUrl + Uri.EscapeDataString(x[timPath].Value<string>()) + x["ext"],  // Require escaping for the flash files stored with arbitrary string names.
                         x["filename"].Value<string>(),
-                        x["no"].Value<long>(),
                         this
                     )
                 )
                 .ToArray();
 
             return uploads;
+        }
+
+        /// <summary>
+        /// Return an altered version of <paramref name="html"/> that fixes js/css, thumbnail, and image/video links.
+        /// </summary>
+        // TODO: This should be run even if save thumbs is false. We can still reference the local images, and 4chan js/css.
+        // TODO: A lot of string manipulation going on here. StringBuilder may be better.
+        private string FixThreadHtmlLinks(string html, Upload[] uploads)
+        {
+            var baseUrl = $"//i.4cdn.org/{BoardCode}/";
+
+            foreach (var upload in uploads)
+            {
+                if (upload.Extension == ".webm") // TODO: Need a better way to check this, flash files and pdfs can also be present.
+                {
+                    html = html.Replace(upload.Tim.ToString() + upload.Extension, upload.Filename);
+                    html = html.Replace($"{baseUrl}{upload.Filename}", $"thumb/{upload.Tim}");
+                }
+                else
+                {
+                    var thumbName = upload.Tim + "s";
+                    html = html.Replace($"{thumbName}.jpg", upload.Tim + upload.Extension);
+                    html = html.Replace($"/{thumbName}", thumbName);
+
+                    html = html.Replace($"{baseUrl}{upload.Tim}", upload.Tim.ToString());
+                    html = html.Replace(upload.Tim.ToString() + upload.Extension, upload.Filename);
+                }
+
+                html = html.Replace($"//is2.4chan.org/{BoardCode}/{upload.Tim}", upload.Tim.ToString());
+                html = html.Replace($"/{upload.Tim}{upload.Extension}", upload.Tim + upload.Extension);
+            }
+
+            // 4chan uses urls starting with // (uses current protocol), when the user views it locally the protocol will be file:// which won't work, so we need to place http prefixes in.
+            // This allows the locally viewed page to reference the js/css hosted on 4chan, fixing the styling and making it a bit functional.
+            html = html.Replace("=\"//", "=\"http://");
+
+            // Alter all content links like "http://is2.4chan.org/tv/123.jpg" to become local like "123.jpg".
+            html = html.Replace($"http://is2.4chan.org/{BoardCode}/", string.Empty);
+
+            return html;
         }
 
         // TODO: Web request here that is non-async and not rate limited (via IProcessable pipeline).
@@ -146,14 +185,14 @@ namespace GChan.Models.Trackers.Sites
 
             try
             {
-                string JSONUrl = "http://a.4cdn.org/" + BoardCode + "/thread/" + Id + ".json";
+                string jsonUrl = "http://a.4cdn.org/" + BoardCode + "/thread/" + Id + ".json";
 
                 const string SUB_HEADER = "\"sub\":\"";
                 const string SUB_ENDER = "\",";
 
                 using (var web = Utils.CreateWebClient())
                 {
-                    string rawjson = web.DownloadString(JSONUrl);
+                    string rawjson = web.DownloadString(jsonUrl);
                     int subStartIndex = rawjson.IndexOf(SUB_HEADER);
 
                     // If "Sub":" was found in json then there is a subject.

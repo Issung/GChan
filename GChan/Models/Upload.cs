@@ -15,35 +15,45 @@ namespace GChan.Models
     /// </summary>
     public class Upload : IAsset, IEquatable<Upload>
     {
-        public AssetId Id { get; private set; }
+        private static readonly ILogger logger = LogManager.GetCurrentClassLogger();
+
+        public AssetId Id { get; }
 
         /// <summary>
         /// For 4chan: Unix timestamp with microseconds at which the image was uploaded.
         /// </summary>
-        public long Tim;
+        public long Tim { get; }
 
         /// <summary>
         /// URL to the access the upload.
         /// </summary>
-        public string Url;
+        public string Url { get; }
 
         /// <summary>
         /// The <strong>sanitised</strong> filename the image was uploaded as <strong>without an extension</strong>.<br/>
         /// e.g. "LittleSaintJames", <strong>not</strong> the stored filename e.g. "1265123123.jpg".
         /// </summary>
-        public string UploadedFilename;
-
-        /// <summary>
-        /// The ID of the post this image belongs to.
-        /// </summary>
-        public long No;
+        public string UploadedFilename { get; }
 
         /// <summary>
         /// The thread this upload is from.
         /// </summary>
-        public Thread Thread;
+        public Thread Thread { get; }
 
-        private static readonly ILogger logger = LogManager.GetCurrentClassLogger();
+        /// <summary>
+        /// The ID of the post this image belongs to.
+        /// </summary>
+        public long No => Thread.Id;
+
+        /// <summary>
+        /// Generate save path filename with the current image filename format setting.
+        /// </summary>
+        public string Filename => GenerateFilename((ImageFileNameFormat)Settings.Default.ImageFilenameFormat);
+
+        /// <summary>
+        /// Contains leading period (e.g. ".png").
+        /// </summary>
+        public string Extension { get; }
 
         public CancellationToken CancellationToken => Thread.CancellationToken;
 
@@ -53,16 +63,15 @@ namespace GChan.Models
             long tim,
             string url,
             string uploadedFilename,
-            long no,
             Thread thread
         )
         {
-            Id = new AssetId(AssetType.Upload, $"{no}.{tim}");
+            Id = new AssetId(AssetType.Upload, $"{thread.Id}.{tim}");
             Tim = tim;
             Url = url;
             UploadedFilename = Utils.SanitiseFilename(uploadedFilename);
-            No = no;
             Thread = thread;
+            Extension = Path.GetExtension(Url);
         }
 
         public async Task<ProcessResult> ProcessAsync(CancellationToken cancellationToken)
@@ -73,8 +82,7 @@ namespace GChan.Models
             }
 
             Directory.CreateDirectory(Thread.SaveTo);
-            var filename = GenerateFilename((ImageFileNameFormat)Settings.Default.ImageFilenameFormat);
-            var path = Utils.CombinePathAndFilename(Thread.SaveTo, filename);
+            var path = Utils.CombinePathAndFilename(Thread.SaveTo, Filename);
 
             try
             {
@@ -103,16 +111,14 @@ namespace GChan.Models
             return new(this, removeFromQueue: true);
         }
 
-        public string GenerateFilename(ImageFileNameFormat format)
+        private string GenerateFilename(ImageFileNameFormat format)
         {
-            var extension = Path.GetExtension(Url); // Contains period (.).
-
             var result = format switch
             {
-                ImageFileNameFormat.ID => $"{No}{extension}",
-                ImageFileNameFormat.OriginalFilename => $"{UploadedFilename}{extension}",
-                ImageFileNameFormat.IDAndOriginalFilename => $"{No} - {UploadedFilename}{extension}",
-                ImageFileNameFormat.OriginalFilenameAndID => $"{UploadedFilename} - {No}{extension}",
+                ImageFileNameFormat.ID => $"{No}{Extension}",
+                ImageFileNameFormat.OriginalFilename => $"{UploadedFilename}{Extension}",
+                ImageFileNameFormat.IDAndOriginalFilename => $"{No} - {UploadedFilename}{Extension}",
+                ImageFileNameFormat.OriginalFilenameAndID => $"{UploadedFilename} - {No}{Extension}",
                 _ => throw new ArgumentException("Given value for 'format' is unknown.")
             };
 
