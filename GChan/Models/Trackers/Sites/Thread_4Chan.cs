@@ -142,7 +142,7 @@ namespace GChan.Models.Trackers.Sites
         /// Return an altered version of <paramref name="html"/> that fixes js/css, thumbnail, and image/video links.
         /// </summary>
         // TODO: This should be run even if save thumbs is false. We can still reference the local images, and 4chan js/css.
-        // TODO: A lot of string manipulation going on here. StringBuilder may be better.
+        // TODO: A lot of string manipulation going on here. StringBuilder may be better. Setup benchmark & compare overhead.
         private string FixThreadHtmlLinks(string html, Upload[] uploads)
         {
             var baseUrl = $"//i.4cdn.org/{BoardCode}/";
