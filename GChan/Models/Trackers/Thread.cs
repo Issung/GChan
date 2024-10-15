@@ -7,6 +7,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using CancellationToken = System.Threading.CancellationToken;
 
@@ -68,7 +69,14 @@ namespace GChan.Models.Trackers
 
         public bool Gone { get; protected set; } = false;
 
-        protected string subject { get; private set; } = null;
+        /// <summary>
+        /// When this thread was last succesfully scraped, null if not yet scraped.<br/>
+        /// <see cref="DateTimeOffset"/> because that's what HttpClient header property accepts.
+        /// </summary>
+        // TODO: Does this work on boards too? If so should this be on Tracker instead of Thread?
+        public DateTimeOffset? LastScrape { get; protected set; } = null;
+
+        private string? subject = null;
         private int? fileCount = null;
 
         protected Thread(string url) : base(url)
@@ -107,7 +115,10 @@ namespace GChan.Models.Trackers
                     cancellationToken
                 );
 
-                FileCount = results.Uploads.Length;
+                if (results == null)
+                {
+                    return new(this, removeFromQueue: false);
+                }
 
                 if (!string.IsNullOrWhiteSpace(results.ThreadHtml))
                 {
@@ -119,6 +130,8 @@ namespace GChan.Models.Trackers
                 var assets = results.Uploads.Concat<IAsset>(results.Thumbnails).ToArray();
                 var newAssets = assets.Where(a => !SeenAssets.Contains(a.Id)).ToArray();
 
+                FileCount = results.Uploads.Length;
+                LastScrape = DateTimeOffset.Now;
                 SeenAssets.AddRange(newAssets);
 
                 return new(this, removeFromQueue: false, newProcessables: newAssets);
@@ -131,18 +144,18 @@ namespace GChan.Models.Trackers
             catch (StatusCodeException e) when (e.IsGone())
             {
                 Gone = true;
+                return new(this, removeFromQueue: true);
             }
             catch (Exception ex)
             {
                 logger.Error(ex);
                 return new(this, removeFromQueue: false);
             }
-
-            return new(this, removeFromQueue: true);
         }
 
         /// <summary>
-        /// Website specific implementation for scraping a thread, returning html, uploads and thumbnail assets.
+        /// Website specific implementation for scraping a thread, returning html, uploads and thumbnail assets.<br/>
+        /// Can return null to indicate the thread has had no change.
         /// </summary>
         protected abstract Task<ThreadScrapeResults> ScrapeThreadImpl(
             bool saveHtml,

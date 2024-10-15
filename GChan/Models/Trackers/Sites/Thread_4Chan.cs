@@ -41,31 +41,40 @@ namespace GChan.Models.Trackers.Sites
             return Regex.IsMatch(url, THREAD_REGEX);
         }
 
-        protected override async Task<ThreadScrapeResults> ScrapeThreadImpl(
+        protected override async Task<ThreadScrapeResults?> ScrapeThreadImpl(
             bool saveHtml,
             bool saveThumbnails,
             CancellationToken cancellationToken
         )
         {
-            string? html = null;
-            Thumbnail[] thumbnails = Array.Empty<Thumbnail>();
+            var html = (string?)null;
+            var uploads = Array.Empty<Upload>();
+            var thumbnails = Array.Empty<Thumbnail>();
 
-            // TODO: Implement If-Modified-Since header header sending & handling.
             var jObject = await GetThreadJson(cancellationToken);
 
-            var uploads = ScrapeUploads(jObject);
+            if (jObject == null)
+            {
+                // Thread has not been modified since last scrape.
+                return null;
+            }    
 
-            // TODO: If thread was not modified since, skip this step.
+            uploads = ScrapeUploads(jObject);
+
             if (saveHtml)
             {
+                if (Settings.Default.Max1RequestPerSecond)  // Bit of hackery, as we're doing 2 network requests within 1 processable.
+                {
+                    await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
+                }
+
                 html = saveHtml ? await GetThreadHtml(cancellationToken) : null;
+
+                html = FixThreadHtmlLinks(html, uploads);
 
                 if (saveThumbnails)
                 {
                     thumbnails = ScrapeThumbnails(jObject);
-
-                    // TODO: This should be run even if save thumbs is false. We can still reference the local images, and 4chan js/css.
-                    html = FixThreadHtmlLinks(html, uploads);
                 }
             }
 
@@ -80,12 +89,18 @@ namespace GChan.Models.Trackers.Sites
             return htmlPage;
         }
 
-        // TODO: Implement If-Modified-Since header header sending & handling.
-        private async Task<JObject> GetThreadJson(CancellationToken cancellationToken)
+        /// <returns>Returns null if the thread was not modified since the last scrape.</returns>
+        private async Task<JObject?> GetThreadJson(CancellationToken cancellationToken)
         {
             var client = Utils.GetHttpClient();
             var jsonUrl = $"http://a.4cdn.org/{BoardCode}/thread/{Id}.json";
-            var json = await client.GetStringAsync(jsonUrl, cancellationToken);
+            var json = await client.GetStringAsync(jsonUrl, LastScrape, cancellationToken);
+
+            if (json == null)
+            {
+                return null;
+            }
+
             var jObject = JObject.Parse(json);
             return jObject;
         }
@@ -141,7 +156,6 @@ namespace GChan.Models.Trackers.Sites
         /// <summary>
         /// Return an altered version of <paramref name="html"/> that fixes js/css, thumbnail, and image/video links.
         /// </summary>
-        // TODO: This should be run even if save thumbs is false. We can still reference the local images, and 4chan js/css.
         // TODO: A lot of string manipulation going on here. StringBuilder may be better. Setup benchmark & compare overhead.
         private string FixThreadHtmlLinks(string html, Upload[] uploads)
         {

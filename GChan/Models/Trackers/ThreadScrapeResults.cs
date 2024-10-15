@@ -4,8 +4,13 @@ namespace GChan.Models.Trackers
 {
     public class ThreadScrapeResults
     {
+        /// <summary>
+        /// Will only be saved if not null.
+        /// </summary>
         public string? ThreadHtml { get; }
+
         public Upload[] Uploads { get; }
+
         public Thumbnail[] Thumbnails { get; }
 
         public ThreadScrapeResults(

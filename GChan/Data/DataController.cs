@@ -31,6 +31,7 @@ namespace GChan.Data
 
         // Thread columns
         private const string COL_SUBJECT = "subject";
+        private const string COL_LAST_SCRAPE = "last_scrape";
         private const string COL_SAVED_IDS = "saved_ids";
 
         // Board columns
@@ -157,6 +158,7 @@ namespace GChan.Data
 
                     cmd.Parameters.AddWithValue(COL_URL, threads[i].Url);
                     cmd.Parameters.AddWithValue(COL_SUBJECT, threads[i].Subject);
+                    cmd.Parameters.AddWithValue(COL_LAST_SCRAPE, threads[i].LastScrape);
                     cmd.Parameters.AddWithValue(COL_SAVED_IDS, threads[i].SavedAssets.ToJson());
 
                     cmd.ExecuteNonQuery();
