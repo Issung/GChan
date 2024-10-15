@@ -147,6 +147,8 @@ namespace GChan
             {
                 registryKey.DeleteValue(Utils.PROGRAM_NAME);
             }
+
+            Utils.UpdateHttpClientUserAgentHeader(userAgentTextBox.Text);
         }
 
         //Source: https://stackoverflow.com/q/1410127/8306962

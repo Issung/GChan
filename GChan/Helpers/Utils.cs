@@ -62,6 +62,12 @@ namespace GChan
             return httpClient;
         }
 
+        public static void UpdateHttpClientUserAgentHeader(string newUserAgentHeaderValue)
+        {
+            httpClient.DefaultRequestHeaders.UserAgent.Clear();
+            httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", newUserAgentHeaderValue);
+        }
+
         public static async Task WriteAllTextAsync(string path, string content, CancellationToken cancellationToken)
         {
             var bytes = System.Text.Encoding.UTF8.GetBytes(content);
