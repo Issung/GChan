@@ -304,6 +304,7 @@ namespace GChan.Controllers
         /// If removing a newly added thread this is likely to fail beacuse files are still being downloaded into the current directory.
         /// It only fails once because after setting thread.Scraping to no more downloads happen (mostly..).
         /// We kind of need a download manager so we can wait for all downloads from this thread to finish before moving dir.
+        /// Comment update in bugfix/rate-limiting branch: This is remedied now with a CancellationToken on the thread and files. But we need >= .NET 5 to use cancellation tokens on the ReadAsStringAsync methods.
         /// </remarks>
         public void RemoveThread(Thread thread, bool manualRemove = false)
         {

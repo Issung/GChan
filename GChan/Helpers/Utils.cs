@@ -58,7 +58,6 @@ namespace GChan
         /// <remarks>Do not dispose it.</remarks>
         public static HttpClient GetHttpClient()
         {
-            // TODO: The User-Agent header needs to be updated when the user changes the setting.
             return httpClient;
         }
 

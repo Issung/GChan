@@ -180,13 +180,6 @@ namespace GChan.Forms
             settings.ShowDialog();
             settings.Dispose();
 
-            // TODO: #41 - Cancellation currently not working, implement later.
-            //if (!Settings.Default.SaveHTML)
-            //{
-            //  Clear all downloads on main controller threadHtmlDownloader.
-            //  threadHtmlDownloader.Clear();
-            //}
-
             systemTrayNotifyIcon.Visible = Settings.Default.MinimizeToTray;
 
             Controller.SettingsUpdated();

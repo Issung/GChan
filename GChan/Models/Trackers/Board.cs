@@ -68,11 +68,6 @@ namespace GChan.Models.Trackers
 
                 var newThreads = threads.Where(t => t.Id > GreatestThreadId);
 
-                // TODO: Not only do we need to return new processables, but also:
-                // - Check the thread is not already being scraped
-                // - Add the threads to the thread list.
-
-                // A board should probably return thread "seeds" 
                 return new(this, removeFromQueue: false, newProcessables: newThreads);
             }
             catch (WebException webEx)
