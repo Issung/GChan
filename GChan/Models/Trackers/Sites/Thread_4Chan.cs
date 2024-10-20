@@ -5,9 +5,12 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+
+#nullable enable
 
 namespace GChan.Models.Trackers.Sites
 {
@@ -17,7 +20,7 @@ namespace GChan.Models.Trackers.Sites
         public const string BOARD_CODE_REGEX = "(?<=((chan|channel).org/))[a-zA-Z0-9]+(?=(/))?";
         public const string ID_CODE_REGEX = "(?<=(thread/))[0-9]*(?=(.*))";
 
-        public Thread_4Chan(string url, string subject = null, int? fileCount = null) : base(url)
+        public Thread_4Chan(string url, string? subject = null, int? fileCount = null) : base(url)
         {
             SiteName = Board_4Chan.SITE_NAME;
 
@@ -68,7 +71,7 @@ namespace GChan.Models.Trackers.Sites
                     await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
                 }
 
-                html = saveHtml ? await GetThreadHtml(cancellationToken) : null;
+                html = await GetThreadHtml(cancellationToken);
 
                 html = FixThreadHtmlLinks(html, uploads);
 
@@ -112,9 +115,9 @@ namespace GChan.Models.Trackers.Sites
                 .Where(post => post["ext"] != null)
                 .Select(post =>
                 {
-                    var no = post["no"].Value<long>();
-                    var tim = post["tim"].Value<long>();
-                    var ext = post["ext"].ToString();
+                    var no = post["no"]!.Value<long>();
+                    var tim = post["tim"]!.Value<long>();
+                    var ext = post["ext"]!.ToString();
 
                     // Only save thumbs for filetypes that need it.
                     if (ext == ".webm") // TODO: Figure out if flash files/pdfs need special handling like webms, and then figure out a better method to check for this condition.
@@ -126,7 +129,7 @@ namespace GChan.Models.Trackers.Sites
 
                     return null;
                 })
-                .Where(t => t != null) // Filter nulls
+                .OfType<Thumbnail>() // Filter nulls
                 .ToArray();
 
             return thumbs;
@@ -139,12 +142,13 @@ namespace GChan.Models.Trackers.Sites
 
             var uploads = jObject
                 .SelectTokens("posts[*]")
-                .Where(x => x["ext"] != null)
-                .Select(x =>
+                .Where(post => post["ext"] != null)
+                .Select(post =>
                     new Upload(
-                        x[timPath].Value<long>(),
-                        baseUrl + Uri.EscapeDataString(x[timPath].Value<string>()) + x["ext"],  // Require escaping for the flash files stored with arbitrary string names.
-                        x["filename"].Value<string>(),
+                        post[timPath]!.Value<long>(),
+                        baseUrl + Uri.EscapeDataString(post[timPath]!.Value<string>()!) + post["ext"],  // Require escaping for the flash files stored with arbitrary string names.
+                        post["filename"]!.Value<string>(),
+                        post["no"]!.Value<long>(),
                         this
                     )
                 )
@@ -204,23 +208,24 @@ namespace GChan.Models.Trackers.Sites
                 const string SUB_HEADER = "\"sub\":\"";
                 const string SUB_ENDER = "\",";
 
-                using (var web = Utils.CreateWebClient())
-                {
-                    string rawjson = web.DownloadString(jsonUrl);
-                    int subStartIndex = rawjson.IndexOf(SUB_HEADER);
+                var web = Utils.GetHttpClient();
 
-                    // If "Sub":" was found in json then there is a subject.
-                    if (subStartIndex >= 0)
+                var request = new HttpRequestMessage(HttpMethod.Get, jsonUrl);
+                var response = web.Send(request);
+                var rawJson = response.ReadAsString();
+                int subStartIndex = rawJson.IndexOf(SUB_HEADER);
+
+                // If "Sub":" was found in json then there is a subject.
+                if (subStartIndex >= 0)
+                {
+                    //Increment along the rawjson until the ending ", sequence is found, then substring it to extract the subject.
+                    for (int i = subStartIndex; i < rawJson.Length; i++)
                     {
-                        //Increment along the rawjson until the ending ", sequence is found, then substring it to extract the subject.
-                        for (int i = subStartIndex; i < rawjson.Length; i++)
+                        if (rawJson.Substring(i, SUB_ENDER.Length) == SUB_ENDER)
                         {
-                            if (rawjson.Substring(i, SUB_ENDER.Length) == SUB_ENDER)
-                            {
-                                subject = rawjson.Substring(subStartIndex + SUB_HEADER.Length, i - (subStartIndex + SUB_HEADER.Length));
-                                subject = Utils.SanitiseSubject(WebUtility.HtmlDecode(subject));
-                                break;
-                            }
+                            subject = rawJson.Substring(subStartIndex + SUB_HEADER.Length, i - (subStartIndex + SUB_HEADER.Length));
+                            subject = Utils.SanitiseSubject(WebUtility.HtmlDecode(subject));
+                            break;
                         }
                     }
                 }

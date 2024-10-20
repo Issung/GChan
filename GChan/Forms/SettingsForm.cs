@@ -158,7 +158,10 @@ namespace GChan
             {
                 // Attempt to get a list of security permissions from the folder.
                 // This will raise an exception if the path is read only or do not have access to view the permissions.
-                var directorySecurity = Directory.GetAccessControl(folderPath);
+                //var directorySecurity = Directory.GetAccessControl(folderPath);
+
+                var directoryInfo = new DirectoryInfo(folderPath);
+                FileSystemAclExtensions.GetAccessControl(directoryInfo);
                 reason = "No problem";
                 return true;
             }
@@ -190,7 +193,7 @@ namespace GChan
 
         private void textBox1_DoubleClick(object sender, EventArgs e)
         {
-            System.Diagnostics.Process.Start("explorer.exe", string.Format(directory));
+            Utils.OpenDirectory(directory);
         }
 
         private void chkTray_CheckedChanged(object sender, EventArgs e)

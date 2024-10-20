@@ -15,8 +15,8 @@ namespace GChan.UnitTest
         readonly static Thread thread = new Thread_4Chan("https://boards.4chan.org/hr/thread/123");
 
         // Two different image link instances, with the same data.
-        readonly static Upload asset1 = new Upload(123, "http://test.com", "test123", thread);
-        readonly static Upload asset2 = new Upload(123, "http://test.com", "test123", thread);
+        readonly static Upload asset1 = new(123, "http://test.com", "test123", 1, thread);
+        readonly static Upload asset2 = new(123, "http://test.com", "test123", 1, thread);
 
         [Fact]
         public void TestAddAndRetrieveWithIndexOperator()

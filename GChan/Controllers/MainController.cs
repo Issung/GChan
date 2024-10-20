@@ -147,11 +147,13 @@ namespace GChan.Controllers
                         if (result == DialogResult.Yes)
                         {
                             var path = newTracker.SaveTo;
+
                             if (!Directory.Exists(path))
                             { 
                                 Directory.CreateDirectory(path);
                             }
-                            Process.Start(path);
+
+                            Utils.OpenDirectory(path);
                         }
                     }
                 }

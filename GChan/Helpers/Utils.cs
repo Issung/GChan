@@ -4,6 +4,7 @@ using GChan.Models.Trackers.Sites;
 using GChan.Properties;
 using NLog;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -36,23 +37,13 @@ namespace GChan
         /// <param name="str">String to validate</param>
         public static bool IsDigitsOnly(string str)
         {
-            foreach(char c in str)
+            foreach (char c in str)
             {
                 if (c < '0' || c > '9')
                     return false;
             }
 
             return true;
-        }
-
-        /// <summary>
-        /// Build a WebClient for one-time use, should be disposed of once done.
-        /// </summary>
-        public static WebClient CreateWebClient()
-        {
-            var client = new WebClient();
-            client.Headers["User-Agent"] = Settings.Default.UserAgent;
-            return client;
         }
 
         /// <remarks>Do not dispose it.</remarks>
@@ -156,39 +147,6 @@ namespace GChan
         }
 
         /// <summary>
-        /// Creates <paramref name="directory"/> if it doesn't already exist.
-        /// </summary>
-        /// <param name="directory">Directory path, exlcluding filename.</param>
-        /// <returns>True if file was downloaded or already existed, false for error occured.</returns>
-        public static bool DownloadFileIfDoesntExist(string url, string directory)
-        {
-            if (!Directory.Exists(directory))
-            { 
-                Directory.CreateDirectory(directory);
-            }
-
-            var fileName = GetFilenameFromUrl(url);
-            var fullpath = Path.Combine(directory, fileName);
-
-            try
-            {
-                if (!File.Exists(fullpath))
-                {
-                    using var client = CreateWebClient();
-                    client.DownloadFile(url, fullpath);
-                }
-
-                return true;
-            }
-            catch (Exception e)
-            {
-                // Should we throw?
-                logger.Warn(e, "Exception occured downloading file.");
-                return false;
-            }
-        }
-
-        /// <summary>
         /// Move thread directory for removal, based on settings.
         /// </summary>
         /// <exception cref="IOException"/>
@@ -272,7 +230,7 @@ namespace GChan
         /// <remarks>
         /// Found to be the fastest method by: https://stackoverflow.com/a/48590650/8306962.
         /// </remarks>
-        public static string RemoveCharactersFromString(string input, params char[] chars) 
+        public static string RemoveCharactersFromString(string input, params char[] chars)
         {
             return string.Join(string.Empty, input.Split(chars));
         }
@@ -312,6 +270,20 @@ namespace GChan
 
             var linkedSource = CancellationTokenSource.CreateLinkedTokenSource(token1, token2);
             return linkedSource.Token;
+        }
+
+        public static void OpenDirectory(string path)
+        {
+            Process.Start("explorer.exe", path);
+        }
+
+        public static void OpenWebpage(string url)
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = url,
+                UseShellExecute = true // Open URL in the default browser
+            });
         }
     }
 }

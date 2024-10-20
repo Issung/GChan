@@ -4,7 +4,9 @@ using GChan.Properties;
 using NLog;
 using System;
 using System.IO;
+using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using System.Threading;
 using System.Windows.Forms;
 
@@ -15,11 +17,16 @@ namespace GChan
         public static MainForm mainForm;
         public static string APPLICATION_INSTALL_DIRECTORY { get; } = AppDomain.CurrentDomain.BaseDirectory;
 
+        public static string USER_DATA_PATH = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
 #if DEBUG
-        public static string PROGRAM_DATA_PATH => Path.Combine(Path.GetDirectoryName(Application.CommonAppDataPath), "DEBUG");
+            $"{NAME}_DEBUG"
 #else
-        public static string PROGRAM_DATA_PATH => Path.GetDirectoryName(Application.CommonAppDataPath);
+            NAME
 #endif
+        );
+
+        public static string LOGS_PATH = Path.Combine(USER_DATA_PATH, "logs");
 
         public const string NAME = "GChan";
 
@@ -30,6 +37,8 @@ namespace GChan
 #else
         public const string GITHUB_REPOSITORY_NAME = "GChan";
 #endif
+
+        public static readonly string VERSION = Assembly.GetEntryAssembly().GetName().Version.ToString();
 
         public const string TRAY_CMDLINE_ARG = "-tray";
 
@@ -45,9 +54,9 @@ namespace GChan
         {
             arguments = args;
 
-#if DEBUG
-            Directory.CreateDirectory(PROGRAM_DATA_PATH);
-#endif
+            Directory.CreateDirectory(LOGS_PATH);
+
+            LogManager.Configuration.Variables["logsDirectory"] = LOGS_PATH;
 
             if (Settings.Default.UpdateSettings)
             {

@@ -1,5 +1,7 @@
 using System;
 
+#nullable enable
+
 namespace GChan.Models.Trackers
 {
     public class ThreadScrapeResults

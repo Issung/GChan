@@ -10,7 +10,7 @@ namespace GChan.Controls
 {
 	internal sealed class DataGridViewPreferencesSetting : ApplicationSettingsBase
 	{
-		private static DataGridViewPreferencesSetting _defaultInstance = (DataGridViewPreferencesSetting)Synchronized(new DataGridViewPreferencesSetting());
+		private static readonly DataGridViewPreferencesSetting _defaultInstance = (DataGridViewPreferencesSetting)Synchronized(new DataGridViewPreferencesSetting());
 		
 		public static DataGridViewPreferencesSetting Default => _defaultInstance;
 
@@ -18,8 +18,8 @@ namespace GChan.Controls
 		// a dictionary is used to save the settings for this DGV.
 		// As name of the control is used as the dictionary key.
 		[UserScopedSetting]
-		[SettingsSerializeAs(SettingsSerializeAs.Binary)]
 		[DefaultSettingValue("")]
+		[SettingsSerializeAs(SettingsSerializeAs.Xml)]	// TODO: Had to change to XML to get it to work in .NET 8, probably not working as intended now.
 		public Dictionary<string, List<ColumnOrderItem>> ColumnOrder
 		{
 			get { return this["ColumnOrder"] as Dictionary<string, List<ColumnOrderItem>>; }

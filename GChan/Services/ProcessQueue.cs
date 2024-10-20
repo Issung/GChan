@@ -6,6 +6,8 @@ using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 
+#nullable enable
+
 namespace GChan.Services
 {
     /// <summary>
@@ -78,15 +80,19 @@ namespace GChan.Services
         {
             while (true)
             {
-                if (queue.TryDequeue(out var downloadable))
+                if (queue.TryDequeue(out var processable))
                 {
-                    if (downloadable.ShouldProcess)
+                    if (processable.ShouldProcess)
                     {
-                        return downloadable;
+                        logger.Trace("Dequeued processable {0}.", processable);
+                        return processable;
                     }
+
+                    logger.Trace("Discarding dequeued processable {0}.", processable);
                 }
                 else
                 {
+                    logger.Trace("Processable queue empty.");
                     return null;
                 }
             }

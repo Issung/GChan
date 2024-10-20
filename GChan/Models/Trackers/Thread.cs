@@ -2,12 +2,10 @@
 using GChan.Properties;
 using GChan.Services;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using CancellationToken = System.Threading.CancellationToken;
 
@@ -28,13 +26,13 @@ namespace GChan.Models.Trackers
         /// Assets that no longer need to be put in processing. This should load the saved assets from the database.
         /// </summary>
         // TODO: Make readonly
-        public AssetIdsCollection SeenAssets { get; set; } = new();
+        public AssetIdsCollection SeenAssets { get; set; } = [];
 
         /// <summary>
         /// Assetss that have successfully completed processing. This should be saved in the database.
         /// </summary>
         // TODO: Make readonly
-        public AssetIdsCollection SavedAssets { get; set; } = new();
+        public AssetIdsCollection SavedAssets { get; set; } = [];
 
         public bool ShouldProcess => !Gone;
 

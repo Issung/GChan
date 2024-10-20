@@ -133,12 +133,14 @@ namespace GChan.Forms
         {
             if (ThreadGridViewSelectedRowIndex != -1)
             {
-                string spath = Model.Threads[ThreadGridViewSelectedRowIndex].SaveTo;
-                if (!Directory.Exists(spath))
+                var path = Model.Threads[ThreadGridViewSelectedRowIndex].SaveTo;
+
+                if (!Directory.Exists(path))
                 { 
-                    Directory.CreateDirectory(spath);
+                    Directory.CreateDirectory(path);
                 }
-                Process.Start(spath);
+
+                Utils.OpenDirectory(path);
             }
         }
 
@@ -146,8 +148,8 @@ namespace GChan.Forms
         {
             if (ThreadGridViewSelectedRowIndex != -1)
             {
-                string spath = Model.Threads[ThreadGridViewSelectedRowIndex].Url;
-                Process.Start(spath);
+                var url = Model.Threads[ThreadGridViewSelectedRowIndex].Url;
+                Utils.OpenWebpage(url);
             }
         }
 
@@ -189,10 +191,14 @@ namespace GChan.Forms
         {
             if (BoardsListBoxSelectedRowIndex != -1)
             {
-                string spath = (Model.Boards[BoardsListBoxSelectedRowIndex]).SaveTo;
-                if (!Directory.Exists(spath))
-                    Directory.CreateDirectory(spath);
-                Process.Start(spath);
+                var path = (Model.Boards[BoardsListBoxSelectedRowIndex]).SaveTo;
+
+                if (!Directory.Exists(path))
+                {
+                    Directory.CreateDirectory(path);
+                }
+
+                Utils.OpenDirectory(path);
             }
         }
 
@@ -200,8 +206,8 @@ namespace GChan.Forms
         {
             if (BoardsListBoxSelectedRowIndex != -1)
             {
-                string spath = boardsListBox.Items[BoardsListBoxSelectedRowIndex].ToString();
-                Process.Start(spath);
+                var url = boardsListBox.Items[BoardsListBoxSelectedRowIndex].ToString();
+                Utils.OpenWebpage(url);
             }
         }
 
@@ -220,7 +226,7 @@ namespace GChan.Forms
 
         private void openFolderToolStripMenuItem1_Click(object sender, EventArgs e)
         {
-            Process.Start(Settings.Default.SavePath);
+            Utils.OpenDirectory(Settings.Default.SavePath);
         }
 
         private void clearAllButton_Click(object sender, EventArgs e)
@@ -241,10 +247,14 @@ namespace GChan.Forms
             {
                 if ((pos = boardsListBox.IndexFromPoint(e.Location)) != -1)
                 {
-                    string spath = Model.Boards[pos].SaveTo;
-                    if (!Directory.Exists(spath))
-                        Directory.CreateDirectory(spath);
-                    Process.Start(spath);
+                    var path = Model.Boards[pos].SaveTo;
+
+                    if (!Directory.Exists(path))
+                    {
+                        Directory.CreateDirectory(path);
+                    }
+
+                    Utils.OpenDirectory(path);
                 }
             }
         }
@@ -305,9 +315,7 @@ namespace GChan.Forms
 
         private void openLogsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var assemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            var fullPath = Path.Combine(assemblyPath, "logs");
-            Process.Start(fullPath);
+            Utils.OpenDirectory(Program.LOGS_PATH);
         }
 
         /// <summary>
@@ -338,9 +346,11 @@ namespace GChan.Forms
             string spath = Settings.Default.SavePath;
 
             if (!Directory.Exists(spath))
+            {
                 Directory.CreateDirectory(spath);
+            }
 
-            Process.Start(spath);
+            Utils.OpenDirectory(spath);
         }
 
         private void systemTrayExitToolStripMenuItem_Click(object sender, EventArgs e)
