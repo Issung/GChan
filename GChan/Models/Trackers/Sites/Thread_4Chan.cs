@@ -139,12 +139,13 @@ namespace GChan.Models.Trackers.Sites
 
             var uploads = jObject
                 .SelectTokens("posts[*]")
-                .Where(x => x["ext"] != null)
-                .Select(x =>
+                .Where(post => post["ext"] != null)
+                .Select(post =>
                     new Upload(
-                        x[timPath].Value<long>(),
-                        baseUrl + Uri.EscapeDataString(x[timPath].Value<string>()) + x["ext"],  // Require escaping for the flash files stored with arbitrary string names.
-                        x["filename"].Value<string>(),
+                        post[timPath].Value<long>(),
+                        baseUrl + Uri.EscapeDataString(post[timPath].Value<string>()) + post["ext"],  // Require escaping for the flash files stored with arbitrary string names.
+                        post["filename"].Value<string>(),
+                        post["no"].Value<long>(),
                         this
                     )
                 )

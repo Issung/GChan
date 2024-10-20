@@ -43,7 +43,7 @@ namespace GChan.Models
         /// <summary>
         /// The ID of the post this image belongs to.
         /// </summary>
-        public long No => Thread.Id;
+        public long No { get; }
 
         /// <summary>
         /// Generate save path filename with the current image filename format setting.
@@ -63,6 +63,7 @@ namespace GChan.Models
             long tim,
             string url,
             string uploadedFilename,
+            long no,
             Thread thread
         )
         {
@@ -70,6 +71,7 @@ namespace GChan.Models
             Tim = tim;
             Url = url;
             UploadedFilename = Utils.SanitiseFilename(uploadedFilename);
+            No = no;
             Thread = thread;
             Extension = Path.GetExtension(Url);
         }
