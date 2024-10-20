@@ -1,4 +1,5 @@
-﻿using NLog;
+﻿using GChan.Data;
+using NLog;
 using System.Net;
 using System.Threading;
 
@@ -23,7 +24,7 @@ namespace GChan.Models.Trackers
 
         public Type Type { get; protected set; }
 
-        public string SiteName { get; protected set; }
+        public Site Site { get; protected set; }
 
         /// <summary>
         /// Code for the board this is tracking, excluding slashes.
@@ -51,15 +52,15 @@ namespace GChan.Models.Trackers
         {
             if (this is Thread thread)
             {
-                return $"Thread {{ {SiteName}, /{BoardCode}/, {thread.Id}, Gone: {thread.Gone} }}";
+                return $"Thread {{ {Site}, /{BoardCode}/, {thread.Id}, Gone: {thread.Gone} }}";
             }
             else if (this is Board)
             {
-                return $"Board {{ {SiteName}, /{BoardCode}/ }}";
+                return $"Board {{ {Site}, /{BoardCode}/ }}";
             }
             else
             {
-                return $"{GetType().Name} {{ {SiteName}, /{BoardCode}/ }}";
+                return $"{GetType().Name} {{ {Site}, /{BoardCode}/ }}";
             }
         }
 

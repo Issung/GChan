@@ -55,7 +55,7 @@ namespace GChan.Models.Trackers
 
         public override string ToString()
         {
-            return $"{SiteName} - /{BoardCode}/ - ({ThreadCount} Threads)";
+            return $"{Site} - /{BoardCode}/ - ({ThreadCount} Threads)";
         }
 
         public async Task<ProcessResult> ProcessAsync(CancellationToken cancellationToken)

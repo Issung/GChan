@@ -76,6 +76,12 @@ namespace GChan.Models
 
             return identifier;
         }
+
+        public AssetId Clone()
+        {
+            // Note this only works because the properties of this class have no deeper members.
+            return (AssetId)MemberwiseClone();
+        }
     }
 
     public class AssetIdJsonConverter : JsonConverter<AssetId>

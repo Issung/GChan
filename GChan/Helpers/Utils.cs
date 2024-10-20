@@ -71,29 +71,24 @@ namespace GChan
             await fileStream.WriteAsync(bytes, 0, bytes.Length, cancellationToken);
         }
 
-        /// <summary>
-        /// Create a new Tracker (Thread or Board).
-        /// </summary>
-        public static Tracker CreateNewTracker(LoadedData data)
+        public static Board CreateBoardFromData(BoardData boardData)
         {
-            // TODO: Should be making trackers based on the LoadedData (pass loadeddata to constructor).
-            // Rather than making them and then loading them with more data.
-            // This would help app-startup ui responsiveness as it would reduce the notify property changed spam greatly.
-            var tracker = CreateNewTracker(data.Url);
-
-            if (data is LoadedThreadData threadData && tracker is Thread thread)
+            if (boardData.Site == Site._4chan)
             {
-                thread.Subject = threadData.Subject;
-                thread.SeenAssets = threadData.SavedIds;
-                thread.SavedAssets = threadData.SavedIds;
-                thread.FileCount = threadData.SavedIds.Count;
-            }
-            else if (data is LoadedBoardData boardData && tracker is Board board)
-            {
-                board.GreatestThreadId = boardData.GreatestThreadId;
+                return new Board_4Chan(boardData);
             }
 
-            return tracker;
+            throw new NotImplementedException($"Unknown site for board data {boardData.Site}");
+        }
+
+        public static Thread CreateThreadFromData(ThreadData threadData)
+        {
+            if (threadData.Site == Site._4chan)
+            {
+                return new Thread_4Chan(threadData);
+            }
+
+            throw new NotImplementedException($"Unknown site for thread data {threadData.Site}");
         }
 
         /// <summary>

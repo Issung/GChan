@@ -1,4 +1,5 @@
 ﻿using GChan.Controllers;
+using GChan.Data;
 using GChan.Models.Trackers;
 using GChan.Properties;
 using GChan.ViewModels;
@@ -35,9 +36,10 @@ namespace GChan.Forms
             Controller = new MainController(this);
         }
 
-        private void MainForm_Load(object sender, EventArgs e)
+        private async void MainForm_Load(object sender, EventArgs e)
         {
-            Controller.LoadTrackers();
+            await DataController.EnsureCreatedAndMigrate();
+            await Controller.LoadTrackers();
         }
 
         private void MainForm_Shown(object sender, EventArgs e)
@@ -114,13 +116,13 @@ namespace GChan.Forms
             }
         }
 
-        private void deleteToolStripMenuItem_Click(object sender, EventArgs e)
+        private async void deleteToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (ThreadGridViewSelectedRowIndex != -1)
             {
                 try
                 {
-                    Controller.RemoveThread(Model.Threads[ThreadGridViewSelectedRowIndex], true);
+                    await Controller.RemoveThread(Model.Threads[ThreadGridViewSelectedRowIndex], true);
                 }
                 catch
                 {
@@ -229,14 +231,14 @@ namespace GChan.Forms
             Utils.OpenDirectory(Settings.Default.SavePath);
         }
 
-        private void clearAllButton_Click(object sender, EventArgs e)
+        private async void clearAllButton_Click(object sender, EventArgs e)
         {
             if (listsTabControl.SelectedIndex > 1)
             { 
                 return;
             }
 
-            Controller.ClearTrackers(listsTabControl.SelectedIndex == 0 ? Type.Thread : Type.Board);
+            await Controller.ClearTrackers(listsTabControl.SelectedIndex == 0 ? Type.Thread : Type.Board);
         }
 
         private void boardsListBox_MouseDoubleClick(object sender, MouseEventArgs e)
@@ -377,9 +379,9 @@ namespace GChan.Forms
             UpdateController.Instance.ShowUpdateDialog();
         }
 
-        internal void MainForm_FormClosing(object sender, FormClosingEventArgs e)
+        internal async void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            e.Cancel = Controller.Closing();
+            e.Cancel = await Controller.Closing();
         }
 
         private void threadGridView_DataError(object sender, DataGridViewDataErrorEventArgs e)

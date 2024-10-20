@@ -100,7 +100,7 @@ namespace GChan.Controllers
 
                 Program.mainForm.FormClosing -= Program.mainForm.MainForm_FormClosing;
 
-                DataController.SaveAll(Program.mainForm.Model.Threads, Program.mainForm.Model.Boards);
+                await DataController.Save(Program.mainForm.Model.Threads, Program.mainForm.Model.Boards);
 
                 Application.Exit();
             }

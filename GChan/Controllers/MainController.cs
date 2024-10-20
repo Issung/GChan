@@ -80,47 +80,29 @@ namespace GChan.Controllers
             }
         }
 
-        public void LoadTrackers()
+        public async Task LoadTrackers()
         {
-            ///Require the save on close setting to be true to load threads on application open.
-            const bool requireSaveOnCloseToBeTrueToLoadThreadsAndBoards = true;
+            var (threads, boards) = await DataController.Load();
 
-            if (!requireSaveOnCloseToBeTrueToLoadThreadsAndBoards || Settings.Default.SaveListsOnClose)              // If enabled load URLs from file
+            lock (BoardLock)
             {
-                var boards = DataController.LoadBoards();
-                var threads = DataController.LoadThreads();
-
-                lock (BoardLock)
+                for (int i = 0; i < boards.Count; i++)
                 {
-                    for (int i = 0; i < boards.Count; i++)
-                    {
-                        Board newBoard = (Board)Utils.CreateNewTracker(boards[i]);
-                        AddNewTracker(newBoard);
-                    }
+                    var board = Utils.CreateBoardFromData(boards[i]);
+                    AddNewTracker(board);
                 }
-
-                new SysThread(() =>
-                {
-                    Parallel.ForEach(threads, (thread) =>
-                    {
-                        Thread newThread = (Thread)Utils.CreateNewTracker(thread);
-                        Form.BeginInvoke(new Action(() => { AddNewTracker(newThread); }));
-                    });
-
-                    Form.Invoke((MethodInvoker)delegate {
-                        FinishLoadingTrackers();
-                    });
-                }).Start();
             }
 
-            /// Executed once everything has finished being loaded.
-            void FinishLoadingTrackers()
+            foreach (var threadData in threads)
             {
-                // Check for updates.
-                if (Settings.Default.CheckForUpdatesOnStart)
-                {
-                    UpdateController.Instance.CheckForUpdates(false);
-                }
+                var thread = Utils.CreateThreadFromData(threadData);
+                AddNewTracker(thread);
+            }
+
+            // Check for updates.
+            if (Settings.Default.CheckForUpdatesOnStart)
+            {
+                UpdateController.Instance.CheckForUpdates(false);
             }
         }
 
@@ -204,7 +186,7 @@ namespace GChan.Controllers
             return true;
         }
 
-        internal void ClearTrackers(Type type)
+        internal async Task ClearTrackers(Type type)
         {
             var typeName = type.ToString().ToLower() + "s";
 
@@ -220,22 +202,16 @@ namespace GChan.Controllers
             {
                 if (type == Type.Thread)
                 {
-                    lock (ThreadLock)
+                    while (Model.Threads.Count > 0)
                     {
-                        while (Model.Threads.Count > 0)
-                        {
-                            RemoveThread(Model.Threads.Last());
-                        }
+                        await RemoveThread(Model.Threads.Last());
                     }
                 }
                 else // Boards
                 {
-                    lock (BoardLock)
+                    while (Model.Boards.Count > 0)
                     {
-                        while (Model.Boards.Count > 0)
-                        {
-                            RemoveBoard(Model.Boards.Last());
-                        }
+                        await RemoveBoard(Model.Boards.Last());
                     }
                 }
             }
@@ -249,7 +225,7 @@ namespace GChan.Controllers
             if (tracker is Thread thread)
             {
                 return !list.OfType<Thread>().Any(t => 
-                    t.SiteName == thread.SiteName &&
+                    t.Site == thread.Site &&
                     t.BoardCode == thread.BoardCode &&
                     t.Id == thread.Id
                 );
@@ -278,13 +254,15 @@ namespace GChan.Controllers
             }
         }
 
-        public void RemoveBoard(Board board)
+        public async Task RemoveBoard(Board board)
         {
             board.Cancel();
 
+            await DataController.RemoveBoard(board);
+
             lock (BoardLock)
             {
-                Form.Invoke((MethodInvoker)delegate 
+                Form.Invoke(() =>
                 {
                     Model.Boards.Remove(board);
                 });
@@ -308,10 +286,11 @@ namespace GChan.Controllers
         /// We kind of need a download manager so we can wait for all downloads from this thread to finish before moving dir.
         /// Comment update in bugfix/rate-limiting branch: This is remedied now with a CancellationToken on the thread and files. But we need >= .NET 5 to use cancellation tokens on the ReadAsStringAsync methods.
         /// </remarks>
-        public void RemoveThread(Thread thread, bool manualRemove = false)
+        public async Task RemoveThread(Thread thread, bool manualRemove = false)
         {
             logger.Trace($"Removing thread {thread}.");
             thread.Cancel();
+            await DataController.RemoveThread(thread);
 
             try
             {
@@ -365,7 +344,7 @@ namespace GChan.Controllers
         /// Returns true to cancel closing, false to go ahead with closing.
         /// </summary>
         // TODO: This method has 2 functions, warning if needed and cleanup, seperate into 2 responsibilities.
-        public bool Closing()
+        public async Task<bool> Closing()
         {
             cancellationTokenSource.Cancel();
 
@@ -385,7 +364,7 @@ namespace GChan.Controllers
 
             if (Settings.Default.SaveListsOnClose)
             {
-                DataController.SaveAll(Model.Threads.ToArray(), Model.Boards.ToArray());
+                await DataController.Save(Model.Threads.ToArray(), Model.Boards.ToArray());
             }
 
             return false;

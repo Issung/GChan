@@ -19,7 +19,7 @@ namespace GChan.Models
 
         public CancellationToken CancellationToken => thread.CancellationToken;
 
-        public bool ShouldProcess => thread.Scraping && !thread.Gone && Settings.Default.SaveThumbnails;
+        public bool ShouldProcess => Settings.Default.SaveThumbnails && thread.ShouldProcess;
 
         /// <summary>
         /// URL to download the thumbnail.
@@ -37,7 +37,7 @@ namespace GChan.Models
             this.thread = thread;
             this.url = url;
 
-            Id = new AssetId(AssetType.Thumbnail, $"{thread.SiteName}.{thread.Id}.{replyId}");
+            Id = new AssetId(AssetType.Thumbnail, $"{thread.Site}.{thread.Id}.{replyId}");
         }
 
         public async Task<ProcessResult> ProcessAsync(CancellationToken cancellationToken)
@@ -57,7 +57,7 @@ namespace GChan.Models
                 var fileBytes = await client.GetByteArrayAsync(url, cancellationToken);
                 await Utils.WriteFileBytesAsync(destinationPath, fileBytes, cancellationToken);
 
-                thread.SavedAssets.Add(Id);
+                thread.SavedAssetIds.Add(Id);
             }
             catch (OperationCanceledException)
             {

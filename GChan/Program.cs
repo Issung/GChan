@@ -17,6 +17,9 @@ namespace GChan
         public static MainForm mainForm;
         public static string APPLICATION_INSTALL_DIRECTORY { get; } = AppDomain.CurrentDomain.BaseDirectory;
 
+        /// <summary>
+        /// User data path at %localappdata%/gchan (no version).
+        /// </summary>
         public static string USER_DATA_PATH = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
 #if DEBUG
@@ -55,7 +58,6 @@ namespace GChan
             arguments = args;
 
             Directory.CreateDirectory(LOGS_PATH);
-
             LogManager.Configuration.Variables["logsDirectory"] = LOGS_PATH;
 
             if (Settings.Default.UpdateSettings)
@@ -108,14 +110,14 @@ namespace GChan
         /// <summary>
         /// Main thread exception handler
         /// </summary>
-        public static void Application_ThreadException(object sender, ThreadExceptionEventArgs exceptionArgs)
+        public static async void Application_ThreadException(object sender, ThreadExceptionEventArgs exceptionArgs)
         {
             Settings.Default.SaveListsOnClose = true;
             Settings.Default.Save();
 
             try
             {
-                DataController.SaveAll(mainForm.Model.Threads, mainForm.Model.Boards);
+                await DataController.Save(mainForm.Model.Threads, mainForm.Model.Boards);
                 logger.Error(exceptionArgs.Exception, $"Application_ThreadException.");
             }
             catch (Exception ex)
@@ -129,14 +131,14 @@ namespace GChan
         /// <summary>
         /// Application domain exception handler
         /// </summary>
-        public static void AppDomain_UnhandledException(object sender, UnhandledExceptionEventArgs args)
+        public static async void AppDomain_UnhandledException(object sender, UnhandledExceptionEventArgs args)
         {
             Settings.Default.SaveListsOnClose = true;
             Settings.Default.Save();
 
             try
             {
-                DataController.SaveAll(mainForm.Model.Threads, mainForm.Model.Boards);
+                await DataController.Save(mainForm.Model.Threads, mainForm.Model.Boards);
                 Exception argsException = args.ExceptionObject as Exception;
                 logger.Error(argsException, $"AppDomain_UnhandledException.");
             }

@@ -1,4 +1,5 @@
-﻿using GChan.Helpers;
+﻿using GChan.Data;
+using GChan.Helpers;
 using GChan.Properties;
 using Newtonsoft.Json.Linq;
 using System;
@@ -22,7 +23,7 @@ namespace GChan.Models.Trackers.Sites
 
         public Thread_4Chan(string url, string? subject = null, int? fileCount = null) : base(url)
         {
-            SiteName = Board_4Chan.SITE_NAME;
+            Site = Site._4chan;
 
             var match = Regex.Match(url, @"boards.(4chan|4channel).org/[a-zA-Z0-9]*?/thread/\d*");
             Url = "http://" + match.Groups[0].Value;
@@ -33,10 +34,23 @@ namespace GChan.Models.Trackers.Sites
             var idCodeMatch = Regex.Match(url, ID_CODE_REGEX);
             Id = long.Parse(idCodeMatch.Groups[0].Value);
 
-            SaveTo = Path.Combine(Settings.Default.SavePath, SiteName, BoardCode, Id.ToString());
+            SaveTo = Path.Combine(Settings.Default.SavePath, Site.ToString().TrimStart('_'), BoardCode, Id.ToString());
 
             Subject = subject ?? GetThreadSubject();
             FileCount = fileCount;
+        }
+
+        public Thread_4Chan(ThreadData data) : base($"http://boards.4chan.org/{data.BoardCode}/thread/{data.Id}/")
+        {
+            this.Site = Site._4chan;
+            this.BoardCode = data.BoardCode;
+            this.LastScrape = data.LastScrape;
+            this.Id = data.Id;
+            this.Subject = data.Subject;
+            this.FileCount = data.FileCount;
+            this.SavedAssetIds = data.SavedAssetIds;
+
+            SaveTo = Path.Combine(Settings.Default.SavePath, Site.ToString().TrimStart('_'), BoardCode, Id.ToString());
         }
 
         public static bool UrlIsThread(string url)

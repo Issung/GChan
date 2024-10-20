@@ -25,16 +25,14 @@ namespace GChan.Models.Trackers
         /// <summary>
         /// Assets that no longer need to be put in processing. This should load the saved assets from the database.
         /// </summary>
-        // TODO: Make readonly
-        public AssetIdsCollection SeenAssets { get; set; } = [];
+        public AssetIdsCollection SeenAssetIds { get; protected init; } = [];
 
         /// <summary>
         /// Assetss that have successfully completed processing. This should be saved in the database.
         /// </summary>
-        // TODO: Make readonly
-        public AssetIdsCollection SavedAssets { get; set; } = [];
+        public AssetIdsCollection SavedAssetIds { get; protected init; } = [];
 
-        public bool ShouldProcess => !Gone;
+        public bool ShouldProcess => !Gone && !cancellationTokenSource.IsCancellationRequested;
 
         public string Subject
         {
@@ -126,11 +124,11 @@ namespace GChan.Models.Trackers
                 }
 
                 var assets = results.Uploads.Concat<IAsset>(results.Thumbnails).ToArray();
-                var newAssets = assets.Where(a => !SeenAssets.Contains(a.Id)).ToArray();
+                var newAssets = assets.Where(a => !SeenAssetIds.Contains(a.Id)).ToArray();
 
                 FileCount = results.Uploads.Length;
                 LastScrape = DateTimeOffset.Now;
-                SeenAssets.AddRange(newAssets);
+                SeenAssetIds.AddRange(newAssets);
 
                 return new(this, removeFromQueue: false, newProcessables: newAssets);
             }
@@ -166,7 +164,7 @@ namespace GChan.Models.Trackers
             unchecked
             {
                 int hash = 3;
-                hash = hash * 13 + SiteName.GetHashCode();
+                hash = hash * 13 + Site.GetHashCode();
                 hash = hash * 13 + BoardCode.GetHashCode();
                 hash = hash * 13 + Id.GetHashCode();
                 return hash;
@@ -175,7 +173,7 @@ namespace GChan.Models.Trackers
 
         public override string ToString()
         {
-            return $"Thread {{ {SiteName}.{Id} }}";
+            return $"Thread {{ {Site}.{Id} }}";
         }
 
         public ValueTask DisposeAsync()

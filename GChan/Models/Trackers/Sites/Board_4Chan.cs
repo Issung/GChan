@@ -2,21 +2,28 @@
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using GChan.Data;
 
 namespace GChan.Models.Trackers.Sites
 {
     public class Board_4Chan : Board
     {
-        public const string SITE_NAME = "4chan";
         public const string IS_BOARD_REGEX = "boards.(4chan|4channel).org/[a-zA-Z0-9]*?/*$";
         public const string BOARD_CODE_REGEX = "(?<=((chan|channel).org/))[a-zA-Z0-9]+(?=(/))?";
 
         public Board_4Chan(string url) : base(url)
         {
-            SiteName = SITE_NAME;
+            Site = Site._4chan;
 
             Match boardCodeMatch = Regex.Match(url, BOARD_CODE_REGEX);
             BoardCode = boardCodeMatch.Groups[0].Value;
+        }
+
+        public Board_4Chan(BoardData data) : base($"http://boards.4chan.org/{data.Code}/")
+        {
+            Site = Site._4chan;
+            this.BoardCode = data.Code;
+            this.GreatestThreadId = data.GreatestThreadId;
         }
 
         public static bool UrlIsBoard(string url)

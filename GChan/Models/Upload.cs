@@ -57,7 +57,7 @@ namespace GChan.Models
 
         public CancellationToken CancellationToken => Thread.CancellationToken;
 
-        public bool ShouldProcess => Thread.Scraping && !Thread.Gone;
+        public bool ShouldProcess => Thread.ShouldProcess;
 
         public Upload(
             long tim,
@@ -92,7 +92,7 @@ namespace GChan.Models
                 var fileBytes = await client.GetByteArrayAsync(Url, cancellationToken);
                 await Utils.WriteFileBytesAsync(path, fileBytes, cancellationToken);
 
-                Thread.SavedAssets.Add(Id);
+                Thread.SavedAssetIds.Add(Id);
             }
             catch (OperationCanceledException)
             {

@@ -53,13 +53,17 @@
 		<Content Include="TodoList.txt" />
 	</ItemGroup>
 	<ItemGroup>
+		<PackageReference Include="EFCore.BulkExtensions" Version="8.1.1" />
 		<PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.10">
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		  <PrivateAssets>all</PrivateAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.10" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 		<PackageReference Include="NLog" Version="5.3.4" />
 		<PackageReference Include="Onova" Version="2.6.12" />
-		<PackageReference Include="SQLitePCLRaw.core" Version="2.1.10" />
 		<PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
-		<PackageReference Include="System.Data.SQLite.Core" Version="1.0.119" />
 		<PackageReference Include="System.Text.Json" Version="8.0.5" />
 		<PackageReference Include="Microsoft-WindowsAPICodePack-Shell" Version="1.1.5" />
 		<PackageReference Include="System.Configuration.ConfigurationManager" Version="8.0.1" />
@@ -67,5 +71,8 @@
 	<ItemGroup>
 		<Compile Remove="BoundListView.cs" />
 		<Compile Remove="BoundListView.Designer.cs" />
+	</ItemGroup>
+	<ItemGroup>
+	  <Folder Include="Data\Migrations\" />
 	</ItemGroup>
 </Project>
