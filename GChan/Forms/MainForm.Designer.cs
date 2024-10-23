@@ -494,7 +494,7 @@ namespace GChan.Forms
             // 
             // threadGridSiteColumn
             // 
-            this.threadGridSiteColumn.DataPropertyName = "SiteName";
+            this.threadGridSiteColumn.DataPropertyName = "SiteDisplayName";
             this.threadGridSiteColumn.FillWeight = 8F;
             this.threadGridSiteColumn.HeaderText = "Site";
             this.threadGridSiteColumn.Name = "threadGridSiteColumn";

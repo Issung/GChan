@@ -26,6 +26,8 @@ namespace GChan.Models.Trackers
 
         public Site Site { get; protected set; }
 
+        public string SiteDisplayName => Site.ToString().TrimStart('_');
+
         /// <summary>
         /// Code for the board this is tracking, excluding slashes.
         /// e.g. gif, r9k, b
