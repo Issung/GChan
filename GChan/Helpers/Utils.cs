@@ -242,12 +242,22 @@ namespace GChan
         public static void SetNotifyIconText(NotifyIcon ni, string text)
         {
             if (text.Length >= 128)
-                throw new ArgumentOutOfRangeException("Text limited to 127 characters");
-            System.Type t = typeof(NotifyIcon);
-            BindingFlags hidden = BindingFlags.NonPublic | BindingFlags.Instance;
-            t.GetField("text", hidden).SetValue(ni, text);
-            if ((bool)t.GetField("added", hidden).GetValue(ni))
-                t.GetMethod("UpdateIcon", hidden).Invoke(ni, new object[] { true });
+            {
+                throw new ArgumentException("Text limited to 127 characters", nameof(text));
+            }
+
+            var type = typeof(NotifyIcon);
+            var privateFlags = BindingFlags.NonPublic | BindingFlags.Instance;
+
+            var textField = type.GetField("_text", privateFlags) ?? throw new Exception("Unable to find '_text' field");
+            textField.SetValue(ni, text);
+
+            var addedField = type.GetField("_added", privateFlags) ?? throw new Exception("Unable to find '_added' field");
+            if ((bool)addedField.GetValue(ni))
+            {
+                var updateMethod = type.GetMethod("UpdateIcon", privateFlags) ?? throw new Exception("Unable to find 'UpdateIcon' method.");
+                updateMethod.Invoke(ni, [true]);
+            }
         }
 
         /// <summary>
