@@ -48,19 +48,34 @@ namespace GChan.Data
         {
             var boardData = new BoardData(board);
             await using var context = NewContext();
-            context.Remove(boardData);
-            await context.SaveChangesAsync();
+
+            try
+            {
+                context.Remove(boardData);
+                await context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException ex) when (ex.Message.Contains("affected 0 row(s)"))
+            {
+                // Swallow exceptions when we delete but there was nothing in the database to be deleted.
+                // This will happen if a board is added and removed before being saved to database. We don't care.
+            }
         }
 
         public static async Task RemoveThread(Thread Thread)
         {
             var threadData = new ThreadData(Thread);
             await using var context = NewContext();
-            context.Remove(threadData);
-            await context.SaveChangesAsync();
 
-
-            await context.ThreadData.Where(t => t == threadData).ExecuteDeleteAsync();
+            try
+            {
+                context.Remove(threadData);
+                await context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException ex) when (ex.Message.Contains("affected 0 row(s)"))
+            {
+                // Swallow exceptions when we delete but there was nothing in the database to be deleted.
+                // This will happen if a thread is added and removed before being saved to database. We don't care.
+            }
         }
 
         private static DataContext NewContext()
