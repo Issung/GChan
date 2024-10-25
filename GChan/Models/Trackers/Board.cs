@@ -68,6 +68,8 @@ namespace GChan.Models.Trackers
 
                 var newThreads = threads.Where(t => t.Id > GreatestThreadId);
 
+                GreatestThreadId = newThreads.Max(t => t.Id);
+
                 return new(this, removeFromQueue: false, newProcessables: newThreads);
             }
             catch (WebException webEx)
