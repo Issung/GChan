@@ -1,4 +1,4 @@
-﻿using GChan.Data;
+using GChan.Data;
 using GChan.Forms;
 using GChan.Helpers;
 using GChan.Models;
@@ -203,6 +203,10 @@ namespace GChan.Controllers
                         Model.Boards.Add(board);
                     });
                 }
+                if (Settings.Default.SaveListsOnClose)
+                {
+                    DataController.SaveBoard(board);
+                }
             }
             else if (tracker is Thread thread)
             {
@@ -212,6 +216,10 @@ namespace GChan.Controllers
                     {
                         Model.Threads.Add(thread);
                     });
+                }
+                if (Settings.Default.SaveListsOnClose)
+                {
+                    DataController.SaveThread(thread);
                 }
             }
 
@@ -324,6 +332,10 @@ namespace GChan.Controllers
                     });
 
                     board.GreatestThreadId = greatestThreadId;
+                    if (Settings.Default.SaveListsOnClose)
+                    {
+                        DataController.SaveBoard(board);
+                    }
                 }
             }
 
@@ -416,6 +428,10 @@ namespace GChan.Controllers
                     Model.Boards.Remove(board);
                 });
             }
+            if (Settings.Default.SaveListsOnClose)
+            {
+                DataController.DeleteBoard(board.Url);
+            }
         }
 
         public void SettingsUpdated()
@@ -456,6 +472,10 @@ namespace GChan.Controllers
                     {
                         Model.Threads.Remove(thread);
                     });
+                }
+                if (Settings.Default.SaveListsOnClose)
+                {
+                    DataController.DeleteThread(thread.Url);
                 }
             }
             catch (Exception ex)
