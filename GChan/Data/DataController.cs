@@ -1,4 +1,4 @@
-﻿using GChan.Trackers;
+using GChan.Trackers;
 using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
@@ -138,6 +138,53 @@ namespace GChan.Data
         {
             SaveThreads(threads);
             SaveBoards(boards);
+        }
+
+        /// <summary>
+        /// Persists a single thread to the database (insert or replace).
+        /// </summary>
+        public static void SaveThread(Thread thread)
+        {
+            using var cmd = new SQLiteCommand(Connection);
+            cmd.CommandText = $@"INSERT OR REPLACE INTO {TB_THREAD} ({COL_URL}, {COL_SUBJECT}, {COL_SAVED_IDS}) VALUES (@{COL_URL}, @{COL_SUBJECT}, @{COL_SAVED_IDS})";
+            cmd.Parameters.AddWithValue(COL_URL, thread.Url);
+            cmd.Parameters.AddWithValue(COL_SUBJECT, thread.Subject);
+            cmd.Parameters.AddWithValue(COL_SAVED_IDS, thread.SavedIds.ToStringList());
+            cmd.ExecuteNonQuery();
+        }
+
+        /// <summary>
+        /// Removes a single thread from the database by URL.
+        /// </summary>
+        public static void DeleteThread(string url)
+        {
+            using var cmd = new SQLiteCommand(Connection);
+            cmd.CommandText = $"DELETE FROM {TB_THREAD} WHERE {COL_URL} = @{COL_URL}";
+            cmd.Parameters.AddWithValue(COL_URL, url);
+            cmd.ExecuteNonQuery();
+        }
+
+        /// <summary>
+        /// Persists a single board to the database (insert or replace).
+        /// </summary>
+        public static void SaveBoard(Board board)
+        {
+            using var cmd = new SQLiteCommand(Connection);
+            cmd.CommandText = $@"INSERT OR REPLACE INTO {TB_BOARD} ({COL_URL}, {COL_GREATEST_THREAD_ID}) VALUES (@{COL_URL}, @{COL_GREATEST_THREAD_ID})";
+            cmd.Parameters.AddWithValue(COL_URL, board.Url);
+            cmd.Parameters.AddWithValue(COL_GREATEST_THREAD_ID, board.GreatestThreadId);
+            cmd.ExecuteNonQuery();
+        }
+
+        /// <summary>
+        /// Removes a single board from the database by URL.
+        /// </summary>
+        public static void DeleteBoard(string url)
+        {
+            using var cmd = new SQLiteCommand(Connection);
+            cmd.CommandText = $"DELETE FROM {TB_BOARD} WHERE {COL_URL} = @{COL_URL}";
+            cmd.Parameters.AddWithValue(COL_URL, url);
+            cmd.ExecuteNonQuery();
         }
 
         public static void SaveThreads(IList<Thread> threads)
