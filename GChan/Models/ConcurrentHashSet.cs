@@ -10,7 +10,8 @@ namespace GChan.Models
 
     /// <summary>
     /// A thread-safe hash-set (credit <see href="https://stackoverflow.com/a/18923091/8306962">Ben Mosher</see>).<br/>
-    /// Also raises change events via <see cref="SetChanged"/>.
+    /// Also raises change events via <see cref="SetChanged"/>, after releasing the lock: handlers marshal to the UI thread,
+    /// and holding the lock while waiting on it would deadlock with the UI thread reading the set.
     /// </summary>
     public class ConcurrentHashSet<T> : IEnumerable<T>, IDisposable
     {
@@ -41,18 +42,13 @@ namespace GChan.Models
 
         public bool Add(T item)
         {
+            bool didAdd;
+
             locker.EnterWriteLock();
 
             try
             {
-                var didAdd = set.Add(item);
-
-                if (didAdd)
-                {
-                    SetChanged?.Invoke();
-                }
-
-                return didAdd;
+                didAdd = set.Add(item);
             }
             finally
             {
@@ -61,24 +57,26 @@ namespace GChan.Models
                     locker.ExitWriteLock();
                 }
             }
+
+            if (didAdd)
+            {
+                SetChanged?.Invoke();
+            }
+
+            return didAdd;
         }
 
         public bool AddRange(IEnumerable<T> items)
         {
+            bool anyAdditions;
+
             locker.EnterWriteLock();
 
             try
             {
                 var results = items.Select(set.Add).ToArray();
 
-                var anyAdditions = results.Any(r => r == true);
-
-                if (anyAdditions)
-                {
-                    SetChanged?.Invoke();
-                }
-
-                return anyAdditions;
+                anyAdditions = results.Any(r => r == true);
             }
             finally
             {
@@ -87,22 +85,26 @@ namespace GChan.Models
                     locker.ExitWriteLock();
                 }
             }
+
+            if (anyAdditions)
+            {
+                SetChanged?.Invoke();
+            }
+
+            return anyAdditions;
         }
 
         public void Clear()
         {
+            bool setHadItems;
+
             locker.EnterWriteLock();
 
             try
             {
-                var setHadItems = set.Any();
+                setHadItems = set.Any();
 
                 set.Clear();
-
-                if (setHadItems)
-                {
-                    SetChanged?.Invoke();
-                }
             }
             finally
             {
@@ -110,6 +112,11 @@ namespace GChan.Models
                 {
                     locker.ExitWriteLock();
                 }
+            }
+
+            if (setHadItems)
+            {
+                SetChanged?.Invoke();
             }
         }
 
@@ -132,18 +139,13 @@ namespace GChan.Models
 
         public bool Remove(T item)
         {
+            bool didRemove;
+
             locker.EnterWriteLock();
 
             try
             {
-                var didRemove = set.Remove(item);
-
-                if (didRemove)
-                {
-                    SetChanged?.Invoke();
-                }
-
-                return didRemove;
+                didRemove = set.Remove(item);
             }
             finally
             {
@@ -152,6 +154,13 @@ namespace GChan.Models
                     locker.ExitWriteLock();
                 }
             }
+
+            if (didRemove)
+            {
+                SetChanged?.Invoke();
+            }
+
+            return didRemove;
         }
 
         public T[] ToArray() 

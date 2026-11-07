@@ -8,6 +8,7 @@ using NLog;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -36,13 +37,13 @@ namespace GChan.Services
 
         private static readonly ILogger logger = LogManager.GetCurrentClassLogger();
         private readonly ConcurrentDistinctPriorityQueue<IProcessable, ProcessPriority> queue = new(LockRecursionPolicy.SupportsRecursion);
-        private readonly ConcurrentDictionary<IProcessable, RetryState> retries = new();
+        private readonly ConcurrentDictionary<IProcessable, RetryState> retries = new(ReferenceEqualityComparer.Instance);  // By instance, like the queue.
         private readonly AsyncAutoResetEvent itemEnqueuedSignal = new();
         private readonly AsyncManualResetEvent resumeSignal = new(set: true);
         private readonly ProcessPool pool;
         private readonly Task task;
 
-        private readonly Action<Tracker> addTrackerCallback;
+        private readonly Action<IReadOnlyList<Tracker>> addTrackersCallback;
         private readonly CancellationToken shutdownCancellationToken;
         private readonly ProcessableParams processableParams;
 
@@ -79,11 +80,11 @@ namespace GChan.Services
 
         public ProcessQueue(
             IProcessableHooks hooks,
-            Action<Tracker> addTrackerCallback,
+            Action<IReadOnlyList<Tracker>> addTrackersCallback,
             CancellationToken shutdownCancellationToken
         )
         {
-            this.addTrackerCallback = addTrackerCallback;
+            this.addTrackersCallback = addTrackersCallback;
             this.shutdownCancellationToken = shutdownCancellationToken;
             this.processableParams = new(hooks);
 
@@ -133,13 +134,13 @@ namespace GChan.Services
 
             await pool.WaitForCapacityAsync(shutdownCancellationToken);
 
-            var backoff = TakeTooManyRequestsDelay();
-
-            if (backoff.HasValue)
+            if (HasTooManyRequestsDelay)
             {
                 // Let requests already in flight finish, then wait out the delay before sending anything else.
+                // Taken after they finish, so any 429s they also get are merged into this one wait rather than waited out in turn.
                 await pool.WaitForIdleAsync(shutdownCancellationToken);
-                await Task.Delay(backoff.Value + TimeSpan.FromSeconds(1), shutdownCancellationToken);
+                var backoff = TakeTooManyRequestsDelay();
+                await Task.Delay(backoff + TimeSpan.FromSeconds(1), shutdownCancellationToken);
                 return;
             }
 
@@ -162,10 +163,15 @@ namespace GChan.Services
 
                 if (wait > TimeSpan.Zero)
                 {
+                    // Cancel whichever wait loses, so an abandoned signal wait can't swallow a later enqueue's signal.
+                    using var waitCancellation = CancellationTokenSource.CreateLinkedTokenSource(shutdownCancellationToken);
+
                     await Task.WhenAny(
-                        Task.Delay(wait, shutdownCancellationToken),
-                        itemEnqueuedSignal.WaitAsync(shutdownCancellationToken)
+                        Task.Delay(wait, waitCancellation.Token),
+                        itemEnqueuedSignal.WaitAsync(waitCancellation.Token)
                     );
+
+                    waitCancellation.Cancel();
                 }
 
                 return;
@@ -193,18 +199,24 @@ namespace GChan.Services
 
                 retries.TryRemove(processable, out _);
 
+                // Board may return new threads as processables. Added in one batch; the callback will enqueue them.
+                var newTrackers = result.NewProcessables.OfType<Tracker>().ToArray();
+
+                if (newTrackers.Length > 0)
+                {
+                    addTrackersCallback(newTrackers);
+                }
+
                 foreach (var newProcessable in result.NewProcessables)
                 {
-                    // Board may return new threads as processables.
-                    if (newProcessable is Tracker tracker)
-                    {
-                        addTrackerCallback(tracker);    // The callback will enqueue the tracker.
-                    }
-                    else
+                    if (newProcessable is not Tracker)
                     {
                         Enqueue(newProcessable);
                     }
                 }
+
+                // Only once the new processables are all added, so e.g. a board doesn't record threads as seen that were never added.
+                result.OnNewProcessablesAdded?.Invoke();
 
                 if (!result.RemoveFromQueue)
                 {
@@ -270,11 +282,22 @@ namespace GChan.Services
             Enqueue(processable, requeue: true);
         }
 
-        private TimeSpan? TakeTooManyRequestsDelay()
+        private bool HasTooManyRequestsDelay
+        {
+            get
+            {
+                lock (tooManyRequestsLock)
+                {
+                    return tooManyRequestsDelay.HasValue;
+                }
+            }
+        }
+
+        private TimeSpan TakeTooManyRequestsDelay()
         {
             lock (tooManyRequestsLock)
             {
-                var delay = tooManyRequestsDelay;
+                var delay = tooManyRequestsDelay ?? TimeSpan.Zero;
                 tooManyRequestsDelay = null;
                 return delay;
             }

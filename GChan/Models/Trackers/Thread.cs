@@ -205,17 +205,6 @@ namespace GChan.Models.Trackers
             CancellationToken cancellationToken
         );
 
-        /// <summary>
-        /// Threads are equal if they are the same thread on the same site, so queues and lists treat copies as duplicates.
-        /// </summary>
-        public override bool Equals(object obj)
-        {
-            return obj is Thread other
-                && other.Site == Site
-                && other.BoardCode == BoardCode
-                && other.Id == Id;
-        }
-
         public override int GetHashCode()
         {
             unchecked

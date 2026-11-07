@@ -28,19 +28,23 @@ namespace GChan.Data
         }
 
         /// <summary>
-        /// Inserts or updates the given threads and boards. Removed (cancelled) trackers are skipped, so a save that was
-        /// started before a tracker's removal can't write it back after its delete.
+        /// Inserts or updates the given threads and boards.
         /// </summary>
-        public static async Task Save(IEnumerable<Thread> threads, IEnumerable<Board> boards)
+        /// <remarks>
+        /// Their values are copied when this is called, so call it on the UI thread to get a consistent snapshot
+        /// (e.g. a board's GreatestThreadId only advances after the threads it found are in the thread list).<br/>
+        /// Removed (cancelled) trackers are skipped, checked once the lock is held, so a save that was started before
+        /// a tracker's removal can't write it back after its delete.
+        /// </remarks>
+        public static Task Save(IEnumerable<Thread> threads, IEnumerable<Board> boards)
         {
-            await Locked(async context =>
-            {
-                // Built inside the lock: removal cancels the tracker before deleting it, so this sees the latest state.
-                var threadData = threads.Where(t => t.Scraping).Select(t => new ThreadData(t)).ToArray();
-                var boardData = boards.Where(b => b.Scraping).Select(b => new BoardData(b)).ToArray();
+            var threadData = threads.Select(t => (Tracker: t, Data: new ThreadData(t))).ToArray();
+            var boardData = boards.Select(b => (Tracker: b, Data: new BoardData(b))).ToArray();
 
-                await context.BulkInsertOrUpdateAsync(boardData);
-                await context.BulkInsertOrUpdateAsync(threadData);
+            return Locked(async context =>
+            {
+                await context.BulkInsertOrUpdateAsync(boardData.Where(b => b.Tracker.Scraping).Select(b => b.Data).ToArray());
+                await context.BulkInsertOrUpdateAsync(threadData.Where(t => t.Tracker.Scraping).Select(t => t.Data).ToArray());
 
                 await context.SaveChangesAsync();
             });
@@ -108,14 +112,22 @@ namespace GChan.Data
             await Locked(async context => await context.ThreadData.ExecuteDeleteAsync());
         }
 
+        /// <summary>
+        /// Runs <paramref name="action"/> on the thread pool while holding <see cref="dbLock"/>.<br/>
+        /// Nothing here continues on the caller's synchronization context, so the UI thread can block on a save
+        /// (at Windows shutdown) without deadlocking against one already running.
+        /// </summary>
         private static async Task Locked(Func<DataContext, Task> action)
         {
-            await dbLock.WaitAsync();
+            await dbLock.WaitAsync().ConfigureAwait(false);
 
             try
             {
-                await using var context = new DataContext();
-                await action(context);
+                await Task.Run(async () =>
+                {
+                    await using var context = new DataContext();
+                    await action(context);
+                }).ConfigureAwait(false);
             }
             finally
             {

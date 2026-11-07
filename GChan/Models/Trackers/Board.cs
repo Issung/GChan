@@ -80,12 +80,20 @@ namespace GChan.Models.Trackers
 
             var newThreads = threads.Where(t => t.Id > GreatestThreadId).ToArray();
 
-            if (newThreads.Any())
+            if (newThreads.Length == 0)
             {
-                GreatestThreadId = newThreads.Max(t => t.Id);
+                return new(removeFromQueue: false);
             }
 
-            return new(removeFromQueue: false, newProcessables: newThreads);
+            var greatestNewThreadId = newThreads.Max(t => t.Id);
+
+            // Only advance once the threads are in the thread list: a save that sees the new GreatestThreadId must also see them,
+            // otherwise a crash after that save loses them (they would be skipped on the next scrape).
+            return new(
+                removeFromQueue: false,
+                newProcessables: newThreads,
+                onNewProcessablesAdded: () => GreatestThreadId = Math.Max(GreatestThreadId, greatestNewThreadId)
+            );
         }
 
         /// <summary>

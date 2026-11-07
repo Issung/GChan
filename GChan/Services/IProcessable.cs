@@ -31,13 +31,21 @@ namespace GChan.Services
         /// </summary>
         public IEnumerable<IProcessable> NewProcessables { get; }
 
+        /// <summary>
+        /// Called once all of <see cref="NewProcessables"/> have been added (new trackers to their lists, others to the queue).
+        /// Not called if adding them fails, in which case the processable is retried.
+        /// </summary>
+        public Action OnNewProcessablesAdded { get; }
+
         public ProcessResult(
             bool removeFromQueue,
-            IEnumerable<IProcessable> newProcessables = null
+            IEnumerable<IProcessable> newProcessables = null,
+            Action onNewProcessablesAdded = null
         )
         {
             RemoveFromQueue = removeFromQueue;
             NewProcessables = newProcessables ?? [];
+            OnNewProcessablesAdded = onNewProcessablesAdded;
         }
     }
 

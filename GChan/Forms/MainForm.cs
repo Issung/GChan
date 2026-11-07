@@ -401,6 +401,14 @@ namespace GChan.Forms
                 return;
             }
 
+            if (e.CloseReason is CloseReason.WindowsShutDown or CloseReason.TaskManagerClosing)
+            {
+                // Cancelling here would block the session from ending, and Windows may kill us before an async close finishes.
+                readyToClose = true;
+                Controller.CloseImmediately();
+                return;
+            }
+
             // WinForms reads e.Cancel as soon as this handler returns, which for an async handler is at its first await.
             // So always cancel this close, finish closing (including the save) asynchronously, then close again.
             e.Cancel = true;

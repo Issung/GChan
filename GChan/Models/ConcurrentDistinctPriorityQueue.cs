@@ -4,14 +4,15 @@ using System.Threading;
 namespace GChan.Models
 {
     /// <summary>
-    /// A queue combined with a hashset to only allow distinct items (by hashcode).
+    /// A queue combined with a hashset to only allow distinct items (by reference: the same instance can't be queued twice,
+    /// but an equal copy can, so a re-added item isn't rejected because a cancelled copy is still waiting to be discarded).
     /// Read/Write locks are imeplemented for each operation so it allows concurrent usage (is threadsafe).<br/>
     /// On dequeue the item with the lowest priority value is removed.
     /// </summary>
-    public class ConcurrentDistinctPriorityQueue<TElement, TPriority>(LockRecursionPolicy lockRecursionPolicy)
+    public class ConcurrentDistinctPriorityQueue<TElement, TPriority>(LockRecursionPolicy lockRecursionPolicy) where TElement : class
     {
         private readonly PriorityQueue<TElement, TPriority> queue = new();
-        private readonly HashSet<TElement> set = [];
+        private readonly HashSet<TElement> set = new(ReferenceEqualityComparer.Instance);
         private readonly ReaderWriterLockSlim locker = new(lockRecursionPolicy);
 
         /// <returns>True if the element is added to the queue, false if the element is already present.</returns>

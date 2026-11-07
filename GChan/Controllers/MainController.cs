@@ -46,7 +46,7 @@ namespace GChan.Controllers
         public MainController(MainForm mainForm)
         {
             // Controller Setup
-            processQueue = new(this, AddTrackerIfNew, cancellationTokenSource.Token);
+            processQueue = new(this, AddTrackersIfNew, cancellationTokenSource.Token);
 
             // Form Setup
             Form = mainForm;
@@ -68,6 +68,12 @@ namespace GChan.Controllers
         public async Task LoadTrackers()
         {
             var (threads, boards) = await DataController.Load();
+
+            if (cancellationTokenSource.IsCancellationRequested)
+            {
+                // The app was closed while loading, don't start anything back up.
+                return;
+            }
 
             foreach (var boardData in boards)
             {
@@ -141,14 +147,18 @@ namespace GChan.Controllers
         /// <summary>
         /// Called by the process queue (from a processing thread) for threads found by board scraping.
         /// </summary>
-        private void AddTrackerIfNew(Tracker tracker)
+        private void AddTrackersIfNew(IReadOnlyList<Tracker> trackers)
         {
             // Check and add in one step on the UI thread, so two boards finding the same thread can't both add it.
+            // One call for the whole batch, as a board's first scrape can find hundreds of threads.
             OnUiThread(() =>
             {
-                if (IsUnique(tracker))
+                foreach (var tracker in trackers)
                 {
-                    AddNewTracker(tracker);
+                    if (IsUnique(tracker))
+                    {
+                        AddNewTracker(tracker);
+                    }
                 }
             });
         }
@@ -352,15 +362,44 @@ namespace GChan.Controllers
             }
 
             // Only shut down processing once closing is certain, as it can't be restarted.
+            ShutDown();
+
+            await SaveAll();
+
+            return false;
+        }
+
+        /// <summary>
+        /// Closes without asking and saves synchronously, for when Windows is ending the session and won't wait for an async close.
+        /// </summary>
+        public void CloseImmediately()
+        {
+            ShutDown();
+
+            if (!Settings.Default.SaveListsOnClose)
+            {
+                return;
+            }
+
+            try
+            {
+                // Block on DataController's task directly: it never continues on the UI thread, so this can't deadlock
+                // (unlike SaveAll, whose error handling awaits on the UI thread).
+                DataController.Save(Model.Threads.ToArray(), Model.Boards.ToArray()).GetAwaiter().GetResult();
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex, "Exception occured saving trackers while Windows was ending the session.");
+            }
+        }
+
+        private void ShutDown()
+        {
             periodicSaveTimer.Stop();
             cancellationTokenSource.Cancel();
 
             Form.systemTrayNotifyIcon.Visible = false;
             Form.systemTrayNotifyIcon.Dispose();
-
-            await SaveAll();
-
-            return false;
         }
 
         internal void PauseQueue()
