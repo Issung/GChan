@@ -1,4 +1,4 @@
-using GChan.Data;
+﻿using GChan.Data;
 using GChan.Forms;
 using GChan.Helpers;
 using GChan.Models;
@@ -105,7 +105,7 @@ namespace GChan.Controllers
                     for (int i = 0; i < boards.Count; i++)
                     {
                         Board newBoard = (Board)Utils.CreateNewTracker(boards[i]);
-                        AddNewTracker(newBoard);
+                        AddNewTracker(newBoard, persist: false);
                     }
                 }
 
@@ -114,7 +114,7 @@ namespace GChan.Controllers
                     Parallel.ForEach(threads, (thread) =>
                     {
                         Thread newThread = (Thread)Utils.CreateNewTracker(thread);
-                        Form.BeginInvoke(new Action(() => { AddNewTracker(newThread); }));
+                        Form.BeginInvoke(new Action(() => { AddNewTracker(newThread, persist: false); }));
                     });
 
                     Form.Invoke((MethodInvoker)delegate {
@@ -186,8 +186,9 @@ namespace GChan.Controllers
             }
         }
 
+        /// <param name="persist">Write the tracker to the database. False when the tracker was just loaded from it.</param>
         /// <returns>Was <paramref name="tracker"/> added to a tracker list.</returns>
-        private bool AddNewTracker(Tracker tracker)
+        private bool AddNewTracker(Tracker tracker, bool persist = true)
         {
             if (tracker == null)
             { 
@@ -202,10 +203,11 @@ namespace GChan.Controllers
                     {
                         Model.Boards.Add(board);
                     });
-                }
-                if (Settings.Default.SaveListsOnClose)
-                {
-                    DataController.SaveBoard(board);
+
+                    if (persist)
+                    {
+                        Persist(() => DataController.SaveBoard(board));
+                    }
                 }
             }
             else if (tracker is Thread thread)
@@ -216,14 +218,36 @@ namespace GChan.Controllers
                     {
                         Model.Threads.Add(thread);
                     });
-                }
-                if (Settings.Default.SaveListsOnClose)
-                {
-                    DataController.SaveThread(thread);
+
+                    if (persist)
+                    {
+                        Persist(() => DataController.SaveThread(thread));
+                    }
                 }
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// Runs <paramref name="write"/> if lists are being saved, so trackers survive the process being killed.
+        /// Failures are logged rather than thrown so a database problem never interrupts tracking.
+        /// </summary>
+        private void Persist(Action write)
+        {
+            if (!Settings.Default.SaveListsOnClose)
+            {
+                return;
+            }
+
+            try
+            {
+                write();
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex, "Exception occured writing trackers to the database.");
+            }
         }
 
         internal void ClearTrackers(Type type)
@@ -331,12 +355,28 @@ namespace GChan.Controllers
                         }
                     });
 
-                    board.GreatestThreadId = greatestThreadId;
-                    if (Settings.Default.SaveListsOnClose)
+                    // Only move forward: greatestThreadId is 0 when no new threads were added this scan.
+                    if (greatestThreadId > board.GreatestThreadId)
                     {
-                        DataController.SaveBoard(board);
+                        board.GreatestThreadId = greatestThreadId;
+
+                        lock (BoardLock)
+                        {
+                            // Don't write back a board that was removed while it was being scanned.
+                            if (Model.Boards.Contains(board))
+                            {
+                                Persist(() => DataController.SaveBoard(board));
+                            }
+                        }
                     }
                 }
+            }
+
+            lock (ThreadLock)
+            {
+                // Save download progress (SavedIds) so a killed process doesn't re-download everything on restart.
+                var trackedThreads = Model.Threads.ToArray();
+                Persist(() => DataController.UpsertThreads(trackedThreads));
             }
 
             // Make a copy of the current threads and queue them for downloading them.
@@ -414,6 +454,7 @@ namespace GChan.Controllers
                 string newSubject = string.IsNullOrWhiteSpace(dialog.UserEntry) ? Thread.NO_SUBJECT : dialog.UserEntry;
 
                 thread.Subject = newSubject;
+                Persist(() => DataController.SaveThread(thread));
             }
         }
 
@@ -427,16 +468,18 @@ namespace GChan.Controllers
                 {
                     Model.Boards.Remove(board);
                 });
-            }
-            if (Settings.Default.SaveListsOnClose)
-            {
-                DataController.DeleteBoard(board.Url);
+
+                Persist(() => DataController.DeleteBoard(board.Url));
             }
         }
 
         public void SettingsUpdated()
         {
             this.assetDownloader.ConcurrentCount = Settings.Default.MaximumConcurrentDownloads;
+
+            // Sync the database with the current lists, so trackers added before saving was turned on are kept too.
+            // Called on the UI thread, which is the only thread that modifies the lists.
+            Persist(() => DataController.SaveAll(Model.Threads.ToArray(), Model.Boards.ToArray()));
         }
 
         /// <summary>
@@ -473,10 +516,6 @@ namespace GChan.Controllers
                         Model.Threads.Remove(thread);
                     });
                 }
-                if (Settings.Default.SaveListsOnClose)
-                {
-                    DataController.DeleteThread(thread.Url);
-                }
             }
             catch (Exception ex)
             {
@@ -490,6 +529,16 @@ namespace GChan.Controllers
                         MessageBoxButtons.OK, 
                         MessageBoxIcon.Error, 
                         MessageBoxDefaultButton.Button1);
+                }
+            }
+
+            lock (ThreadLock)
+            {
+                // Check the list rather than whether the steps above succeeded: the scan routine removes
+                // gone threads from the list before calling this, even if moving the folder then fails.
+                if (!Model.Threads.Contains(thread))
+                {
+                    Persist(() => DataController.DeleteThread(thread.Url));
                 }
             }
         }
@@ -536,10 +585,7 @@ namespace GChan.Controllers
             assetDownloader.Dispose();
             threadHtmlDownloader.Dispose();
 
-            if (Settings.Default.SaveListsOnClose)
-            {
-                DataController.SaveAll(Model.Threads.ToArray(), Model.Boards.ToArray());
-            }
+            Persist(() => DataController.SaveAll(Model.Threads.ToArray(), Model.Boards.ToArray()));
 
             return false;
         }
