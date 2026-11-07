@@ -28,7 +28,7 @@ namespace GChan.Data.Models
             Site = board.Site;
             Code = board.BoardCode.Trim('/');
             GreatestThreadId = board.GreatestThreadId;
-            LastScrape = board.LastScrape;
+            LastScrape = board.LastModified;
         }
     }
 }

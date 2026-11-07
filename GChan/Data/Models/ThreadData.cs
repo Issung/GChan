@@ -41,7 +41,7 @@ namespace GChan.Data
             this.Id = thread.Id;
             this.Subject = thread.subject;
             this.FileCount = thread.FileCount;
-            this.LastScrape = thread.LastScrape;
+            this.LastScrape = thread.LastModified;
             this.SavedAssetIds = thread.SavedAssetIds;
         }
     }

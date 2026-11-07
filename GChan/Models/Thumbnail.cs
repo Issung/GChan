@@ -63,7 +63,9 @@ namespace GChan.Models
             return new(removeFromQueue: true);
         }
 
-        public bool Equals(Thumbnail other) => Id.Equals(other.Id);
+        public bool Equals(Thumbnail other) => other != null && Id.Equals(other.Id);
+
+        public override bool Equals(object obj) => Equals(obj as Thumbnail);
 
         public override int GetHashCode() => Id.GetHashCode();
 

@@ -40,7 +40,7 @@ namespace GChan.Models.Trackers
 
         public bool ShouldProcess => !cancellationTokenSource.IsCancellationRequested;
 
-        public DateTimeOffset? ReadyToProcessAt => LastScrape + TimeSpan.FromSeconds(Settings.Default.MinSecondsBetweenScrapes);
+        public DateTimeOffset? ReadyToProcessAt => LastAttempt + TimeSpan.FromSeconds(Settings.Default.MinSecondsBetweenScrapes);
 
         public ProcessPriority Priority => ProcessPriority.Default;
 
@@ -52,7 +52,7 @@ namespace GChan.Models.Trackers
 
         protected Board(BoardData data) : base($"https://boards.4chan.org/{data.Code}/")
         {
-            this.LastScrape = data.LastScrape;
+            this.LastModified = data.LastScrape;
         }
 
         public void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
@@ -65,9 +65,11 @@ namespace GChan.Models.Trackers
 
         public async Task<ProcessResult> ProcessAsync(ProcessableParams parameters, CancellationToken cancellationToken)
         {
-            var threads = await GetThreadsImpl(cancellationToken);
+            LastAttempt = DateTimeOffset.Now;
 
-            LastScrape = DateTimeOffset.Now;
+            var (threads, lastModified) = await GetThreadsImpl(cancellationToken);
+
+            LastModified = lastModified;
 
             if (threads == null)
             {
@@ -87,9 +89,10 @@ namespace GChan.Models.Trackers
         }
 
         /// <summary>
-        /// May return null if threads have not been modified since last scrape.
+        /// Returns the board's threads and the server's last-modified time to store in <see cref="Tracker.LastModified"/>.<br/>
+        /// Threads may be null if they have not been modified since <see cref="Tracker.LastModified"/>.
         /// </summary>
-        protected abstract Task<Thread[]?> GetThreadsImpl(CancellationToken cancellationToken);
+        protected abstract Task<(Thread[]? Threads, DateTimeOffset LastModified)> GetThreadsImpl(CancellationToken cancellationToken);
 
         public override string ToString()
         {

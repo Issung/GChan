@@ -171,16 +171,17 @@ namespace GChan.Models
             }
         }
 
-        /// <remarks>Is this correct? What happens if the enumerator changes during enumeration? Should we return a copy with ToArray() instead?</remarks>
+        /// <summary>
+        /// Enumerates a snapshot taken under the lock, so other threads can modify the set during enumeration.
+        /// </summary>
         public IEnumerator<T> GetEnumerator()
         {
-            return set.GetEnumerator();
+            return ((IEnumerable<T>)ToArray()).GetEnumerator();
         }
 
-        /// <remarks>Is this correct? What happens if the enumerator changes during enumeration? Should we return a copy with ToArray() instead?</remarks>
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return set.GetEnumerator();
+            return GetEnumerator();
         }
 
         public void Dispose()

@@ -17,17 +17,6 @@ namespace GChan.Helpers.Extensions
             }
         }
 
-        /// <summary>
-        /// Return <paramref name="assets"/> filtered to those not present in <paramref name="savedIds"/>.
-        /// </summary>
-        public static IEnumerable<IAsset> FilterAssets(
-            this IEnumerable<IAsset> assets,
-            AssetIdsCollection savedIds
-        )
-        {
-            return assets.Where(a => savedIds.Contains(a.Id));
-        }
-
         public static async Task<IEnumerable<TSource>> ParallelWhereAsync<TSource>(
             this IEnumerable<TSource> source,
             Func<TSource, Task<bool>> predicate,

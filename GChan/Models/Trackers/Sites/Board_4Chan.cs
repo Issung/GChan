@@ -7,6 +7,7 @@ using GChan.Helpers.Extensions;
 using System.Threading;
 using System.IO;
 using GChan.Properties;
+using System;
 
 namespace GChan.Models.Trackers.Sites
 {
@@ -37,15 +38,15 @@ namespace GChan.Models.Trackers.Sites
             return Regex.IsMatch(url, IS_BOARD_REGEX);
         }
 
-        override protected async Task<Thread[]?> GetThreadsImpl(CancellationToken cancellationToken)
+        override protected async Task<(Thread[]? Threads, DateTimeOffset LastModified)> GetThreadsImpl(CancellationToken cancellationToken)
         {
             var catalogUrl = "https://a.4cdn.org/" + BoardCode + "/catalog.json";
             var client = Utils.GetHttpClient();
-            var json = await client.GetStringAsync(catalogUrl, LastScrape, cancellationToken);
+            var (json, lastModified) = await client.GetStringIfModifiedAsync(catalogUrl, LastModified, cancellationToken);
 
             if (json == null)
             {
-                return null;
+                return (null, lastModified);
             }
 
             var jArray = JArray.Parse(json);
@@ -56,14 +57,14 @@ namespace GChan.Models.Trackers.Sites
                 {
                     var id = thread["no"].Value<long>();
                     var url = "https://boards.4chan.org/" + BoardCode + "/thread/" + id;
-                    var subject = thread["sub"]?.Value<string>() ?? Thread.NO_SUBJECT;
+                    var subject = Thread_4Chan.ExtractSubject(thread);  // May be null, the thread then extracts it on its first scrape.
                     var fileCount = thread["images"].Value<int>() + 1;  // Add 1 to the file count because all threads must start with an image, catalog excludes this.
 
                     return new Thread_4Chan(url, subject, fileCount);
                 })
                 .ToArray();
 
-            return threads;
+            return (threads, lastModified);
         }
     }
 }

@@ -114,8 +114,10 @@ namespace GChan.Models
 
         public bool Equals(Upload other)
         {
-            return Id.Equals(other.Id);
+            return other != null && Id.Equals(other.Id);
         }
+
+        public override bool Equals(object obj) => Equals(obj as Upload);
 
         public override int GetHashCode() => Id.GetHashCode();
 

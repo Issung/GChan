@@ -31,7 +31,8 @@ namespace GChan.Models.Trackers.Sites
         /// <summary>
         /// For use from boards scraping.
         /// </summary>
-        public Thread_4Chan(string url, string subject, int fileCount) : base(url)
+        /// <param name="subject">Null if the catalog has no usable subject, it is then extracted on the first scrape.</param>
+        public Thread_4Chan(string url, string? subject, int fileCount) : base(url)
         {
             Site = Site._4chan;
             ConfigureFromUrl(url);
@@ -52,14 +53,14 @@ namespace GChan.Models.Trackers.Sites
             this.SavedAssetIds.AddRange(data.SavedAssetIds);
             this.SeenAssetIds.AddRange(data.SavedAssetIds);
 
-            // Only populate LastScrape if it appears that all uploads have been saved.
+            // Only populate LastModified if it appears that all uploads have been saved.
             // This will cause the next dequeue of this thread to be downloaded regardless of when the last scrape was and
             // will remedy issue #2 mentioned by vlad-patras here: https://github.com/Issung/GChan/issues/49#issuecomment-2491144815 in which the
             // application is closed & reopened, a thread remains unchanged before removal but had files undownloaded.
             // TODO: This won't cover the case of some thumbnails not being saved.
             if (FileCount == SavedAssetIds.Count(a => a.Type == AssetType.Upload))
             {
-                this.LastScrape = data.LastScrape;
+                this.LastModified = data.LastScrape;
             }
 
             SaveTo = Path.Combine(Settings.Default.SavePath, Site.ToString().TrimStart('_'), BoardCode, Id.ToString());
@@ -70,7 +71,7 @@ namespace GChan.Models.Trackers.Sites
             return Regex.IsMatch(url, THREAD_REGEX);
         }
 
-        protected override async Task<ThreadScrapeResults?> ScrapeThreadImpl(
+        protected override async Task<(ThreadScrapeResults? Results, DateTimeOffset LastModified)> ScrapeThreadImpl(
             bool saveHtml,
             bool saveThumbnails,
             CancellationToken cancellationToken
@@ -80,18 +81,18 @@ namespace GChan.Models.Trackers.Sites
             var uploads = Array.Empty<Upload>();
             var thumbnails = Array.Empty<Thumbnail>();
 
-            var jObject = await GetThreadJson(cancellationToken);
+            var (jObject, lastModified) = await GetThreadJson(cancellationToken);
 
             if (jObject == null)
             {
                 // Thread has not been modified since last scrape.
-                return null;
+                return (null, lastModified);
             }
 
             if (subject == null)
             {
-                var newSubject = ExtractSubject(jObject);
-                Subject = newSubject;
+                var firstPost = jObject.SelectToken("posts[0]") ?? throw new Exception("A thread must have a first post.");
+                Subject = ExtractSubject(firstPost);
             }
             uploads = ScrapeUploads(jObject);
 
@@ -112,7 +113,7 @@ namespace GChan.Models.Trackers.Sites
                 }
             }
 
-            return new(html, uploads, thumbnails);
+            return (new(html, uploads, thumbnails), lastModified);
         }
 
         private async Task<string> GetThreadHtml(CancellationToken cancellationToken)
@@ -123,20 +124,19 @@ namespace GChan.Models.Trackers.Sites
             return htmlPage;
         }
 
-        /// <returns>Returns null if the thread was not modified since the last scrape.</returns>
-        private async Task<JObject?> GetThreadJson(CancellationToken cancellationToken)
+        /// <returns>The thread JSON (null if the thread was not modified since the last scrape) and the server's last-modified time.</returns>
+        private async Task<(JObject? Json, DateTimeOffset LastModified)> GetThreadJson(CancellationToken cancellationToken)
         {
             var client = Utils.GetHttpClient();
             var jsonUrl = $"https://a.4cdn.org/{BoardCode}/thread/{Id}.json";
-            var json = await client.GetStringAsync(jsonUrl, LastScrape, cancellationToken);
+            var (json, lastModified) = await client.GetStringIfModifiedAsync(jsonUrl, LastModified, cancellationToken);
 
             if (json == null)
             {
-                return null;
+                return (null, lastModified);
             }
 
-            var jObject = JObject.Parse(json);
-            return jObject;
+            return (JObject.Parse(json), lastModified);
         }
 
         private Thumbnail[] ScrapeThumbnails(JObject jObject)
@@ -241,10 +241,12 @@ namespace GChan.Models.Trackers.Sites
             SaveTo = Path.Combine(Settings.Default.SavePath, Site.ToString().TrimStart('_'), BoardCode, Id.ToString());
         }
 
-        private static string? ExtractSubject(JObject jObject)
+        /// <summary>
+        /// Picks a subject from a thread's opening post (from the thread JSON or the board catalog, which share the same fields).
+        /// </summary>
+        /// <returns>The sanitised subject, or null if the post has nothing suitable.</returns>
+        public static string? ExtractSubject(JToken post)
         {
-            var post = jObject.SelectToken("posts[0]") ?? throw new Exception("A thread must have a first post.");
-
             var sub = WebUtility.HtmlDecode(post["sub"]?.Value<string>());  // Subject is HTML encoded, so we must decode.
 
             var name = post["name"]?.Value<string>();

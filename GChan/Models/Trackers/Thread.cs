@@ -33,9 +33,9 @@ namespace GChan.Models.Trackers
         /// </summary>
         public AssetIdsCollection SavedAssetIds { get; private init; } = [];
 
-        public bool ShouldProcess => !Gone && !cancellationTokenSource.IsCancellationRequested;
+        public bool ShouldProcess => !cancellationTokenSource.IsCancellationRequested;
 
-        public DateTimeOffset? ReadyToProcessAt => LastScrape + TimeSpan.FromSeconds(Settings.Default.MinSecondsBetweenScrapes);
+        public DateTimeOffset? ReadyToProcessAt => LastAttempt + TimeSpan.FromSeconds(Settings.Default.MinSecondsBetweenScrapes);
 
         public ProcessPriority Priority { get; protected set; } = ProcessPriority.Default;
 
@@ -106,9 +106,6 @@ namespace GChan.Models.Trackers
             }
         }
 
-
-        public bool Gone { get; protected set; } = false;
-
         /// <summary>
         /// Internal representation of subject, may or may not be the subject. Could be username, thread body text, or the GChan user's custom entry.
         /// </summary>
@@ -151,10 +148,13 @@ namespace GChan.Models.Trackers
                 return new(removeFromQueue: true);
             }
 
+            LastAttempt = DateTimeOffset.Now;
+
             ThreadScrapeResults results;
+            DateTimeOffset lastModified;
             try
             {
-                results = await ScrapeThreadImpl(
+                (results, lastModified) = await ScrapeThreadImpl(
                     Settings.Default.SaveHtml,
                     Settings.Default.SaveThumbnails,
                     cancellationToken
@@ -166,10 +166,9 @@ namespace GChan.Models.Trackers
                 return new(removeFromQueue: true);
             }
 
-            LastScrape = DateTimeOffset.Now;
-
             if (results == null)
             {
+                LastModified = lastModified;
                 return new(removeFromQueue: false);
             }
 
@@ -187,20 +186,35 @@ namespace GChan.Models.Trackers
             SeenAssetIds.AddRange(newAssets);
             Priority = ProcessPriority.Default; // Set priority to default. May have been set to "high" if thread was new.
 
+            // Only now that the results are handled, so a failure above means the next scrape fetches them again.
+            LastModified = lastModified;
+
             return new(removeFromQueue: false, newProcessables: newAssets);
         }
 
         /// <summary>
-        /// Website specific implementation for scraping a thread, returning html, uploads and thumbnail assets.<br/>
-        /// Can return null to indicate the thread has had no change sice <see cref="Tracker.LastScrape"/>.
+        /// Website specific implementation for scraping a thread, returning html, uploads and thumbnail assets,
+        /// and the server's last-modified time to store in <see cref="Tracker.LastModified"/>.<br/>
+        /// Results are null if the thread has had no change since <see cref="Tracker.LastModified"/>.
         /// </summary>
         /// <exception cref="HttpRequestException"/>
         /// <exception cref="TooManyRequestsException"/>
-        protected abstract Task<ThreadScrapeResults> ScrapeThreadImpl(
+        protected abstract Task<(ThreadScrapeResults Results, DateTimeOffset LastModified)> ScrapeThreadImpl(
             bool saveHtml,
             bool saveThumbnails,
             CancellationToken cancellationToken
         );
+
+        /// <summary>
+        /// Threads are equal if they are the same thread on the same site, so queues and lists treat copies as duplicates.
+        /// </summary>
+        public override bool Equals(object obj)
+        {
+            return obj is Thread other
+                && other.Site == Site
+                && other.BoardCode == BoardCode
+                && other.Id == Id;
+        }
 
         public override int GetHashCode()
         {

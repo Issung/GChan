@@ -37,10 +37,17 @@ namespace GChan.Models.Trackers
         public string BoardCode { get; protected set; }
 
         /// <summary>
-        /// When this tracker was last succesfully scraped, null if not yet scraped.<br/>
-        /// <see cref="DateTimeOffset"/> because that's what HttpClient header property accepts.
+        /// The server's last-modified time of the content from the last successful scrape, null if not yet scraped.<br/>
+        /// Sent as <c>If-Modified-Since</c>, so it must be the server's time, not ours: a local time taken after the request
+        /// would hide anything posted while the request was in flight, or within any clock skew.
         /// </summary>
-        public DateTimeOffset? LastScrape { get; protected set; }
+        public DateTimeOffset? LastModified { get; protected set; }
+
+        /// <summary>
+        /// Local time the last scrape was started (successful or not), null if not yet attempted this session.<br/>
+        /// Used to space scrapes out by <see cref="Settings.MinSecondsBetweenScrapes"/>.
+        /// </summary>
+        public DateTimeOffset? LastAttempt { get; protected set; }
 
         /// <summary>
         /// Whether or not to keep scraping this tracker.
@@ -62,7 +69,7 @@ namespace GChan.Models.Trackers
         {
             if (this is Thread thread)
             {
-                return $"Thread {{ {Site}, /{BoardCode}/, {thread.Id}, Gone: {thread.Gone} }}";
+                return $"Thread {{ {Site}, /{BoardCode}/, {thread.Id} }}";
             }
             else if (this is Board)
             {
