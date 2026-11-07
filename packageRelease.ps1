@@ -1,6 +1,10 @@
-# Extract the version from the .csproj file
-$csprojContent = Get-Content "GChan\GChan.csproj"
-$version = $csprojContent | Select-String "<Version>(.*?)</Version>" | ForEach-Object { $_.Matches.Groups[1].Value }
+# Builds GChan and zips it as GChan<version>.zip in the current directory.
+# Run from the repository root. The release workflow (.github/workflows/release.yml) runs this too.
+$ErrorActionPreference = "Stop"
+
+# Extract the project's own <Version> from the .csproj file
+$csproj = [xml](Get-Content -Raw "GChan\GChan.csproj")
+$version = $csproj.SelectSingleNode("/Project/PropertyGroup/Version").InnerText
 
 if (-not $version) {
     Write-Error "Version not found in the .csproj file."
@@ -10,16 +14,19 @@ if (-not $version) {
 $version = $version.Trim()
 Write-Host "Version found: $version"
 
-# Prepare output directory
-$outputDirectory = "$env:TEMP\GChanReleaseBuild\GChan$version"
-if (-not (Test-Path -Path $outputDirectory)) {    # Create outputDirectory if it doesn't already exist.
-    New-Item -Path $outputDirectory -ItemType Directory 
+# Prepare a clean output directory
+$outputDirectory = Join-Path ([System.IO.Path]::GetTempPath()) "GChanReleaseBuild\GChan$version"
+if (Test-Path -Path $outputDirectory) {
+    Remove-Item -Path $outputDirectory -Recurse -Force
 }
-Remove-Item -Path $outputDirectory -Recurse -Force  # Clean outputDirectory.
 
 # Publish the dotnet solution
 Write-Host "Publishing GChan project..."
 dotnet publish GChan -c Release -r win-x86 -o $outputDirectory
+if ($LASTEXITCODE -ne 0) {
+    Write-Error "dotnet publish failed with exit code $LASTEXITCODE."
+    exit $LASTEXITCODE
+}
 
 # Pack the published output into a zip file
 $zipFileName = "GChan$version.zip"
@@ -29,3 +36,9 @@ Write-Host "Creating zip file: $zipFileName"
 Compress-Archive -Path "$outputDirectory" -DestinationPath $zipFilePath -Force
 
 Write-Host "Packaging complete. Zip file saved as: $zipFileName"
+
+# Hand the results to the GitHub Actions workflow, when running in one.
+if ($env:GITHUB_OUTPUT) {
+    "version=$version" >> $env:GITHUB_OUTPUT
+    "zip=$zipFilePath" >> $env:GITHUB_OUTPUT
+}

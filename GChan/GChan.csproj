@@ -22,10 +22,11 @@
 		<!-- Exclude irrelevant locale resources from build output (such as de, es, ru, pt-BR, etc). -->
 		<SatelliteResourceLanguages>en</SatelliteResourceLanguages>
 
-		<!-- Versioning -->
-		<Version>6.5.0</Version>
-		<AssemblyVersion>6.5.0</AssemblyVersion>
-		<FileVersion>6.5.0</FileVersion>
+		<!--
+			Versioning. Bumping this on develop publishes a GitHub release (see .github/workflows/release.yml).
+			A suffix (e.g. 6.6.0-beta) makes it a pre-release. AssemblyVersion and FileVersion are derived from it, without the suffix.
+		-->
+		<Version>6.6.0-beta</Version>
 	</PropertyGroup>
 	<PropertyGroup>
 		<ApplicationIcon>4chanIcon.ico</ApplicationIcon>

@@ -1,0 +1,153 @@
+# Publishes a GitHub release whenever the <Version> in GChan/GChan.csproj changes on develop.
+#
+# - Tag and release name: v<Version>, e.g. v6.6.0 or v6.6.0-beta.
+# - A version with a suffix (e.g. 6.6.0-beta) is published as a pre-release, otherwise as the latest release.
+# - Notes list the commits since the previous v* tag; edit them on GitHub afterwards if you like.
+# - Pull requests that touch the build only build it, and attach the zip to the run, without releasing.
+# - Run it by hand from the Actions tab to retry a failed release, or as a dry run to only build.
+name: Release
+
+on:
+  push:
+    branches: [develop]
+    paths:
+      - GChan/GChan.csproj
+      - packageRelease.ps1
+      - .github/workflows/release.yml
+  pull_request:
+    branches: [develop]
+    paths:
+      - GChan/GChan.csproj
+      - packageRelease.ps1
+      - .github/workflows/release.yml
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Only build the zip, don't publish a release
+        type: boolean
+        default: false
+
+# Never run two releases at once.
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0  # The previous version, tags and commit history are needed to decide and to write the notes.
+
+      - name: Decide whether to release
+        id: decide
+        env:
+          EVENT: ${{ github.event_name }}
+          BEFORE: ${{ github.event.before }}
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          # The project's own <Version> (not e.g. a package reference's), or nothing.
+          function Get-Version([string[]] $csproj) {
+              $text = $csproj -join "`n"
+              $start = $text.IndexOf('<')  # Skip a byte order mark, which git show output carries.
+              if ($start -lt 0) { return }
+              try { $xml = [xml]$text.Substring($start) } catch { return }
+              $node = $xml.SelectSingleNode("/*[local-name()='Project']/*[local-name()='PropertyGroup']/*[local-name()='Version']")
+              if ($node) { $node.InnerText.Trim() }
+          }
+
+          $version = Get-Version (Get-Content GChan/GChan.csproj)
+          if (-not $version) { throw "No <Version> found in GChan/GChan.csproj." }
+          $tag = "v$version"
+          git rev-parse -q --verify "refs/tags/$tag" | Out-Null
+          $tagExists = $LASTEXITCODE -eq 0
+          $global:LASTEXITCODE = 0
+
+          $release = $false
+          switch ($env:EVENT) {
+              "push" {
+                  # Only when this push changed the version, so other edits to the files above don't release.
+                  $previous = $null
+                  if ($env:BEFORE -notmatch '^0+$') {
+                      $previousCsproj = git show "$($env:BEFORE):GChan/GChan.csproj" 2>$null
+                      if ($LASTEXITCODE -eq 0) { $previous = Get-Version $previousCsproj }
+                      $global:LASTEXITCODE = 0
+                  }
+
+                  if (-not $previous) {
+                      # E.g. after a force push. Better to skip than to release something by surprise.
+                      Write-Host "::warning::Couldn't find the version before this push, not releasing. Run this workflow by hand to release $tag."
+                  } elseif ($previous -eq $version) {
+                      Write-Host "Version is still $version, not releasing."
+                  } elseif ($tagExists) {
+                      Write-Host "::warning::Version changed to $version but tag $tag already exists, not releasing. Bump the version again."
+                  } else {
+                      Write-Host "Version changed from '$previous' to '$version', releasing $tag."
+                      $release = $true
+                  }
+              }
+              "workflow_dispatch" {
+                  if ($env:DRY_RUN -eq "true") {
+                      Write-Host "Dry run, not releasing."
+                  } elseif ($tagExists) {
+                      throw "Tag $tag already exists. Bump <Version> in GChan/GChan.csproj first."
+                  } else {
+                      $release = $true
+                  }
+              }
+              default {
+                  Write-Host "Building only for $($env:EVENT)."
+              }
+          }
+
+          "version=$version" >> $env:GITHUB_OUTPUT
+          "tag=$tag" >> $env:GITHUB_OUTPUT
+          "prerelease=$($version.Contains('-').ToString().ToLower())" >> $env:GITHUB_OUTPUT
+          "release=$($release.ToString().ToLower())" >> $env:GITHUB_OUTPUT
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Build and zip
+        id: package
+        run: ./packageRelease.ps1
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: GChan${{ steps.package.outputs.version }}
+          path: ${{ steps.package.outputs.zip }}
+          if-no-files-found: error
+
+      - name: Publish release
+        if: steps.decide.outputs.release == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.decide.outputs.tag }}
+          PRERELEASE: ${{ steps.decide.outputs.prerelease }}
+          ZIP: ${{ steps.package.outputs.zip }}
+        run: |
+          # Notes: the commits since the previous release's tag.
+          $previousTag = git describe --tags --abbrev=0 --match "v*" HEAD 2>$null
+          $global:LASTEXITCODE = 0
+          $notes = @()
+          if ($previousTag) {
+              $notes += git log --no-merges --reverse --pretty=format:"* %s" "$previousTag..HEAD"
+              $notes += ""
+              $notes += "**Full changelog**: https://github.com/$($env:GITHUB_REPOSITORY)/compare/$previousTag...$($env:TAG)"
+          }
+          $notesFile = Join-Path $env:RUNNER_TEMP "release-notes.md"
+          $notes | Set-Content -Path $notesFile -Encoding utf8
+
+          $releaseArgs = @($env:TAG, $env:ZIP, "--title", $env:TAG, "--target", $env:GITHUB_SHA, "--notes-file", $notesFile)
+          if ($env:PRERELEASE -eq "true") { $releaseArgs += "--prerelease" } else { $releaseArgs += "--latest" }
+
+          gh release create @releaseArgs
+          if ($LASTEXITCODE -ne 0) { throw "gh release create failed." }
