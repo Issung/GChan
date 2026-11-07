@@ -388,9 +388,44 @@ namespace GChan.Forms
             UpdateController.Instance.ShowUpdateDialog();
         }
 
+        /// <summary>Set once <see cref="MainController.Closing"/> has finished and agreed to close.</summary>
+        private bool readyToClose;
+
+        /// <summary>Set while <see cref="MainController.Closing"/> is running, so repeated close requests are ignored.</summary>
+        private bool closingInProgress;
+
         internal async void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            e.Cancel = await Controller.Closing();
+            if (readyToClose)
+            {
+                return;
+            }
+
+            // WinForms reads e.Cancel as soon as this handler returns, which for an async handler is at its first await.
+            // So always cancel this close, finish closing (including the save) asynchronously, then close again.
+            e.Cancel = true;
+
+            if (closingInProgress)
+            {
+                return;
+            }
+
+            closingInProgress = true;
+
+            try
+            {
+                var cancelClose = await Controller.Closing();
+
+                if (!cancelClose)
+                {
+                    readyToClose = true;
+                    Close();
+                }
+            }
+            finally
+            {
+                closingInProgress = false;
+            }
         }
 
         private void threadGridView_DataError(object sender, DataGridViewDataErrorEventArgs e)

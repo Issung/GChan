@@ -141,7 +141,7 @@ namespace GChan
 
             try
             {
-                await DataController.Save(mainForm.Model.Threads, mainForm.Model.Boards);
+                await DataController.Save(mainForm.Model.Threads.ToArray(), mainForm.Model.Boards.ToArray());
                 logger.Error(exceptionArgs.Exception, $"Application_ThreadException.");
             }
             catch (Exception ex)
@@ -162,7 +162,7 @@ namespace GChan
 
             try
             {
-                await DataController.Save(mainForm.Model.Threads, mainForm.Model.Boards);
+                await DataController.Save(mainForm.Model.Threads.ToArray(), mainForm.Model.Boards.ToArray());
                 Exception argsException = args.ExceptionObject as Exception;
                 logger.Error(argsException, $"AppDomain_UnhandledException.");
             }
