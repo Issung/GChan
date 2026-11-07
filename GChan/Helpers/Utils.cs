@@ -268,28 +268,6 @@ namespace GChan
             }
         }
 
-        /// <summary>
-        /// Combines two CancellationTokens into one. The resulting token is canceled if either of the input tokens is canceled.
-        /// </summary>
-        /// <param name="token1">First CancellationToken</param>
-        /// <param name="token2">Second CancellationToken</param>
-        /// <returns>A new CancellationToken linked to both input tokens.</returns>
-        public static CancellationToken CombineCancellationTokens(CancellationToken token1, CancellationToken token2)
-        {
-            if (!token1.CanBeCanceled)
-            {
-                return token2;
-            }
-
-            if (!token2.CanBeCanceled)
-            {
-                return token1;
-            }
-
-            var linkedSource = CancellationTokenSource.CreateLinkedTokenSource(token1, token2);
-            return linkedSource.Token;
-        }
-
         public static void OpenDirectory(string path)
         {
             Process.Start("explorer.exe", path);
