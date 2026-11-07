@@ -206,6 +206,16 @@ namespace GChan.Data
         }
 
         /// <summary>
+        /// Removes several threads from the database by URL, in one transaction.
+        /// </summary>
+        public static void DeleteThreads(IEnumerable<string> urls) => InTransaction(() => DeleteByUrls(TB_THREAD, urls));
+
+        /// <summary>
+        /// Removes several boards from the database by URL, in one transaction.
+        /// </summary>
+        public static void DeleteBoards(IEnumerable<string> urls) => InTransaction(() => DeleteByUrls(TB_BOARD, urls));
+
+        /// <summary>
         /// Runs <paramref name="action"/> inside a single transaction while holding the connection lock.
         /// <see cref="SQLiteConnection"/> is not thread-safe, so all database access must hold <see cref="_connectionLock"/>.
         /// </summary>
@@ -264,6 +274,14 @@ namespace GChan.Data
             cmd.CommandText = $"DELETE FROM {table} WHERE {COL_URL} = @{COL_URL}";
             cmd.Parameters.AddWithValue(COL_URL, url);
             cmd.ExecuteNonQuery();
+        }
+
+        private static void DeleteByUrls(string table, IEnumerable<string> urls)
+        {
+            foreach (var url in urls)
+            {
+                DeleteByUrl(table, url);
+            }
         }
 
         private static void DeleteAll(string table)

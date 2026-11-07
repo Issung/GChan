@@ -267,20 +267,28 @@ namespace GChan.Controllers
                 {
                     lock (ThreadLock)
                     {
-                        for (int i = Model.Threads.Count - 1; i >= 0; i--)
+                        var threads = Model.Threads.ToArray();
+
+                        for (int i = threads.Length - 1; i >= 0; i--)
                         {
-                            RemoveThread(Model.Threads[i], true);
+                            RemoveThread(threads[i], true, persist: false);
                         }
+
+                        DeleteRemovedThreads(threads);
                     }
                 }
                 else // Boards
                 {
                     lock (BoardLock)
                     {
-                        for (int i = Model.Boards.Count - 1; i >= 0; i--)
+                        var boards = Model.Boards.ToArray();
+
+                        for (int i = boards.Length - 1; i >= 0; i--)
                         {
-                            RemoveBoard(Model.Boards[i]);
+                            RemoveBoard(boards[i], persist: false);
                         }
+
+                        Persist(() => DataController.DeleteBoards(boards.Select(b => b.Url)));
                     }
                 }
             }
@@ -312,7 +320,8 @@ namespace GChan.Controllers
             {
                 // Remove 404'd threads
                 var removedThreads = Model.Threads.RemoveAll(t => t.Gone);
-                removedThreads.ForEach(t => RemoveThread(t));
+                removedThreads.ForEach(t => RemoveThread(t, persist: false));
+                DeleteRemovedThreads(removedThreads);
             }
 
             // Make a copy of the current boards and scrape them for new threads.
@@ -458,7 +467,8 @@ namespace GChan.Controllers
             }
         }
 
-        public void RemoveBoard(Board board)
+        /// <param name="persist">Delete the board from the database. False when the caller deletes in bulk.</param>
+        public void RemoveBoard(Board board, bool persist = true)
         {
             board.Scraping = false;
 
@@ -469,7 +479,10 @@ namespace GChan.Controllers
                     Model.Boards.Remove(board);
                 });
 
-                Persist(() => DataController.DeleteBoard(board.Url));
+                if (persist)
+                {
+                    Persist(() => DataController.DeleteBoard(board.Url));
+                }
             }
         }
 
@@ -487,13 +500,14 @@ namespace GChan.Controllers
         /// </summary>
         /// <param name="thread">Thread to remove.</param>
         /// <param name="manualRemove">Was this remove initiated by the user or by the scanning routine.</param>
+        /// <param name="persist">Delete the thread from the database. False when the caller calls <see cref="DeleteRemovedThreads"/> in bulk.</param>
         /// <remarks>
         /// TODO: RemoveThread likely to throw. Info below:
         /// If removing a newly added thread this is likely to fail beacuse files are still being downloaded into the current directory.
         /// It only fails once because after setting thread.Scraping to no more downloads happen (mostly..).
         /// We kind of need a download manager so we can wait for all downloads from this thread to finish before moving dir.
         /// </remarks>
-        public void RemoveThread(Thread thread, bool manualRemove = false)
+        public void RemoveThread(Thread thread, bool manualRemove = false, bool persist = true)
         {
             logger.Trace($"Removing thread {thread}.");
             thread.Scraping = false;
@@ -532,13 +546,28 @@ namespace GChan.Controllers
                 }
             }
 
+            if (persist)
+            {
+                DeleteRemovedThreads(new[] { thread });
+            }
+        }
+
+        /// <summary>
+        /// Deletes the database rows of those <paramref name="threads"/> that are no longer in the thread list.
+        /// </summary>
+        /// <remarks>
+        /// Checks the list rather than whether removal succeeded: the scan routine removes gone threads
+        /// from the list before calling <see cref="RemoveThread"/>, even if moving the folder then fails.
+        /// </remarks>
+        private void DeleteRemovedThreads(IEnumerable<Thread> threads)
+        {
             lock (ThreadLock)
             {
-                // Check the list rather than whether the steps above succeeded: the scan routine removes
-                // gone threads from the list before calling this, even if moving the folder then fails.
-                if (!Model.Threads.Contains(thread))
+                var urls = threads.Where(t => !Model.Threads.Contains(t)).Select(t => t.Url).ToArray();
+
+                if (urls.Length > 0)
                 {
-                    Persist(() => DataController.DeleteThread(thread.Url));
+                    Persist(() => DataController.DeleteThreads(urls));
                 }
             }
         }
