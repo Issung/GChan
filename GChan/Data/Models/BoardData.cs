@@ -23,6 +23,18 @@ namespace GChan.Data.Models
         /// </summary>
         public BoardData() { }
 
+        /// <summary>
+        /// Only the key, for deleting.
+        /// </summary>
+        public static BoardData KeyOf(Board board)
+        {
+            return new()
+            {
+                Site = board.Site,
+                Code = board.BoardCode.Trim('/'),
+            };
+        }
+
         public BoardData(Board board)
         {
             Site = board.Site;

@@ -55,8 +55,7 @@ namespace GChan.Data
             this.Subject = thread.subject;
             this.FileCount = thread.FileCount;
             this.LastScrape = thread.LastModified;
-            // A copy, so a save stores this moment rather than whatever it is when serialised. AssetIds are immutable, so a shallow copy will do.
-            this.SavedAssetIds = new AssetIdsCollection(thread.SavedAssetIds.ToArray());
+            this.SavedAssetIds = thread.SavedAssetIds.Clone();  // A copy, so a save stores this moment rather than whatever it is when serialised.
         }
     }
 }

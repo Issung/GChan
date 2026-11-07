@@ -41,10 +41,45 @@ namespace GChan.Forms
         /// </summary>
         public static void StaticInvoke(Action action)
         {
-            if (!instance.Disposing && !instance.IsDisposed)
+            TryInvoke(action);
+        }
+
+        /// <summary>
+        /// Runs <paramref name="action"/> on the UI thread and waits for it. Does nothing if the form has no handle or is closed.
+        /// </summary>
+        /// <returns>True if <paramref name="action"/> ran, false if the form was unavailable.</returns>
+        public static bool TryInvoke(Action action)
+        {
+            var form = instance;
+
+            // Without a handle, InvokeRequired is false even off the UI thread, so the action would run on the wrong thread.
+            if (form == null || form.Disposing || form.IsDisposed || !form.IsHandleCreated)
             {
-                instance.Invoke(action);
+                return false;
             }
+
+            if (!form.InvokeRequired)
+            {
+                action();
+                return true;
+            }
+
+            var ran = false;
+
+            try
+            {
+                form.Invoke(() =>
+                {
+                    ran = true;
+                    action();
+                });
+            }
+            catch (Exception ex) when (!ran && (ex is ObjectDisposedException || (ex is InvalidOperationException && (form.IsDisposed || !form.IsHandleCreated))))
+            {
+                // The form closed between the check above and the invoke.
+            }
+
+            return ran;
         }
 
         private async void MainForm_Load(object sender, EventArgs e)

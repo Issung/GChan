@@ -66,7 +66,7 @@ namespace GChan.Data
 
         public static async Task RemoveBoard(IEnumerable<Board> boards)
         {
-            var boardDatas = boards.Select(b => new BoardData(b)).ToArray();
+            var boardDatas = boards.Select(BoardData.KeyOf).ToArray();
 
             await Locked(async context =>
             {

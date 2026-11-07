@@ -69,11 +69,12 @@ namespace GChan.Models
             return collection;
         }
 
+        /// <summary>
+        /// A shallow copy: <see cref="AssetId"/>s are immutable, so they can be shared.
+        /// </summary>
         public AssetIdsCollection Clone()
         {
-            var ids = this.Select(assetId => assetId.Clone());
-            var newCollection = new AssetIdsCollection(ids);
-            return newCollection;
+            return new AssetIdsCollection(ToArray());
         }
 
         public override int GetHashCode()

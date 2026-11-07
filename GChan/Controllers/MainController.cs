@@ -162,18 +162,20 @@ namespace GChan.Controllers
             var done = false;
 
             OnUiThread(() =>
-            { 
+            {
                 if (!source.ShouldProcess)
                 {
                     return;
                 }
 
-                // A set rather than IsUnique for each, as the batch can be large and so can the thread list.
-                var trackedThreads = Model.Threads.Select(ThreadKey).ToHashSet();
+                // For large batches (a board's first scrape) a set rather than scanning the thread list for each.
+                var trackedThreads = trackers.Count > 8 ? Model.Threads.Select(ThreadKey).ToHashSet() : null;
 
                 foreach (var tracker in trackers)
                 {
-                    var isNew = tracker is Thread thread ? trackedThreads.Add(ThreadKey(thread)) : IsUnique(tracker);
+                    var isNew = tracker is Thread thread && trackedThreads != null
+                        ? trackedThreads.Add(ThreadKey(thread))
+                        : IsUnique(tracker);
 
                     if (isNew)
                     {
@@ -397,11 +399,11 @@ namespace GChan.Controllers
         }
 
         /// <summary>
-        /// Saves synchronously, for when Windows is ending the session and won't wait for an async close.<br/>
-        /// Nothing is shut down: Windows asks before it knows the session will end, and another app may still cancel it.
+        /// Saves synchronously, for when Windows is ending the session and won't wait for an async close.
         /// </summary>
         /// <param name="shutDown">
-        /// Also stop processing, for when the close is certain (e.g. Task Manager), so nothing touches the form as it goes away.
+        /// Also stop processing (permanently), for when the close is certain (e.g. Task Manager), so nothing touches the form as it
+        /// goes away. Pass false for a Windows shutdown: Windows asks before it knows the session will end, and another app may still cancel it.
         /// </param>
         public void SaveNow(bool shutDown)
         {
@@ -506,36 +508,6 @@ namespace GChan.Controllers
         /// Runs <paramref name="action"/> on the UI thread and waits for it. Does nothing once the form is closed.
         /// </summary>
         /// <returns>True if <paramref name="action"/> ran, false if the form was closed.</returns>
-        private bool OnUiThread(Action action)
-        {
-            // Without a handle, InvokeRequired is false even off the UI thread, so the action would run on the wrong thread.
-            if (Form.IsDisposed || Form.Disposing || !Form.IsHandleCreated)
-            {
-                return false;
-            }
-
-            if (!Form.InvokeRequired)
-            {
-                action();
-                return true;
-            }
-
-            var ran = false;
-
-            try
-            {
-                Form.Invoke(() =>
-                {
-                    ran = true;
-                    action();
-                });
-            }
-            catch (Exception ex) when (!ran && (ex is ObjectDisposedException || (ex is InvalidOperationException && (Form.IsDisposed || !Form.IsHandleCreated))))
-            {
-                // The form closed between the check above and the invoke.
-            }
-
-            return ran;
-        }
+        private bool OnUiThread(Action action) => MainForm.TryInvoke(action);
     }
 }
