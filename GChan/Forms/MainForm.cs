@@ -406,7 +406,7 @@ namespace GChan.Forms
                 // Don't cancel: that would block the session from ending, and Windows may kill us before an async close finishes.
                 // For shutdown this is raised before Windows knows the session will end (another app can still cancel it),
                 // so don't shut anything down either, just save while we can and let the close go ahead.
-                Controller.SaveNow();
+                Controller.SaveNow(shutDown: e.CloseReason == CloseReason.TaskManagerClosing);
                 return;
             }
 

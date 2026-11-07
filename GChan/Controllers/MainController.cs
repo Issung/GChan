@@ -1,4 +1,5 @@
 ﻿using GChan.Data;
+using GChan.Data.Models;
 using GChan.Forms;
 using GChan.Helpers.Extensions;
 using GChan.Models.Trackers;
@@ -57,7 +58,7 @@ namespace GChan.Controllers
             UpdateController.Instance.UpdateCheckFinished += Instance_UpdateCheckFinished;
 
             if (!Settings.Default.MinimizeToTray)
-            {
+            { 
                 Form.systemTrayNotifyIcon.Visible = false;
             }
 
@@ -101,7 +102,7 @@ namespace GChan.Controllers
             var addedTrackers = new List<Tracker>();
 
             foreach (var url in urls)
-            {
+            { 
                 var newTracker = Utils.CreateNewTracker(url);
 
                 if (newTracker != null)
@@ -122,7 +123,7 @@ namespace GChan.Controllers
                             var path = newTracker.SaveTo;
 
                             if (!Directory.Exists(path))
-                            {
+                            { 
                                 Directory.CreateDirectory(path);
                             }
 
@@ -145,69 +146,46 @@ namespace GChan.Controllers
         }
 
         /// <summary>
-        /// Called by the process queue (from a processing thread) for threads found by board scraping.
-        /// Adds those not already tracked, then runs <paramref name="onAdded"/>, in one step on the UI thread.
+        /// Called by the process queue (from a processing thread) with the results of processing <paramref name="source"/>.
+        /// Adds the <paramref name="trackers"/> not already tracked (threads found by board scraping), then runs
+        /// <paramref name="onAdded"/>, in one step on the UI thread.
         /// </summary>
-        /// <returns>False if the UI was unavailable (closing), in which case nothing was added and <paramref name="onAdded"/> didn't run.</returns>
-        private bool AddTrackersIfNew(IReadOnlyList<Tracker> trackers, Action onAdded)
+        /// <returns>
+        /// False if nothing was done: the UI was unavailable (closing), or <paramref name="source"/> was removed while it was
+        /// being processed. <paramref name="onAdded"/> didn't run in that case.
+        /// </returns>
+        private bool AddTrackersIfNew(IProcessable source, IReadOnlyList<Tracker> trackers, Action onAdded)
         {
-            // Check and add in one step on the UI thread, so two boards finding the same thread can't both add it.
+            // Check and add in one step on the UI thread, so two boards finding the same thread can't both add it,
+            // and a board removed (which happens on the UI thread) can't have its results added afterwards.
             // One call for the whole batch, as a board's first scrape can find hundreds of threads.
-            return OnUiThread(() =>
-            {
-                var trackedThreads = Model.Threads.Select(t => (t.Site, t.BoardCode, t.Id)).ToHashSet();
-                var trackedBoards = Model.Boards.Select(b => b.Url).ToHashSet();
+            var done = false;
 
-                // For large batches (a board's first scrape) refresh the grids once at the end rather than for every row.
-                // Not for small ones, as a reset can lose the grid's selection and scroll position.
-                var suspendListEvents = trackers.Count > 20;
-                var threadCount = Model.Threads.Count;
-                var boardCount = Model.Boards.Count;
-
-                if (suspendListEvents)
+            OnUiThread(() =>
+            { 
+                if (!source.ShouldProcess)
                 {
-                    Model.Threads.RaiseListChangedEvents = false;
-                    Model.Boards.RaiseListChangedEvents = false;
+                    return;
                 }
 
-                try
+                // A set rather than IsUnique for each, as the batch can be large and so can the thread list.
+                var trackedThreads = Model.Threads.Select(ThreadKey).ToHashSet();
+
+                foreach (var tracker in trackers)
                 {
-                    foreach (var tracker in trackers)
+                    var isNew = tracker is Thread thread ? trackedThreads.Add(ThreadKey(thread)) : IsUnique(tracker);
+
+                    if (isNew)
                     {
-                        var isNew = tracker switch
-                        {
-                            Thread thread => trackedThreads.Add((thread.Site, thread.BoardCode, thread.Id)),
-                            Board board => trackedBoards.Add(board.Url),
-                            _ => false,
-                        };
-
-                        if (isNew)
-                        {
-                            AddNewTracker(tracker);
-                        }
-                    }
-                }
-                finally
-                {
-                    if (suspendListEvents)
-                    {
-                        Model.Threads.RaiseListChangedEvents = true;
-                        Model.Boards.RaiseListChangedEvents = true;
-
-                        if (Model.Threads.Count != threadCount)
-                        {
-                            Model.Threads.ResetBindings();
-                        }
-
-                        if (Model.Boards.Count != boardCount)
-                        {
-                            Model.Boards.ResetBindings();
-                        }
+                        AddNewTracker(tracker);
                     }
                 }
 
                 onAdded?.Invoke();
+                done = true;
             });
+
+            return done;
         }
 
         /// <summary>Adds to the tracker list and the process queue. Must be called on the UI thread.</summary>
@@ -266,17 +244,19 @@ namespace GChan.Controllers
         {
             if (tracker is Thread thread)
             {
-                return !Model.Threads.Any(t =>
-                    t.Site == thread.Site &&
-                    t.BoardCode == thread.BoardCode &&
-                    t.Id == thread.Id
-                );
+                var key = ThreadKey(thread);
+                return !Model.Threads.Any(t => ThreadKey(t) == key);
             }
             else // Board
             {
                 return !Model.Boards.Any(t => t.Url == tracker.Url);
             }
         }
+
+        /// <summary>
+        /// What identifies a thread for duplicate detection.
+        /// </summary>
+        private static (Site Site, string BoardCode, long Id) ThreadKey(Thread thread) => (thread.Site, thread.BoardCode, thread.Id);
 
         public void RenameThreadSubjectPrompt(int threadBindingSourceIndex)
         {
@@ -384,7 +364,7 @@ namespace GChan.Controllers
             {
                 // Only show notification if the update check was initiated by the user.
                 if (initiatedByUser)
-                {
+                { 
                     Form.toolTip.Show("No Updates Available.", Form.menuStrip, 70, 20, 1750);
                 }
             }
@@ -420,8 +400,16 @@ namespace GChan.Controllers
         /// Saves synchronously, for when Windows is ending the session and won't wait for an async close.<br/>
         /// Nothing is shut down: Windows asks before it knows the session will end, and another app may still cancel it.
         /// </summary>
-        public void SaveNow()
+        /// <param name="shutDown">
+        /// Also stop processing, for when the close is certain (e.g. Task Manager), so nothing touches the form as it goes away.
+        /// </param>
+        public void SaveNow(bool shutDown)
         {
+            if (shutDown)
+            {
+                ShutDown();
+            }
+
             if (!Settings.Default.SaveListsOnClose)
             {
                 return;
@@ -520,7 +508,8 @@ namespace GChan.Controllers
         /// <returns>True if <paramref name="action"/> ran, false if the form was closed.</returns>
         private bool OnUiThread(Action action)
         {
-            if (Form.IsDisposed || Form.Disposing)
+            // Without a handle, InvokeRequired is false even off the UI thread, so the action would run on the wrong thread.
+            if (Form.IsDisposed || Form.Disposing || !Form.IsHandleCreated)
             {
                 return false;
             }

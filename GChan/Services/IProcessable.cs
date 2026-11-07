@@ -34,8 +34,8 @@ namespace GChan.Services
         /// <summary>
         /// Called once all of <see cref="NewProcessables"/> have been added (new trackers to their lists, others to the queue),
         /// to record state that must not be saved before they are.<br/>
-        /// If there are new trackers it runs on the UI thread in the same step as adding them, so no save sees one without the other.
-        /// Not called if they could not be added.
+        /// Always runs on the UI thread, in the same step as adding the new trackers, so no save sees one without the other.
+        /// Not called if they could not be added, or if this processable was removed while it was being processed.
         /// </summary>
         public Action OnNewProcessablesAdded { get; }
 

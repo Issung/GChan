@@ -44,10 +44,10 @@ namespace GChan.Services
         private readonly Task task;
 
         /// <summary>
-        /// Adds new trackers to their lists (and enqueues them), then runs the given action, in one step on the UI thread.
-        /// Returns false if they could not be added (e.g. the app is closing).
+        /// Given the processable that produced them, adds new trackers to their lists (and enqueues them), then runs the given
+        /// action, in one step on the UI thread. Returns false if nothing was done (the app is closing, or the processable was removed).
         /// </summary>
-        private readonly Func<IReadOnlyList<Tracker>, Action?, bool> addTrackersCallback;
+        private readonly Func<IProcessable, IReadOnlyList<Tracker>, Action?, bool> addTrackersCallback;
         private readonly CancellationToken shutdownCancellationToken;
         private readonly ProcessableParams processableParams;
 
@@ -84,7 +84,7 @@ namespace GChan.Services
 
         public ProcessQueue(
             IProcessableHooks hooks,
-            Func<IReadOnlyList<Tracker>, Action?, bool> addTrackersCallback,
+            Func<IProcessable, IReadOnlyList<Tracker>, Action?, bool> addTrackersCallback,
             CancellationToken shutdownCancellationToken
         )
         {
@@ -215,19 +215,15 @@ namespace GChan.Services
                 }
 
                 // Board may return new threads as processables. Added in one batch; the callback will enqueue them.
+                // It also runs OnNewProcessablesAdded, in the same UI-thread step, and only if the add happened.
                 var newTrackers = result.NewProcessables.OfType<Tracker>().ToArray();
 
-                if (newTrackers.Length > 0)
+                if (newTrackers.Length > 0 || result.OnNewProcessablesAdded != null)
                 {
-                    // The callback runs OnNewProcessablesAdded itself, together with the add, and only if the add happened.
-                    if (!addTrackersCallback(newTrackers, result.OnNewProcessablesAdded))
+                    if (!addTrackersCallback(processable, newTrackers, result.OnNewProcessablesAdded))
                     {
-                        logger.Debug("New trackers from {processable} could not be added.", processable);
+                        logger.Debug("Results of {processable} were not added, it was removed or the app is closing.", processable);
                     }
-                }
-                else
-                {
-                    result.OnNewProcessablesAdded?.Invoke();
                 }
 
                 if (!result.RemoveFromQueue)

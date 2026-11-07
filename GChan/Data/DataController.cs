@@ -13,7 +13,7 @@ namespace GChan.Data
 {
     public static class DataController
     {
-        /// <summary>
+        /// <summary> 
         /// Serialises all database access. Writes come from the UI thread and from processing threads at once, and running them
         /// one at a time keeps them in order (e.g. a removal's delete can't be overtaken by an earlier save) and avoids SQLite lock errors.
         /// </summary>
@@ -85,7 +85,7 @@ namespace GChan.Data
 
         public static async Task RemoveThreads(IEnumerable<Thread> threads)
         {
-            var threadDatas = threads.Select(t => new ThreadData(t)).ToArray();
+            var threadDatas = threads.Select(ThreadData.KeyOf).ToArray();
 
             await Locked(async context =>
             {
