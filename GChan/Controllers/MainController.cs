@@ -105,7 +105,7 @@ namespace GChan.Controllers
                     for (int i = 0; i < boards.Count; i++)
                     {
                         Board newBoard = (Board)Utils.CreateNewTracker(boards[i]);
-                        AddNewTracker(newBoard);
+                        AddNewTracker(newBoard, persist: false);
                     }
                 }
 
@@ -114,7 +114,7 @@ namespace GChan.Controllers
                     Parallel.ForEach(threads, (thread) =>
                     {
                         Thread newThread = (Thread)Utils.CreateNewTracker(thread);
-                        Form.BeginInvoke(new Action(() => { AddNewTracker(newThread); }));
+                        Form.BeginInvoke(new Action(() => { AddNewTracker(newThread, persist: false); }));
                     });
 
                     Form.Invoke((MethodInvoker)delegate {
@@ -186,8 +186,9 @@ namespace GChan.Controllers
             }
         }
 
+        /// <param name="persist">Write the tracker to the database. False when the tracker was just loaded from it.</param>
         /// <returns>Was <paramref name="tracker"/> added to a tracker list.</returns>
-        private bool AddNewTracker(Tracker tracker)
+        private bool AddNewTracker(Tracker tracker, bool persist = true)
         {
             if (tracker == null)
             { 
@@ -202,6 +203,11 @@ namespace GChan.Controllers
                     {
                         Model.Boards.Add(board);
                     });
+
+                    if (persist)
+                    {
+                        Persist(() => DataController.SaveBoard(board));
+                    }
                 }
             }
             else if (tracker is Thread thread)
@@ -212,10 +218,36 @@ namespace GChan.Controllers
                     {
                         Model.Threads.Add(thread);
                     });
+
+                    if (persist)
+                    {
+                        Persist(() => DataController.SaveThread(thread));
+                    }
                 }
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// Runs <paramref name="write"/> if lists are being saved, so trackers survive the process being killed.
+        /// Failures are logged rather than thrown so a database problem never interrupts tracking.
+        /// </summary>
+        private void Persist(Action write)
+        {
+            if (!Settings.Default.SaveListsOnClose)
+            {
+                return;
+            }
+
+            try
+            {
+                write();
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex, "Exception occured writing trackers to the database.");
+            }
         }
 
         internal void ClearTrackers(Type type)
@@ -235,20 +267,28 @@ namespace GChan.Controllers
                 {
                     lock (ThreadLock)
                     {
-                        for (int i = Model.Threads.Count - 1; i >= 0; i--)
+                        var threads = Model.Threads.ToArray();
+
+                        for (int i = threads.Length - 1; i >= 0; i--)
                         {
-                            RemoveThread(Model.Threads[i], true);
+                            RemoveThread(threads[i], true, persist: false);
                         }
+
+                        DeleteRemovedThreads(threads);
                     }
                 }
                 else // Boards
                 {
                     lock (BoardLock)
                     {
-                        for (int i = Model.Boards.Count - 1; i >= 0; i--)
+                        var boards = Model.Boards.ToArray();
+
+                        for (int i = boards.Length - 1; i >= 0; i--)
                         {
-                            RemoveBoard(Model.Boards[i]);
+                            RemoveBoard(boards[i], persist: false);
                         }
+
+                        Persist(() => DataController.DeleteBoards(boards.Select(b => b.Url)));
                     }
                 }
             }
@@ -280,7 +320,8 @@ namespace GChan.Controllers
             {
                 // Remove 404'd threads
                 var removedThreads = Model.Threads.RemoveAll(t => t.Gone);
-                removedThreads.ForEach(t => RemoveThread(t));
+                removedThreads.ForEach(t => RemoveThread(t, persist: false));
+                DeleteRemovedThreads(removedThreads);
             }
 
             // Make a copy of the current boards and scrape them for new threads.
@@ -323,8 +364,28 @@ namespace GChan.Controllers
                         }
                     });
 
-                    board.GreatestThreadId = greatestThreadId;
+                    // Only move forward: greatestThreadId is 0 when no new threads were added this scan.
+                    if (greatestThreadId > board.GreatestThreadId)
+                    {
+                        board.GreatestThreadId = greatestThreadId;
+
+                        lock (BoardLock)
+                        {
+                            // Don't write back a board that was removed while it was being scanned.
+                            if (Model.Boards.Contains(board))
+                            {
+                                Persist(() => DataController.SaveBoard(board));
+                            }
+                        }
+                    }
                 }
+            }
+
+            lock (ThreadLock)
+            {
+                // Save download progress (SavedIds) so a killed process doesn't re-download everything on restart.
+                var trackedThreads = Model.Threads.ToArray();
+                Persist(() => DataController.UpsertThreads(trackedThreads));
             }
 
             // Make a copy of the current threads and queue them for downloading them.
@@ -402,10 +463,12 @@ namespace GChan.Controllers
                 string newSubject = string.IsNullOrWhiteSpace(dialog.UserEntry) ? Thread.NO_SUBJECT : dialog.UserEntry;
 
                 thread.Subject = newSubject;
+                Persist(() => DataController.SaveThread(thread));
             }
         }
 
-        public void RemoveBoard(Board board)
+        /// <param name="persist">Delete the board from the database. False when the caller deletes in bulk.</param>
+        public void RemoveBoard(Board board, bool persist = true)
         {
             board.Scraping = false;
 
@@ -415,12 +478,21 @@ namespace GChan.Controllers
                 {
                     Model.Boards.Remove(board);
                 });
+
+                if (persist)
+                {
+                    Persist(() => DataController.DeleteBoard(board.Url));
+                }
             }
         }
 
         public void SettingsUpdated()
         {
             this.assetDownloader.ConcurrentCount = Settings.Default.MaximumConcurrentDownloads;
+
+            // Sync the database with the current lists, so trackers added before saving was turned on are kept too.
+            // Called on the UI thread, which is the only thread that modifies the lists.
+            Persist(() => DataController.SaveAll(Model.Threads.ToArray(), Model.Boards.ToArray()));
         }
 
         /// <summary>
@@ -428,13 +500,14 @@ namespace GChan.Controllers
         /// </summary>
         /// <param name="thread">Thread to remove.</param>
         /// <param name="manualRemove">Was this remove initiated by the user or by the scanning routine.</param>
+        /// <param name="persist">Delete the thread from the database. False when the caller calls <see cref="DeleteRemovedThreads"/> in bulk.</param>
         /// <remarks>
         /// TODO: RemoveThread likely to throw. Info below:
         /// If removing a newly added thread this is likely to fail beacuse files are still being downloaded into the current directory.
         /// It only fails once because after setting thread.Scraping to no more downloads happen (mostly..).
         /// We kind of need a download manager so we can wait for all downloads from this thread to finish before moving dir.
         /// </remarks>
-        public void RemoveThread(Thread thread, bool manualRemove = false)
+        public void RemoveThread(Thread thread, bool manualRemove = false, bool persist = true)
         {
             logger.Trace($"Removing thread {thread}.");
             thread.Scraping = false;
@@ -470,6 +543,31 @@ namespace GChan.Controllers
                         MessageBoxButtons.OK, 
                         MessageBoxIcon.Error, 
                         MessageBoxDefaultButton.Button1);
+                }
+            }
+
+            if (persist)
+            {
+                DeleteRemovedThreads(new[] { thread });
+            }
+        }
+
+        /// <summary>
+        /// Deletes the database rows of those <paramref name="threads"/> that are no longer in the thread list.
+        /// </summary>
+        /// <remarks>
+        /// Checks the list rather than whether removal succeeded: the scan routine removes gone threads
+        /// from the list before calling <see cref="RemoveThread"/>, even if moving the folder then fails.
+        /// </remarks>
+        private void DeleteRemovedThreads(IEnumerable<Thread> threads)
+        {
+            lock (ThreadLock)
+            {
+                var urls = threads.Where(t => !Model.Threads.Contains(t)).Select(t => t.Url).ToArray();
+
+                if (urls.Length > 0)
+                {
+                    Persist(() => DataController.DeleteThreads(urls));
                 }
             }
         }
@@ -516,10 +614,7 @@ namespace GChan.Controllers
             assetDownloader.Dispose();
             threadHtmlDownloader.Dispose();
 
-            if (Settings.Default.SaveListsOnClose)
-            {
-                DataController.SaveAll(Model.Threads.ToArray(), Model.Boards.ToArray());
-            }
+            Persist(() => DataController.SaveAll(Model.Threads.ToArray(), Model.Boards.ToArray()));
 
             return false;
         }

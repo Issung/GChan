@@ -132,42 +132,170 @@ namespace GChan.Data
         }
 
         /// <summary>
-        /// Saves the thread and board lists to disk.
+        /// Replaces the stored thread and board lists with <paramref name="threads"/> and <paramref name="boards"/>.
         /// </summary>
         public static void SaveAll(IList<Thread> threads, IList<Board> boards)
         {
-            SaveThreads(threads);
-            SaveBoards(boards);
+            InTransaction(() =>
+            {
+                ReplaceThreads(threads);
+                ReplaceBoards(boards);
+            });
         }
 
-        public static void SaveThreads(IList<Thread> threads)
+        public static void SaveThreads(IList<Thread> threads) => InTransaction(() => ReplaceThreads(threads));
+
+        public static void SaveBoards(IList<Board> boards) => InTransaction(() => ReplaceBoards(boards));
+
+        /// <summary>
+        /// Inserts or updates each of <paramref name="threads"/>, leaving any other stored threads untouched.
+        /// </summary>
+        public static void UpsertThreads(IEnumerable<Thread> threads)
         {
-            using (var cmd = new SQLiteCommand(Connection))
+            InTransaction(() =>
             {
-                cmd.CommandText = $"DELETE FROM {TB_THREAD}";
-
-                cmd.ExecuteNonQuery();
-
-                for (int i = 0; i < threads.Count; i++)
+                foreach (var thread in threads)
                 {
-                    cmd.CommandText = $@"INSERT INTO
-                                            {TB_THREAD} ({COL_URL}, {COL_SUBJECT}, {COL_SAVED_IDS}) 
-                                        VALUES 
-                                            (@{COL_URL}, @{COL_SUBJECT}, @{COL_SAVED_IDS})";
-
-                    cmd.Parameters.AddWithValue(COL_URL, threads[i].Url);
-                    cmd.Parameters.AddWithValue(COL_SUBJECT, threads[i].Subject);
-                    cmd.Parameters.AddWithValue(COL_SAVED_IDS, threads[i].SavedIds.ToStringList());
-
-                    cmd.ExecuteNonQuery();
+                    UpsertThread(thread);
                 }
+            });
+        }
+
+        /// <summary>
+        /// Persists a single thread to the database (insert or replace).
+        /// </summary>
+        public static void SaveThread(Thread thread)
+        {
+            lock (_connectionLock)
+            {
+                UpsertThread(thread);
             }
+        }
+
+        /// <summary>
+        /// Removes a single thread from the database by URL.
+        /// </summary>
+        public static void DeleteThread(string url)
+        {
+            lock (_connectionLock)
+            {
+                DeleteByUrl(TB_THREAD, url);
+            }
+        }
+
+        /// <summary>
+        /// Persists a single board to the database (insert or replace).
+        /// </summary>
+        public static void SaveBoard(Board board)
+        {
+            lock (_connectionLock)
+            {
+                UpsertBoard(board);
+            }
+        }
+
+        /// <summary>
+        /// Removes a single board from the database by URL.
+        /// </summary>
+        public static void DeleteBoard(string url)
+        {
+            lock (_connectionLock)
+            {
+                DeleteByUrl(TB_BOARD, url);
+            }
+        }
+
+        /// <summary>
+        /// Removes several threads from the database by URL, in one transaction.
+        /// </summary>
+        public static void DeleteThreads(IEnumerable<string> urls) => InTransaction(() => DeleteByUrls(TB_THREAD, urls));
+
+        /// <summary>
+        /// Removes several boards from the database by URL, in one transaction.
+        /// </summary>
+        public static void DeleteBoards(IEnumerable<string> urls) => InTransaction(() => DeleteByUrls(TB_BOARD, urls));
+
+        /// <summary>
+        /// Runs <paramref name="action"/> inside a single transaction while holding the connection lock.
+        /// <see cref="SQLiteConnection"/> is not thread-safe, so all database access must hold <see cref="_connectionLock"/>.
+        /// </summary>
+        private static void InTransaction(Action action)
+        {
+            lock (_connectionLock)
+            {
+                using var transaction = Connection.BeginTransaction();
+                action();
+                transaction.Commit();
+            }
+        }
+
+        private static void ReplaceThreads(IList<Thread> threads)
+        {
+            DeleteAll(TB_THREAD);
+
+            foreach (var thread in threads)
+            {
+                UpsertThread(thread);
+            }
+        }
+
+        private static void ReplaceBoards(IList<Board> boards)
+        {
+            DeleteAll(TB_BOARD);
+
+            foreach (var board in boards)
+            {
+                UpsertBoard(board);
+            }
+        }
+
+        private static void UpsertThread(Thread thread)
+        {
+            using var cmd = new SQLiteCommand(Connection);
+            cmd.CommandText = $"INSERT OR REPLACE INTO {TB_THREAD} ({COL_URL}, {COL_SUBJECT}, {COL_SAVED_IDS}) VALUES (@{COL_URL}, @{COL_SUBJECT}, @{COL_SAVED_IDS})";
+            cmd.Parameters.AddWithValue(COL_URL, thread.Url);
+            cmd.Parameters.AddWithValue(COL_SUBJECT, thread.Subject);
+            cmd.Parameters.AddWithValue(COL_SAVED_IDS, thread.SavedIds.ToStringList());
+            cmd.ExecuteNonQuery();
+        }
+
+        private static void UpsertBoard(Board board)
+        {
+            using var cmd = new SQLiteCommand(Connection);
+            cmd.CommandText = $"INSERT OR REPLACE INTO {TB_BOARD} ({COL_URL}, {COL_GREATEST_THREAD_ID}) VALUES (@{COL_URL}, @{COL_GREATEST_THREAD_ID})";
+            cmd.Parameters.AddWithValue(COL_URL, board.Url);
+            cmd.Parameters.AddWithValue(COL_GREATEST_THREAD_ID, board.GreatestThreadId);
+            cmd.ExecuteNonQuery();
+        }
+
+        private static void DeleteByUrl(string table, string url)
+        {
+            using var cmd = new SQLiteCommand(Connection);
+            cmd.CommandText = $"DELETE FROM {table} WHERE {COL_URL} = @{COL_URL}";
+            cmd.Parameters.AddWithValue(COL_URL, url);
+            cmd.ExecuteNonQuery();
+        }
+
+        private static void DeleteByUrls(string table, IEnumerable<string> urls)
+        {
+            foreach (var url in urls)
+            {
+                DeleteByUrl(table, url);
+            }
+        }
+
+        private static void DeleteAll(string table)
+        {
+            using var cmd = new SQLiteCommand(Connection);
+            cmd.CommandText = $"DELETE FROM {table}";
+            cmd.ExecuteNonQuery();
         }
 
         public static IList<LoadedThreadData> LoadThreads()
         {
             var loadedThreads = new List<LoadedThreadData>();
 
+            lock (_connectionLock)
             using (var cmd = new SQLiteCommand(Connection))
             {
                 cmd.CommandText = $"SELECT * FROM {TB_THREAD}";
@@ -182,26 +310,11 @@ namespace GChan.Data
             return loadedThreads;
         }
 
-        public static void SaveBoards(IList<Board> boards)
-        {
-            using var cmd = new SQLiteCommand(Connection);
-            cmd.CommandText = $"DELETE FROM {TB_BOARD}";
-            cmd.ExecuteNonQuery();
-
-            for (int i = 0; i < boards.Count; i++)
-            {
-                cmd.CommandText = $@"INSERT INTO {TB_BOARD} ({COL_URL}, {COL_GREATEST_THREAD_ID}) VALUES (@{COL_URL}, @{COL_GREATEST_THREAD_ID})";
-                cmd.Parameters.AddWithValue(COL_URL, boards[i].Url);
-                cmd.Parameters.AddWithValue(COL_GREATEST_THREAD_ID, boards[i].GreatestThreadId);
-
-                cmd.ExecuteNonQuery();
-            }
-        }
-
         public static IList<LoadedBoardData> LoadBoards()
         {
             var loadedBoards = new List<LoadedBoardData>();
 
+            lock (_connectionLock)
             using (var cmd = new SQLiteCommand(Connection))
             {
                 cmd.CommandText = $"SELECT * FROM {TB_BOARD}";
