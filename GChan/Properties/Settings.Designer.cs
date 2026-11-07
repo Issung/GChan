@@ -12,7 +12,7 @@ namespace GChan.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.9.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.11.0.0")]
     internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
         
         private static Settings defaultInstance = ((Settings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Settings())));
@@ -37,13 +37,13 @@ namespace GChan.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("60000")]
-        public int ScanTimer {
+        [global::System.Configuration.DefaultSettingValueAttribute("60")]
+        public int MinSecondsBetweenScrapes {
             get {
-                return ((int)(this["ScanTimer"]));
+                return ((int)(this["MinSecondsBetweenScrapes"]));
             }
             set {
-                this["ScanTimer"] = value;
+                this["MinSecondsBetweenScrapes"] = value;
             }
         }
         
@@ -157,30 +157,6 @@ namespace GChan.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool AddUrlFromClipboardWhenTextboxEmpty {
-            get {
-                return ((bool)(this["AddUrlFromClipboardWhenTextboxEmpty"]));
-            }
-            set {
-                this["AddUrlFromClipboardWhenTextboxEmpty"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool StartWithWindowsMinimized {
-            get {
-                return ((bool)(this["StartWithWindowsMinimized"]));
-            }
-            set {
-                this["StartWithWindowsMinimized"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("True")]
         public bool CheckForUpdatesOnStart {
             get {
@@ -193,7 +169,7 @@ namespace GChan.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("35")]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
         public int MaximumConcurrentDownloads {
             get {
                 return ((int)(this["MaximumConcurrentDownloads"]));
@@ -225,6 +201,18 @@ namespace GChan.Properties {
             }
             set {
                 this["UserAgent"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool Max1RequestPerSecond {
+            get {
+                return ((bool)(this["Max1RequestPerSecond"]));
+            }
+            set {
+                this["Max1RequestPerSecond"] = value;
             }
         }
     }

@@ -2,8 +2,11 @@
 using GChan.Forms;
 using GChan.Properties;
 using NLog;
+using NLog.Targets;
 using System;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Forms;
@@ -15,11 +18,19 @@ namespace GChan
         public static MainForm mainForm;
         public static string APPLICATION_INSTALL_DIRECTORY { get; } = AppDomain.CurrentDomain.BaseDirectory;
 
+        /// <summary>
+        /// User data path at %localappdata%/gchan (no version).
+        /// </summary>
+        public static string USER_DATA_PATH = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
 #if DEBUG
-        public static string PROGRAM_DATA_PATH => Path.Combine(Path.GetDirectoryName(Application.CommonAppDataPath), "DEBUG");
+            $"{NAME}_DEBUG"
 #else
-        public static string PROGRAM_DATA_PATH => Path.GetDirectoryName(Application.CommonAppDataPath);
+            NAME
 #endif
+        );
+
+        public static string LOGS_PATH = Path.Combine(USER_DATA_PATH, "logs");
 
         public const string NAME = "GChan";
 
@@ -30,6 +41,8 @@ namespace GChan
 #else
         public const string GITHUB_REPOSITORY_NAME = "GChan";
 #endif
+
+        public static readonly string VERSION = Assembly.GetEntryAssembly().GetName().Version.ToString();
 
         public const string TRAY_CMDLINE_ARG = "-tray";
 
@@ -45,8 +58,10 @@ namespace GChan
         {
             arguments = args;
 
+            UpdateNLogLogFilePath();
+
 #if DEBUG
-            Directory.CreateDirectory(PROGRAM_DATA_PATH);
+            SetLogLevelsToTrace();
 #endif
 
             if (Settings.Default.UpdateSettings)
@@ -96,17 +111,37 @@ namespace GChan
             }
         }
 
+        private static void UpdateNLogLogFilePath()
+        {
+            Directory.CreateDirectory(LOGS_PATH);
+            var logTarget = LogManager.Configuration.AllTargets.OfType<FileTarget>().Single();
+            logTarget.FileName = Path.Combine(LOGS_PATH, $"{NAME}.log");
+            LogManager.ReconfigExistingLoggers();
+        }
+
+        private static void SetLogLevelsToTrace()
+        {
+            var config = LogManager.Configuration;
+
+            foreach (var rule in config.LoggingRules)
+            {
+                rule.SetLoggingLevels(LogLevel.Trace, LogLevel.Fatal);
+            }
+
+            LogManager.Configuration = config;
+        }
+
         /// <summary>
         /// Main thread exception handler
         /// </summary>
-        public static void Application_ThreadException(object sender, ThreadExceptionEventArgs exceptionArgs)
+        public static async void Application_ThreadException(object sender, ThreadExceptionEventArgs exceptionArgs)
         {
             Settings.Default.SaveListsOnClose = true;
             Settings.Default.Save();
 
             try
             {
-                DataController.SaveAll(mainForm.Model.Threads, mainForm.Model.Boards);
+                await DataController.Save(mainForm.Model.Threads.ToArray(), mainForm.Model.Boards.ToArray());
                 logger.Error(exceptionArgs.Exception, $"Application_ThreadException.");
             }
             catch (Exception ex)
@@ -120,14 +155,14 @@ namespace GChan
         /// <summary>
         /// Application domain exception handler
         /// </summary>
-        public static void AppDomain_UnhandledException(object sender, UnhandledExceptionEventArgs args)
+        public static async void AppDomain_UnhandledException(object sender, UnhandledExceptionEventArgs args)
         {
             Settings.Default.SaveListsOnClose = true;
             Settings.Default.Save();
 
             try
             {
-                DataController.SaveAll(mainForm.Model.Threads, mainForm.Model.Boards);
+                await DataController.Save(mainForm.Model.Threads.ToArray(), mainForm.Model.Boards.ToArray());
                 Exception argsException = args.ExceptionObject as Exception;
                 logger.Error(argsException, $"AppDomain_UnhandledException.");
             }

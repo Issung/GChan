@@ -1,20 +1,21 @@
 ﻿using GChan.Controllers;
-using GChan.Models;
+using GChan.Data;
+using GChan.Helpers.Extensions;
 using GChan.Properties;
-using GChan.Trackers;
+using GChan.ViewModels;
 using NLog;
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Windows.Forms;
-using Type = GChan.Trackers.Type;
+using Type = GChan.Models.Trackers.Type;
 
 namespace GChan.Forms
 {
     public partial class MainForm : Form
     {
+        private static MainForm instance;
+
         internal MainFormModel Model => Controller.Model;
 
         private readonly MainController Controller;
@@ -22,22 +23,69 @@ namespace GChan.Forms
         /// <summary>
         /// Get the index of the selected row in the thread grid view.
         /// </summary>
-        private int ThreadGridViewSelectedRowIndex => threadGridView?.CurrentCell?.RowIndex ?? -1;
+        private int ThreadsGridSelectedRowIndex => threadGridView.SelectedRowIndex();
 
-        private int BoardsListBoxSelectedRowIndex { get { return boardsListBox.SelectedIndex; } set {boardsListBox.SelectedIndex = value;} }
+        private int BoardsGridSelectedRowIndex => boardsGridView.SelectedRowIndex();
 
         private static readonly ILogger logger = LogManager.GetCurrentClassLogger();
 
         public MainForm()
         {
             InitializeComponent();
-
             Controller = new MainController(this);
+            instance = this;
         }
 
-        private void MainForm_Load(object sender, EventArgs e)
+        /// <summary>
+        /// Invoke <paramref name="action"/> on the form (on main thread) if not disposed/disposing.
+        /// </summary>
+        public static void StaticInvoke(Action action)
         {
-            Controller.LoadTrackers();
+            TryInvoke(action);
+        }
+
+        /// <summary>
+        /// Runs <paramref name="action"/> on the UI thread and waits for it. Does nothing if the form has no handle or is closed.
+        /// </summary>
+        /// <returns>True if <paramref name="action"/> ran, false if the form was unavailable.</returns>
+        public static bool TryInvoke(Action action)
+        {
+            var form = instance;
+
+            // Without a handle, InvokeRequired is false even off the UI thread, so the action would run on the wrong thread.
+            if (form == null || form.Disposing || form.IsDisposed || !form.IsHandleCreated)
+            {
+                return false;
+            }
+
+            if (!form.InvokeRequired)
+            {
+                action();
+                return true;
+            }
+
+            var ran = false;
+
+            try
+            {
+                form.Invoke(() =>
+                {
+                    ran = true;
+                    action();
+                });
+            }
+            catch (Exception ex) when (!ran && (ex is ObjectDisposedException || (ex is InvalidOperationException && (form.IsDisposed || !form.IsHandleCreated))))
+            {
+                // The form closed between the check above and the invoke.
+            }
+
+            return ran;
+        }
+
+        private async void MainForm_Load(object sender, EventArgs e)
+        {
+            await DataController.EnsureCreatedAndMigrate();
+            await Controller.LoadTrackers();
         }
 
         private void MainForm_Shown(object sender, EventArgs e)
@@ -78,17 +126,15 @@ namespace GChan.Forms
 
         private void addButton_Click(object sender, EventArgs e)
         {
-            // This way, it doesn't flash text during lazy entry
-            string textBox = urlTextBox.Text; 
+            var text = urlTextBox.Text;
+            urlTextBox.Text = string.Empty;   // Clear textbox.
 
-            // Clear TextBox faster
-            urlTextBox.Text = "";
+            if (string.IsNullOrWhiteSpace(text) && Clipboard.ContainsText())
+            {
+                text = Clipboard.GetText();
+            }
 
-            if (string.IsNullOrWhiteSpace(textBox) && Clipboard.ContainsText() && Settings.Default.AddUrlFromClipboardWhenTextboxEmpty)
-                textBox = Clipboard.GetText();
-
-            // Get url from TextBox
-            var urls = textBox.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(Utils.PrepareURL);
+            var urls = text.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(Utils.PrepareUrl);
             Controller.AddUrls(urls);
         }
 
@@ -97,7 +143,7 @@ namespace GChan.Forms
             var textData = (string)e.Data.GetData(DataFormats.Text);
 
             // Get url from TextBox
-            var urls = textData.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(Utils.PrepareURL);
+            var urls = textData.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(Utils.PrepareUrl);
             Controller.AddUrls(urls);
         }
 
@@ -116,13 +162,13 @@ namespace GChan.Forms
             }
         }
 
-        private void deleteToolStripMenuItem_Click(object sender, EventArgs e)
+        private async void deleteToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (ThreadGridViewSelectedRowIndex != -1)
+            if (ThreadsGridSelectedRowIndex != -1)
             {
                 try
                 {
-                    Controller.RemoveThread(Model.Threads[ThreadGridViewSelectedRowIndex], true);
+                    await Controller.RemoveThread(Model.Threads[ThreadsGridSelectedRowIndex], true);
                 }
                 catch
                 {
@@ -133,31 +179,33 @@ namespace GChan.Forms
 
         private void openFolderToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (ThreadGridViewSelectedRowIndex != -1)
+            if (ThreadsGridSelectedRowIndex != -1)
             {
-                string spath = Model.Threads[ThreadGridViewSelectedRowIndex].SaveTo;
-                if (!Directory.Exists(spath))
-                { 
-                    Directory.CreateDirectory(spath);
+                var path = Model.Threads[ThreadsGridSelectedRowIndex].SaveTo;
+
+                if (!Directory.Exists(path))
+                {
+                    Directory.CreateDirectory(path);
                 }
-                Process.Start(spath);
+
+                Utils.OpenDirectory(path);
             }
         }
 
         private void openInBrowserToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (ThreadGridViewSelectedRowIndex != -1)
+            if (ThreadsGridSelectedRowIndex != -1)
             {
-                string spath = Model.Threads[ThreadGridViewSelectedRowIndex].Url;
-                Process.Start(spath);
+                var url = Model.Threads[ThreadsGridSelectedRowIndex].Url;
+                Utils.OpenWebpage(url);
             }
         }
 
         private void copyURLToClipboardToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (ThreadGridViewSelectedRowIndex != -1)
+            if (ThreadsGridSelectedRowIndex != -1)
             {
-                string spath = Model.Threads[ThreadGridViewSelectedRowIndex].Url;
+                string spath = Model.Threads[ThreadsGridSelectedRowIndex].Url;
                 Clipboard.SetText(spath);
             }
         }
@@ -182,44 +230,40 @@ namespace GChan.Forms
             settings.ShowDialog();
             settings.Dispose();
 
-            // TODO: #41 - Cancellation currently not working, implement later.
-            //if (!Settings.Default.SaveHTML)
-            //{
-            //  Clear all downloads on main controller threadHtmlDownloader.
-            //  threadHtmlDownloader.Clear();
-            //}
-
             systemTrayNotifyIcon.Visible = Settings.Default.MinimizeToTray;
-            Controller.ScanTimerInterval = Settings.Default.ScanTimer;
 
             Controller.SettingsUpdated();
         }
 
         private void openBoardFolderToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (BoardsListBoxSelectedRowIndex != -1)
+            if (BoardsGridSelectedRowIndex != -1)
             {
-                string spath = (Model.Boards[BoardsListBoxSelectedRowIndex]).SaveTo;
-                if (!Directory.Exists(spath))
-                    Directory.CreateDirectory(spath);
-                Process.Start(spath);
+                var path = Model.Boards[BoardsGridSelectedRowIndex].SaveTo;
+
+                if (!Directory.Exists(path))
+                {
+                    Directory.CreateDirectory(path);
+                }
+
+                Utils.OpenDirectory(path);
             }
         }
 
         private void openBoardURLToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (BoardsListBoxSelectedRowIndex != -1)
+            if (BoardsGridSelectedRowIndex != -1)
             {
-                string spath = boardsListBox.Items[BoardsListBoxSelectedRowIndex].ToString();
-                Process.Start(spath);
+                var url = Model.Boards[BoardsGridSelectedRowIndex].Url;
+                Utils.OpenWebpage(url);
             }
         }
 
-        private void deleteBoardToolStripMenuItem_Click(object sender, EventArgs e)
+        private async void deleteBoardToolStripMenuItem_ClickAsync(object sender, EventArgs e)
         {
-            if (BoardsListBoxSelectedRowIndex != -1)
+            if (BoardsGridSelectedRowIndex != -1)
             {
-                Controller.RemoveBoard((Board)boardsListBox.SelectedItem);
+                await Controller.RemoveBoard(Model.Boards[BoardsGridSelectedRowIndex], true);
             }
         }
 
@@ -230,31 +274,33 @@ namespace GChan.Forms
 
         private void openFolderToolStripMenuItem1_Click(object sender, EventArgs e)
         {
-            Process.Start(Settings.Default.SavePath);
+            Utils.OpenDirectory(Settings.Default.SavePath);
         }
 
-        private void clearAllButton_Click(object sender, EventArgs e)
+        private async void clearAllButton_Click(object sender, EventArgs e)
         {
             if (listsTabControl.SelectedIndex > 1)
-            { 
+            {
                 return;
             }
 
-            Controller.ClearTrackers(listsTabControl.SelectedIndex == 0 ? Type.Thread : Type.Board);
+            await Controller.ClearTrackers(listsTabControl.SelectedIndex == 0 ? Type.Thread : Type.Board);
         }
 
-        private void boardsListBox_MouseDoubleClick(object sender, MouseEventArgs e)
+        private void boardsGridView_MouseDoubleClick(object sender, MouseEventArgs e)
         {
-            int pos;
-
             if (e.Button == MouseButtons.Left)
             {
-                if ((pos = boardsListBox.IndexFromPoint(e.Location)) != -1)
+                if (BoardsGridSelectedRowIndex != -1)
                 {
-                    string spath = Model.Boards[pos].SaveTo;
-                    if (!Directory.Exists(spath))
-                        Directory.CreateDirectory(spath);
-                    Process.Start(spath);
+                    var path = Model.Boards[BoardsGridSelectedRowIndex].SaveTo;
+
+                    if (!Directory.Exists(path))
+                    {
+                        Directory.CreateDirectory(path);
+                    }
+
+                    Utils.OpenDirectory(path);
                 }
             }
         }
@@ -263,9 +309,9 @@ namespace GChan.Forms
         /// Left click: Allows user to deselect all rows by clicking white space.
         /// Right click: Select the clicked row (not normally done with right click). Is necessary for future events so we know which row to operate on (e.g. remove tracker).
         /// </summary>
-        private void threadGridView_MouseDown(object sender, MouseEventArgs e)
+        private void gridView_MouseDown(object sender, MouseEventArgs e)
         {
-            DataGridView.HitTestInfo hitInfo = threadGridView.HitTest(e.X, e.Y);
+            var hitInfo = threadGridView.HitTest(e.X, e.Y);
 
             if (e.Button == MouseButtons.Left)
             {
@@ -307,17 +353,15 @@ namespace GChan.Forms
 
         private void renameToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (ThreadGridViewSelectedRowIndex != -1)
+            if (ThreadsGridSelectedRowIndex != -1)
             {
-                Controller.RenameThreadSubjectPrompt(ThreadGridViewSelectedRowIndex);
+                Controller.RenameThreadSubjectPrompt(ThreadsGridSelectedRowIndex);
             }
         }
 
         private void openLogsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var assemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            var fullPath = Path.Combine(assemblyPath, "logs");
-            Process.Start(fullPath);
+            Utils.OpenDirectory(Program.LOGS_PATH);
         }
 
         /// <summary>
@@ -348,9 +392,11 @@ namespace GChan.Forms
             string spath = Settings.Default.SavePath;
 
             if (!Directory.Exists(spath))
+            {
                 Directory.CreateDirectory(spath);
+            }
 
-            Process.Start(spath);
+            Utils.OpenDirectory(spath);
         }
 
         private void systemTrayExitToolStripMenuItem_Click(object sender, EventArgs e)
@@ -377,14 +423,98 @@ namespace GChan.Forms
             UpdateController.Instance.ShowUpdateDialog();
         }
 
-        internal void MainForm_FormClosing(object sender, FormClosingEventArgs e)
+        /// <summary>Set once <see cref="MainController.Closing"/> has finished and agreed to close.</summary>
+        private bool readyToClose;
+
+        /// <summary>Set while <see cref="MainController.Closing"/> is running, so repeated close requests are ignored.</summary>
+        private bool closingInProgress;
+
+        internal async void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            e.Cancel = Controller.Closing();
+            if (readyToClose)
+            {
+                return;
+            }
+
+            if (e.CloseReason is CloseReason.WindowsShutDown or CloseReason.TaskManagerClosing)
+            {
+                // Don't cancel: that would block the session from ending, and Windows may kill us before an async close finishes.
+                // For shutdown this is raised before Windows knows the session will end (another app can still cancel it),
+                // so don't shut anything down either, just save while we can and let the close go ahead.
+                Controller.SaveNow(shutDown: e.CloseReason == CloseReason.TaskManagerClosing);
+                return;
+            }
+
+            // WinForms reads e.Cancel as soon as this handler returns, which for an async handler is at its first await.
+            // So always cancel this close, finish closing (including the save) asynchronously, then close again.
+            e.Cancel = true;
+
+            if (closingInProgress)
+            {
+                return;
+            }
+
+            closingInProgress = true;
+
+            try
+            {
+                var cancelClose = await Controller.Closing();
+
+                if (!cancelClose)
+                {
+                    readyToClose = true;
+                    Close();
+                }
+            }
+            finally
+            {
+                closingInProgress = false;
+            }
         }
 
         private void threadGridView_DataError(object sender, DataGridViewDataErrorEventArgs e)
         {
             logger.Error(e.Exception, $"A data error occured on the threadGridView. RowIndex: {e.RowIndex}, ColumnIndex: {e.ColumnIndex}, Context: {e.Context}.");
+        }
+
+        private void kofiToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Utils.OpenWebpage("https://ko-fi.com/issung");
+        }
+
+        private void payPalToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Utils.OpenWebpage("https://www.paypal.com/paypalme/Issung");
+        }
+
+        private void gitHubSponsorToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Utils.OpenWebpage("https://github.com/sponsors/Issung");
+        }
+
+        private void pauseDownloadsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Controller.PauseQueue();
+        }
+
+        private void resumeDownloadsToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            Controller.ResumeQueue();
+        }
+
+        private void resumeDownloadsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Controller.ResumeQueue();
+        }
+
+        private void resumeDownloadsToolStripMenuItem2_Click(object sender, EventArgs e)
+        {
+            Controller.ResumeQueue();
+        }
+
+        private void pauseDownloadsToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            Controller.PauseQueue();
         }
     }
 }

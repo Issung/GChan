@@ -1,4 +1,5 @@
-﻿using GChan.Properties;
+﻿using GChan.Forms;
+using GChan.Properties;
 using Microsoft.Win32;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using System;
@@ -67,7 +68,8 @@ namespace GChan
             directory = Settings.Default.SavePath;
             directoryTextBox.Text = directory;
 
-            timerNumeric.Value = (Settings.Default.ScanTimer / 1000);
+            minSecondsBetweenScrapesNumeric.Value = Settings.Default.MinSecondsBetweenScrapes;
+            max1RequestPerSecondCheckBox.Checked = Settings.Default.Max1RequestPerSecond;
             concurrentDownloadsNumeric.Value = Settings.Default.MaximumConcurrentDownloads;
 
             imageFilenameFormatComboBox.SelectedIndex = Settings.Default.ImageFilenameFormat;
@@ -76,15 +78,12 @@ namespace GChan
             chkSaveHtml.Checked = Settings.Default.SaveHtml;
             chkSaveThumbnails.Checked = Settings.Default.SaveThumbnails;
             chkSave.Checked = Settings.Default.SaveListsOnClose;
-            chkTray.Checked = Settings.Default.MinimizeToTray;
+            chkMinimiseToTray.Checked = Settings.Default.MinimizeToTray;
             chkWarn.Checked = Settings.Default.WarnOnClose;
 
             chkStartWithWindows.Checked = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true).GetValueNames().Contains(Utils.PROGRAM_NAME);
-            chkStartWithWindowsMinimized.Checked = Settings.Default.StartWithWindowsMinimized;
 
             renameThreadFolderCheckBox.Checked = Settings.Default.AddThreadSubjectToFolder;
-
-            addUrlFromClipboardWhenTextboxEmpty.Checked = Settings.Default.AddUrlFromClipboardWhenTextboxEmpty;
 
             checkForUpdatesOnStartCheckBox.Checked = Settings.Default.CheckForUpdatesOnStart;
         }
@@ -97,7 +96,7 @@ namespace GChan
                 return;
             }
 
-            if (timerNumeric.Value < 5)
+            if (minSecondsBetweenScrapesNumeric.Value < 5)
             {
                 MessageBox.Show("Timer must be greater than 5 seconds.");
                 return;
@@ -116,18 +115,17 @@ namespace GChan
         {
             Settings.Default.UserAgent = userAgentTextBox.Text;
             Settings.Default.SavePath = directory;
-            Settings.Default.ScanTimer = (int)timerNumeric.Value * 1000;
+            Settings.Default.MinSecondsBetweenScrapes = (int)minSecondsBetweenScrapesNumeric.Value;
+            Settings.Default.Max1RequestPerSecond = max1RequestPerSecondCheckBox.Checked;
             Settings.Default.MaximumConcurrentDownloads = (int)concurrentDownloadsNumeric.Value;
             Settings.Default.ImageFilenameFormat = (byte)imageFilenameFormatComboBox.SelectedIndex;
             Settings.Default.ThreadFolderNameFormat = (byte)threadFolderNameFormatComboBox.SelectedIndex;
             Settings.Default.SaveHtml = chkSaveHtml.Checked;
             Settings.Default.SaveThumbnails = chkSaveThumbnails.Checked;
             Settings.Default.SaveListsOnClose = chkSave.Checked;
-            Settings.Default.MinimizeToTray = chkTray.Checked;
+            Settings.Default.MinimizeToTray = chkMinimiseToTray.Checked;
             Settings.Default.WarnOnClose = chkWarn.Checked;
-            Settings.Default.StartWithWindowsMinimized = chkStartWithWindowsMinimized.Checked;
             Settings.Default.AddThreadSubjectToFolder = renameThreadFolderCheckBox.Checked;
-            Settings.Default.AddUrlFromClipboardWhenTextboxEmpty = addUrlFromClipboardWhenTextboxEmpty.Checked;
             Settings.Default.CheckForUpdatesOnStart = checkForUpdatesOnStartCheckBox.Checked;
 
             Settings.Default.Save();
@@ -135,7 +133,7 @@ namespace GChan
             var registryKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
             if (chkStartWithWindows.Checked)
             {
-                var args = (Settings.Default.MinimizeToTray && Settings.Default.StartWithWindowsMinimized) ? $" {Program.TRAY_CMDLINE_ARG}" : "";
+                var args = Settings.Default.MinimizeToTray ? $" {Program.TRAY_CMDLINE_ARG}" : "";
                 registryKey.SetValue(
                     Utils.PROGRAM_NAME,
                     '"' + Application.ExecutablePath + '"' + args
@@ -145,6 +143,8 @@ namespace GChan
             {
                 registryKey.DeleteValue(Utils.PROGRAM_NAME);
             }
+
+            Utils.UpdateHttpClientUserAgentHeader(userAgentTextBox.Text);
         }
 
         //Source: https://stackoverflow.com/q/1410127/8306962
@@ -154,7 +154,10 @@ namespace GChan
             {
                 // Attempt to get a list of security permissions from the folder.
                 // This will raise an exception if the path is read only or do not have access to view the permissions.
-                var directorySecurity = Directory.GetAccessControl(folderPath);
+                //var directorySecurity = Directory.GetAccessControl(folderPath);
+
+                var directoryInfo = new DirectoryInfo(folderPath);
+                FileSystemAclExtensions.GetAccessControl(directoryInfo);
                 reason = "No problem";
                 return true;
             }
@@ -172,11 +175,13 @@ namespace GChan
 
         private void SetPathButton_Click(object sender, EventArgs e)
         {
-            var openFileDialog = new CommonOpenFileDialog();
-            openFileDialog.IsFolderPicker = true;
-            openFileDialog.Title = "Select Folder";
-            openFileDialog.InitialDirectory = Path.GetPathRoot(Environment.SystemDirectory);
-            
+            var openFileDialog = new CommonOpenFileDialog
+            {
+                IsFolderPicker = true,
+                Title = "Select Folder",
+                InitialDirectory = Path.GetPathRoot(Environment.SystemDirectory)
+            };
+
             if (openFileDialog.ShowDialog() == CommonFileDialogResult.Ok && !string.IsNullOrWhiteSpace(openFileDialog.FileName))
             {
                 directory = openFileDialog.FileName;
@@ -186,22 +191,7 @@ namespace GChan
 
         private void textBox1_DoubleClick(object sender, EventArgs e)
         {
-            System.Diagnostics.Process.Start("explorer.exe", string.Format(directory));
-        }
-
-        private void chkTray_CheckedChanged(object sender, EventArgs e)
-        {
-            EnableChkStartWithWindowsMinimizedCheckBox();
-        }
-
-        private void chkStartWithWindows_CheckedChanged(object sender, EventArgs e)
-        {
-            EnableChkStartWithWindowsMinimizedCheckBox();
-        }
-
-        private void EnableChkStartWithWindowsMinimizedCheckBox()
-        {
-            chkStartWithWindowsMinimized.Enabled = chkTray.Checked && chkStartWithWindows.Checked;
+            Utils.OpenDirectory(directory);
         }
 
         private void renameThreadFolderCheckBox_CheckedChanged(object sender, EventArgs e)
@@ -213,6 +203,12 @@ namespace GChan
         private void chkHTML_CheckedChanged(object sender, EventArgs e)
         {
             chkSaveThumbnails.Enabled = chkSaveHtml.Checked;
+        }
+
+        private void aboutRateLimitingButton_Click(object sender, EventArgs e)
+        {
+            var infoForm = new RateLimitingInfoForm();
+            infoForm.ShowDialog();
         }
     }
 }

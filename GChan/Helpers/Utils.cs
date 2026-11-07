@@ -1,14 +1,20 @@
 ﻿using GChan.Data;
+using GChan.Data.Models;
+using GChan.Helpers;
+using GChan.Models.Trackers;
+using GChan.Models.Trackers.Sites;
 using GChan.Properties;
-using GChan.Trackers;
 using NLog;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Net;
+using System.Net.Http;
 using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
-using Thread = GChan.Trackers.Thread;
+using Thread = GChan.Models.Trackers.Thread;
 
 namespace GChan
 {
@@ -19,10 +25,15 @@ namespace GChan
     {
         public const string PROGRAM_NAME = "GChan";
 
-        public static readonly char[] IllegalSubjectCharacters = Path.GetInvalidFileNameChars();
+        /// <summary>
+        /// <see href="https://github.com/dotnet/runtime/issues/63383#issuecomment-1005371573"/>
+        /// </summary>
+        public static readonly char[] IllegalSubjectCharacters = [..Path.GetInvalidPathChars(), ..Path.GetInvalidFileNameChars(), '/', '\\'];
         public static readonly char[] IllegalFilenameCharacters = Path.GetInvalidFileNameChars();
 
         private static readonly ILogger logger = LogManager.GetCurrentClassLogger();
+
+        private static readonly HttpClient httpClient = CreateHttpClient();
 
         /// <summary>
         /// Validates if the string only contains digits
@@ -30,7 +41,7 @@ namespace GChan
         /// <param name="str">String to validate</param>
         public static bool IsDigitsOnly(string str)
         {
-            foreach(char c in str)
+            foreach (char c in str)
             {
                 if (c < '0' || c > '9')
                     return false;
@@ -39,38 +50,49 @@ namespace GChan
             return true;
         }
 
-        /// <summary>
-        /// Build a WebClient for one-time use, should be disposed of once done.
-        /// </summary>
-        public static WebClient CreateWebClient()
+        /// <remarks>Do not dispose it.</remarks>
+        public static HttpClient GetHttpClient()
         {
-            var client = new WebClient();
-            client.Headers["User-Agent"] = Settings.Default.UserAgent;
-            return client;
+            return httpClient;
         }
 
-        /// <summary>
-        /// Create a new Tracker (Thread or Board).
-        /// </summary>
-        public static Tracker CreateNewTracker(LoadedData data)
+        public static void UpdateHttpClientUserAgentHeader(string newUserAgentHeaderValue)
         {
-            // TODO: Should be making trackers based on the LoadedData (pass loadeddata to constructor).
-            // Rather than making them and then loading them with more data.
-            // This would help app-startup ui responsiveness as it would reduce the notify property changed spam greatly.
-            var tracker = CreateNewTracker(data.Url);
+            httpClient.DefaultRequestHeaders.UserAgent.Clear();
+            httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", newUserAgentHeaderValue);
+        }
 
-            if (data is LoadedThreadData threadData && tracker is Thread thread)
+        public static async Task WriteAllTextAsync(string path, string content, CancellationToken cancellationToken)
+        {
+            var bytes = System.Text.Encoding.UTF8.GetBytes(content);
+            await WriteFileBytesAsync(path, bytes, cancellationToken);
+        }
+
+
+        public static async Task WriteFileBytesAsync(string path, byte[] bytes, CancellationToken cancellationToken)
+        {
+            using var fileStream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None, bufferSize: 4096, useAsync: true);
+            await fileStream.WriteAsync(bytes, 0, bytes.Length, cancellationToken);
+        }
+
+        public static Board CreateBoardFromData(BoardData boardData)
+        {
+            if (boardData.Site == Site._4chan)
             {
-                thread.Subject = threadData.Subject;
-                thread.SavedIds = threadData.SavedIds;
-                thread.FileCount = threadData.SavedIds.Count;
-            }
-            else if (data is LoadedBoardData boardData && tracker is Board board)
-            {
-                board.GreatestThreadId = boardData.GreatestThreadId;
+                return new Board_4Chan(boardData);
             }
 
-            return tracker;
+            throw new NotImplementedException($"Unknown site for board data {boardData.Site}");
+        }
+
+        public static Thread CreateThreadFromData(ThreadData threadData)
+        {
+            if (threadData.Site == Site._4chan)
+            {
+                return new Thread_4Chan(threadData);
+            }
+
+            throw new NotImplementedException($"Unknown site for thread data {threadData.Site}");
         }
 
         /// <summary>
@@ -96,96 +118,39 @@ namespace GChan
         /// eg "4chan.org/gif/thread/16245377#p16245377" becomes "4chan.org/gif/thread/16245377".
         /// (hashtag and any following characters are trimmed).
         /// </summary>
-        public static string PrepareURL(string url)
+        public static string PrepareUrl(string url)
         {
             url = url.Trim();
 
             int indexOfHash = url.IndexOf('#');
             if (indexOfHash > 0)
+            {
                 url = url.Substring(0, indexOfHash);
+            }
 
             return url;
         }
 
-        private static string GetFilenameFromUrl(string hrefLink)
+        private static HttpClient CreateHttpClient()
+        {
+            var handler = new HttpErrorStatusExceptionHandler()
+            {
+                InnerHandler = new HttpClientHandler(),
+            };
+
+            var client = new HttpClient(handler);
+
+            client.DefaultRequestHeaders.UserAgent.Clear();
+            client.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", Settings.Default.UserAgent);
+
+            return client;
+        }
+
+        public static string GetFilenameFromUrl(string hrefLink)
         {
             var parts = hrefLink.Split('/');
             var fileName = parts.LastOrDefault() ?? hrefLink;
             return fileName;
-        }
-
-        /// <summary>
-        /// Creates <paramref name="directory"/> if it doesn't already exist.
-        /// </summary>
-        /// <param name="directory">Directory path, exlcluding filename.</param>
-        /// <returns>True if file was downloaded or already existed, false for error occured.</returns>
-        public static bool DownloadFileIfDoesntExist(string url, string directory)
-        {
-            if (!Directory.Exists(directory))
-            { 
-                Directory.CreateDirectory(directory);
-            }
-
-            var fileName = GetFilenameFromUrl(url);
-            var fullpath = Path.Combine(directory, fileName);
-
-            try
-            {
-                if (!File.Exists(fullpath))
-                {
-                    using var client = CreateWebClient();
-                    client.DownloadFile(url, fullpath);
-                }
-
-                return true;
-            }
-            catch (Exception e)
-            {
-                // Should we throw?
-                logger.Warn(e, "Exception occured downloading file.");
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// New DownloadToDir overload that takes a new ImageLink class, this is used to retain the image's uploaded filename.
-        /// </summary>
-        /// <param name="successCallback">Action to call when download completes successfully.</param>
-        public static void DownloadToDir(
-            Asset link, 
-            string dir, 
-            Action<Asset> successCallback
-        )
-        {
-            if (!Directory.Exists(dir))
-            { 
-                Directory.CreateDirectory(dir);
-            }
-
-            string destFilepath = CombinePathAndFilename(dir, link.GenerateFilename((ImageFileNameFormat)Settings.Default.ImageFilenameFormat));
-
-            try
-            {
-                using var webClient = CreateWebClient();
-                webClient.DownloadFile(link.Url, destFilepath);
-
-                // TODO: Figure out how to make the async downloading work properly.
-                // This line is currently not working and downloads 0 byte files 100% of the time.
-                //webClient.DownloadFileAsync(new Uri(link.URL), destFilepath);
-                /*Task.Run(() => { 
-                    webClient.DownloadFileAsync(new Uri(link.URL), destFilepath);
-                    while (webClient.IsBusy)
-                    { 
-                        //Do nothing?
-                    }
-                });*/
-
-                successCallback(link);
-            }
-            catch (WebException ex)
-            {
-                logger.Error(ex, $"Error occured while downloading link {link.Url}.");
-            }
         }
 
         /// <summary>
@@ -204,7 +169,7 @@ namespace GChan
             var destinationDirectory = folderNameFormat switch
             {
                 ThreadFolderNameFormat.IdSubject => $"{currentDirectory} - {subject}",
-                ThreadFolderNameFormat.SubjectId => Path.Combine(Path.GetDirectoryName(currentDirectory), $"{subject} - {thread.ID}"),
+                ThreadFolderNameFormat.SubjectId => Path.Combine(Path.GetDirectoryName(currentDirectory), $"{subject} - {thread.Id}"),
                 _ => throw new Exception($"Unknown value {folderNameFormat} for thread folder name format."),
             };
 
@@ -255,6 +220,7 @@ namespace GChan
         /// Remove a string of characters illegal for a folder name.<br/>
         /// Used for thread subjects if addThreadSubjectToFolder setting is enabled.
         /// </summary>
+        /// <exception cref="NullReferenceException">If <paramref name="subject"/> is null.</exception>
         public static string SanitiseSubject(string subject)
         {
             return RemoveCharactersFromString(subject, IllegalSubjectCharacters);
@@ -272,7 +238,7 @@ namespace GChan
         /// <remarks>
         /// Found to be the fastest method by: https://stackoverflow.com/a/48590650/8306962.
         /// </remarks>
-        public static string RemoveCharactersFromString(string input, params char[] chars) 
+        public static string RemoveCharactersFromString(string input, params char[] chars)
         {
             return string.Join(string.Empty, input.Split(chars));
         }
@@ -284,12 +250,36 @@ namespace GChan
         public static void SetNotifyIconText(NotifyIcon ni, string text)
         {
             if (text.Length >= 128)
-                throw new ArgumentOutOfRangeException("Text limited to 127 characters");
-            System.Type t = typeof(NotifyIcon);
-            BindingFlags hidden = BindingFlags.NonPublic | BindingFlags.Instance;
-            t.GetField("text", hidden).SetValue(ni, text);
-            if ((bool)t.GetField("added", hidden).GetValue(ni))
-                t.GetMethod("UpdateIcon", hidden).Invoke(ni, new object[] { true });
+            {
+                throw new ArgumentException("Text limited to 127 characters", nameof(text));
+            }
+
+            var type = typeof(NotifyIcon);
+            var privateFlags = BindingFlags.NonPublic | BindingFlags.Instance;
+
+            var textField = type.GetField("_text", privateFlags) ?? throw new Exception("Unable to find '_text' field");
+            textField.SetValue(ni, text);
+
+            var addedField = type.GetField("_added", privateFlags) ?? throw new Exception("Unable to find '_added' field");
+            if ((bool)addedField.GetValue(ni))
+            {
+                var updateMethod = type.GetMethod("UpdateIcon", privateFlags) ?? throw new Exception("Unable to find 'UpdateIcon' method.");
+                updateMethod.Invoke(ni, [true]);
+            }
+        }
+
+        public static void OpenDirectory(string path)
+        {
+            Process.Start("explorer.exe", path);
+        }
+
+        public static void OpenWebpage(string url)
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = url,
+                UseShellExecute = true // Open URL in the default browser
+            });
         }
     }
 }

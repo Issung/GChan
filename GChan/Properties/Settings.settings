@@ -5,8 +5,8 @@
     <Setting Name="SavePath" Type="System.String" Scope="User">
       <Value Profile="(Default)">C:\GChan</Value>
     </Setting>
-    <Setting Name="ScanTimer" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">60000</Value>
+    <Setting Name="MinSecondsBetweenScrapes" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">60</Value>
     </Setting>
     <Setting Name="SaveHtml" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
@@ -35,23 +35,20 @@
     <Setting Name="ThreadFolderNameFormat" Type="System.Byte" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
-    <Setting Name="AddUrlFromClipboardWhenTextboxEmpty" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">False</Value>
-    </Setting>
-    <Setting Name="StartWithWindowsMinimized" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">False</Value>
-    </Setting>
     <Setting Name="CheckForUpdatesOnStart" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
     <Setting Name="MaximumConcurrentDownloads" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">35</Value>
+      <Value Profile="(Default)">1</Value>
     </Setting>
     <Setting Name="SaveThumbnails" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="UserAgent" Type="System.String" Scope="User">
       <Value Profile="(Default)">Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36</Value>
+    </Setting>
+    <Setting Name="Max1RequestPerSecond" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
     </Setting>
   </Settings>
 </SettingsFile>

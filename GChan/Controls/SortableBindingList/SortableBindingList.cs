@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing.Imaging;
 using System.Linq;
 
 namespace GChan.Controls

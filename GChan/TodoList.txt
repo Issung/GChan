@@ -1,4 +1,21 @@
-﻿Todo items:
+﻿Version 6 & Onwards:
+	When scraping is paused, new threads should say "Paused..." instead of "Loading..." or something.
+	Icons for donations & pause/resume (seemingly totally busted in .net core).
+	Fix log files going straight to I:\ drive.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Todo items:
 	Add (proper scaled) icons to all context menus.
 	Archived thread indicator (with red text/highlight or seperate column (archived yes/no)).
 	Asynchronous General.DownloadToDir downloads files as 0bytes empty files, fix this immediately.

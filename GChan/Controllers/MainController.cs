@@ -1,81 +1,58 @@
 ﻿using GChan.Data;
+using GChan.Data.Models;
 using GChan.Forms;
-using GChan.Helpers;
-using GChan.Models;
+using GChan.Helpers.Extensions;
+using GChan.Models.Trackers;
 using GChan.Properties;
-using GChan.Trackers;
+using GChan.Services;
+using GChan.ViewModels;
 using NLog;
 using Onova.Models;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using SysThread = System.Threading.Thread;
-using Thread = GChan.Trackers.Thread;
+using Thread = GChan.Models.Trackers.Thread;
 using Timer = System.Windows.Forms.Timer;
-using Type = GChan.Trackers.Type;
+using Type = GChan.Models.Trackers.Type;
 
 namespace GChan.Controllers
 {
-    class MainController
+    /// <remarks>
+    /// <see cref="Model"/>'s lists are only ever modified on the UI thread, which is what keeps them consistent.
+    /// Code running elsewhere (processing threads) must marshal changes with <see cref="OnUiThread"/>, and must not hold
+    /// a lock while doing so, as the UI thread may be waiting for that lock.
+    /// </remarks>
+    public class MainController : IProcessableHooks
     {
-        internal MainForm Form;
+        /// <summary>
+        /// How often tracker state (download progress, subjects, board positions) is saved while running,
+        /// so little is lost if the process is killed.
+        /// </summary>
+        private static readonly TimeSpan PERIODIC_SAVE_INTERVAL = TimeSpan.FromMinutes(1);
 
-        internal MainFormModel Model;
+        internal readonly MainForm Form;
+        internal readonly MainFormModel Model;
 
-        private SysThread scanThread = null;
-
-        private readonly DownloadManager<Asset> assetDownloader = new(true);
-        private readonly DownloadManager<Thread> threadHtmlDownloader = new(true); // Allow threads to be removed after download, we just re-add them. TODO: Maybe improve.
-
-        private readonly Timer scanTimer = new();
-
+        private readonly CancellationTokenSource cancellationTokenSource = new();
+        private readonly ProcessQueue processQueue;
+        private readonly Timer periodicSaveTimer = new();
         private readonly ILogger logger = LogManager.GetCurrentClassLogger();
 
-        public int ScanTimerInterval { get { return scanTimer.Interval; } set { scanTimer.Interval = value; } }
-
-#if DEBUG
-        /// Define special lock objects when in DEBUG mode that print when/where they are acquired.
-        /// Credit: https://stackoverflow.com/a/36487032/8306962
-
-        readonly object threadLock = new();
-
-        object ThreadLock 
-        { 
-            get 
-            {
-                var frame = new StackFrame(1, true);
-                logger.Trace($"threadLock acquired by: {frame.GetMethod().Name} at line {frame.GetFileLineNumber()} on thread {SysThread.CurrentThread.ManagedThreadId}.");
-                return threadLock;
-            } 
-        }
-
-        readonly object boardLock = new();
-
-        object BoardLock
-        {
-            get
-            {
-                var frame = new StackFrame(1, true);
-                logger.Trace($"boardLock acquired by: {frame.GetMethod().Name} at line {frame.GetFileLineNumber()} on thread {SysThread.CurrentThread.ManagedThreadId}.");
-                return boardLock;
-            }
-        }
-#else
-        readonly object ThreadLock = new();
-        readonly object BoardLock = new();
-#endif
+        private bool periodicSaveRunning;
 
         public MainController(MainForm mainForm)
         {
+            // Controller Setup
+            processQueue = new(this, AddTrackersIfNew, cancellationTokenSource.Token);
+
+            // Form Setup
             Form = mainForm;
 
-            Model = new MainFormModel(Form);
+            Model = new MainFormModel(Form, processQueue);
             Form.mainFormModelBindingSource.DataSource = Model;
 
             UpdateController.Instance.UpdateCheckFinished += Instance_UpdateCheckFinished;
@@ -85,76 +62,55 @@ namespace GChan.Controllers
                 Form.systemTrayNotifyIcon.Visible = false;
             }
 
-            scanTimer.Enabled = false;
-            scanTimer.Interval = Settings.Default.ScanTimer;
-            scanTimer.Tick += new EventHandler(StartScanThread);
+            periodicSaveTimer.Interval = (int)PERIODIC_SAVE_INTERVAL.TotalMilliseconds;
+            periodicSaveTimer.Tick += PeriodicSaveTimer_Tick;
         }
 
-        public void LoadTrackers()
+        public async Task LoadTrackers()
         {
-            ///Require the save on close setting to be true to load threads on application open.
-            const bool requireSaveOnCloseToBeTrueToLoadThreadsAndBoards = true;
+            var (threads, boards) = await DataController.Load();
 
-            if (!requireSaveOnCloseToBeTrueToLoadThreadsAndBoards || Settings.Default.SaveListsOnClose)              // If enabled load URLs from file
+            if (cancellationTokenSource.IsCancellationRequested)
             {
-                var boards = DataController.LoadBoards();
-                var threads = DataController.LoadThreads();
-
-                lock (BoardLock)
-                {
-                    for (int i = 0; i < boards.Count; i++)
-                    {
-                        Board newBoard = (Board)Utils.CreateNewTracker(boards[i]);
-                        AddNewTracker(newBoard, persist: false);
-                    }
-                }
-
-                new SysThread(() =>
-                {
-                    Parallel.ForEach(threads, (thread) =>
-                    {
-                        Thread newThread = (Thread)Utils.CreateNewTracker(thread);
-                        Form.BeginInvoke(new Action(() => { AddNewTracker(newThread, persist: false); }));
-                    });
-
-                    Form.Invoke((MethodInvoker)delegate {
-                        FinishLoadingTrackers();
-                    });
-                }).Start();
+                // The app was closed while loading, don't start anything back up.
+                return;
             }
 
-            /// Executed once everything has finished being loaded.
-            void FinishLoadingTrackers()
+            foreach (var boardData in boards)
             {
-                scanTimer.Enabled = true;
-                StartScanThread(this, new EventArgs());
+                var board = Utils.CreateBoardFromData(boardData);
+                AddNewTracker(board);
+            }
 
-                // Check for updates.
-                if (Settings.Default.CheckForUpdatesOnStart)
-                {
-                    UpdateController.Instance.CheckForUpdates(false);
-                }
+            foreach (var threadData in threads)
+            {
+                var thread = Utils.CreateThreadFromData(threadData);
+                AddNewTracker(thread);
+            }
+
+            periodicSaveTimer.Start();
+
+            // Check for updates.
+            if (Settings.Default.CheckForUpdatesOnStart)
+            {
+                UpdateController.Instance.CheckForUpdates(false);
             }
         }
 
         public void AddUrls(IEnumerable<string> urls)
         {
-            bool trackerWasAdded = false;
+            var addedTrackers = new List<Tracker>();
+
             foreach (var url in urls)
             { 
                 var newTracker = Utils.CreateNewTracker(url);
 
                 if (newTracker != null)
                 {
-                    var trackerList = ((newTracker.Type == Type.Board) ? Model.Boards.Cast<Tracker>() : Model.Threads.Cast<Tracker>()).ToArray();
-
-                    if (IsUnique(newTracker, trackerList))
+                    if (IsUnique(newTracker))
                     {
-                        var addSuccess = AddNewTracker(newTracker);
-                        if (addSuccess)
-                        { 
-                            trackerWasAdded = true;
-                        }
+                        AddNewTracker(newTracker);
+                        addedTrackers.Add(newTracker);
                     }
                     else
                     {
@@ -165,11 +121,13 @@ namespace GChan.Controllers
                         if (result == DialogResult.Yes)
                         {
                             var path = newTracker.SaveTo;
+
                             if (!Directory.Exists(path))
                             { 
                                 Directory.CreateDirectory(path);
                             }
-                            Process.Start(path);
+
+                            Utils.OpenDirectory(path);
                         }
                     }
                 }
@@ -179,341 +137,193 @@ namespace GChan.Controllers
                 }
             }
 
-            if (trackerWasAdded)
+            if (addedTrackers.Count > 0)
             {
-                scanTimer.Enabled = true;
-                StartScanThread(this, new EventArgs());
+                // Save trackers the user adds straight away, so they survive the process being killed.
+                // Threads found by board scraping are left to the periodic save, which saves them together with the board's GreatestThreadId.
+                _ = Persist(() => DataController.Save(addedTrackers.OfType<Thread>(), addedTrackers.OfType<Board>()));
             }
-        }
-
-        /// <param name="persist">Write the tracker to the database. False when the tracker was just loaded from it.</param>
-        /// <returns>Was <paramref name="tracker"/> added to a tracker list.</returns>
-        private bool AddNewTracker(Tracker tracker, bool persist = true)
-        {
-            if (tracker == null)
-            { 
-                return false;
-            }
-
-            if (tracker is Board board)
-            {
-                lock (BoardLock)
-                {
-                    Form.Invoke((MethodInvoker)delegate () 
-                    {
-                        Model.Boards.Add(board);
-                    });
-
-                    if (persist)
-                    {
-                        Persist(() => DataController.SaveBoard(board));
-                    }
-                }
-            }
-            else if (tracker is Thread thread)
-            {
-                lock (ThreadLock)
-                {
-                    Form.Invoke((MethodInvoker)delegate () 
-                    {
-                        Model.Threads.Add(thread);
-                    });
-
-                    if (persist)
-                    {
-                        Persist(() => DataController.SaveThread(thread));
-                    }
-                }
-            }
-
-            return true;
         }
 
         /// <summary>
-        /// Runs <paramref name="write"/> if lists are being saved, so trackers survive the process being killed.
-        /// Failures are logged rather than thrown so a database problem never interrupts tracking.
+        /// Called by the process queue (from a processing thread) with the results of processing <paramref name="source"/>.
+        /// Adds the <paramref name="trackers"/> not already tracked (threads found by board scraping), then runs
+        /// <paramref name="onAdded"/>, in one step on the UI thread.
         /// </summary>
-        private void Persist(Action write)
+        /// <returns>
+        /// False if nothing was done: the UI was unavailable (closing), or <paramref name="source"/> was removed while it was
+        /// being processed. <paramref name="onAdded"/> didn't run in that case.
+        /// </returns>
+        private bool AddTrackersIfNew(IProcessable source, IReadOnlyList<Tracker> trackers, Action onAdded)
         {
-            if (!Settings.Default.SaveListsOnClose)
-            {
-                return;
-            }
+            // Check and add in one step on the UI thread, so two boards finding the same thread can't both add it,
+            // and a board removed (which happens on the UI thread) can't have its results added afterwards.
+            // One call for the whole batch, as a board's first scrape can find hundreds of threads.
+            var done = false;
 
-            try
+            OnUiThread(() =>
             {
-                write();
+                if (!source.ShouldProcess)
+                {
+                    return;
+                }
+
+                // For large batches (a board's first scrape) a set rather than scanning the thread list for each.
+                var trackedThreads = trackers.Count > 8 ? Model.Threads.Select(ThreadKey).ToHashSet() : null;
+
+                foreach (var tracker in trackers)
+                {
+                    var isNew = tracker is Thread thread && trackedThreads != null
+                        ? trackedThreads.Add(ThreadKey(thread))
+                        : IsUnique(tracker);
+
+                    if (isNew)
+                    {
+                        AddNewTracker(tracker);
+                    }
+                }
+
+                onAdded?.Invoke();
+                done = true;
+            });
+
+            return done;
+        }
+
+        /// <summary>Adds to the tracker list and the process queue. Must be called on the UI thread.</summary>
+        private void AddNewTracker(Tracker tracker)
+        {
+            if (tracker is Board board)
+            {
+                Model.Boards.Add(board);
+                processQueue.Enqueue(board);
             }
-            catch (Exception ex)
+            else if (tracker is Thread thread)
             {
-                logger.Error(ex, "Exception occured writing trackers to the database.");
+                Model.Threads.Add(thread);
+                processQueue.Enqueue(thread);
             }
         }
 
-        internal void ClearTrackers(Type type)
+        internal async Task ClearTrackers(Type type)
         {
-            string typeName = type.ToString().ToLower() + "s";
+            var typeName = type.ToString().ToLower() + "s";
 
-            DialogResult dialogResult = MessageBox.Show(
+            var confirmResult = MessageBox.Show(
                 $"Are you sure you want to clear all {typeName}?",
                 $"Clear all {typeName}?",
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Warning,
-                MessageBoxDefaultButton.Button2);    // Confirmation prompt
+                MessageBoxDefaultButton.Button2
+            );
 
-            if (dialogResult == DialogResult.Yes)
+            if (confirmResult == DialogResult.Yes)
             {
                 if (type == Type.Thread)
                 {
-                    lock (ThreadLock)
-                    {
-                        var threads = Model.Threads.ToArray();
-
-                        for (int i = threads.Length - 1; i >= 0; i--)
-                        {
-                            RemoveThread(threads[i], true, persist: false);
-                        }
-
-                        DeleteRemovedThreads(threads);
-                    }
+                    // Threads can fail to removal (e.g. I/O), so try to remove all, not saving to database on each, then do 1 db operation.
+                    var threads = Model.Threads.ToArray();
+                    var removedThreads = await threads.ParallelWhereAsync(async t => await RemoveThread(t, manualRemoval: true, saveToDatabase: false));
+                    await TryDatabase(() => DataController.RemoveThreads(removedThreads));
                 }
                 else // Boards
                 {
-                    lock (BoardLock)
+                    // Boards are less likely to fail removal (no I/O upon removal), so no special error handling here.
+                    while (Model.Boards.Count > 0)
                     {
-                        var boards = Model.Boards.ToArray();
-
-                        for (int i = boards.Length - 1; i >= 0; i--)
-                        {
-                            RemoveBoard(boards[i], persist: false);
-                        }
-
-                        Persist(() => DataController.DeleteBoards(boards.Select(b => b.Url)));
+                        await RemoveBoard(Model.Boards.Last(), saveToDatabase: false);
                     }
+
+                    await TryDatabase(DataController.RemoveAllBoards);
                 }
             }
         }
 
         /// <summary>
-        /// Run the scan thread if it isn't already running.
+        /// Returns true if <paramref name="tracker"/> is not already in its tracker list. Must be called on the UI thread.
         /// </summary>
-        private void StartScanThread(object sender, EventArgs e)
-        {
-            if (scanThread == null || !scanThread.IsAlive)
-            {
-                scanThread = new SysThread(new ThreadStart(ScanRoutine))
-                {
-                    Name = "Scan Thread",
-                    IsBackground = true
-                };
-
-                scanThread.Start();
-            }
-        }
-
-        /// <summary>
-        /// Thread entry-point.
-        /// </summary>
-        private void ScanRoutine()
-        {
-            lock (ThreadLock)
-            {
-                // Remove 404'd threads
-                var removedThreads = Model.Threads.RemoveAll(t => t.Gone);
-                removedThreads.ForEach(t => RemoveThread(t, persist: false));
-                DeleteRemovedThreads(removedThreads);
-            }
-
-            // Make a copy of the current boards and scrape them for new threads.
-            var boards = Model.Boards.ToArray();
-
-            foreach (var board in boards)
-            {
-                if (board.Scraping)
-                {
-                    var threadUrls = board.GetThreadLinks();
-                    var greatestThreadIdLock = new object();
-                    var greatestThreadId = 0;
-
-                    Parallel.ForEach(threadUrls, (threadUrl) =>
-                    {
-                        if (board.Scraping)
-                        {
-                            var id = GetThreadId(board, threadUrl);
-
-                            if (id != null && id > board.GreatestThreadId)
-                            {
-                                var newThread = (Thread)Utils.CreateNewTracker(threadUrl);
-
-                                if (newThread != null && IsUnique(newThread, Model.Threads))
-                                {
-                                    var urlWasAdded = AddNewTracker(newThread);
-
-                                    if (urlWasAdded)
-                                    {
-                                        lock (greatestThreadIdLock)
-                                        { 
-                                            if (id > greatestThreadId)
-                                            {
-                                                greatestThreadId = id.Value;
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    });
-
-                    // Only move forward: greatestThreadId is 0 when no new threads were added this scan.
-                    if (greatestThreadId > board.GreatestThreadId)
-                    {
-                        board.GreatestThreadId = greatestThreadId;
-
-                        lock (BoardLock)
-                        {
-                            // Don't write back a board that was removed while it was being scanned.
-                            if (Model.Boards.Contains(board))
-                            {
-                                Persist(() => DataController.SaveBoard(board));
-                            }
-                        }
-                    }
-                }
-            }
-
-            lock (ThreadLock)
-            {
-                // Save download progress (SavedIds) so a killed process doesn't re-download everything on restart.
-                var trackedThreads = Model.Threads.ToArray();
-                Persist(() => DataController.UpsertThreads(trackedThreads));
-            }
-
-            // Make a copy of the current threads and queue them for downloading them.
-            var threads = Model.Threads.ToArray();
-
-            foreach (var thread in threads)
-            {
-                if (thread.Scraping)
-                {
-                    var links = thread.GetImageLinks();
-                    assetDownloader.Queue(links);
-
-                    if (Settings.Default.SaveHtml)
-                    { 
-                        threadHtmlDownloader.Queue(thread);
-                    }
-                }
-            }
-        }
-
-        public int? GetThreadId(Board board, string url)
-        {
-            try
-            {
-                var idCodeMatch = board.SiteName switch
-                {
-                    Board_4Chan.SITE_NAME => Regex.Match(url, Thread_4Chan.ID_CODE_REGEX),
-                    _ => null,
-                };
-
-                if (idCodeMatch?.Groups.Count > 0)
-                {
-                    return int.Parse(idCodeMatch.Groups[0].Value);
-                }
-            }
-            catch
-            {
-
-            }
-
-            return null;
-        }
-
-        /// <summary>
-        /// Returns true if a url is not contained within a list of trackers. 
-        /// </summary>
-        private bool IsUnique(Tracker tracker, IEnumerable<Tracker> list)
+        private bool IsUnique(Tracker tracker)
         {
             if (tracker is Thread thread)
             {
-                return !list.OfType<Thread>().Any(t => 
-                    t.SiteName == thread.SiteName &&
-                    t.BoardCode == thread.BoardCode &&
-                    t.ID == thread.ID
-                );
+                var key = ThreadKey(thread);
+                return !Model.Threads.Any(t => ThreadKey(t) == key);
             }
             else // Board
             {
-                return !list.OfType<Board>().Any(t => t.Url == tracker.Url);
+                return !Model.Boards.Any(t => t.Url == tracker.Url);
             }
         }
 
+        /// <summary>
+        /// What identifies a thread for duplicate detection.
+        /// </summary>
+        private static (Site Site, string BoardCode, long Id) ThreadKey(Thread thread) => (thread.Site, thread.BoardCode, thread.Id);
+
         public void RenameThreadSubjectPrompt(int threadBindingSourceIndex)
         {
-            Thread thread = Model.Threads[threadBindingSourceIndex];
-            GetStringMessageBox dialog = new GetStringMessageBox(thread.Subject)
+            var thread = Model.Threads[threadBindingSourceIndex];
+            var dialog = new GetStringMessageBox(thread.Subject)
             {
                 StartPosition = FormStartPosition.CenterParent
             };
 
-            DialogResult result = dialog.ShowDialog();
+            var result = dialog.ShowDialog();
 
             if (result == DialogResult.OK)
             {
                 string newSubject = string.IsNullOrWhiteSpace(dialog.UserEntry) ? Thread.NO_SUBJECT : dialog.UserEntry;
 
                 thread.Subject = newSubject;
-                Persist(() => DataController.SaveThread(thread));
+                _ = Persist(() => DataController.Save([thread], []));
             }
         }
 
-        /// <param name="persist">Delete the board from the database. False when the caller deletes in bulk.</param>
-        public void RemoveBoard(Board board, bool persist = true)
+        public async Task RemoveBoard(Board board, bool saveToDatabase = true)
         {
-            board.Scraping = false;
+            board.Cancel();
 
-            lock (BoardLock)
+            if (saveToDatabase)
             {
-                Form.Invoke((MethodInvoker)delegate 
-                {
-                    Model.Boards.Remove(board);
-                });
-
-                if (persist)
-                {
-                    Persist(() => DataController.DeleteBoard(board.Url));
-                }
+                await TryDatabase(() => DataController.RemoveBoard([board]));
             }
+
+            OnUiThread(() => Model.Boards.Remove(board));
         }
 
         public void SettingsUpdated()
         {
-            this.assetDownloader.ConcurrentCount = Settings.Default.MaximumConcurrentDownloads;
+            // Save everything now, so trackers added before saving was turned on are kept too.
+            _ = SaveAll();
+        }
 
-            // Sync the database with the current lists, so trackers added before saving was turned on are kept too.
-            // Called on the UI thread, which is the only thread that modifies the lists.
-            Persist(() => DataController.SaveAll(Model.Threads.ToArray(), Model.Boards.ToArray()));
+        public async Task ThreadRemoveSelf(Thread thread)
+        {
+            await RemoveThread(thread, manualRemoval: false, saveToDatabase: true);
         }
 
         /// <summary>
         /// Remove a thread from tracking.
         /// </summary>
         /// <param name="thread">Thread to remove.</param>
-        /// <param name="manualRemove">Was this remove initiated by the user or by the scanning routine.</param>
-        /// <param name="persist">Delete the thread from the database. False when the caller calls <see cref="DeleteRemovedThreads"/> in bulk.</param>
+        /// <param name="manualRemoval">Was this remove initiated by the user or by the scanning routine.</param>
         /// <remarks>
         /// TODO: RemoveThread likely to throw. Info below:
         /// If removing a newly added thread this is likely to fail beacuse files are still being downloaded into the current directory.
         /// It only fails once because after setting thread.Scraping to no more downloads happen (mostly..).
         /// We kind of need a download manager so we can wait for all downloads from this thread to finish before moving dir.
+        /// Comment update in bugfix/rate-limiting branch: This is remedied now with a CancellationToken on the thread and files. But we need >= .NET 5 to use cancellation tokens on the ReadAsStringAsync methods.
         /// </remarks>
-        public void RemoveThread(Thread thread, bool manualRemove = false, bool persist = true)
+        /// <returns>Returns true if removal successful.</returns>
+        public async Task<bool> RemoveThread(Thread thread, bool manualRemoval = false, bool saveToDatabase = true)
         {
             logger.Trace($"Removing thread {thread}.");
-            thread.Scraping = false;
-            // TODO: #41 - Cancellation currently not working, implement later.
-            //imageDownloader.Cancel(i => i.Thread == thread);
-            //threadHtmlDownloader.Cancel(thread);
+            thread.Cancel();
+
+            if (saveToDatabase)
+            {
+                await TryDatabase(() => DataController.RemoveThreads([thread]));
+            }
 
             try
             {
@@ -522,54 +332,28 @@ namespace GChan.Controllers
                     Utils.MoveThread(thread);
                 }
 
-                lock (ThreadLock)
-                {
-                    // Remove on UI thread because this method can be called from non-ui thread.
-                    Form.Invoke(() =>
-                    {
-                        Model.Threads.Remove(thread);
-                    });
-                }
+                // Remove on UI thread because this method can be called from non-ui thread.
+                OnUiThread(() => Model.Threads.Remove(thread));
             }
             catch (Exception ex)
             {
                 logger.Error(ex, $"Exception occured attempting to remove thread {thread}.");
 
-                if (manualRemove)
+                if (manualRemoval)
                 {
                     MessageBox.Show(
-                        $"An error occured when trying to remove the thread {thread.Subject} ({thread.ID}). Please check the logs file in the ProgramData folder for more information.", 
-                        "Thread Removal Error", 
-                        MessageBoxButtons.OK, 
-                        MessageBoxIcon.Error, 
-                        MessageBoxDefaultButton.Button1);
+                        $"An error occured when trying to remove the thread {thread.Subject} ({thread.Id}). Please check the logs file in the ProgramData folder for more information.",
+                        "Thread Removal Error",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error,
+                        MessageBoxDefaultButton.Button1
+                    );
                 }
+
+                return false;
             }
 
-            if (persist)
-            {
-                DeleteRemovedThreads(new[] { thread });
-            }
-        }
-
-        /// <summary>
-        /// Deletes the database rows of those <paramref name="threads"/> that are no longer in the thread list.
-        /// </summary>
-        /// <remarks>
-        /// Checks the list rather than whether removal succeeded: the scan routine removes gone threads
-        /// from the list before calling <see cref="RemoveThread"/>, even if moving the folder then fails.
-        /// </remarks>
-        private void DeleteRemovedThreads(IEnumerable<Thread> threads)
-        {
-            lock (ThreadLock)
-            {
-                var urls = threads.Where(t => !Model.Threads.Contains(t)).Select(t => t.Url).ToArray();
-
-                if (urls.Length > 0)
-                {
-                    Persist(() => DataController.DeleteThreads(urls));
-                }
-            }
+            return true;
         }
 
         private void Instance_UpdateCheckFinished(object sender, CheckForUpdatesResult result, bool initiatedByUser)
@@ -589,10 +373,11 @@ namespace GChan.Controllers
         }
 
         /// <summary>
-        /// Returns true to cancel closing, false to go ahead with closing.
+        /// Asks the user to confirm closing if needed, then stops processing and saves.
         /// </summary>
+        /// <returns>True to cancel closing, false to go ahead with closing.</returns>
         // TODO: This method has 2 functions, warning if needed and cleanup, seperate into 2 responsibilities.
-        public bool Closing()
+        public async Task<bool> Closing()
         {
             if (Settings.Default.WarnOnClose && Model.Threads.Count > 0)
             {
@@ -605,18 +390,124 @@ namespace GChan.Controllers
                 }
             }
 
-            // TODO: Call cancel scraping method.
-            Form.systemTrayNotifyIcon.Visible = false;
-            Form.systemTrayNotifyIcon.Dispose();
-            scanTimer.Enabled = false;
-            scanTimer.Dispose();
+            // Only shut down processing once closing is certain, as it can't be restarted.
+            ShutDown();
 
-            assetDownloader.Dispose();
-            threadHtmlDownloader.Dispose();
-
-            Persist(() => DataController.SaveAll(Model.Threads.ToArray(), Model.Boards.ToArray()));
+            await SaveAll();
 
             return false;
         }
+
+        /// <summary>
+        /// Saves synchronously, for when Windows is ending the session and won't wait for an async close.
+        /// </summary>
+        /// <param name="shutDown">
+        /// Also stop processing (permanently), for when the close is certain (e.g. Task Manager), so nothing touches the form as it
+        /// goes away. Pass false for a Windows shutdown: Windows asks before it knows the session will end, and another app may still cancel it.
+        /// </param>
+        public void SaveNow(bool shutDown)
+        {
+            if (shutDown)
+            {
+                ShutDown();
+            }
+
+            if (!Settings.Default.SaveListsOnClose)
+            {
+                return;
+            }
+
+            try
+            {
+                // Block on DataController's task directly: it never continues on the UI thread, so this can't deadlock
+                // (unlike SaveAll, whose error handling awaits on the UI thread).
+                DataController.Save(Model.Threads.ToArray(), Model.Boards.ToArray()).GetAwaiter().GetResult();
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex, "Exception occured saving trackers while Windows was ending the session.");
+            }
+        }
+
+        private void ShutDown()
+        {
+            periodicSaveTimer.Stop();
+            cancellationTokenSource.Cancel();
+
+            Form.systemTrayNotifyIcon.Visible = false;
+            Form.systemTrayNotifyIcon.Dispose();
+        }
+
+        internal void PauseQueue()
+        {
+            logger.Info("Pausing Queue.");
+            processQueue.Pause = true;
+        }
+
+        internal void ResumeQueue()
+        {
+            logger.Info("Resuming Queue.");
+            processQueue.Pause = false;
+        }
+
+        private async void PeriodicSaveTimer_Tick(object sender, EventArgs e)
+        {
+            if (periodicSaveRunning)
+            {
+                return;
+            }
+
+            periodicSaveRunning = true;
+
+            try
+            {
+                await SaveAll();
+            }
+            finally
+            {
+                periodicSaveRunning = false;
+            }
+        }
+
+        /// <summary>
+        /// Saves all trackers, if lists are being saved. Must be called on the UI thread, where the lists are snapshotted.
+        /// </summary>
+        private Task SaveAll()
+        {
+            var threads = Model.Threads.ToArray();
+            var boards = Model.Boards.ToArray();
+
+            return Persist(() => DataController.Save(threads, boards));
+        }
+
+        /// <summary>
+        /// Runs a database write if lists are being saved (<see cref="Settings.SaveListsOnClose"/>).
+        /// Failures are logged rather than thrown, so a database problem never interrupts tracking.
+        /// </summary>
+        private Task Persist(Func<Task> write)
+        {
+            return Settings.Default.SaveListsOnClose ? TryDatabase(write) : Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// Runs a database operation, logging rather than throwing any failure.
+        /// </summary>
+        private async Task TryDatabase(Func<Task> operation)
+        {
+            try
+            {
+                await operation();
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex, "Exception occured accessing the database.");
+            }
+        }
+
+        /// <summary>
+        /// Runs <paramref name="action"/> on the UI thread and waits for it. Does nothing once the form is closed.
+        /// </summary>
+        /// <returns>True if <paramref name="action"/> ran, false if the form was closed.</returns>
+        private bool OnUiThread(Action action) => MainForm.TryInvoke(action);
     }
 }

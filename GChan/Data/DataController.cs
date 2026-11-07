@@ -1,332 +1,138 @@
-﻿using GChan.Trackers;
+﻿using EFCore.BulkExtensions;
+using GChan.Data.Models;
+using GChan.Models.Trackers;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
-using System.Data.SQLite;
-using System.IO;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Thread = GChan.Models.Trackers.Thread;
 
 namespace GChan.Data
 {
-    class DataController
+    public static class DataController
     {
-        /// <summary>
-        /// Current database version, change this when database structure is changed.
+        /// <summary> 
+        /// Serialises all database access. Writes come from the UI thread and from processing threads at once, and running them
+        /// one at a time keeps them in order (e.g. a removal's delete can't be overtaken by an earlier save) and avoids SQLite lock errors.
         /// </summary>
-        public const int DATABASE_VERSION = 2;
-
-        private const string DATABASE_FILENAME = "trackers.db";
-        private static readonly string DATABASE_FOLDERNAME = "data";
-        private static readonly string DATABASE_PATH = Path.Combine(AppContext.BaseDirectory, DATABASE_FOLDERNAME, DATABASE_FILENAME);
-        private static readonly string DATABASE_CONNECTION_STRING = "DataSource=" + DATABASE_PATH;
+        private static readonly SemaphoreSlim dbLock = new(1, 1);
 
         /// <summary>
-        /// Tables
+        /// Make sure this is called before any other data access.
         /// </summary>
-        private const string TB_VERSION = "version";
-        private const string TB_THREAD = "thread";
-        private const string TB_BOARD = "board";
-
-        // Columns
-        private const string COL_VERSION = "version";
-        private const string COL_URL = "url";
-
-        // Thread columns
-        private const string COL_SUBJECT = "subject";
-        private const string COL_SAVED_IDS = "saved_ids";
-
-        // Board columns
-        private const string COL_GREATEST_THREAD_ID = "greatest_thread_id";
-
-        static SQLiteConnection _connection = null;
-
-        static object _connectionLock = new object();
-
-        static SQLiteConnection Connection 
-        { 
-            get 
-            {
-                lock (_connectionLock)
-                { 
-                    bool dbExisted = File.Exists(DATABASE_PATH);
-
-                    if (!dbExisted)
-                    {
-                        Directory.CreateDirectory(DATABASE_FOLDERNAME);
-                        SQLiteConnection.CreateFile(DATABASE_PATH);
-                    }
-
-                    if (_connection == null)
-                    {
-                        _connection = new SQLiteConnection(DATABASE_CONNECTION_STRING);
-                        _connection.Open();
-
-                        if (!dbExisted)
-                        {
-                            CreateDB();
-                        }
-                        else
-                        {
-                            UpgradeDB();
-                        }
-                    }
-
-                    return _connection;
-                }
-            } 
-        }
-
-        private static void CreateDB()
+        public static async Task EnsureCreatedAndMigrate()
         {
-            using (var cmd = new SQLiteCommand(Connection))
-            {
-                // Version Table
-                cmd.CommandText = $"DROP TABLE IF EXISTS {TB_VERSION}";
-                cmd.ExecuteNonQuery();
-
-                cmd.CommandText = $"CREATE TABLE {TB_VERSION} ({COL_VERSION} INTEGER PRIMARY KEY NOT NULL)";
-                cmd.ExecuteNonQuery();
-
-                cmd.CommandText = $"INSERT INTO {TB_VERSION} ({COL_VERSION}) VALUES (@{COL_VERSION})";
-                cmd.Parameters.AddWithValue(COL_VERSION, DATABASE_VERSION);
-                cmd.ExecuteNonQuery();
-
-                // Thread Table
-                cmd.CommandText = $"DROP TABLE IF EXISTS {TB_THREAD}";
-                cmd.ExecuteNonQuery();
-
-                cmd.CommandText = $"CREATE TABLE {TB_THREAD} ({COL_URL} TEXT PRIMARY KEY NOT NULL, {COL_SUBJECT} TEXT, {COL_SAVED_IDS} TEXT)";
-                cmd.ExecuteNonQuery();
-
-                // Board Table
-                cmd.CommandText = $"DROP TABLE IF EXISTS {TB_BOARD}";
-                cmd.ExecuteNonQuery();
-
-                cmd.CommandText = $"CREATE TABLE {TB_BOARD} ({COL_URL} TEXT PRIMARY KEY NOT NULL, {COL_GREATEST_THREAD_ID} INTEGER)";
-                cmd.ExecuteNonQuery();
-            }
+            await Locked(async context => await context.Database.MigrateAsync());
         }
 
         /// <summary>
-        /// Drop the current database and build a new one.
+        /// Inserts or updates the given threads and boards.
         /// </summary>
-        private static void UpgradeDB()
+        /// <remarks>
+        /// Their values are copied when this is called, so call it on the UI thread to get a consistent snapshot
+        /// (e.g. a board's GreatestThreadId only advances after the threads it found are in the thread list).<br/>
+        /// Removed (cancelled) trackers are skipped, checked once the lock is held, so a save that was started before
+        /// a tracker's removal can't write it back after its delete.
+        /// </remarks>
+        public static Task Save(IEnumerable<Thread> threads, IEnumerable<Board> boards)
         {
-            int version = -1;
+            var threadData = threads.Select(t => (Tracker: t, Data: new ThreadData(t))).ToArray();
+            var boardData = boards.Select(b => (Tracker: b, Data: new BoardData(b))).ToArray();
 
-            using (var cmd = new SQLiteCommand(Connection))
+            return Locked(async context =>
             {
-                cmd.CommandText = $"SELECT * FROM {TB_VERSION}";
+                await context.BulkInsertOrUpdateAsync(boardData.Where(b => b.Tracker.Scraping).Select(b => b.Data).ToArray());
+                await context.BulkInsertOrUpdateAsync(threadData.Where(t => t.Tracker.Scraping).Select(t => t.Data).ToArray());
 
-                using SQLiteDataReader reader = cmd.ExecuteReader();
-
-                if (reader.Read())
-                {
-                    version = reader.GetInt32(0);
-                }
-            }
-
-            if (version == -1 || version != DATABASE_VERSION)
-            {
-                // TODO: Figure out migration strategies.
-                CreateDB();
-            }
-        }
-
-        /// <summary>
-        /// Replaces the stored thread and board lists with <paramref name="threads"/> and <paramref name="boards"/>.
-        /// </summary>
-        public static void SaveAll(IList<Thread> threads, IList<Board> boards)
-        {
-            InTransaction(() =>
-            {
-                ReplaceThreads(threads);
-                ReplaceBoards(boards);
+                await context.SaveChangesAsync();
             });
         }
 
-        public static void SaveThreads(IList<Thread> threads) => InTransaction(() => ReplaceThreads(threads));
-
-        public static void SaveBoards(IList<Board> boards) => InTransaction(() => ReplaceBoards(boards));
-
-        /// <summary>
-        /// Inserts or updates each of <paramref name="threads"/>, leaving any other stored threads untouched.
-        /// </summary>
-        public static void UpsertThreads(IEnumerable<Thread> threads)
+        public static async Task<(IReadOnlyList<ThreadData> ThreadData, IReadOnlyList<BoardData> BoardData)> Load()
         {
-            InTransaction(() =>
+            IReadOnlyList<ThreadData> threadData = null;
+            IReadOnlyList<BoardData> boardData = null;
+
+            await Locked(async context =>
             {
-                foreach (var thread in threads)
+                threadData = await context.ThreadData.ToArrayAsync();
+                boardData = await context.BoardData.ToArrayAsync();
+            });
+
+            return (threadData, boardData);
+        }
+
+        public static async Task RemoveBoard(IEnumerable<Board> boards)
+        {
+            var boardDatas = boards.Select(BoardData.KeyOf).ToArray();
+
+            await Locked(async context =>
+            {
+                try
                 {
-                    UpsertThread(thread);
+                    context.BoardData.RemoveRange(boardDatas);
+                    await context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException ex) when (ex.Message.Contains("affected") && ex.Message.Contains("row(s)")) // E.g. "Affected 0 row(s)".
+                {
+                    // Swallow exceptions when we delete but there was nothing in the database to be deleted.
+                    // This will happen if a board is added and removed before being saved to database. We don't care.
                 }
             });
         }
 
-        /// <summary>
-        /// Persists a single thread to the database (insert or replace).
-        /// </summary>
-        public static void SaveThread(Thread thread)
+        public static async Task RemoveThreads(IEnumerable<Thread> threads)
         {
-            lock (_connectionLock)
+            var threadDatas = threads.Select(ThreadData.KeyOf).ToArray();
+
+            await Locked(async context =>
             {
-                UpsertThread(thread);
-            }
-        }
-
-        /// <summary>
-        /// Removes a single thread from the database by URL.
-        /// </summary>
-        public static void DeleteThread(string url)
-        {
-            lock (_connectionLock)
-            {
-                DeleteByUrl(TB_THREAD, url);
-            }
-        }
-
-        /// <summary>
-        /// Persists a single board to the database (insert or replace).
-        /// </summary>
-        public static void SaveBoard(Board board)
-        {
-            lock (_connectionLock)
-            {
-                UpsertBoard(board);
-            }
-        }
-
-        /// <summary>
-        /// Removes a single board from the database by URL.
-        /// </summary>
-        public static void DeleteBoard(string url)
-        {
-            lock (_connectionLock)
-            {
-                DeleteByUrl(TB_BOARD, url);
-            }
-        }
-
-        /// <summary>
-        /// Removes several threads from the database by URL, in one transaction.
-        /// </summary>
-        public static void DeleteThreads(IEnumerable<string> urls) => InTransaction(() => DeleteByUrls(TB_THREAD, urls));
-
-        /// <summary>
-        /// Removes several boards from the database by URL, in one transaction.
-        /// </summary>
-        public static void DeleteBoards(IEnumerable<string> urls) => InTransaction(() => DeleteByUrls(TB_BOARD, urls));
-
-        /// <summary>
-        /// Runs <paramref name="action"/> inside a single transaction while holding the connection lock.
-        /// <see cref="SQLiteConnection"/> is not thread-safe, so all database access must hold <see cref="_connectionLock"/>.
-        /// </summary>
-        private static void InTransaction(Action action)
-        {
-            lock (_connectionLock)
-            {
-                using var transaction = Connection.BeginTransaction();
-                action();
-                transaction.Commit();
-            }
-        }
-
-        private static void ReplaceThreads(IList<Thread> threads)
-        {
-            DeleteAll(TB_THREAD);
-
-            foreach (var thread in threads)
-            {
-                UpsertThread(thread);
-            }
-        }
-
-        private static void ReplaceBoards(IList<Board> boards)
-        {
-            DeleteAll(TB_BOARD);
-
-            foreach (var board in boards)
-            {
-                UpsertBoard(board);
-            }
-        }
-
-        private static void UpsertThread(Thread thread)
-        {
-            using var cmd = new SQLiteCommand(Connection);
-            cmd.CommandText = $"INSERT OR REPLACE INTO {TB_THREAD} ({COL_URL}, {COL_SUBJECT}, {COL_SAVED_IDS}) VALUES (@{COL_URL}, @{COL_SUBJECT}, @{COL_SAVED_IDS})";
-            cmd.Parameters.AddWithValue(COL_URL, thread.Url);
-            cmd.Parameters.AddWithValue(COL_SUBJECT, thread.Subject);
-            cmd.Parameters.AddWithValue(COL_SAVED_IDS, thread.SavedIds.ToStringList());
-            cmd.ExecuteNonQuery();
-        }
-
-        private static void UpsertBoard(Board board)
-        {
-            using var cmd = new SQLiteCommand(Connection);
-            cmd.CommandText = $"INSERT OR REPLACE INTO {TB_BOARD} ({COL_URL}, {COL_GREATEST_THREAD_ID}) VALUES (@{COL_URL}, @{COL_GREATEST_THREAD_ID})";
-            cmd.Parameters.AddWithValue(COL_URL, board.Url);
-            cmd.Parameters.AddWithValue(COL_GREATEST_THREAD_ID, board.GreatestThreadId);
-            cmd.ExecuteNonQuery();
-        }
-
-        private static void DeleteByUrl(string table, string url)
-        {
-            using var cmd = new SQLiteCommand(Connection);
-            cmd.CommandText = $"DELETE FROM {table} WHERE {COL_URL} = @{COL_URL}";
-            cmd.Parameters.AddWithValue(COL_URL, url);
-            cmd.ExecuteNonQuery();
-        }
-
-        private static void DeleteByUrls(string table, IEnumerable<string> urls)
-        {
-            foreach (var url in urls)
-            {
-                DeleteByUrl(table, url);
-            }
-        }
-
-        private static void DeleteAll(string table)
-        {
-            using var cmd = new SQLiteCommand(Connection);
-            cmd.CommandText = $"DELETE FROM {table}";
-            cmd.ExecuteNonQuery();
-        }
-
-        public static IList<LoadedThreadData> LoadThreads()
-        {
-            var loadedThreads = new List<LoadedThreadData>();
-
-            lock (_connectionLock)
-            using (var cmd = new SQLiteCommand(Connection))
-            {
-                cmd.CommandText = $"SELECT * FROM {TB_THREAD}";
-
-                using SQLiteDataReader reader = cmd.ExecuteReader();
-                while (reader.Read())
+                try
                 {
-                    loadedThreads.Add(new LoadedThreadData(reader));
+                    context.ThreadData.RemoveRange(threadDatas);
+                    await context.SaveChangesAsync();
                 }
-            }
-
-            return loadedThreads;
+                catch (DbUpdateConcurrencyException ex) when (ex.Message.Contains("affected") && ex.Message.Contains("row(s)")) // E.g. "Affected 0 row(s)".
+                {
+                    // Swallow exceptions when we delete but there was nothing in the database to be deleted.
+                    // This will happen if a thread is added and removed before being saved to database. We don't care.
+                }
+            });
         }
 
-        public static IList<LoadedBoardData> LoadBoards()
+        public static async Task RemoveAllBoards()
         {
-            var loadedBoards = new List<LoadedBoardData>();
+            await Locked(async context => await context.BoardData.ExecuteDeleteAsync());
+        }
 
-            lock (_connectionLock)
-            using (var cmd = new SQLiteCommand(Connection))
+        public static async Task RemoveAllThreads()
+        {
+            await Locked(async context => await context.ThreadData.ExecuteDeleteAsync());
+        }
+
+        /// <summary>
+        /// Runs <paramref name="action"/> on the thread pool while holding <see cref="dbLock"/>.<br/>
+        /// Nothing here continues on the caller's synchronization context, so the UI thread can block on a save
+        /// (at Windows shutdown) without deadlocking against one already running.
+        /// </summary>
+        private static async Task Locked(Func<DataContext, Task> action)
+        {
+            await dbLock.WaitAsync().ConfigureAwait(false);
+
+            try
             {
-                cmd.CommandText = $"SELECT * FROM {TB_BOARD}";
-
-                using SQLiteDataReader reader = cmd.ExecuteReader();
-                while (reader.Read())
+                await Task.Run(async () =>
                 {
-                    loadedBoards.Add(new LoadedBoardData(reader));
-                }
+                    await using var context = new DataContext();
+                    await action(context);
+                }).ConfigureAwait(false);
             }
-
-            return loadedBoards;
+            finally
+            {
+                dbLock.Release();
+            }
         }
     }
 }

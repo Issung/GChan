@@ -1,4 +1,7 @@
-﻿namespace GChan.Forms {
+﻿using GChan.ViewModels;
+
+namespace GChan.Forms
+{
     partial class MainForm {
         /// <summary>
         /// Erforderliche Designervariable.
@@ -22,550 +25,677 @@
         /// Erforderliche Methode für die Designerunterstützung.
         /// Der Inhalt der Methode darf nicht mit dem Code-Editor geändert werden.
         /// </summary>
-        private void InitializeComponent() {
-            this.components = new System.ComponentModel.Container();
+        private void InitializeComponent()
+        {
+            components = new System.ComponentModel.Container();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
-            this.menuStrip = new System.Windows.Forms.MenuStrip();
-            this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.settingsToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-            this.openFolderToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-            this.openLogsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.changelogToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-            this.aboutToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-            this.checkForUpdatesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.updateAvailableToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.listsTabControl = new System.Windows.Forms.TabControl();
-            this.threadsTabPage = new System.Windows.Forms.TabPage();
-            this.threadGridView = new GChan.Controls.PreferencesDataGridView();
-            this.threadsContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.openFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.openInBrowserToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.copyURLToClipboardToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.renameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.deleteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.threadsBindingSource = new System.Windows.Forms.BindingSource(this.components);
-            this.mainFormModelBindingSource = new System.Windows.Forms.BindingSource(this.components);
-            this.boardsTabPage = new System.Windows.Forms.TabPage();
-            this.boardsListBox = new System.Windows.Forms.ListBox();
-            this.boardsContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.boardsContextMenuOpenFolderButton = new System.Windows.Forms.ToolStripMenuItem();
-            this.boardsContextMenuOpenInBrowserButton = new System.Windows.Forms.ToolStripMenuItem();
-            this.boardsContextMenuRemoveButton = new System.Windows.Forms.ToolStripMenuItem();
-            this.boardsBindingSource = new System.Windows.Forms.BindingSource(this.components);
-            this.addButton = new System.Windows.Forms.Button();
-            this.urlTextBox = new System.Windows.Forms.TextBox();
-            this.systemTrayNotifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
-            this.systemTrayContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.systemTrayOpenFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.systemTrayExitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.clearAllButton = new System.Windows.Forms.Button();
-            this.clipboardButton = new System.Windows.Forms.Button();
-            this.toolTip = new System.Windows.Forms.ToolTip(this.components);
-            this.threadGridSubjectColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.threadGridSiteColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.threadGridBoardCodeColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.threadGridIdColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.threadGridFileCountColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.menuStrip.SuspendLayout();
-            this.listsTabControl.SuspendLayout();
-            this.threadsTabPage.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.threadGridView)).BeginInit();
-            this.threadsContextMenu.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.threadsBindingSource)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.mainFormModelBindingSource)).BeginInit();
-            this.boardsTabPage.SuspendLayout();
-            this.boardsContextMenu.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.boardsBindingSource)).BeginInit();
-            this.systemTrayContextMenu.SuspendLayout();
-            this.SuspendLayout();
+            menuStrip = new System.Windows.Forms.MenuStrip();
+            fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            pauseDownloadsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            mainFormModelBindingSource = new System.Windows.Forms.BindingSource(components);
+            resumeDownloadsToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            settingsToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            openFolderToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            openLogsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            changelogToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            aboutToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            checkForUpdatesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            donateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            kofiToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            payPalToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            gitHubSponsorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            updateAvailableToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            resumeDownloadsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            listsTabControl = new System.Windows.Forms.TabControl();
+            threadsTabPage = new System.Windows.Forms.TabPage();
+            threadGridView = new Controls.PreferencesDataGridView();
+            threadGridSubjectColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            threadGridSiteColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            threadGridBoardCodeColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            Id = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            threadGridFileCountColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            threadGridPendingColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            threadsContextMenu = new System.Windows.Forms.ContextMenuStrip(components);
+            openFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            openInBrowserToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            copyURLToClipboardToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            renameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            deleteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            threadsBindingSource = new System.Windows.Forms.BindingSource(components);
+            boardsTabPage = new System.Windows.Forms.TabPage();
+            boardsGridView = new Controls.PreferencesDataGridView();
+            boardsContextMenu = new System.Windows.Forms.ContextMenuStrip(components);
+            boardsContextMenuOpenFolderButton = new System.Windows.Forms.ToolStripMenuItem();
+            boardsContextMenuOpenInBrowserButton = new System.Windows.Forms.ToolStripMenuItem();
+            boardsContextMenuRemoveButton = new System.Windows.Forms.ToolStripMenuItem();
+            boardsBindingSource = new System.Windows.Forms.BindingSource(components);
+            addButton = new System.Windows.Forms.Button();
+            urlTextBox = new System.Windows.Forms.TextBox();
+            systemTrayNotifyIcon = new System.Windows.Forms.NotifyIcon(components);
+            systemTrayContextMenu = new System.Windows.Forms.ContextMenuStrip(components);
+            resumeDownloadsToolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
+            pauseDownloadsToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            systemTrayOpenFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            systemTrayExitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            clearAllButton = new System.Windows.Forms.Button();
+            clipboardButton = new System.Windows.Forms.Button();
+            toolTip = new System.Windows.Forms.ToolTip(components);
+            boardsGridViewSiteColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            boardsGridViewBoardColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            boardsGridViewThreadsColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            menuStrip.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)mainFormModelBindingSource).BeginInit();
+            listsTabControl.SuspendLayout();
+            threadsTabPage.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)threadGridView).BeginInit();
+            threadsContextMenu.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)threadsBindingSource).BeginInit();
+            boardsTabPage.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)boardsGridView).BeginInit();
+            boardsContextMenu.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)boardsBindingSource).BeginInit();
+            systemTrayContextMenu.SuspendLayout();
+            SuspendLayout();
             // 
             // menuStrip
             // 
-            this.menuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.fileToolStripMenuItem,
-            this.helpToolStripMenuItem,
-            this.updateAvailableToolStripMenuItem});
-            this.menuStrip.Location = new System.Drawing.Point(0, 0);
-            this.menuStrip.Name = "menuStrip";
-            this.menuStrip.Size = new System.Drawing.Size(582, 24);
-            this.menuStrip.TabIndex = 0;
-            this.menuStrip.Text = "msHead";
+            menuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { fileToolStripMenuItem, helpToolStripMenuItem, updateAvailableToolStripMenuItem, resumeDownloadsToolStripMenuItem });
+            menuStrip.Location = new System.Drawing.Point(0, 0);
+            menuStrip.Name = "menuStrip";
+            menuStrip.Padding = new System.Windows.Forms.Padding(7, 2, 0, 2);
+            menuStrip.Size = new System.Drawing.Size(679, 24);
+            menuStrip.TabIndex = 0;
+            menuStrip.Text = "msHead";
             // 
             // fileToolStripMenuItem
             // 
-            this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.settingsToolStripMenuItem1,
-            this.openFolderToolStripMenuItem1,
-            this.openLogsToolStripMenuItem,
-            this.exitToolStripMenuItem});
-            this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
-            this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
-            this.fileToolStripMenuItem.Text = "File";
+            fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { pauseDownloadsToolStripMenuItem, resumeDownloadsToolStripMenuItem1, settingsToolStripMenuItem1, openFolderToolStripMenuItem1, openLogsToolStripMenuItem, exitToolStripMenuItem });
+            fileToolStripMenuItem.Name = "fileToolStripMenuItem";
+            fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
+            fileToolStripMenuItem.Text = "File";
+            // 
+            // pauseDownloadsToolStripMenuItem
+            // 
+            pauseDownloadsToolStripMenuItem.DataBindings.Add(new System.Windows.Forms.Binding("Visible", mainFormModelBindingSource, "QueueIsProcessing", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            pauseDownloadsToolStripMenuItem.Name = "pauseDownloadsToolStripMenuItem";
+            pauseDownloadsToolStripMenuItem.Size = new System.Drawing.Size(179, 22);
+            pauseDownloadsToolStripMenuItem.Text = "Pause Downloads";
+            pauseDownloadsToolStripMenuItem.Click += pauseDownloadsToolStripMenuItem_Click;
+            // 
+            // mainFormModelBindingSource
+            // 
+            mainFormModelBindingSource.DataSource = typeof(MainFormModel);
+            // 
+            // resumeDownloadsToolStripMenuItem1
+            // 
+            resumeDownloadsToolStripMenuItem1.DataBindings.Add(new System.Windows.Forms.Binding("Visible", mainFormModelBindingSource, "QueueIsPaused", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            resumeDownloadsToolStripMenuItem1.Name = "resumeDownloadsToolStripMenuItem1";
+            resumeDownloadsToolStripMenuItem1.Size = new System.Drawing.Size(179, 22);
+            resumeDownloadsToolStripMenuItem1.Text = "Resume Downloads";
+            resumeDownloadsToolStripMenuItem1.Click += resumeDownloadsToolStripMenuItem1_Click;
             // 
             // settingsToolStripMenuItem1
             // 
-            this.settingsToolStripMenuItem1.Image = global::GChan.Properties.Resources.settings_wrench;
-            this.settingsToolStripMenuItem1.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
-            this.settingsToolStripMenuItem1.Name = "settingsToolStripMenuItem1";
-            this.settingsToolStripMenuItem1.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-            this.settingsToolStripMenuItem1.Size = new System.Drawing.Size(179, 22);
-            this.settingsToolStripMenuItem1.Text = "&Settings";
-            this.settingsToolStripMenuItem1.Click += new System.EventHandler(this.settingsToolStripMenuItem_Click);
+            settingsToolStripMenuItem1.Image = Properties.Resources.settings_wrench;
+            settingsToolStripMenuItem1.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
+            settingsToolStripMenuItem1.Name = "settingsToolStripMenuItem1";
+            settingsToolStripMenuItem1.ShortcutKeys = System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S;
+            settingsToolStripMenuItem1.Size = new System.Drawing.Size(179, 22);
+            settingsToolStripMenuItem1.Text = "&Settings";
+            settingsToolStripMenuItem1.Click += settingsToolStripMenuItem_Click;
             // 
             // openFolderToolStripMenuItem1
             // 
-            this.openFolderToolStripMenuItem1.Image = global::GChan.Properties.Resources.folder;
-            this.openFolderToolStripMenuItem1.Name = "openFolderToolStripMenuItem1";
-            this.openFolderToolStripMenuItem1.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.F)));
-            this.openFolderToolStripMenuItem1.Size = new System.Drawing.Size(179, 22);
-            this.openFolderToolStripMenuItem1.Text = "Open &Folder";
-            this.openFolderToolStripMenuItem1.Click += new System.EventHandler(this.openFolderToolStripMenuItem1_Click);
+            openFolderToolStripMenuItem1.Image = Properties.Resources.folder;
+            openFolderToolStripMenuItem1.Name = "openFolderToolStripMenuItem1";
+            openFolderToolStripMenuItem1.ShortcutKeys = System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.F;
+            openFolderToolStripMenuItem1.Size = new System.Drawing.Size(179, 22);
+            openFolderToolStripMenuItem1.Text = "Open &Folder";
+            openFolderToolStripMenuItem1.Click += openFolderToolStripMenuItem1_Click;
             // 
             // openLogsToolStripMenuItem
             // 
-            this.openLogsToolStripMenuItem.Image = global::GChan.Properties.Resources.file;
-            this.openLogsToolStripMenuItem.Name = "openLogsToolStripMenuItem";
-            this.openLogsToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.P)));
-            this.openLogsToolStripMenuItem.Size = new System.Drawing.Size(179, 22);
-            this.openLogsToolStripMenuItem.Text = "Open Logs";
-            this.openLogsToolStripMenuItem.ToolTipText = "The ProgramData folder contains the files used to store saved threads & boards, a" +
-    "nd also crash logs to help with debugging.";
-            this.openLogsToolStripMenuItem.Click += new System.EventHandler(this.openLogsToolStripMenuItem_Click);
+            openLogsToolStripMenuItem.Image = Properties.Resources.file;
+            openLogsToolStripMenuItem.Name = "openLogsToolStripMenuItem";
+            openLogsToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.P;
+            openLogsToolStripMenuItem.Size = new System.Drawing.Size(179, 22);
+            openLogsToolStripMenuItem.Text = "Open Logs";
+            openLogsToolStripMenuItem.ToolTipText = "The ProgramData folder contains the files used to store saved threads & boards, and also crash logs to help with debugging.";
+            openLogsToolStripMenuItem.Click += openLogsToolStripMenuItem_Click;
             // 
             // exitToolStripMenuItem
             // 
-            this.exitToolStripMenuItem.Image = global::GChan.Properties.Resources.close;
-            this.exitToolStripMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
-            this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Q)));
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(179, 22);
-            this.exitToolStripMenuItem.Text = "&Exit";
-            this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
+            exitToolStripMenuItem.Image = Properties.Resources.close;
+            exitToolStripMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
+            exitToolStripMenuItem.Name = "exitToolStripMenuItem";
+            exitToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Q;
+            exitToolStripMenuItem.Size = new System.Drawing.Size(179, 22);
+            exitToolStripMenuItem.Text = "&Exit";
+            exitToolStripMenuItem.Click += exitToolStripMenuItem_Click;
             // 
             // helpToolStripMenuItem
             // 
-            this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.changelogToolStripMenuItem1,
-            this.aboutToolStripMenuItem1,
-            this.checkForUpdatesToolStripMenuItem});
-            this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
-            this.helpToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
-            this.helpToolStripMenuItem.Text = "Help";
+            helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { changelogToolStripMenuItem1, aboutToolStripMenuItem1, checkForUpdatesToolStripMenuItem, donateToolStripMenuItem });
+            helpToolStripMenuItem.Name = "helpToolStripMenuItem";
+            helpToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
+            helpToolStripMenuItem.Text = "Help";
             // 
             // changelogToolStripMenuItem1
             // 
-            this.changelogToolStripMenuItem1.BackColor = System.Drawing.SystemColors.Control;
-            this.changelogToolStripMenuItem1.Image = global::GChan.Properties.Resources.alert;
-            this.changelogToolStripMenuItem1.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
-            this.changelogToolStripMenuItem1.Name = "changelogToolStripMenuItem1";
-            this.changelogToolStripMenuItem1.Size = new System.Drawing.Size(171, 22);
-            this.changelogToolStripMenuItem1.Text = "&Changelog";
-            this.changelogToolStripMenuItem1.Click += new System.EventHandler(this.changelogToolStripMenuItem_Click);
+            changelogToolStripMenuItem1.BackColor = System.Drawing.SystemColors.Control;
+            changelogToolStripMenuItem1.Image = Properties.Resources.alert;
+            changelogToolStripMenuItem1.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
+            changelogToolStripMenuItem1.Name = "changelogToolStripMenuItem1";
+            changelogToolStripMenuItem1.Size = new System.Drawing.Size(171, 22);
+            changelogToolStripMenuItem1.Text = "&Changelog";
+            changelogToolStripMenuItem1.Click += changelogToolStripMenuItem_Click;
             // 
             // aboutToolStripMenuItem1
             // 
-            this.aboutToolStripMenuItem1.Image = global::GChan.Properties.Resources.question;
-            this.aboutToolStripMenuItem1.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
-            this.aboutToolStripMenuItem1.Name = "aboutToolStripMenuItem1";
-            this.aboutToolStripMenuItem1.Size = new System.Drawing.Size(171, 22);
-            this.aboutToolStripMenuItem1.Text = "&About";
-            this.aboutToolStripMenuItem1.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
+            aboutToolStripMenuItem1.Image = Properties.Resources.question;
+            aboutToolStripMenuItem1.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
+            aboutToolStripMenuItem1.Name = "aboutToolStripMenuItem1";
+            aboutToolStripMenuItem1.Size = new System.Drawing.Size(171, 22);
+            aboutToolStripMenuItem1.Text = "&About";
+            aboutToolStripMenuItem1.Click += aboutToolStripMenuItem_Click;
             // 
             // checkForUpdatesToolStripMenuItem
             // 
-            this.checkForUpdatesToolStripMenuItem.Image = global::GChan.Properties.Resources.download;
-            this.checkForUpdatesToolStripMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
-            this.checkForUpdatesToolStripMenuItem.Name = "checkForUpdatesToolStripMenuItem";
-            this.checkForUpdatesToolStripMenuItem.Size = new System.Drawing.Size(171, 22);
-            this.checkForUpdatesToolStripMenuItem.Text = "Check for Updates";
-            this.checkForUpdatesToolStripMenuItem.Click += new System.EventHandler(this.checkForUpdatesToolStripMenuItem_Click);
+            checkForUpdatesToolStripMenuItem.Image = Properties.Resources.download;
+            checkForUpdatesToolStripMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
+            checkForUpdatesToolStripMenuItem.Name = "checkForUpdatesToolStripMenuItem";
+            checkForUpdatesToolStripMenuItem.Size = new System.Drawing.Size(171, 22);
+            checkForUpdatesToolStripMenuItem.Text = "Check for Updates";
+            checkForUpdatesToolStripMenuItem.Click += checkForUpdatesToolStripMenuItem_Click;
+            // 
+            // donateToolStripMenuItem
+            // 
+            donateToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { kofiToolStripMenuItem, payPalToolStripMenuItem, gitHubSponsorToolStripMenuItem });
+            donateToolStripMenuItem.Name = "donateToolStripMenuItem";
+            donateToolStripMenuItem.Size = new System.Drawing.Size(171, 22);
+            donateToolStripMenuItem.Text = "Donate";
+            // 
+            // kofiToolStripMenuItem
+            // 
+            kofiToolStripMenuItem.Name = "kofiToolStripMenuItem";
+            kofiToolStripMenuItem.Size = new System.Drawing.Size(158, 22);
+            kofiToolStripMenuItem.Text = "Ko-fi";
+            kofiToolStripMenuItem.Click += kofiToolStripMenuItem_Click;
+            // 
+            // payPalToolStripMenuItem
+            // 
+            payPalToolStripMenuItem.Name = "payPalToolStripMenuItem";
+            payPalToolStripMenuItem.Size = new System.Drawing.Size(158, 22);
+            payPalToolStripMenuItem.Text = "PayPal";
+            payPalToolStripMenuItem.Click += payPalToolStripMenuItem_Click;
+            // 
+            // gitHubSponsorToolStripMenuItem
+            // 
+            gitHubSponsorToolStripMenuItem.Name = "gitHubSponsorToolStripMenuItem";
+            gitHubSponsorToolStripMenuItem.Size = new System.Drawing.Size(158, 22);
+            gitHubSponsorToolStripMenuItem.Text = "GitHub Sponsor";
+            gitHubSponsorToolStripMenuItem.Click += gitHubSponsorToolStripMenuItem_Click;
             // 
             // updateAvailableToolStripMenuItem
             // 
-            this.updateAvailableToolStripMenuItem.Image = global::GChan.Properties.Resources.alert;
-            this.updateAvailableToolStripMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
-            this.updateAvailableToolStripMenuItem.Name = "updateAvailableToolStripMenuItem";
-            this.updateAvailableToolStripMenuItem.Size = new System.Drawing.Size(126, 20);
-            this.updateAvailableToolStripMenuItem.Text = "Update Available!";
-            this.updateAvailableToolStripMenuItem.ToolTipText = "An update is available for GChan! Click here for more info.";
-            this.updateAvailableToolStripMenuItem.Visible = false;
-            this.updateAvailableToolStripMenuItem.Click += new System.EventHandler(this.updateAvailableToolStripMenuItem_Click);
+            updateAvailableToolStripMenuItem.Image = Properties.Resources.alert;
+            updateAvailableToolStripMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
+            updateAvailableToolStripMenuItem.Name = "updateAvailableToolStripMenuItem";
+            updateAvailableToolStripMenuItem.Size = new System.Drawing.Size(126, 20);
+            updateAvailableToolStripMenuItem.Text = "Update Available!";
+            updateAvailableToolStripMenuItem.ToolTipText = "An update is available for GChan! Click here for more info.";
+            updateAvailableToolStripMenuItem.Visible = false;
+            updateAvailableToolStripMenuItem.Click += updateAvailableToolStripMenuItem_Click;
+            // 
+            // resumeDownloadsToolStripMenuItem
+            // 
+            resumeDownloadsToolStripMenuItem.DataBindings.Add(new System.Windows.Forms.Binding("Visible", mainFormModelBindingSource, "QueueIsPaused", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            resumeDownloadsToolStripMenuItem.Name = "resumeDownloadsToolStripMenuItem";
+            resumeDownloadsToolStripMenuItem.Size = new System.Drawing.Size(123, 20);
+            resumeDownloadsToolStripMenuItem.Text = "Resume Downloads";
+            resumeDownloadsToolStripMenuItem.Click += resumeDownloadsToolStripMenuItem_Click;
             // 
             // listsTabControl
             // 
-            this.listsTabControl.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.listsTabControl.Controls.Add(this.threadsTabPage);
-            this.listsTabControl.Controls.Add(this.boardsTabPage);
-            this.listsTabControl.Location = new System.Drawing.Point(12, 56);
-            this.listsTabControl.Name = "listsTabControl";
-            this.listsTabControl.SelectedIndex = 0;
-            this.listsTabControl.Size = new System.Drawing.Size(558, 222);
-            this.listsTabControl.TabIndex = 1;
+            listsTabControl.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            listsTabControl.Controls.Add(threadsTabPage);
+            listsTabControl.Controls.Add(boardsTabPage);
+            listsTabControl.Location = new System.Drawing.Point(14, 65);
+            listsTabControl.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            listsTabControl.Name = "listsTabControl";
+            listsTabControl.SelectedIndex = 0;
+            listsTabControl.Size = new System.Drawing.Size(651, 256);
+            listsTabControl.TabIndex = 1;
             // 
             // threadsTabPage
             // 
-            this.threadsTabPage.Controls.Add(this.threadGridView);
-            this.threadsTabPage.Location = new System.Drawing.Point(4, 22);
-            this.threadsTabPage.Name = "threadsTabPage";
-            this.threadsTabPage.Padding = new System.Windows.Forms.Padding(3);
-            this.threadsTabPage.Size = new System.Drawing.Size(550, 196);
-            this.threadsTabPage.TabIndex = 0;
-            this.threadsTabPage.Text = "Threads (0)";
-            this.threadsTabPage.UseVisualStyleBackColor = true;
+            threadsTabPage.Controls.Add(threadGridView);
+            threadsTabPage.Location = new System.Drawing.Point(4, 24);
+            threadsTabPage.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            threadsTabPage.Name = "threadsTabPage";
+            threadsTabPage.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            threadsTabPage.Size = new System.Drawing.Size(643, 228);
+            threadsTabPage.TabIndex = 0;
+            threadsTabPage.Text = "Threads (0)";
+            threadsTabPage.UseVisualStyleBackColor = true;
             // 
             // threadGridView
             // 
-            this.threadGridView.AllowUserToAddRows = false;
-            this.threadGridView.AllowUserToDeleteRows = false;
-            this.threadGridView.AllowUserToOrderColumns = true;
-            this.threadGridView.AllowUserToResizeRows = false;
-            dataGridViewCellStyle1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(245)))), ((int)(((byte)(245)))), ((int)(((byte)(245)))));
+            threadGridView.AllowUserToAddRows = false;
+            threadGridView.AllowUserToDeleteRows = false;
+            threadGridView.AllowUserToOrderColumns = true;
+            threadGridView.AllowUserToResizeRows = false;
+            dataGridViewCellStyle1.BackColor = System.Drawing.Color.FromArgb(245, 245, 245);
             dataGridViewCellStyle1.NullValue = " ";
-            this.threadGridView.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle1;
-            this.threadGridView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.threadGridView.AutoGenerateColumns = false;
-            this.threadGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
-            this.threadGridView.BackgroundColor = System.Drawing.Color.White;
-            this.threadGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.threadGridView.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.threadGridSubjectColumn,
-            this.threadGridSiteColumn,
-            this.threadGridBoardCodeColumn,
-            this.threadGridIdColumn,
-            this.threadGridFileCountColumn});
-            this.threadGridView.ContextMenuStrip = this.threadsContextMenu;
-            this.threadGridView.DataSource = this.threadsBindingSource;
+            threadGridView.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle1;
+            threadGridView.AutoGenerateColumns = false;
+            threadGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            threadGridView.BackgroundColor = System.Drawing.Color.White;
+            threadGridView.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            threadGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            threadGridView.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { threadGridSubjectColumn, threadGridSiteColumn, threadGridBoardCodeColumn, Id, threadGridFileCountColumn, threadGridPendingColumn });
+            threadGridView.ContextMenuStrip = threadsContextMenu;
+            threadGridView.DataSource = threadsBindingSource;
             dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
             dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
             dataGridViewCellStyle2.NullValue = " ";
             dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
             dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
             dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.threadGridView.DefaultCellStyle = dataGridViewCellStyle2;
-            this.threadGridView.GridColor = System.Drawing.SystemColors.Window;
-            this.threadGridView.Location = new System.Drawing.Point(-1, -1);
-            this.threadGridView.Margin = new System.Windows.Forms.Padding(0);
-            this.threadGridView.MultiSelect = false;
-            this.threadGridView.Name = "threadGridView";
-            this.threadGridView.ReadOnly = true;
-            this.threadGridView.RowHeadersVisible = false;
-            this.threadGridView.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.threadGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.threadGridView.ShowCellErrors = false;
-            this.threadGridView.ShowEditingIcon = false;
-            this.threadGridView.ShowRowErrors = false;
-            this.threadGridView.Size = new System.Drawing.Size(552, 198);
-            this.threadGridView.TabIndex = 1;
-            this.threadGridView.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.threadGridView_DataError);
-            this.threadGridView.MouseDown += new System.Windows.Forms.MouseEventHandler(this.threadGridView_MouseDown);
-            // 
-            // threadsContextMenu
-            // 
-            this.threadsContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.openFolderToolStripMenuItem,
-            this.openInBrowserToolStripMenuItem,
-            this.copyURLToClipboardToolStripMenuItem,
-            this.renameToolStripMenuItem,
-            this.deleteToolStripMenuItem});
-            this.threadsContextMenu.Name = "cmThreads";
-            this.threadsContextMenu.Size = new System.Drawing.Size(238, 114);
-            // 
-            // openFolderToolStripMenuItem
-            // 
-            this.openFolderToolStripMenuItem.Image = global::GChan.Properties.Resources.folder;
-            this.openFolderToolStripMenuItem.Name = "openFolderToolStripMenuItem";
-            this.openFolderToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.F)));
-            this.openFolderToolStripMenuItem.Size = new System.Drawing.Size(237, 22);
-            this.openFolderToolStripMenuItem.Text = "Open &Folder";
-            this.openFolderToolStripMenuItem.Click += new System.EventHandler(this.openFolderToolStripMenuItem_Click);
-            // 
-            // openInBrowserToolStripMenuItem
-            // 
-            this.openInBrowserToolStripMenuItem.AutoSize = false;
-            this.openInBrowserToolStripMenuItem.Image = global::GChan.Properties.Resources.world;
-            this.openInBrowserToolStripMenuItem.Name = "openInBrowserToolStripMenuItem";
-            this.openInBrowserToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.B)));
-            this.openInBrowserToolStripMenuItem.Size = new System.Drawing.Size(237, 22);
-            this.openInBrowserToolStripMenuItem.Text = "Open in &Browser";
-            this.openInBrowserToolStripMenuItem.Click += new System.EventHandler(this.openInBrowserToolStripMenuItem_Click);
-            // 
-            // copyURLToClipboardToolStripMenuItem
-            // 
-            this.copyURLToClipboardToolStripMenuItem.Image = global::GChan.Properties.Resources.clipboard;
-            this.copyURLToClipboardToolStripMenuItem.Name = "copyURLToClipboardToolStripMenuItem";
-            this.copyURLToClipboardToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.C)));
-            this.copyURLToClipboardToolStripMenuItem.Size = new System.Drawing.Size(237, 22);
-            this.copyURLToClipboardToolStripMenuItem.Text = "Copy &URL to Clipboard";
-            this.copyURLToClipboardToolStripMenuItem.Click += new System.EventHandler(this.copyURLToClipboardToolStripMenuItem_Click);
-            // 
-            // renameToolStripMenuItem
-            // 
-            this.renameToolStripMenuItem.Image = global::GChan.Properties.Resources.Rename;
-            this.renameToolStripMenuItem.Name = "renameToolStripMenuItem";
-            this.renameToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F2;
-            this.renameToolStripMenuItem.Size = new System.Drawing.Size(237, 22);
-            this.renameToolStripMenuItem.Text = "&Rename";
-            this.renameToolStripMenuItem.Click += new System.EventHandler(this.renameToolStripMenuItem_Click);
-            // 
-            // deleteToolStripMenuItem
-            // 
-            this.deleteToolStripMenuItem.Image = global::GChan.Properties.Resources.close;
-            this.deleteToolStripMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
-            this.deleteToolStripMenuItem.Name = "deleteToolStripMenuItem";
-            this.deleteToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.Delete;
-            this.deleteToolStripMenuItem.Size = new System.Drawing.Size(237, 22);
-            this.deleteToolStripMenuItem.Text = "R&emove";
-            this.deleteToolStripMenuItem.Click += new System.EventHandler(this.deleteToolStripMenuItem_Click);
-            // 
-            // threadsBindingSource
-            // 
-            this.threadsBindingSource.DataMember = "Threads";
-            this.threadsBindingSource.DataSource = this.mainFormModelBindingSource;
-            // 
-            // mainFormModelBindingSource
-            // 
-            this.mainFormModelBindingSource.DataSource = typeof(GChan.Models.MainFormModel);
-            // 
-            // boardsTabPage
-            // 
-            this.boardsTabPage.Controls.Add(this.boardsListBox);
-            this.boardsTabPage.Location = new System.Drawing.Point(4, 22);
-            this.boardsTabPage.Name = "boardsTabPage";
-            this.boardsTabPage.Padding = new System.Windows.Forms.Padding(3);
-            this.boardsTabPage.Size = new System.Drawing.Size(550, 196);
-            this.boardsTabPage.TabIndex = 1;
-            this.boardsTabPage.Text = "Boards (0)";
-            this.boardsTabPage.UseVisualStyleBackColor = true;
-            // 
-            // boardsListBox
-            // 
-            this.boardsListBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.boardsListBox.ContextMenuStrip = this.boardsContextMenu;
-            this.boardsListBox.DataSource = this.boardsBindingSource;
-            this.boardsListBox.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.boardsListBox.FormattingEnabled = true;
-            this.boardsListBox.Location = new System.Drawing.Point(3, 3);
-            this.boardsListBox.Name = "boardsListBox";
-            this.boardsListBox.Size = new System.Drawing.Size(544, 190);
-            this.boardsListBox.TabIndex = 1;
-            this.boardsListBox.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.boardsListBox_MouseDoubleClick);
-            // 
-            // boardsContextMenu
-            // 
-            this.boardsContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.boardsContextMenuOpenFolderButton,
-            this.boardsContextMenuOpenInBrowserButton,
-            this.boardsContextMenuRemoveButton});
-            this.boardsContextMenu.Name = "cmThreads";
-            this.boardsContextMenu.Size = new System.Drawing.Size(203, 70);
-            // 
-            // boardsContextMenuOpenFolderButton
-            // 
-            this.boardsContextMenuOpenFolderButton.Image = global::GChan.Properties.Resources.folder;
-            this.boardsContextMenuOpenFolderButton.Name = "boardsContextMenuOpenFolderButton";
-            this.boardsContextMenuOpenFolderButton.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.F)));
-            this.boardsContextMenuOpenFolderButton.Size = new System.Drawing.Size(202, 22);
-            this.boardsContextMenuOpenFolderButton.Text = "Open Folder";
-            this.boardsContextMenuOpenFolderButton.Click += new System.EventHandler(this.openBoardFolderToolStripMenuItem_Click);
-            // 
-            // boardsContextMenuOpenInBrowserButton
-            // 
-            this.boardsContextMenuOpenInBrowserButton.Image = global::GChan.Properties.Resources.world;
-            this.boardsContextMenuOpenInBrowserButton.Name = "boardsContextMenuOpenInBrowserButton";
-            this.boardsContextMenuOpenInBrowserButton.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.B)));
-            this.boardsContextMenuOpenInBrowserButton.Size = new System.Drawing.Size(202, 22);
-            this.boardsContextMenuOpenInBrowserButton.Text = "Open in Browser";
-            this.boardsContextMenuOpenInBrowserButton.Click += new System.EventHandler(this.openBoardURLToolStripMenuItem_Click);
-            // 
-            // boardsContextMenuRemoveButton
-            // 
-            this.boardsContextMenuRemoveButton.Image = global::GChan.Properties.Resources.close;
-            this.boardsContextMenuRemoveButton.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
-            this.boardsContextMenuRemoveButton.Name = "boardsContextMenuRemoveButton";
-            this.boardsContextMenuRemoveButton.ShortcutKeys = System.Windows.Forms.Keys.Delete;
-            this.boardsContextMenuRemoveButton.Size = new System.Drawing.Size(202, 22);
-            this.boardsContextMenuRemoveButton.Text = "Remove";
-            this.boardsContextMenuRemoveButton.Click += new System.EventHandler(this.deleteBoardToolStripMenuItem_Click);
-            // 
-            // boardsBindingSource
-            // 
-            this.boardsBindingSource.DataMember = "Boards";
-            this.boardsBindingSource.DataSource = this.mainFormModelBindingSource;
-            // 
-            // addButton
-            // 
-            this.addButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.addButton.Location = new System.Drawing.Point(384, 28);
-            this.addButton.Name = "addButton";
-            this.addButton.Size = new System.Drawing.Size(74, 23);
-            this.addButton.TabIndex = 2;
-            this.addButton.Text = "Add";
-            this.toolTip.SetToolTip(this.addButton, "Add the entered thread/board to tracking.");
-            this.addButton.UseVisualStyleBackColor = true;
-            this.addButton.Click += new System.EventHandler(this.addButton_Click);
-            // 
-            // urlTextBox
-            // 
-            this.urlTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.urlTextBox.Location = new System.Drawing.Point(12, 30);
-            this.urlTextBox.Name = "urlTextBox";
-            this.urlTextBox.Size = new System.Drawing.Size(366, 20);
-            this.urlTextBox.TabIndex = 3;
-            // 
-            // systemTrayNotifyIcon
-            // 
-            this.systemTrayNotifyIcon.ContextMenuStrip = this.systemTrayContextMenu;
-            this.systemTrayNotifyIcon.Icon = ((System.Drawing.Icon)(resources.GetObject("systemTrayNotifyIcon.Icon")));
-            this.systemTrayNotifyIcon.Text = "Click to open/hide";
-            this.systemTrayNotifyIcon.Visible = true;
-            this.systemTrayNotifyIcon.MouseDown += new System.Windows.Forms.MouseEventHandler(this.systemTrayNotifyIcon_MouseDown);
-            this.systemTrayNotifyIcon.MouseMove += new System.Windows.Forms.MouseEventHandler(this.systemTrayNotifyIcon_MouseMove);
-            // 
-            // systemTrayContextMenu
-            // 
-            this.systemTrayContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.systemTrayOpenFolderToolStripMenuItem,
-            this.systemTrayExitToolStripMenuItem});
-            this.systemTrayContextMenu.Name = "cmTray";
-            this.systemTrayContextMenu.Size = new System.Drawing.Size(140, 48);
-            // 
-            // systemTrayOpenFolderToolStripMenuItem
-            // 
-            this.systemTrayOpenFolderToolStripMenuItem.Image = global::GChan.Properties.Resources.folder;
-            this.systemTrayOpenFolderToolStripMenuItem.Name = "systemTrayOpenFolderToolStripMenuItem";
-            this.systemTrayOpenFolderToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
-            this.systemTrayOpenFolderToolStripMenuItem.Text = "Open &Folder";
-            this.systemTrayOpenFolderToolStripMenuItem.Click += new System.EventHandler(this.systemTrayOpenFolderToolStripMenuItem_Click);
-            // 
-            // systemTrayExitToolStripMenuItem
-            // 
-            this.systemTrayExitToolStripMenuItem.Image = global::GChan.Properties.Resources.close;
-            this.systemTrayExitToolStripMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
-            this.systemTrayExitToolStripMenuItem.Name = "systemTrayExitToolStripMenuItem";
-            this.systemTrayExitToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
-            this.systemTrayExitToolStripMenuItem.Text = "&Exit";
-            this.systemTrayExitToolStripMenuItem.Click += new System.EventHandler(this.systemTrayExitToolStripMenuItem_Click);
-            // 
-            // clearAllButton
-            // 
-            this.clearAllButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.clearAllButton.Location = new System.Drawing.Point(464, 28);
-            this.clearAllButton.Name = "clearAllButton";
-            this.clearAllButton.Size = new System.Drawing.Size(74, 23);
-            this.clearAllButton.TabIndex = 4;
-            this.clearAllButton.Text = "Clear";
-            this.clearAllButton.UseVisualStyleBackColor = true;
-            this.clearAllButton.Click += new System.EventHandler(this.clearAllButton_Click);
-            // 
-            // clipboardButton
-            // 
-            this.clipboardButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.clipboardButton.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.clipboardButton.Location = new System.Drawing.Point(544, 28);
-            this.clipboardButton.Name = "clipboardButton";
-            this.clipboardButton.Size = new System.Drawing.Size(26, 23);
-            this.clipboardButton.TabIndex = 5;
-            this.clipboardButton.Text = "📋";
-            this.toolTip.SetToolTip(this.clipboardButton, "Copy Thread URLs to Clipboard (Delimited by commas)");
-            this.clipboardButton.UseVisualStyleBackColor = true;
-            this.clipboardButton.Click += new System.EventHandler(this.clipboardButton_Click);
+            threadGridView.DefaultCellStyle = dataGridViewCellStyle2;
+            threadGridView.Dock = System.Windows.Forms.DockStyle.Fill;
+            threadGridView.GridColor = System.Drawing.SystemColors.Window;
+            threadGridView.Location = new System.Drawing.Point(4, 3);
+            threadGridView.Margin = new System.Windows.Forms.Padding(0);
+            threadGridView.MultiSelect = false;
+            threadGridView.Name = "threadGridView";
+            threadGridView.ReadOnly = true;
+            threadGridView.RowHeadersVisible = false;
+            threadGridView.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            threadGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            threadGridView.ShowCellErrors = false;
+            threadGridView.ShowEditingIcon = false;
+            threadGridView.ShowRowErrors = false;
+            threadGridView.Size = new System.Drawing.Size(635, 222);
+            threadGridView.TabIndex = 1;
+            threadGridView.DataError += threadGridView_DataError;
+            threadGridView.MouseDown += gridView_MouseDown;
             // 
             // threadGridSubjectColumn
             // 
-            this.threadGridSubjectColumn.DataPropertyName = "Subject";
-            this.threadGridSubjectColumn.FillWeight = 25F;
-            this.threadGridSubjectColumn.HeaderText = "Subject";
-            this.threadGridSubjectColumn.Name = "threadGridSubjectColumn";
-            this.threadGridSubjectColumn.ReadOnly = true;
+            threadGridSubjectColumn.DataPropertyName = "Subject";
+            threadGridSubjectColumn.FillWeight = 25F;
+            threadGridSubjectColumn.HeaderText = "Subject";
+            threadGridSubjectColumn.Name = "threadGridSubjectColumn";
+            threadGridSubjectColumn.ReadOnly = true;
+            threadGridSubjectColumn.ToolTipText = "The subject of the thread (can also be taken from the username or description, or overwritten by you).";
             // 
             // threadGridSiteColumn
             // 
-            this.threadGridSiteColumn.DataPropertyName = "SiteName";
-            this.threadGridSiteColumn.FillWeight = 8F;
-            this.threadGridSiteColumn.HeaderText = "Site";
-            this.threadGridSiteColumn.Name = "threadGridSiteColumn";
-            this.threadGridSiteColumn.ReadOnly = true;
-            this.threadGridSiteColumn.ToolTipText = "The website the thread is hosted on.";
+            threadGridSiteColumn.DataPropertyName = "SiteDisplayName";
+            threadGridSiteColumn.FillWeight = 8F;
+            threadGridSiteColumn.HeaderText = "Site";
+            threadGridSiteColumn.Name = "threadGridSiteColumn";
+            threadGridSiteColumn.ReadOnly = true;
+            threadGridSiteColumn.ToolTipText = "The website the thread is hosted on.";
             // 
             // threadGridBoardCodeColumn
             // 
-            this.threadGridBoardCodeColumn.DataPropertyName = "BoardCode";
-            this.threadGridBoardCodeColumn.FillWeight = 8.387236F;
-            this.threadGridBoardCodeColumn.HeaderText = "Board";
-            this.threadGridBoardCodeColumn.Name = "threadGridBoardCodeColumn";
-            this.threadGridBoardCodeColumn.ReadOnly = true;
+            threadGridBoardCodeColumn.DataPropertyName = "BoardCode";
+            threadGridBoardCodeColumn.FillWeight = 8.387236F;
+            threadGridBoardCodeColumn.HeaderText = "Board";
+            threadGridBoardCodeColumn.Name = "threadGridBoardCodeColumn";
+            threadGridBoardCodeColumn.ReadOnly = true;
+            threadGridBoardCodeColumn.ToolTipText = "The thread's board code.";
             // 
-            // threadGridIdColumn
+            // Id
             // 
-            this.threadGridIdColumn.DataPropertyName = "ID";
-            this.threadGridIdColumn.FillWeight = 8.387236F;
-            this.threadGridIdColumn.HeaderText = "ID";
-            this.threadGridIdColumn.Name = "threadGridIdColumn";
-            this.threadGridIdColumn.ReadOnly = true;
+            Id.DataPropertyName = "Id";
+            Id.FillWeight = 11F;
+            Id.HeaderText = "Id";
+            Id.Name = "Id";
+            Id.ReadOnly = true;
+            Id.ToolTipText = "The thread identifier.";
             // 
             // threadGridFileCountColumn
             // 
-            this.threadGridFileCountColumn.DataPropertyName = "FileCount";
-            this.threadGridFileCountColumn.FillWeight = 8.387236F;
-            this.threadGridFileCountColumn.HeaderText = "File Count";
-            this.threadGridFileCountColumn.Name = "threadGridFileCountColumn";
-            this.threadGridFileCountColumn.ReadOnly = true;
+            threadGridFileCountColumn.DataPropertyName = "FileCount";
+            threadGridFileCountColumn.FillWeight = 8.387236F;
+            threadGridFileCountColumn.HeaderText = "Files";
+            threadGridFileCountColumn.Name = "threadGridFileCountColumn";
+            threadGridFileCountColumn.ReadOnly = true;
+            threadGridFileCountColumn.ToolTipText = "The amount of files in the thread.";
+            // 
+            // threadGridPendingColumn
+            // 
+            threadGridPendingColumn.DataPropertyName = "PendingFileCount";
+            threadGridPendingColumn.FillWeight = 8.387236F;
+            threadGridPendingColumn.HeaderText = "Pending";
+            threadGridPendingColumn.Name = "threadGridPendingColumn";
+            threadGridPendingColumn.ReadOnly = true;
+            threadGridPendingColumn.ToolTipText = "The amount of files in queue pending download (excluding thumbnails).";
+            // 
+            // threadsContextMenu
+            // 
+            threadsContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { openFolderToolStripMenuItem, openInBrowserToolStripMenuItem, copyURLToClipboardToolStripMenuItem, renameToolStripMenuItem, deleteToolStripMenuItem });
+            threadsContextMenu.Name = "cmThreads";
+            threadsContextMenu.Size = new System.Drawing.Size(238, 114);
+            // 
+            // openFolderToolStripMenuItem
+            // 
+            openFolderToolStripMenuItem.Image = Properties.Resources.folder;
+            openFolderToolStripMenuItem.Name = "openFolderToolStripMenuItem";
+            openFolderToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.F;
+            openFolderToolStripMenuItem.Size = new System.Drawing.Size(237, 22);
+            openFolderToolStripMenuItem.Text = "Open &Folder";
+            openFolderToolStripMenuItem.Click += openFolderToolStripMenuItem_Click;
+            // 
+            // openInBrowserToolStripMenuItem
+            // 
+            openInBrowserToolStripMenuItem.AutoSize = false;
+            openInBrowserToolStripMenuItem.Image = Properties.Resources.world;
+            openInBrowserToolStripMenuItem.Name = "openInBrowserToolStripMenuItem";
+            openInBrowserToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.B;
+            openInBrowserToolStripMenuItem.Size = new System.Drawing.Size(237, 22);
+            openInBrowserToolStripMenuItem.Text = "Open in &Browser";
+            openInBrowserToolStripMenuItem.Click += openInBrowserToolStripMenuItem_Click;
+            // 
+            // copyURLToClipboardToolStripMenuItem
+            // 
+            copyURLToClipboardToolStripMenuItem.Image = Properties.Resources.clipboard;
+            copyURLToClipboardToolStripMenuItem.Name = "copyURLToClipboardToolStripMenuItem";
+            copyURLToClipboardToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.C;
+            copyURLToClipboardToolStripMenuItem.Size = new System.Drawing.Size(237, 22);
+            copyURLToClipboardToolStripMenuItem.Text = "Copy &URL to Clipboard";
+            copyURLToClipboardToolStripMenuItem.Click += copyURLToClipboardToolStripMenuItem_Click;
+            // 
+            // renameToolStripMenuItem
+            // 
+            renameToolStripMenuItem.Image = Properties.Resources.Rename;
+            renameToolStripMenuItem.Name = "renameToolStripMenuItem";
+            renameToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F2;
+            renameToolStripMenuItem.Size = new System.Drawing.Size(237, 22);
+            renameToolStripMenuItem.Text = "&Rename";
+            renameToolStripMenuItem.Click += renameToolStripMenuItem_Click;
+            // 
+            // deleteToolStripMenuItem
+            // 
+            deleteToolStripMenuItem.Image = Properties.Resources.close;
+            deleteToolStripMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
+            deleteToolStripMenuItem.Name = "deleteToolStripMenuItem";
+            deleteToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.Delete;
+            deleteToolStripMenuItem.Size = new System.Drawing.Size(237, 22);
+            deleteToolStripMenuItem.Text = "R&emove";
+            deleteToolStripMenuItem.Click += deleteToolStripMenuItem_Click;
+            // 
+            // threadsBindingSource
+            // 
+            threadsBindingSource.DataMember = "Threads";
+            threadsBindingSource.DataSource = mainFormModelBindingSource;
+            // 
+            // boardsTabPage
+            // 
+            boardsTabPage.Controls.Add(boardsGridView);
+            boardsTabPage.Location = new System.Drawing.Point(4, 24);
+            boardsTabPage.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            boardsTabPage.Name = "boardsTabPage";
+            boardsTabPage.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            boardsTabPage.Size = new System.Drawing.Size(643, 228);
+            boardsTabPage.TabIndex = 1;
+            boardsTabPage.Text = "Boards (0)";
+            boardsTabPage.UseVisualStyleBackColor = true;
+            // 
+            // boardsGridView
+            // 
+            boardsGridView.AllowUserToAddRows = false;
+            boardsGridView.AllowUserToDeleteRows = false;
+            boardsGridView.AllowUserToOrderColumns = true;
+            boardsGridView.AllowUserToResizeRows = false;
+            dataGridViewCellStyle3.BackColor = System.Drawing.Color.FromArgb(245, 245, 245);
+            dataGridViewCellStyle3.NullValue = " ";
+            boardsGridView.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle3;
+            boardsGridView.AutoGenerateColumns = false;
+            boardsGridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            boardsGridView.BackgroundColor = System.Drawing.Color.White;
+            boardsGridView.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            boardsGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            boardsGridView.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { boardsGridViewSiteColumn, boardsGridViewBoardColumn, boardsGridViewThreadsColumn });
+            boardsGridView.ContextMenuStrip = boardsContextMenu;
+            boardsGridView.DataSource = boardsBindingSource;
+            dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle4.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle4.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
+            dataGridViewCellStyle4.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle4.NullValue = " ";
+            dataGridViewCellStyle4.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle4.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle4.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            boardsGridView.DefaultCellStyle = dataGridViewCellStyle4;
+            boardsGridView.Dock = System.Windows.Forms.DockStyle.Fill;
+            boardsGridView.GridColor = System.Drawing.SystemColors.Window;
+            boardsGridView.Location = new System.Drawing.Point(4, 3);
+            boardsGridView.Margin = new System.Windows.Forms.Padding(0);
+            boardsGridView.MultiSelect = false;
+            boardsGridView.Name = "boardsGridView";
+            boardsGridView.ReadOnly = true;
+            boardsGridView.RowHeadersVisible = false;
+            boardsGridView.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            boardsGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            boardsGridView.ShowCellErrors = false;
+            boardsGridView.ShowEditingIcon = false;
+            boardsGridView.ShowRowErrors = false;
+            boardsGridView.Size = new System.Drawing.Size(635, 222);
+            boardsGridView.TabIndex = 2;
+            boardsGridView.MouseDown += gridView_MouseDown;
+            // 
+            // boardsContextMenu
+            // 
+            boardsContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { boardsContextMenuOpenFolderButton, boardsContextMenuOpenInBrowserButton, boardsContextMenuRemoveButton });
+            boardsContextMenu.Name = "cmThreads";
+            boardsContextMenu.Size = new System.Drawing.Size(203, 70);
+            // 
+            // boardsContextMenuOpenFolderButton
+            // 
+            boardsContextMenuOpenFolderButton.Image = Properties.Resources.folder;
+            boardsContextMenuOpenFolderButton.Name = "boardsContextMenuOpenFolderButton";
+            boardsContextMenuOpenFolderButton.ShortcutKeys = System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.F;
+            boardsContextMenuOpenFolderButton.Size = new System.Drawing.Size(202, 22);
+            boardsContextMenuOpenFolderButton.Text = "Open Folder";
+            boardsContextMenuOpenFolderButton.Click += openBoardFolderToolStripMenuItem_Click;
+            // 
+            // boardsContextMenuOpenInBrowserButton
+            // 
+            boardsContextMenuOpenInBrowserButton.Image = Properties.Resources.world;
+            boardsContextMenuOpenInBrowserButton.Name = "boardsContextMenuOpenInBrowserButton";
+            boardsContextMenuOpenInBrowserButton.ShortcutKeys = System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.B;
+            boardsContextMenuOpenInBrowserButton.Size = new System.Drawing.Size(202, 22);
+            boardsContextMenuOpenInBrowserButton.Text = "Open in Browser";
+            boardsContextMenuOpenInBrowserButton.Click += openBoardURLToolStripMenuItem_Click;
+            // 
+            // boardsContextMenuRemoveButton
+            // 
+            boardsContextMenuRemoveButton.Image = Properties.Resources.close;
+            boardsContextMenuRemoveButton.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
+            boardsContextMenuRemoveButton.Name = "boardsContextMenuRemoveButton";
+            boardsContextMenuRemoveButton.ShortcutKeys = System.Windows.Forms.Keys.Delete;
+            boardsContextMenuRemoveButton.Size = new System.Drawing.Size(202, 22);
+            boardsContextMenuRemoveButton.Text = "Remove";
+            boardsContextMenuRemoveButton.Click += deleteBoardToolStripMenuItem_ClickAsync;
+            // 
+            // boardsBindingSource
+            // 
+            boardsBindingSource.DataMember = "Boards";
+            boardsBindingSource.DataSource = mainFormModelBindingSource;
+            // 
+            // addButton
+            // 
+            addButton.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            addButton.Location = new System.Drawing.Point(448, 32);
+            addButton.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            addButton.Name = "addButton";
+            addButton.Size = new System.Drawing.Size(86, 27);
+            addButton.TabIndex = 2;
+            addButton.Text = "Add";
+            toolTip.SetToolTip(addButton, "Add the entered thread/board to tracking.\r\nCopies text from clipboard if textbox is empty.");
+            addButton.UseVisualStyleBackColor = true;
+            addButton.Click += addButton_Click;
+            // 
+            // urlTextBox
+            // 
+            urlTextBox.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            urlTextBox.Location = new System.Drawing.Point(14, 35);
+            urlTextBox.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            urlTextBox.Name = "urlTextBox";
+            urlTextBox.Size = new System.Drawing.Size(426, 23);
+            urlTextBox.TabIndex = 3;
+            // 
+            // systemTrayNotifyIcon
+            // 
+            systemTrayNotifyIcon.ContextMenuStrip = systemTrayContextMenu;
+            systemTrayNotifyIcon.Icon = (System.Drawing.Icon)resources.GetObject("systemTrayNotifyIcon.Icon");
+            systemTrayNotifyIcon.Text = "Click to open/hide";
+            systemTrayNotifyIcon.Visible = true;
+            systemTrayNotifyIcon.MouseDown += systemTrayNotifyIcon_MouseDown;
+            systemTrayNotifyIcon.MouseMove += systemTrayNotifyIcon_MouseMove;
+            // 
+            // systemTrayContextMenu
+            // 
+            systemTrayContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { resumeDownloadsToolStripMenuItem2, pauseDownloadsToolStripMenuItem1, systemTrayOpenFolderToolStripMenuItem, systemTrayExitToolStripMenuItem });
+            systemTrayContextMenu.Name = "cmTray";
+            systemTrayContextMenu.Size = new System.Drawing.Size(179, 92);
+            // 
+            // resumeDownloadsToolStripMenuItem2
+            // 
+            resumeDownloadsToolStripMenuItem2.DataBindings.Add(new System.Windows.Forms.Binding("Visible", mainFormModelBindingSource, "QueueIsPaused", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            resumeDownloadsToolStripMenuItem2.Name = "resumeDownloadsToolStripMenuItem2";
+            resumeDownloadsToolStripMenuItem2.Size = new System.Drawing.Size(178, 22);
+            resumeDownloadsToolStripMenuItem2.Text = "Resume Downloads";
+            resumeDownloadsToolStripMenuItem2.Click += resumeDownloadsToolStripMenuItem2_Click;
+            // 
+            // pauseDownloadsToolStripMenuItem1
+            // 
+            pauseDownloadsToolStripMenuItem1.DataBindings.Add(new System.Windows.Forms.Binding("Visible", mainFormModelBindingSource, "QueueIsProcessing", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            pauseDownloadsToolStripMenuItem1.Name = "pauseDownloadsToolStripMenuItem1";
+            pauseDownloadsToolStripMenuItem1.Size = new System.Drawing.Size(178, 22);
+            pauseDownloadsToolStripMenuItem1.Text = "Pause Downloads";
+            pauseDownloadsToolStripMenuItem1.Click += pauseDownloadsToolStripMenuItem1_Click;
+            // 
+            // systemTrayOpenFolderToolStripMenuItem
+            // 
+            systemTrayOpenFolderToolStripMenuItem.Image = Properties.Resources.folder;
+            systemTrayOpenFolderToolStripMenuItem.Name = "systemTrayOpenFolderToolStripMenuItem";
+            systemTrayOpenFolderToolStripMenuItem.Size = new System.Drawing.Size(178, 22);
+            systemTrayOpenFolderToolStripMenuItem.Text = "Open &Folder";
+            systemTrayOpenFolderToolStripMenuItem.Click += systemTrayOpenFolderToolStripMenuItem_Click;
+            // 
+            // systemTrayExitToolStripMenuItem
+            // 
+            systemTrayExitToolStripMenuItem.Image = Properties.Resources.close;
+            systemTrayExitToolStripMenuItem.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
+            systemTrayExitToolStripMenuItem.Name = "systemTrayExitToolStripMenuItem";
+            systemTrayExitToolStripMenuItem.Size = new System.Drawing.Size(178, 22);
+            systemTrayExitToolStripMenuItem.Text = "&Exit";
+            systemTrayExitToolStripMenuItem.Click += systemTrayExitToolStripMenuItem_Click;
+            // 
+            // clearAllButton
+            // 
+            clearAllButton.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            clearAllButton.Location = new System.Drawing.Point(541, 32);
+            clearAllButton.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            clearAllButton.Name = "clearAllButton";
+            clearAllButton.Size = new System.Drawing.Size(86, 27);
+            clearAllButton.TabIndex = 4;
+            clearAllButton.Text = "Clear";
+            clearAllButton.UseVisualStyleBackColor = true;
+            clearAllButton.Click += clearAllButton_Click;
+            // 
+            // clipboardButton
+            // 
+            clipboardButton.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            clipboardButton.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 0);
+            clipboardButton.Location = new System.Drawing.Point(635, 32);
+            clipboardButton.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            clipboardButton.Name = "clipboardButton";
+            clipboardButton.Size = new System.Drawing.Size(30, 27);
+            clipboardButton.TabIndex = 5;
+            clipboardButton.Text = "📋";
+            toolTip.SetToolTip(clipboardButton, "Copy Thread URLs to Clipboard (Delimited by commas)");
+            clipboardButton.UseVisualStyleBackColor = true;
+            clipboardButton.Click += clipboardButton_Click;
+            // 
+            // boardsGridViewSiteColumn
+            // 
+            boardsGridViewSiteColumn.DataPropertyName = "SiteDisplayName";
+            boardsGridViewSiteColumn.HeaderText = "Site";
+            boardsGridViewSiteColumn.Name = "boardsGridViewSiteColumn";
+            boardsGridViewSiteColumn.ReadOnly = true;
+            // 
+            // boardsGridViewBoardColumn
+            // 
+            boardsGridViewBoardColumn.DataPropertyName = "BoardCode";
+            boardsGridViewBoardColumn.HeaderText = "Board";
+            boardsGridViewBoardColumn.Name = "boardsGridViewBoardColumn";
+            boardsGridViewBoardColumn.ReadOnly = true;
+            // 
+            // boardsGridViewThreadsColumn
+            // 
+            boardsGridViewThreadsColumn.DataPropertyName = "ThreadCount";
+            boardsGridViewThreadsColumn.HeaderText = "Threads";
+            boardsGridViewThreadsColumn.Name = "boardsGridViewThreadsColumn";
+            boardsGridViewThreadsColumn.ReadOnly = true;
             // 
             // MainForm
             // 
-            this.AcceptButton = this.addButton;
-            this.AllowDrop = true;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(582, 294);
-            this.Controls.Add(this.clipboardButton);
-            this.Controls.Add(this.clearAllButton);
-            this.Controls.Add(this.urlTextBox);
-            this.Controls.Add(this.addButton);
-            this.Controls.Add(this.listsTabControl);
-            this.Controls.Add(this.menuStrip);
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.MainMenuStrip = this.menuStrip;
-            this.Name = "MainForm";
-            this.Text = "GChan";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
-            this.Load += new System.EventHandler(this.MainForm_Load);
-            this.Shown += new System.EventHandler(this.MainForm_Shown);
-            this.SizeChanged += new System.EventHandler(this.MainForm_SizeChanged);
-            this.DragDrop += new System.Windows.Forms.DragEventHandler(this.DragDropHandler);
-            this.DragEnter += new System.Windows.Forms.DragEventHandler(this.DragEnterHandler);
-            this.menuStrip.ResumeLayout(false);
-            this.menuStrip.PerformLayout();
-            this.listsTabControl.ResumeLayout(false);
-            this.threadsTabPage.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.threadGridView)).EndInit();
-            this.threadsContextMenu.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.threadsBindingSource)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.mainFormModelBindingSource)).EndInit();
-            this.boardsTabPage.ResumeLayout(false);
-            this.boardsContextMenu.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.boardsBindingSource)).EndInit();
-            this.systemTrayContextMenu.ResumeLayout(false);
-            this.ResumeLayout(false);
-            this.PerformLayout();
-
+            AcceptButton = addButton;
+            AllowDrop = true;
+            AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            ClientSize = new System.Drawing.Size(679, 339);
+            Controls.Add(clipboardButton);
+            Controls.Add(clearAllButton);
+            Controls.Add(urlTextBox);
+            Controls.Add(addButton);
+            Controls.Add(listsTabControl);
+            Controls.Add(menuStrip);
+            Icon = (System.Drawing.Icon)resources.GetObject("$this.Icon");
+            MainMenuStrip = menuStrip;
+            Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            Name = "MainForm";
+            Text = "GChan";
+            FormClosing += MainForm_FormClosing;
+            Load += MainForm_Load;
+            Shown += MainForm_Shown;
+            SizeChanged += MainForm_SizeChanged;
+            DragDrop += DragDropHandler;
+            DragEnter += DragEnterHandler;
+            menuStrip.ResumeLayout(false);
+            menuStrip.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)mainFormModelBindingSource).EndInit();
+            listsTabControl.ResumeLayout(false);
+            threadsTabPage.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)threadGridView).EndInit();
+            threadsContextMenu.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)threadsBindingSource).EndInit();
+            boardsTabPage.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)boardsGridView).EndInit();
+            boardsContextMenu.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)boardsBindingSource).EndInit();
+            systemTrayContextMenu.ResumeLayout(false);
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
         private System.Windows.Forms.TabControl listsTabControl;
         private System.Windows.Forms.Button addButton;
-        private System.Windows.Forms.ListBox boardsListBox;
         private System.Windows.Forms.ContextMenuStrip threadsContextMenu;
         private System.Windows.Forms.ToolStripMenuItem openFolderToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem openInBrowserToolStripMenuItem;
@@ -605,11 +735,26 @@
         internal System.Windows.Forms.TextBox urlTextBox;
         internal System.Windows.Forms.ToolStripMenuItem updateAvailableToolStripMenuItem;
         private System.Windows.Forms.DataGridViewTextBoxColumn fileCountDataGridViewTextBoxColumn;
+        private System.Windows.Forms.DataGridViewTextBoxColumn threadGridIdColumn;
+        private System.Windows.Forms.ToolStripMenuItem donateToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem kofiToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem payPalToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem gitHubSponsorToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem resumeDownloadsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem pauseDownloadsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem resumeDownloadsToolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem resumeDownloadsToolStripMenuItem2;
+        private System.Windows.Forms.ToolStripMenuItem pauseDownloadsToolStripMenuItem1;
+        internal Controls.PreferencesDataGridView boardsGridView;
         private System.Windows.Forms.DataGridViewTextBoxColumn threadGridSubjectColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn threadGridSiteColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn threadGridBoardCodeColumn;
-        private System.Windows.Forms.DataGridViewTextBoxColumn threadGridIdColumn;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Id;
         private System.Windows.Forms.DataGridViewTextBoxColumn threadGridFileCountColumn;
+        private System.Windows.Forms.DataGridViewTextBoxColumn threadGridPendingColumn;
+        private System.Windows.Forms.DataGridViewTextBoxColumn boardsGridViewSiteColumn;
+        private System.Windows.Forms.DataGridViewTextBoxColumn boardsGridViewBoardColumn;
+        private System.Windows.Forms.DataGridViewTextBoxColumn boardsGridViewThreadsColumn;
     }
 }
 
