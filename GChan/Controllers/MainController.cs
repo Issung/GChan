@@ -146,20 +146,67 @@ namespace GChan.Controllers
 
         /// <summary>
         /// Called by the process queue (from a processing thread) for threads found by board scraping.
+        /// Adds those not already tracked, then runs <paramref name="onAdded"/>, in one step on the UI thread.
         /// </summary>
-        private void AddTrackersIfNew(IReadOnlyList<Tracker> trackers)
+        /// <returns>False if the UI was unavailable (closing), in which case nothing was added and <paramref name="onAdded"/> didn't run.</returns>
+        private bool AddTrackersIfNew(IReadOnlyList<Tracker> trackers, Action onAdded)
         {
             // Check and add in one step on the UI thread, so two boards finding the same thread can't both add it.
             // One call for the whole batch, as a board's first scrape can find hundreds of threads.
-            OnUiThread(() =>
+            return OnUiThread(() =>
             {
-                foreach (var tracker in trackers)
+                var trackedThreads = Model.Threads.Select(t => (t.Site, t.BoardCode, t.Id)).ToHashSet();
+                var trackedBoards = Model.Boards.Select(b => b.Url).ToHashSet();
+
+                // For large batches (a board's first scrape) refresh the grids once at the end rather than for every row.
+                // Not for small ones, as a reset can lose the grid's selection and scroll position.
+                var suspendListEvents = trackers.Count > 20;
+                var threadCount = Model.Threads.Count;
+                var boardCount = Model.Boards.Count;
+
+                if (suspendListEvents)
                 {
-                    if (IsUnique(tracker))
+                    Model.Threads.RaiseListChangedEvents = false;
+                    Model.Boards.RaiseListChangedEvents = false;
+                }
+
+                try
+                {
+                    foreach (var tracker in trackers)
                     {
-                        AddNewTracker(tracker);
+                        var isNew = tracker switch
+                        {
+                            Thread thread => trackedThreads.Add((thread.Site, thread.BoardCode, thread.Id)),
+                            Board board => trackedBoards.Add(board.Url),
+                            _ => false,
+                        };
+
+                        if (isNew)
+                        {
+                            AddNewTracker(tracker);
+                        }
                     }
                 }
+                finally
+                {
+                    if (suspendListEvents)
+                    {
+                        Model.Threads.RaiseListChangedEvents = true;
+                        Model.Boards.RaiseListChangedEvents = true;
+
+                        if (Model.Threads.Count != threadCount)
+                        {
+                            Model.Threads.ResetBindings();
+                        }
+
+                        if (Model.Boards.Count != boardCount)
+                        {
+                            Model.Boards.ResetBindings();
+                        }
+                    }
+                }
+
+                onAdded?.Invoke();
             });
         }
 
@@ -370,12 +417,11 @@ namespace GChan.Controllers
         }
 
         /// <summary>
-        /// Closes without asking and saves synchronously, for when Windows is ending the session and won't wait for an async close.
+        /// Saves synchronously, for when Windows is ending the session and won't wait for an async close.<br/>
+        /// Nothing is shut down: Windows asks before it knows the session will end, and another app may still cancel it.
         /// </summary>
-        public void CloseImmediately()
+        public void SaveNow()
         {
-            ShutDown();
-
             if (!Settings.Default.SaveListsOnClose)
             {
                 return;
@@ -471,27 +517,36 @@ namespace GChan.Controllers
         /// <summary>
         /// Runs <paramref name="action"/> on the UI thread and waits for it. Does nothing once the form is closed.
         /// </summary>
-        private void OnUiThread(Action action)
+        /// <returns>True if <paramref name="action"/> ran, false if the form was closed.</returns>
+        private bool OnUiThread(Action action)
         {
             if (Form.IsDisposed || Form.Disposing)
             {
-                return;
+                return false;
             }
 
             if (!Form.InvokeRequired)
             {
                 action();
-                return;
+                return true;
             }
+
+            var ran = false;
 
             try
             {
-                Form.Invoke(action);
+                Form.Invoke(() =>
+                {
+                    ran = true;
+                    action();
+                });
             }
-            catch (Exception ex) when (ex is ObjectDisposedException || (ex is InvalidOperationException && (Form.IsDisposed || !Form.IsHandleCreated)))
+            catch (Exception ex) when (!ran && (ex is ObjectDisposedException || (ex is InvalidOperationException && (Form.IsDisposed || !Form.IsHandleCreated))))
             {
                 // The form closed between the check above and the invoke.
             }
+
+            return ran;
         }
     }
 }

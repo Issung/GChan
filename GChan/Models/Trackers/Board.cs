@@ -69,10 +69,9 @@ namespace GChan.Models.Trackers
 
             var (threads, lastModified) = await GetThreadsImpl(cancellationToken);
 
-            LastModified = lastModified;
-
             if (threads == null)
             {
+                LastModified = lastModified;
                 return new(removeFromQueue: false);
             }
 
@@ -82,17 +81,23 @@ namespace GChan.Models.Trackers
 
             if (newThreads.Length == 0)
             {
+                LastModified = lastModified;
                 return new(removeFromQueue: false);
             }
 
             var greatestNewThreadId = newThreads.Max(t => t.Id);
 
-            // Only advance once the threads are in the thread list: a save that sees the new GreatestThreadId must also see them,
-            // otherwise a crash after that save loses them (they would be skipped on the next scrape).
+            // Only record this scrape (GreatestThreadId, and LastModified which is sent as If-Modified-Since) once its threads
+            // are in the thread list. A save that sees the new values then also sees the threads, and if adding them fails the
+            // next scrape finds them again instead of skipping them or getting a 304.
             return new(
                 removeFromQueue: false,
                 newProcessables: newThreads,
-                onNewProcessablesAdded: () => GreatestThreadId = Math.Max(GreatestThreadId, greatestNewThreadId)
+                onNewProcessablesAdded: () =>
+                {
+                    GreatestThreadId = Math.Max(GreatestThreadId, greatestNewThreadId);
+                    LastModified = lastModified;
+                }
             );
         }
 

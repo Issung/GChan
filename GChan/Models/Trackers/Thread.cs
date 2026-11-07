@@ -205,18 +205,6 @@ namespace GChan.Models.Trackers
             CancellationToken cancellationToken
         );
 
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                int hash = 3;
-                hash = hash * 13 + Site.GetHashCode();
-                hash = hash * 13 + BoardCode.GetHashCode();
-                hash = hash * 13 + Id.GetHashCode();
-                return hash;
-            }
-        }
-
         public override string ToString()
         {
             return $"Thread {{ {Site}.{Id} }}";

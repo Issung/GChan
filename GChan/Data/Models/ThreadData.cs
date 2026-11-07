@@ -42,7 +42,7 @@ namespace GChan.Data
             this.Subject = thread.subject;
             this.FileCount = thread.FileCount;
             this.LastScrape = thread.LastModified;
-            this.SavedAssetIds = thread.SavedAssetIds;
+            this.SavedAssetIds = thread.SavedAssetIds.Clone();  // A copy, so a save stores this moment rather than whatever it is when serialised.
         }
     }
 }

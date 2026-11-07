@@ -32,8 +32,10 @@ namespace GChan.Services
         public IEnumerable<IProcessable> NewProcessables { get; }
 
         /// <summary>
-        /// Called once all of <see cref="NewProcessables"/> have been added (new trackers to their lists, others to the queue).
-        /// Not called if adding them fails, in which case the processable is retried.
+        /// Called once all of <see cref="NewProcessables"/> have been added (new trackers to their lists, others to the queue),
+        /// to record state that must not be saved before they are.<br/>
+        /// If there are new trackers it runs on the UI thread in the same step as adding them, so no save sees one without the other.
+        /// Not called if they could not be added.
         /// </summary>
         public Action OnNewProcessablesAdded { get; }
 

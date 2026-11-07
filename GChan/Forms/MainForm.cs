@@ -403,9 +403,10 @@ namespace GChan.Forms
 
             if (e.CloseReason is CloseReason.WindowsShutDown or CloseReason.TaskManagerClosing)
             {
-                // Cancelling here would block the session from ending, and Windows may kill us before an async close finishes.
-                readyToClose = true;
-                Controller.CloseImmediately();
+                // Don't cancel: that would block the session from ending, and Windows may kill us before an async close finishes.
+                // For shutdown this is raised before Windows knows the session will end (another app can still cancel it),
+                // so don't shut anything down either, just save while we can and let the close go ahead.
+                Controller.SaveNow();
                 return;
             }
 

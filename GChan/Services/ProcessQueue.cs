@@ -43,7 +43,11 @@ namespace GChan.Services
         private readonly ProcessPool pool;
         private readonly Task task;
 
-        private readonly Action<IReadOnlyList<Tracker>> addTrackersCallback;
+        /// <summary>
+        /// Adds new trackers to their lists (and enqueues them), then runs the given action, in one step on the UI thread.
+        /// Returns false if they could not be added (e.g. the app is closing).
+        /// </summary>
+        private readonly Func<IReadOnlyList<Tracker>, Action?, bool> addTrackersCallback;
         private readonly CancellationToken shutdownCancellationToken;
         private readonly ProcessableParams processableParams;
 
@@ -80,7 +84,7 @@ namespace GChan.Services
 
         public ProcessQueue(
             IProcessableHooks hooks,
-            Action<IReadOnlyList<Tracker>> addTrackersCallback,
+            Func<IReadOnlyList<Tracker>, Action?, bool> addTrackersCallback,
             CancellationToken shutdownCancellationToken
         )
         {
@@ -134,13 +138,16 @@ namespace GChan.Services
 
             await pool.WaitForCapacityAsync(shutdownCancellationToken);
 
-            if (HasTooManyRequestsDelay)
+            var backoff = TakeTooManyRequestsDelay();
+
+            if (backoff.HasValue)
             {
                 // Let requests already in flight finish, then wait out the delay before sending anything else.
-                // Taken after they finish, so any 429s they also get are merged into this one wait rather than waited out in turn.
+                // Any 429s they also get are merged into this one wait rather than waited out in turn.
                 await pool.WaitForIdleAsync(shutdownCancellationToken);
-                var backoff = TakeTooManyRequestsDelay();
-                await Task.Delay(backoff + TimeSpan.FromSeconds(1), shutdownCancellationToken);
+                var laterBackoff = TakeTooManyRequestsDelay();
+                var delay = laterBackoff > backoff ? laterBackoff.Value : backoff.Value;
+                await Task.Delay(delay + TimeSpan.FromSeconds(1), shutdownCancellationToken);
                 return;
             }
 
@@ -199,14 +206,6 @@ namespace GChan.Services
 
                 retries.TryRemove(processable, out _);
 
-                // Board may return new threads as processables. Added in one batch; the callback will enqueue them.
-                var newTrackers = result.NewProcessables.OfType<Tracker>().ToArray();
-
-                if (newTrackers.Length > 0)
-                {
-                    addTrackersCallback(newTrackers);
-                }
-
                 foreach (var newProcessable in result.NewProcessables)
                 {
                     if (newProcessable is not Tracker)
@@ -215,8 +214,21 @@ namespace GChan.Services
                     }
                 }
 
-                // Only once the new processables are all added, so e.g. a board doesn't record threads as seen that were never added.
-                result.OnNewProcessablesAdded?.Invoke();
+                // Board may return new threads as processables. Added in one batch; the callback will enqueue them.
+                var newTrackers = result.NewProcessables.OfType<Tracker>().ToArray();
+
+                if (newTrackers.Length > 0)
+                {
+                    // The callback runs OnNewProcessablesAdded itself, together with the add, and only if the add happened.
+                    if (!addTrackersCallback(newTrackers, result.OnNewProcessablesAdded))
+                    {
+                        logger.Debug("New trackers from {processable} could not be added.", processable);
+                    }
+                }
+                else
+                {
+                    result.OnNewProcessablesAdded?.Invoke();
+                }
 
                 if (!result.RemoveFromQueue)
                 {
@@ -282,22 +294,11 @@ namespace GChan.Services
             Enqueue(processable, requeue: true);
         }
 
-        private bool HasTooManyRequestsDelay
-        {
-            get
-            {
-                lock (tooManyRequestsLock)
-                {
-                    return tooManyRequestsDelay.HasValue;
-                }
-            }
-        }
-
-        private TimeSpan TakeTooManyRequestsDelay()
+        private TimeSpan? TakeTooManyRequestsDelay()
         {
             lock (tooManyRequestsLock)
             {
-                var delay = tooManyRequestsDelay ?? TimeSpan.Zero;
+                var delay = tooManyRequestsDelay;
                 tooManyRequestsDelay = null;
                 return delay;
             }
